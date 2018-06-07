@@ -80,9 +80,13 @@ var structureBackground = svgContainer.append("g").attr("id","structureLinksBack
 //Attributes for structureLinksBackground
 var structureBackground_Attributes = structureBackground.attr("x",0)
 														.attr("y",function(i,j){return j*blocks.attr("height");})
-														.attr("width",Number(blocks.attr("x"))-Number(structureBackground.attr("x")))
+														.attr("width",Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 														.attr("height",blocks.attr("height"))
-														.style("fill", blocks.attr("fill"));
+														.style("fill", function (d) {if (d >= coreThreshold) {
+															return d3.hcl(blueColorScale(d)).darker();
+															};
+															return d3.hcl(orangeColorScale(d)).darker();
+														});
 
 //Creation of the subGroup for the PA blocks
 var matrixPA = svgContainer.append("g").attr("id","presenceAbsence")
@@ -94,7 +98,7 @@ var matrixPA = svgContainer.append("g").attr("id","presenceAbsence")
 
 //ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
-		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 3 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
+		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 5 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
 	})
 									.attr("width", blocks.attr("width"))
 									.attr("height",blocks.attr("height"))
