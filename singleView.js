@@ -70,6 +70,20 @@ var flatten = panMatrix.reduce(function(a, b) {
 });
 //console.log(flatten)
 
+//Creation of the subgroup for the StructureLinks background
+var structureBackground = svgContainer.append("g").attr("id","structureLinksBackground")
+											.selectAll("rect")
+												.data(panChromosomeBlockCounts)
+												.enter()
+												.append("rect");
+
+//Attributes for structureLinksBackground
+var structureBackground_Attributes = structureBackground.attr("x",0)
+														.attr("y",function(i,j){return j*blocks.attr("height");})
+														.attr("width",Number(blocks.attr("x"))-Number(structureBackground.attr("x")))
+														.attr("height",blocks.attr("height"))
+														.style("fill", blocks.attr("fill"));
+
 //Creation of the subGroup for the PA blocks
 var matrixPA = svgContainer.append("g").attr("id","presenceAbsence")
 											.selectAll("rect")
@@ -84,5 +98,5 @@ var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
 	})
 									.attr("width", blocks.attr("width"))
 									.attr("height",blocks.attr("height"))
-									.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");})
+									.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
 									.style("fill", function (d) {return orangeColorScale (d);});
