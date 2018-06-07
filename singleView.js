@@ -47,10 +47,12 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 //For color, see : https://bl.ocks.org/mbostock/3014589
 var blueColorScale = d3.scaleLinear()
 		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
+		.interpolate(d3interpolateHcl)
 		.range(["white",  d3.hcl(246, 45,72)]);
 
 var orangeColorScale = d3.scaleLinear()
 		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
+		.interpolate(d3interpolateHcl)
 		.range(["white",  d3.hcl(60, 60,72)]);
 							
 //Selecting all previous blocks, and determining their attributes
