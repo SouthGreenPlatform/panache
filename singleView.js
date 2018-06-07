@@ -61,7 +61,7 @@ var blocksAttributes = blocks.attr("x",svgContainer.attr("width")*0.55)
 							.style("fill", function (d) {if (d >= coreThreshold) {
 								return orangeColorScale(d);
 								};
-								return blueColorScale(d);
+								return orangeColorScale(d);
 							});
 
 var flatten = panMatrix.reduce(function(a, b) {
