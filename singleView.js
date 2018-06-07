@@ -61,9 +61,9 @@ var blocksAttributes = blocks.attr("x",svgContainer.attr("width")*0.55)
 							.attr("height",svgContainer.attr("height")/panMatrix[0].length)
 							.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
 							.style("fill", function (d) {if (d >= coreThreshold) {
-								return blueColorScale(d);
-								};
 								return orangeColorScale(d);
+								};
+								return blueColorScale(d);
 							});
 
 //Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
@@ -85,9 +85,9 @@ var structureBackground_Attributes = structureBackground.attr("x",0)
 														.attr("width",Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 														.attr("height",blocks.attr("height"))
 														.style("fill", function (d) {if (d >= coreThreshold) {
-															return d3.hcl(blueColorScale(d)).darker();
-															};
 															return d3.hcl(orangeColorScale(d)).darker();
+															};
+															return d3.hcl(blueColorScale(d)).darker();
 														});
 
 //Creation of the subGroup for the PA blocks
