@@ -59,28 +59,30 @@ var blocksAttributes = blocks.attr("x",svgContainer.attr("width")*0.55)
 							.attr("height",svgContainer.attr("height")/panMatrix[0].length)
 							.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
 							.style("fill", function (d) {if (d >= coreThreshold) {
-								return orangeColorScale(d);
+								return blueColorScale(d);
 								};
 								return orangeColorScale(d);
 							});
 
+//Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
 var flatten = panMatrix.reduce(function(a, b) {
     return a.concat(b);
 });
 //console.log(flatten)
 
+//Creation of the subGroup for the PA blocks
 var matrixPA = svgContainer.append("g").attr("id","presenceAbsence")
 											.selectAll("rect")
-												.data(flatten)
+												.data(flatten) //There is one rect per genome x PA block, not just per genome
 												.enter()
 												.append("rect");
 
 
-//ATTENTION .attr()+.attr() concatenate and does NOT an addition !!
+//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
-		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 3 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width");
+		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 3 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
 	})
 									.attr("width", blocks.attr("width"))
-									.attr("height",svgContainer.attr("height")/panMatrix[0].length)
+									.attr("height",blocks.attr("height"))
 									.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");})
 									.style("fill", function (d) {return orangeColorScale (d);});
