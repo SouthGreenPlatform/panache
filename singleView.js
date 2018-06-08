@@ -47,24 +47,27 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 //For color, see : https://bl.ocks.org/mbostock/3014589
 var blueColorScale = d3.scaleLinear()
 		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
-		.interpolate(d3.interpolateHcl)
+		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference,might be usefull later
 		.range(["white",  d3.hcl(246, 45,72)]);
 
 var orangeColorScale = d3.scaleLinear()
 		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
 		.interpolate(d3.interpolateHcl)
 		.range(["white",  d3.hcl(60, 60,72)]);
-							
+
+//Creating a function to apply different color Scale depending on one value
+function thresholdBasedColor(d,threshold,colorScaleLess,colorScaleMore) {
+	if (d >= threshold) {
+		return colorScaleMore(d);
+	} return colorScaleLess(d);
+};
+
 //Selecting all previous blocks, and determining their attributes
 var blocksAttributes = blocks.attr("x",svgContainer.attr("width")*0.55)
 							.attr("width", 25)
 							.attr("height",svgContainer.attr("height")/panMatrix[0].length)
 							.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
-							.style("fill", function (d) {if (d >= coreThreshold) {
-								return orangeColorScale(d);
-								};
-								return blueColorScale(d);
-							});
+							.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
 
 //Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
 var flatten = panMatrix.reduce(function(a, b) {
@@ -84,25 +87,24 @@ var structureBackground_Attributes = structureBackground.attr("x",0)
 														.attr("y",function(i,j){return j*blocks.attr("height");})
 														.attr("width",Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 														.attr("height",blocks.attr("height"))
-														.style("fill", function (d) {if (d >= coreThreshold) {
-															return d3.hcl(orangeColorScale(d)).darker();
-															};
-															return d3.hcl(blueColorScale(d)).darker();
-														});
+														.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale));
+														color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
+														color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
+														return color});
 
 //Creation of the subGroup for the PA blocks
 var matrixPA = svgContainer.append("g").attr("id","presenceAbsence")
 											.selectAll("rect")
-												.data(flatten) //There is one rect per genome x PA block, not just per genome
+												.data(flatten) //There is one rect per (genome x PA block), not just per genome
 												.enter()
 												.append("rect");
 
 
 //ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
-		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 5 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
+		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
 	})
 									.attr("width", blocks.attr("width"))
 									.attr("height",blocks.attr("height"))
 									.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
-									.style("fill", function (d) {return orangeColorScale (d);});
+									.style("fill", function (d) {return d3.interpolateGreys (d*0.80);});
