@@ -73,42 +73,44 @@ var blocksAttributes = blocks.attr("x", svgContainer.attr("width")*0.55)
 								.attr("height", svgContainer.attr("height")/panMatrix[0].length)
 								.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
 								.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
-								.on("mouseover", eventDisplayInfoOn)
-								.on("mouseout", eventDisplayInfoOff);
+								.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+								.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
 
-function eventDisplayInfoOn(d, i) {  // Add interactivity
+function eventDisplayInfoOn(d, i) {		//Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
+										//http://bl.ocks.org/phil-pedruco/9032348 was useful too
 
-	// Use D3 to select element, change color and size
+	//Uses D3 to select element and change its color based on the previously built color scales
 	d3.select(this).style("fill", function(d) {
-		var color = d3.hcl(thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale));
-		color.h = color.h+10;
-		color.c = color.c*1.1;
-		color.l = color.l*1.1;
+		var color = d3.hcl(thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
+		color.h = color.h+10; //Slight change in hue for better noticing
+		color.c = color.c*1.1; //Slight increase in chroma
+		color.l = color.l*1.1; //Slight increase in luminance
 		return color;
 	});
-	//Here d is the block value from panChromosomeBlockCounts, i is the index within it
-	//How do I access the position of the block, in order to place the text label ? select(this).attr?
+	//Here, d is the block value from panChromosomeBlockCounts, i is the index within it
+	//To access values of a block, we need to take "this" as an argument
+
 	//alert(d + " " + i);
 
-	// Specify where to put label of text
+	//Specifies where to put label of text altogether with its properties
 	svgContainer.append("text")
 				.attr("id", "t" + d + "-" + i)
 				.attr("x", Number(d3.select(this).attr("x")) - Number(d3.select(this).attr("width"))/2)
-				//The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
+				//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
 				.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
 				.attr("font-family", "sans-serif")
 				.attr("text-anchor", "end") //Can be "start", "middle", ou "end"
-				.attr("dominant-baseline", "middle") //Vertical alignment
+				.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments
 				.text(function() {
-					return [d,i];  // Value of the text
+					return "This block appears in " + d + " selected genome(s)";  //Text content
 				});
 };
 
 function eventDisplayInfoOff(d, i) {
-	// Use D3 to select element, change color back to normal
+	//Uses D3 to select element, change color back to normal by overwriting and not recovery
 	d3.select(this).style("fill",function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
 
-	// Select text by id and then remove
+	//Selects text by id and then removes it
 	d3.select("#t" + d + "-" + i).remove();  // Remove text location
 };
 
@@ -131,9 +133,10 @@ var structureBackground_Attributes = structureBackground.attr("x",0)
 														.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 														.attr("height", blocks.attr("height"))
 														.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
-														color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-														color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-														return color});
+															color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
+															color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
+															return color;
+														});
 
 //Creation of the subGroup for the PA blocks
 var matrixPA = svgContainer.append("g").attr("id", "presenceAbsence")
