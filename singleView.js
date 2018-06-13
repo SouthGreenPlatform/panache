@@ -30,6 +30,11 @@ for (var j = 0; j < panMatrix[0].length; j++) {
 //Calculating the threshold for the change in color scale in panChromosome, arbitrary value for now
 var coreThreshold = 85/100*panMatrix.length;
 
+//Creating the variables for a scalable display
+/*
+var w = window.innerWidth, h = window.innerHeight;
+*/
+
 //Creating the SVG HTML tag
 var svgContainer = d3.select("body").append("svg")
 									.attr("width", 1000).attr("height", 500);
@@ -39,7 +44,7 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 							.selectAll("rect") //First an empty selection of all not yet existing rectangles
 								.data(panChromosomeBlockCounts) //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
 								.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
-								.append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+								.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
 							
 							//For more about joins, see : https://bost.ocks.org/mike/join/
 
@@ -48,26 +53,64 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 var blueColorScale = d3.scaleLinear()
 		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
 		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference,might be usefull later
-		.range(["white",  d3.hcl(246, 45,72)]);
+		.range(["white", d3.hcl(246, 45,72)]);
 
 var orangeColorScale = d3.scaleLinear()
 		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
 		.interpolate(d3.interpolateHcl)
-		.range(["white",  d3.hcl(60, 60,72)]);
+		.range(["white", d3.hcl(60, 60,72)]);
 
 //Creating a function to apply different color Scale depending on one value
-function thresholdBasedColor(d,threshold,colorScaleLess,colorScaleMore) {
+function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
 	if (d >= threshold) {
 		return colorScaleMore(d);
 	} return colorScaleLess(d);
 };
 
 //Selecting all previous blocks, and determining their attributes
-var blocksAttributes = blocks.attr("x",svgContainer.attr("width")*0.55)
-							.attr("width", 25)
-							.attr("height",svgContainer.attr("height")/panMatrix[0].length)
-							.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
-							.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
+var blocksAttributes = blocks.attr("x", svgContainer.attr("width")*0.55)
+								.attr("width", 25)
+								.attr("height", svgContainer.attr("height")/panMatrix[0].length)
+								.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
+								.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
+								.on("mouseover", eventDisplayInfoOn)
+								.on("mouseout", eventDisplayInfoOff);
+
+function eventDisplayInfoOn(d, i) {  // Add interactivity
+
+	// Use D3 to select element, change color and size
+	d3.select(this).style("fill", function(d) {
+		var color = d3.hcl(thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale));
+		color.h = color.h+10;
+		color.c = color.c*1.1;
+		color.l = color.l*1.1;
+		return color;
+	});
+	//Here d is the block value from panChromosomeBlockCounts, i is the index within it
+	//How do I access the position of the block, in order to place the text label ? select(this).attr?
+	//alert(d + " " + i);
+
+	// Specify where to put label of text
+	svgContainer.append("text")
+				.attr("id", "t" + d + "-" + i)
+				.attr("x", Number(d3.select(this).attr("x")) - Number(d3.select(this).attr("width"))/2)
+				//The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
+				.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
+				.attr("font-family", "sans-serif")
+				.attr("text-anchor", "end") //Can be "start", "middle", ou "end"
+				.attr("dominant-baseline", "middle") //Vertical alignment
+				.text(function() {
+					return [d,i];  // Value of the text
+				});
+};
+
+function eventDisplayInfoOff(d, i) {
+	// Use D3 to select element, change color back to normal
+	d3.select(this).style("fill",function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
+
+	// Select text by id and then remove
+	d3.select("#t" + d + "-" + i).remove();  // Remove text location
+};
 
 //Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
 var flatten = panMatrix.reduce(function(a, b) {
@@ -76,7 +119,7 @@ var flatten = panMatrix.reduce(function(a, b) {
 //console.log(flatten)
 
 //Creation of the subgroup for the StructureLinks background
-var structureBackground = svgContainer.append("g").attr("id","structureLinksBackground")
+var structureBackground = svgContainer.append("g").attr("id", "structureLinksBackground")
 											.selectAll("rect")
 												.data(panChromosomeBlockCounts)
 												.enter()
@@ -84,16 +127,16 @@ var structureBackground = svgContainer.append("g").attr("id","structureLinksBack
 
 //Attributes for structureLinksBackground
 var structureBackground_Attributes = structureBackground.attr("x",0)
-														.attr("y",function(i,j){return j*blocks.attr("height");})
-														.attr("width",Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
-														.attr("height",blocks.attr("height"))
-														.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale));
+														.attr("y", function(i,j){return j*blocks.attr("height");})
+														.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
+														.attr("height", blocks.attr("height"))
+														.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
 														color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 														color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 														return color});
 
 //Creation of the subGroup for the PA blocks
-var matrixPA = svgContainer.append("g").attr("id","presenceAbsence")
+var matrixPA = svgContainer.append("g").attr("id", "presenceAbsence")
 											.selectAll("rect")
 												.data(flatten) //There is one rect per (genome x PA block), not just per genome
 												.enter()
@@ -105,6 +148,6 @@ var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
 		return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
 	})
 									.attr("width", blocks.attr("width"))
-									.attr("height",blocks.attr("height"))
+									.attr("height", blocks.attr("height"))
 									.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
 									.style("fill", function (d) {return d3.interpolateGreys (d*0.80);});
