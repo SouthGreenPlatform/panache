@@ -49,7 +49,7 @@ var coreThreshold = 85/100*panMatrix.length;
 
 //Creating a color gradient for the slider line, it works fine but the color does not apply on the line...
 //WTFUCKYFUCK ??? THE GRADIENT APPLIES ONLY IF THE LINE IS NOT PERFECTLY HORIZONTAL
-//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/
+//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps
 var sliderGradient = svgContainer.append("defs")
 									.append("linearGradient")
 									.attr("id", "sliderGradient")
@@ -93,12 +93,28 @@ var sliderArea = d3.area()
 	.y1(function(d) { return d[2]; })
 	.curve(d3.curveMonotoneY);
 
-slider.append("path")
-	.datum([[sliderScale.range()[0]-4,0,0],[sliderScale.range()[0],4,-4],[sliderScale.range()[1],4,-4],[sliderScale.range()[1]+4,0,0]])
-	.attr("fill", "steelblue")
-	.attr("d", sliderArea)
-	.attr("stroke", "#000");
+//Oh lord I managed to have the handle between the actual slider and its stroke O.o
 
+slider.append("path")
+		.datum([[sliderScale.range()[0]-4,0,0],[sliderScale.range()[0],4,-4],[sliderScale.range()[1],4,-4],[sliderScale.range()[1]+4,0,0]])
+		.attr("fill", "url(#sliderGradient)")
+		.attr("d", sliderArea)
+		.attr("stroke", "#000")
+		.attr("stroke-opacity", 0.3)
+	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Cloning again
+		.attr("class", "track-overlay")//This clone is getting the class "track-overlay" instead of "track-inset"
+		//This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
+//		.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
+		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
+		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
+		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
+				.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
+				//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
+				//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
+//					.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . IT IS NOT USEFUL HERE AS I DID NOT USE THE TRANSITION
+					.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
+					//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.;
+/*
 slider.append("line") //Addition of a svg line within the slider group, only used for "contouring" here
 		.attr("class", "track")
 		.attr("x1", sliderScale.range()[0]) //Calling the first boundary of sliderScale.range (ie left position)
@@ -110,12 +126,12 @@ slider.append("line") //Addition of a svg line within the slider group, only use
 	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "line" object in the DOM and selects the new one
 		//parentNode corresponds to the closest DOM ancestor, here it is slider, which contains line
 		//We cannot use cloneNode alone as it is part of the select method in here
-/*		
+		
 		CETTE FONCTION EST COMPLIQUEE
 		La méthode Node.appendChild() ajoute un nœud à la fin de la liste des enfants d'un nœud parent spécifié. Si l'enfant donné est une référence à un nœud existant dans le document, appendChild() le déplace  de sa position actuelle vers une nouvelle position (il n'est pas nécessaire de supprimer le noeud sur son noeud parent avant de l'ajouter à un autre).
 
 		Cela signifie qu'un noeud ne peut pas être à deux points du document simultanément. Donc, si le nœud a déjà un parent, le nœud est d'abord retiré, puis ajouté à la nouvelle position. Le Node.cloneNode() peut être utilisé pour réaliser une copie de noeud avant de l'ajouter à son nouveau parent. Notez que les copies faites avec cloneNode ne seront pas automatiquement synchronisées.
-*/
+
 
 		.attr("class", "track-inset") //An inner part for the slider, overlaid over the previous one and slightly thinner to add a contour effect.
 		//The newly created clone is getting the "track-inset" class, for styling with json. ATTENTION It calls the style option from the Json file I did not put in here so I added them as attributes
@@ -135,6 +151,7 @@ slider.append("line") //Addition of a svg line within the slider group, only use
 //					.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . IT IS NOT USEFUL HERE AS I DID NOT USE THE TRANSITION
 					.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
 					//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
+*/
 
 slider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
 		.attr("class", "ticks") //Giving the class "ticks", for styling reasons
