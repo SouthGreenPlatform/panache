@@ -31,14 +31,14 @@ for (var j = 0; j < panMatrix[0].length; j++) {
 //Color Scale, might be concatenated with another one I believe, I want hue is great, HCL might allow better color handling
 //For color, see : https://bl.ocks.org/mbostock/3014589
 var blueColorScale = d3.scaleLinear()
-		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
+		.domain([0,panMatrix.length]) //We declare the min/max values, they will be linked to the min/max colors
 		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference,might be usefull later Shoul I interpol the color range instead ?
-		.range([d3.hcl(246, 0,95), d3.hcl(246, 45,72)]);
+		.range([d3.hcl(246, 0,95), d3.hcl(246, 65,70)]);
 
 var orangeColorScale = d3.scaleLinear()
-		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
+		.domain([0,panMatrix.length]) //We declare the min/max values, they will be linked to the min/max colors
 		.interpolate(d3.interpolateHcl)
-		.range([d3.hcl(60, 0,95), d3.hcl(60, 60,72)]);
+		.range([d3.hcl(60, 0,95), d3.hcl(60, 65,70)]);
 
 //Creating the SVG HTML tag
 var svgContainer = d3.select("body").append("svg")
