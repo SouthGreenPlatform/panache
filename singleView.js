@@ -28,12 +28,50 @@ for (var j = 0; j < panMatrix[0].length; j++) {
 };
 //console.log(panChromosomeBlockCounts);
 
+//Color Scale, might be concatenated with another one I believe, I want hue is great, HCL might allow better color handling
+//For color, see : https://bl.ocks.org/mbostock/3014589
+var blueColorScale = d3.scaleLinear()
+		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
+		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference,might be usefull later Shoul I interpol the color range instead ?
+		.range([d3.hcl(246, 0,95), d3.hcl(246, 45,72)]);
+
+var orangeColorScale = d3.scaleLinear()
+		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
+		.interpolate(d3.interpolateHcl)
+		.range([d3.hcl(60, 0,95), d3.hcl(60, 60,72)]);
+
 //Creating the SVG HTML tag
 var svgContainer = d3.select("body").append("svg")
 									.attr("width", 1000).attr("height", 500);
 
 //Calculating the threshold for the change in color scale in panChromosome, arbitrary value for now
 var coreThreshold = 85/100*panMatrix.length;
+
+//Creating a color gradient for the slider line, it works fine but the color does not apply on the line...
+//WTFUCKYFUCK ??? THE GRADIENT APPLIES ONLY IF THE LINE IS NOT PERFECTLY HORIZONTAL
+//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/
+var sliderGradient = svgContainer.append("defs")
+									.append("linearGradient")
+									.attr("id", "sliderGradient")
+									.attr("x1",0)
+									.attr("x2",1)
+									.attr("y1",0)
+									.attr("y2",0)
+										.append("stop")
+										.attr("offset",0)
+										.attr("stop-color",blueColorScale.range()[0])
+									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+										.attr("offset",coreThreshold/panMatrix.length)
+										.attr("stop-color",d3.hcl(blueColorScale(coreThreshold/panMatrix.length)))
+									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+										.attr("offset",coreThreshold/panMatrix.length)
+										.attr("stop-color",d3.hcl(orangeColorScale(coreThreshold/panMatrix.length)))
+									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+										.attr("offset",1)
+										.attr("stop-color",orangeColorScale.range()[1]);
+										
+
+
 
 //					I want to create a drag slider to interactively change this threshold! see https://bl.ocks.org/mbostock/6452972
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,12 +87,24 @@ var slider = svgContainer.append("g") //slider is a subgroup of svgContainer
 				.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
 				.attr("transform", "translate(" + 850 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
 
+var sliderArea = d3.area()
+	.x(function(d, i) { return d[0]; })
+	.y0(function(d) { return d[1]; })
+	.y1(function(d) { return d[2]; })
+	.curve(d3.curveMonotoneY);
+
+slider.append("path")
+	.datum([[sliderScale.range()[0]-4,0,0],[sliderScale.range()[0],4,-4],[sliderScale.range()[1],4,-4],[sliderScale.range()[1]+4,0,0]])
+	.attr("fill", "steelblue")
+	.attr("d", sliderArea)
+	.attr("stroke", "#000");
+
 slider.append("line") //Addition of a svg line within the slider group, only used for "contouring" here
 		.attr("class", "track")
 		.attr("x1", sliderScale.range()[0]) //Calling the first boundary of sliderScale.range (ie left position)
 		.attr("x2", sliderScale.range()[1]) //Calling the second boundary of sliderScale.range (ie right position)
 		.attr("stroke-linecap","round") //Tells the line to have roundish tips
-		.attr("stroke", "red")
+		.attr("stroke", "#000")
 		.attr("stroke-opacity", 0.3)
 		.attr("stroke-width", "10px")
 	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "line" object in the DOM and selects the new one
@@ -69,7 +119,7 @@ slider.append("line") //Addition of a svg line within the slider group, only use
 
 		.attr("class", "track-inset") //An inner part for the slider, overlaid over the previous one and slightly thinner to add a contour effect.
 		//The newly created clone is getting the "track-inset" class, for styling with json. ATTENTION It calls the style option from the Json file I did not put in here so I added them as attributes
-		.attr("stroke", "blue") //Could be cool to color it depending on the color Scales !
+		.attr("stroke", "url(#sliderGradient)") //Could be cool to color it depending on the color Scales !
 		.attr("stroke-width", "8px")
 		.attr("stroke-opacity", 1)
 	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Cloning again
@@ -106,6 +156,7 @@ var handle = slider.insert("circle", ".track-overlay") //Tells to insert a circl
 		.attr("r", 9) //The radius
 		.attr("fill","#fff") //The circle is filled in white
 		.attr("stroke","#000")
+		.attr("cx", coreThreshold)
 		.attr("stroke-opacity",0.5)
 		.attr("stroke-width","1.25px");
 
@@ -140,17 +191,6 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 							
 							//For more about joins, see : https://bost.ocks.org/mike/join/
 
-//Color Scale, might be concatenated with another one I believe, I want hue is great, HCL might allow better color handling
-//For color, see : https://bl.ocks.org/mbostock/3014589
-var blueColorScale = d3.scaleLinear()
-		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
-		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference,might be usefull later Shoul I interpol the color range instead ?
-		.range([d3.hcl(246, 0,95), d3.hcl(246, 45,72)]);
-
-var orangeColorScale = d3.scaleLinear()
-		.domain([0,10]) //We declare the min/max values, they will be linked to the min/max colors
-		.interpolate(d3.interpolateHcl)
-		.range([d3.hcl(60, 0,95), d3.hcl(60, 60,72)]);
 
 //Creating a function to apply different color Scale depending on one value
 function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
