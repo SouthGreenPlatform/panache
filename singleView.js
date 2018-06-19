@@ -48,28 +48,31 @@ var svgContainer = d3.select("body").append("svg")
 var coreThreshold = 85/100*panMatrix.length;
 
 //Creating a color gradient for the slider line, it works fine but the color does not apply on the line...
-//WTFUCKYFUCK ??? THE GRADIENT APPLIES ONLY IF THE LINE IS NOT PERFECTLY HORIZONTAL
-//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps
+//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical lines
+//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps, I used a path instead of a line here
+//How to handle dynamic color change for the gradient : http://bl.ocks.org/nbremer/b1fbcc0ff00abe8893a087d85fc8005b
 var sliderGradient = svgContainer.append("defs")
 									.append("linearGradient")
 									.attr("id", "sliderGradient")
-									.attr("x1",0)
-									.attr("x2",1)
-									.attr("y1",0)
-									.attr("y2",0)
-										.append("stop")
-										.attr("offset",0)
-										.attr("stop-color",blueColorScale.range()[0])
-									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-										.attr("offset",coreThreshold/panMatrix.length)
-										.attr("stop-color",blueColorScale(coreThreshold))
-									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-										.attr("offset",coreThreshold/panMatrix.length)
-										.attr("stop-color",orangeColorScale(coreThreshold))
-									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-										.attr("offset",1)
-										.attr("stop-color",orangeColorScale.range()[1]);
-										
+									.attr("x1", 0)
+									.attr("x2", 1)
+									.attr("y1", 0)
+									.attr("y2", 0);
+
+sliderGradient.append("stop") //ATTENTION The order of the stops prevales on their offset
+				.attr("offset", 0)
+				.attr("stop-color", blueColorScale.range()[0])
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+				.attr("class", "hueSwingingPointLeft")
+				.attr("offset", coreThreshold/panMatrix.length)
+				.attr("stop-color", blueColorScale(coreThreshold))
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+				.attr("class", "hueSwingingPointRight")
+				.attr("stop-color", orangeColorScale(coreThreshold))
+			.select(function() { return this.parentNode; }).append("stop")
+				.attr("offset", 1)
+				.attr("stop-color", orangeColorScale.range()[1]);
+
 
 
 
@@ -101,19 +104,23 @@ slider.append("path")
 		.attr("d", sliderArea)
 		.attr("stroke", "#000")
 		.attr("stroke-opacity", 0.3)
-	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Cloning again
-		.attr("class", "track-overlay")//This clone is getting the class "track-overlay" instead of "track-inset"
+
+slider.append("line") //Cloning again
+	.attr("class", "track-overlay")//This clone is getting the class "track-overlay" instead of "track-inset"
 		//This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
 //		.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
-		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
-		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
-		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
-				.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
-				//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
-				//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
-//					.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . IT IS NOT USEFUL HERE AS I DID NOT USE THE TRANSITION
-					.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
-					//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.;
+	.attr("x1", sliderScale.range()[0])
+	.attr("x2", sliderScale.range()[1])
+	.attr("stroke-linecap","round")
+	.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
+	.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
+	.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
+		.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
+		//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
+		//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
+//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . IT IS NOT USEFUL HERE AS I DID NOT USE THE TRANSITION
+			.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
+			//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.;
 /*
 slider.append("line") //Addition of a svg line within the slider group, only used for "contouring" here
 		.attr("class", "track")
@@ -170,16 +177,18 @@ slider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-ove
 
 var handle = slider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" element it finds within slider
 		.attr("class", "handle") //It is given the class "handle" (useful for easier styling)
-		.attr("r", 9) //The radius
+		.attr("r",7) //The radius
 		.attr("fill","#fff") //The circle is filled in white
 		.attr("stroke","#000")
-		.attr("cx", coreThreshold)
+		.attr("cx", coreThreshold/panMatrix.length*100)
 		.attr("stroke-opacity",0.5)
 		.attr("stroke-width","1.25px");
 
 function dynamicColorChange(h) {
 	handle.attr("cx", sliderScale(h));
 	coreThreshold = h*panMatrix.length;
+	d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", blueColorScale(coreThreshold));
+	d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", orangeColorScale(coreThreshold));
 	blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
 	structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
 		color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
@@ -211,7 +220,7 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 
 //Creating a function to apply different color Scale depending on one value
 function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
-	if (d >= threshold) {
+	if (d > threshold) {
 		return colorScaleMore(d);
 	} return colorScaleLess(d);
 };
