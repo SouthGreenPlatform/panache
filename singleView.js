@@ -28,27 +28,27 @@ for (var j = 0; j < panMatrix[0].length; j++) {
 };
 //console.log(panChromosomeBlockCounts);
 
-//Color Scale, might be concatenated with another one I believe, I want hue is great, HCL might allow better color handling
+//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 //For color, see : https://bl.ocks.org/mbostock/3014589
 var blueColorScale = d3.scaleLinear()
-		.domain([0,panMatrix.length]) //We declare the min/max values, they will be linked to the min/max colors
-		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference,might be usefull later Shoul I interpol the color range instead ?
-		.range([d3.hcl(246, 0,95), d3.hcl(246, 65,70)]);
+		.domain([0,panMatrix.length]) //We declare the min/max values as input domain, they will be linked to the min/max colors
+		.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
+		.range([d3.hcl(246, 0,95), d3.hcl(246, 65,70)]); //No need to interpolate after range instead of before
 
-var orangeColorScale = d3.scaleLinear()
-		.domain([0,panMatrix.length]) //We declare the min/max values, they will be linked to the min/max colors
+var orangeColorScale = d3.scaleLinear() //Same construction method
+		.domain([0,panMatrix.length])
 		.interpolate(d3.interpolateHcl)
 		.range([d3.hcl(60, 0,95), d3.hcl(60, 65,70)]);
 
-//Creating the SVG HTML tag
+//Creating the SVG DOM tag
 var svgContainer = d3.select("body").append("svg")
 									.attr("width", 1000).attr("height", 500);
 
 //Calculating the threshold for the change in color scale in panChromosome, arbitrary value for now
-var coreThreshold = 85/100*panMatrix.length;
+var coreThreshold = 85/100*panMatrix.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
 
-//Creating a color gradient for the slider line, it works fine but the color does not apply on the line...
-//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical lines
+//Creating a color gradient for the slider shape
+//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
 //Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps, I used a path instead of a line here
 //How to handle dynamic color change for the gradient : http://bl.ocks.org/nbremer/b1fbcc0ff00abe8893a087d85fc8005b
 var sliderGradient = svgContainer.append("defs")
@@ -60,10 +60,10 @@ var sliderGradient = svgContainer.append("defs")
 									.attr("y2", 0);
 
 sliderGradient.append("stop") //ATTENTION The order of the stops prevales on their offset
-				.attr("offset", 0)
-				.attr("stop-color", blueColorScale.range()[0])
-			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-				.attr("class", "hueSwingingPointLeft")
+				.attr("offset", 0) //Relative position of the stop on the gradient
+				.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
+				.attr("class", "hueSwingingPointLeft") //Class that is used later for dynamic changes
 				.attr("offset", coreThreshold/panMatrix.length)
 				.attr("stop-color", blueColorScale(coreThreshold))
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
@@ -75,127 +75,98 @@ sliderGradient.append("stop") //ATTENTION The order of the stops prevales on the
 
 
 
-
-//					I want to create a drag slider to interactively change this threshold! see https://bl.ocks.org/mbostock/6452972
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Creation of a slider for choosing the core threshold ! see https://bl.ocks.org/mbostock/6452972 for slider example
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//1st create a scale (linear in our case)
-//and 
+
+//1st create a scale that links value to a position in pixel
 var sliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 		.domain([0, 1]) //Takes the possible treshold values as an input
 		.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
 		.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
+//Translation of the whole slider object wherever it is required
 var slider = svgContainer.append("g") //slider is a subgroup of svgContainer
 				.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
 				.attr("transform", "translate(" + 850 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
 
+//Creation of a function for the path determining the slider shape (as horizontal lines do not the job if mapped to a gradient)
 var sliderArea = d3.area()
-	.x(function(d, i) { return d[0]; })
-	.y0(function(d) { return d[1]; })
-	.y1(function(d) { return d[2]; })
-	.curve(d3.curveMonotoneY);
+	.x(function(d) { return d[0]; })
+	.y0(function(d) { return d[1]; }) //2nd elements are considered as the lower baseline of the shape
+	.y1(function(d) { return d[2]; }) //3rd elements are considered as the upper baseline of the shape
+	.curve(d3.curveMonotoneY); //Style of the curve, see https://github.com/d3/d3-shape/blob/master/README.md#curves
 
-//Oh lord I managed to have the handle between the actual slider and its stroke O.o
-
+//Creation of the SVG for the slider
 slider.append("path")
 		.datum([[sliderScale.range()[0]-4,0,0],[sliderScale.range()[0],4,-4],[sliderScale.range()[1],4,-4],[sliderScale.range()[1]+4,0,0]])
-		.attr("fill", "url(#sliderGradient)")
-		.attr("d", sliderArea)
+		.attr("fill", "url(#sliderGradient)") //The gradient is used to fill the shape
+		.attr("d", sliderArea) //Calls the sliderArea function on the input data given to the path
 		.attr("stroke", "#000")
 		.attr("stroke-opacity", 0.3)
 
-slider.append("line") //Cloning again
-	.attr("class", "track-overlay")//This clone is getting the class "track-overlay" instead of "track-inset"
-		//This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
-//		.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
-	.attr("x1", sliderScale.range()[0])
-	.attr("x2", sliderScale.range()[1])
-	.attr("stroke-linecap","round")
+//Addition of the interactive zone
+slider.append("line")
+	.attr("class", "track-overlay") //This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
+//	.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it, as the interactive object is already nothing but a stroke. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
+	.attr("x1", sliderScale.range()[0]) //Calling the first boundary of sliderScale.range (ie left position)
+	.attr("x2", sliderScale.range()[1]) //Calling the second boundary of sliderScale.range (ie right position)
+	.attr("stroke-linecap","round") //The line will not have straight tips
 	.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
 	.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
 	.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
 		.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
 		//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
 		//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
-//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . IT IS NOT USEFUL HERE AS I DID NOT USE THE TRANSITION
+//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
 			.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
-			//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.;
-/*
-slider.append("line") //Addition of a svg line within the slider group, only used for "contouring" here
-		.attr("class", "track")
-		.attr("x1", sliderScale.range()[0]) //Calling the first boundary of sliderScale.range (ie left position)
-		.attr("x2", sliderScale.range()[1]) //Calling the second boundary of sliderScale.range (ie right position)
-		.attr("stroke-linecap","round") //Tells the line to have roundish tips
-		.attr("stroke", "#000")
-		.attr("stroke-opacity", 0.3)
-		.attr("stroke-width", "10px")
-	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "line" object in the DOM and selects the new one
-		//parentNode corresponds to the closest DOM ancestor, here it is slider, which contains line
-		//We cannot use cloneNode alone as it is part of the select method in here
-		
-		CETTE FONCTION EST COMPLIQUEE
-		La méthode Node.appendChild() ajoute un nœud à la fin de la liste des enfants d'un nœud parent spécifié. Si l'enfant donné est une référence à un nœud existant dans le document, appendChild() le déplace  de sa position actuelle vers une nouvelle position (il n'est pas nécessaire de supprimer le noeud sur son noeud parent avant de l'ajouter à un autre).
+			//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
 
-		Cela signifie qu'un noeud ne peut pas être à deux points du document simultanément. Donc, si le nœud a déjà un parent, le nœud est d'abord retiré, puis ajouté à la nouvelle position. Le Node.cloneNode() peut être utilisé pour réaliser une copie de noeud avant de l'ajouter à son nouveau parent. Notez que les copies faites avec cloneNode ne seront pas automatiquement synchronisées.
-
-
-		.attr("class", "track-inset") //An inner part for the slider, overlaid over the previous one and slightly thinner to add a contour effect.
-		//The newly created clone is getting the "track-inset" class, for styling with json. ATTENTION It calls the style option from the Json file I did not put in here so I added them as attributes
-		.attr("stroke", "url(#sliderGradient)") //Could be cool to color it depending on the color Scales !
-		.attr("stroke-width", "8px")
-		.attr("stroke-opacity", 1)
-	.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Cloning again
-		.attr("class", "track-overlay")//This clone is getting the class "track-overlay" instead of "track-inset"
-		//This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
-//		.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
-		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
-		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
-		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
-				.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
-				//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
-				//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
-//					.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . IT IS NOT USEFUL HERE AS I DID NOT USE THE TRANSITION
-					.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
-					//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
-*/
-
-slider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
-		.attr("class", "ticks") //Giving the class "ticks", for styling reasons
-		.attr("font-family","sans-serif")
-		.attr("font-size","10px")
-		.attr("transform", "translate(0," + 18 + ")") //One more translation in order to have it right under the rest of the slider
-	.selectAll("text") //We are going to link data to all text within this group
-//	.data(sliderScale.ticks(5)) //Data are five tick labels based on the scale domain. See https://github.com/d3/d3-scale/blob/master/README.md#continuous_ticks for more on ticks, as it is only a suggestion and not the actual numer of displayed ticks
-	.data([0, 0.25, 0.5 , 0.75, 1]) //I used my own chosen ticks as .ticks(5) wont displays it as I wish
-	.enter().append("text")
-			.attr("x", sliderScale) //For each tick, it's x position is calculated thanks to sliderScale(d)
-			.attr("text-anchor", "middle") //Each tick is centered on its x position
-			.text(function(d) { return d*100 + "%"; });
-
-
-
+//Creation of the handle circle, thats translates the interaction into visual movement
 var handle = slider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" element it finds within slider
-		.attr("class", "handle") //It is given the class "handle" (useful for easier styling)
-		.attr("r",7) //The radius
-		.attr("fill","#fff") //The circle is filled in white
-		.attr("stroke","#000")
+		.attr("class", "handle") //It is given the class "handle" (useful for easier/universal styling when used with css format)
+		.attr("r", 7) //The radius
+		.attr("fill", "#fff") //The circle is filled in white
+		.attr("stroke", "#000")
 		.attr("cx", coreThreshold/panMatrix.length*100)
-		.attr("stroke-opacity",0.5)
-		.attr("stroke-width","1.25px");
+		.attr("stroke-opacity", 0.3)
+		.attr("stroke-width", "1.25px");
 
-function dynamicColorChange(h) {
-	handle.attr("cx", sliderScale(h));
-	coreThreshold = h*panMatrix.length;
-	d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", blueColorScale(coreThreshold));
+//Creation of the tick label that will give coreTreshold percent value in real time
+slider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
+		.attr("class", "tick") //Giving the class "ticks", for styling reasons
+		.attr("font-family", "sans-serif")
+		.attr("font-size", "10px")
+		.attr("transform", "translate(0 18)") //One more translation in order to have it right under the rest of the slider
+		.append("text").attr("x", handle.attr("cx")).attr("text-anchor", "middle").text(handle.attr("cx")+"%"); //Text value based on coreThreshold
+
+slider.insert("text", ".track-overlay")
+		.attr("font-family", "sans-serif")
+		.attr("font-size", "10px")
+		.attr("transform", "translate(" + sliderScale.range()[1]/2 + " -15)")
+		.attr("text-anchor", "middle")
+		.text("Dispensable/Core threshold");
+
+//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
+function dynamicColorChange(slidePercent) {
+	handle.attr("cx", sliderScale(slidePercent)); //Position change for the handle
+	coreThreshold = slidePercent*panMatrix.length; //Updates the value of coreThreshold
+	d3.select(".tick").select("text").attr("x", sliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
+	d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 	d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", orangeColorScale(coreThreshold));
-	blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
-	structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
+	blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the panChromosome blocks' colours
+	structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
 		color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 		color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 		return color;
 	});
 }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//End of the slider creation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
