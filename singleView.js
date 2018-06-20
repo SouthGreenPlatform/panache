@@ -144,9 +144,15 @@ slider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-ove
 slider.insert("text", ".track-overlay")
 		.attr("font-family", "sans-serif")
 		.attr("font-size", "10px")
-		.attr("transform", "translate(" + sliderScale.range()[1]/2 + " -15)")
+		.attr("transform", "translate("+sliderScale.range()[1]/2+",0)") //Keeping the value outside of quotes is neede for its calculation
+		.attr("dy","-2.5em") //A vertical translation depending on the font size (2em --> two times the font size, enough space for two lines)
 		.attr("text-anchor", "middle")
-		.text("Dispensable/Core threshold");
+		.append("tspan")
+			.text("Minimal Presence ratio")
+			.attr("x", 0) //Needed for the carriage return
+		.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+			.text("to be part of Core")
+			.attr("dy","1.2em");
 
 //Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 function eventDynamicColorChange(slidePercent) {
