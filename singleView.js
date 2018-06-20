@@ -120,11 +120,11 @@ slider.append("line")
 		//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
 		//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
 //			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
-			.on("start drag", function() { dynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
+			.on("start drag", function() { eventDynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
 			//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
 
 //Creation of the handle circle, thats translates the interaction into visual movement
-var handle = slider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" element it finds within slider
+var handle = slider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" class element it finds within slider
 		.attr("class", "handle") //It is given the class "handle" (useful for easier/universal styling when used with css format)
 		.attr("r", 7) //The radius
 		.attr("fill", "#fff") //The circle is filled in white
@@ -149,7 +149,7 @@ slider.insert("text", ".track-overlay")
 		.text("Dispensable/Core threshold");
 
 //Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
-function dynamicColorChange(slidePercent) {
+function eventDynamicColorChange(slidePercent) {
 	handle.attr("cx", sliderScale(slidePercent)); //Position change for the handle
 	coreThreshold = slidePercent*panMatrix.length; //Updates the value of coreThreshold
 	d3.select(".tick").select("text").attr("x", sliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
@@ -191,7 +191,7 @@ var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") 
 
 //Creating a function to apply different color Scale depending on one value
 function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
-	if (d > threshold) {
+	if (d >= threshold) {
 		return colorScaleMore(d);
 	} return colorScaleLess(d);
 };
@@ -233,6 +233,21 @@ function eventDisplayInfoOn(d, i) {		//Takes most of its code from http://bl.ock
 				.text(function() {
 					return "This block appears in " + d + " selected genome(s)";  //Text content
 				});
+
+	//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
+	var bbox = d3.select("#t" + d + "-" + i).node().getBBox(); //Do not know exactly why but node() is needed
+	//console.log(d3.select("#t" + d + "-" + i).node().getBBox());
+
+	svgContainer.insert("rect", "#t" + d + "-" + i)
+	.attr("id", "t" + d + "-" + i + "bg")
+		.attr("x", bbox.x - 2)
+		.attr("y", bbox.y - 2)
+		.attr("width", bbox.width + 4)
+		.attr("height", bbox.height + 4)
+		.style("fill", d3.hcl(83, 4, 96))
+		.style("fill-opacity", "0.8")
+		.style("stroke", d3.hcl(86, 5, 80))
+		.style("stroke-opacity", "0.9");
 };
 
 function eventDisplayInfoOff(d, i) {
@@ -240,7 +255,8 @@ function eventDisplayInfoOff(d, i) {
 	d3.select(this).style("fill",function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
 
 	//Selects text by id and then removes it
-	d3.select("#t" + d + "-" + i).remove();  // Remove text location
+	d3.select("#t" + d + "-" + i).remove();  // Remove text location slecting the id thanks to #
+	d3.select("#t" + d + "-" + i + "bg").remove();
 };
 
 //Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
