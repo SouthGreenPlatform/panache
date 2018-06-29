@@ -1,8 +1,10 @@
-//Récupération de mon fichier au format JSON
+//Fetching data and applying the visualisation to it
 d3.dsv(";","musaPresenceAbsenceMatrix.csv").then(function(data) { //a quoi sert le then ?
 	console.log(data);
 
-
+	//The real data I would like to work with, fetched from the csv file
+	//ATTENTION I have to check/change the numbers for the lines index, the header names...
+	var TruePanMatrix = data
 
 	//My false data
 	var panMatrix = [
