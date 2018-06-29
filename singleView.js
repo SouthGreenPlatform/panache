@@ -1,3 +1,18 @@
+//Récupération de mon fichier au format JSON
+d3.dsv(";","musaPresenceAbsenceMatrix.csv").then(function(data) { //a quoi sert le then ?
+  console.log(data);
+  var piment = data;
+});
+
+//It is possible to define the header names in order to keep the right column in the rest of the code
+
+var cacahuete = d3.dsv(";","musaPresenceAbsenceMatrix.csv").then(function(data) {return data;});/*, function (d) {
+	return {
+		
+	}
+})*/ //ATTENTION not giving 'return' will save the request and not only the value of the input file
+
+
 //My false data
 var panMatrix = [
 	[1,1,0,1,1,0,0,0,1,1,0,1],
