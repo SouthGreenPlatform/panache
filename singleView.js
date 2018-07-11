@@ -1,15 +1,15 @@
 //Fetching data and applying the visualisation to it
 d3.dsv(";","musaPresenceAbsenceMatrix.csv").then(function(realPanMatrix) { //a quoi sert le then ?
-	console.log(realPanMatrix); //I have to think about how to work with this JSON format
+	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
+	//I have to think about how to work with this JSON format
 
 	//The real data I would like to work with, fetched from the csv file
 	//ATTENTION I have to check/change the numbers for the lines index, the header names...
-	//var TruePanMatrix = data; //ATTENTION Attributing a var to data doesn't seem to work --> I can change the name directly within then
-	console.log(realPanMatrix[0]);
+	console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
 	//console.log(realPanMatrix[0][1]); Does not work
-	console.log(realPanMatrix.Cluster);
-	console.log(realPanMatrix["Cluster"]);
-	realPanMatrix.forEach(function(realPanMatrix) {console.log(realPanMatrix.Cluster)});
+	//console.log(realPanMatrix.Cluster); //undefined
+	//console.log(realPanMatrix["Cluster"]); //undefined
+	//realPanMatrix.forEach(function(realPanMatrix) {console.log(realPanMatrix.Cluster)}); //prints cluster for each line !
 
 	//My false data
 	var panMatrix = [
