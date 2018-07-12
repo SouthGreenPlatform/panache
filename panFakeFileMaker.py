@@ -37,7 +37,7 @@ with open('myFakePanData.tsv', 'wb') as csvfile:
 	startPosition = 0
 	chromosomeIndex = 0
 	blockIndex = 0
-	while (blockIndex <= blockPopSize):
+	while (blockIndex < blockPopSize):
 		seqLength = random.randint(10,21)
 		seqStart = startPosition
 		seqStop = seqStart + seqLength
