@@ -81,7 +81,7 @@ with open('myFakePanData.tsv', 'wb') as csvfile:
 	#print(similarBlocks)
 		
 	#Writing the header row ---------------------------------------------------
-	writer.writerow(['ID-Position'] + ['Sequence IUPAC+'] + ['SimilarBlocks'] + ['Function'] + ['Gen1'] + ['Gen2'] + ['Gen3'] + ['Gen4'] + ['Gen5'] + ['Gen6'])
+	writer.writerow(['ID_Position'] + ['Sequence_IUPAC_Plus'] + ['SimilarBlocks'] + ['Function'] + ['Gen1'] + ['Gen2'] + ['Gen3'] + ['Gen4'] + ['Gen5'] + ['Gen6'])
 	
 	for i in listID:
 		#Writing fake sequences in IUPAC+ code --------------------------------
