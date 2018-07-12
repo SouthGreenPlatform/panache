@@ -18,7 +18,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
 	var newMatrix = realPanMatrix.map(function(a) {
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a;
-		return Object.values(rest);
+		return Object.values(rest); //Values transforms properties into an array
 	}); //a => const {ID-position, Sequence IUPAC+,SimilarBlocks, Function, ...rest} = a;);
 	
 	console.log(newMatrix);
