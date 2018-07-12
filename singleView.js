@@ -1,5 +1,5 @@
 //Fetching data and applying the visualisation to it
-d3.dsv(";","musaPresenceAbsenceMatrix.csv").then(function(realPanMatrix) { //a quoi sert le then ?
+d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert le then ?
 	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
