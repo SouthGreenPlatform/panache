@@ -3,6 +3,7 @@
 import random
 import sys
 import csv
+import re
 
 blockPopSize = int(sys.argv[1])
 chrPopSize = int(sys.argv[2])
@@ -55,7 +56,7 @@ with open('myFakePanData.tsv', 'wb') as csvfile:
 	#Linking the ID of similar blocks ------------------------------------------
 	availableBlocks = list(listID)
 	#Limiting the number of similarities to a certain amount
-	similarityNumber = random.randint(3,int(blockPopSize/4))
+	similarityNumber = random.randint(3,int(round(blockPopSize/7)))
 	similarBlocks = []
 	for duplication in range(similarityNumber+1):
 		#Limiting the max number of similar blocks for a given similarity
@@ -93,8 +94,10 @@ with open('myFakePanData.tsv', 'wb') as csvfile:
 		while (index < len(similarBlocks)) and (absent):
 			absent = (i not in similarBlocks[index])
 			if (not absent):
-			
 				linkedChr = str(similarBlocks[index][0:-1])
+				linkedChr = re.sub(r"\[|\]|'","",linkedChr)
+				
+				linkedChr = re.sub(r", ",";",linkedChr)
 				
 				#Writing sequence based on an exisitng one --------------------
 				seqCode = similarBlocks[index][-1]
