@@ -10,6 +10,22 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 	//console.log(realPanMatrix.Cluster); //undefined
 	//console.log(realPanMatrix["Cluster"]); //undefined
 	//realPanMatrix.forEach(function(realPanMatrix) {console.log(realPanMatrix.Cluster)}); //prints cluster for each line !
+	
+	//Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
+	//And for more about the map method : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/map
+	//var result = realPanMatrix.map(a => [a.Gen1,a.Gen2,a.Gen3,a.Gen4,a.Gen5,a.Gen6]);
+	
+	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
+	var newMatrix = realPanMatrix.map(function(a) {
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a;
+		return Object.values(rest);
+	}); //a => const {ID-position, Sequence IUPAC+,SimilarBlocks, Function, ...rest} = a;);
+	
+	console.log(newMatrix);
+	
+	//Destructuring objects can be a good way to extract data, cf the rest selection : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
+	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
+	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
 	//My false data
 	var panMatrix = [
