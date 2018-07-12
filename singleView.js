@@ -52,20 +52,20 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 	var panChromosomeBlockCounts = [];
 
 	//Calculation of each column sum
-	for (var j = 0; j < panMatrix[0].length; j++) {
-		panChromosomeBlockCounts.push(transpose(panMatrix)[j].reduce(function(acc, val) { return acc + val; }));
+	for (var i = 0; i < newMatrix.length; i++) {
+		panChromosomeBlockCounts.push(newMatrix)[i].reduce(function(acc, val) { return acc + val; }));
 	};
 	//console.log(panChromosomeBlockCounts);
 
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 	//For color, see : https://bl.ocks.org/mbostock/3014589
 	var blueColorScale = d3.scaleLinear()
-			.domain([0,panMatrix.length]) //We declare the min/max values as input domain, they will be linked to the min/max colors
+			.domain([0,newMatrix[0].length]) //We declare the min/max values as input domain, they will be linked to the min/max colors
 			.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
 			.range([d3.hcl(246, 0,95), d3.hcl(246, 65,70)]); //No need to interpolate after range instead of before
 
 	var orangeColorScale = d3.scaleLinear() //Same construction method
-			.domain([0,panMatrix.length])
+			.domain([0,newMatrix[0].length])
 			.interpolate(d3.interpolateHcl)
 			.range([d3.hcl(60, 0,95), d3.hcl(60, 65,70)]);
 
@@ -74,7 +74,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 										.attr("width", 1000).attr("height", 500);
 
 	//Calculating the threshold for the change in color scale in panChromosome, arbitrary value for now
-	var coreThreshold = 85/100*panMatrix.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
+	var coreThreshold = 85/100*newMatrix[0].length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
 
 	//Creating a color gradient for the slider shape
 	//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
@@ -93,7 +93,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 					.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
 				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
 					.attr("class", "hueSwingingPointLeft") //Class that is used later for dynamic changes
-					.attr("offset", coreThreshold/panMatrix.length)
+					.attr("offset", coreThreshold/newMatrix[0].length)
 					.attr("stop-color", blueColorScale(coreThreshold))
 				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 					.attr("class", "hueSwingingPointRight")
@@ -158,7 +158,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 			.attr("r", 7) //The radius
 			.attr("fill", "#fff") //The circle is filled in white
 			.attr("stroke", "#000")
-			.attr("cx", coreThreshold/panMatrix.length*100)
+			.attr("cx", coreThreshold/newMatrix[0].length*100)
 			.attr("stroke-opacity", 0.3)
 			.attr("stroke-width", "1.25px");
 
@@ -186,10 +186,10 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function eventDynamicColorChange(slidePercent) {
 		handle.attr("cx", sliderScale(slidePercent)); //Position change for the handle
-		coreThreshold = slidePercent*panMatrix.length; //Updates the value of coreThreshold
+		coreThreshold = slidePercent*newMatrix[0].length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", sliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
-		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
-		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/panMatrix.length).attr("stop-color", orangeColorScale(coreThreshold));
+		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
+		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the panChromosome blocks' colours
 		structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
 			color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
@@ -234,7 +234,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 	//Selecting all previous blocks, and determining their attributes
 	var blocksAttributes = blocks.attr("x", svgContainer.attr("width")*0.55)
 									.attr("width", 25)
-									.attr("height", svgContainer.attr("height")/panMatrix[0].length)
+									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
 									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
@@ -295,7 +295,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 	};
 
 	//Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
-	var flatten = panMatrix.reduce(function(a, b) {
+	var flatten = transpose(newMatrix).reduce(function(a, b) {
 		return a.concat(b);
 	});
 	//console.log(flatten)
