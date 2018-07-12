@@ -1,5 +1,5 @@
 //Fetching data and applying the visualisation to it
-d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert le then ?
+d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert le then ?
 	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
@@ -53,7 +53,7 @@ d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert 
 
 	//Calculation of each column sum
 	for (var i = 0; i < newMatrix.length; i++) {
-		panChromosomeBlockCounts.push(newMatrix)[i].reduce(function(acc, val) { return acc + val; }));
+		panChromosomeBlockCounts.push(newMatrix[i].reduce(function(acc, val) { return acc + val; }));
 	};
 	//console.log(panChromosomeBlockCounts);
 
