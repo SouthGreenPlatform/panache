@@ -1,25 +1,26 @@
 //Fetching data and applying the visualisation to it
 d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert le then ?
-	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
+	//console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
 	//The real data I would like to work with, fetched from the csv file
 	//ATTENTION I have to check/change the numbers for the lines index, the header names...
-	console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
+	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
 	//console.log(realPanMatrix[0][1]); Does not work
 	//console.log(realPanMatrix.Cluster); //undefined
 	//console.log(realPanMatrix["Cluster"]); //undefined
 	//realPanMatrix.forEach(function(realPanMatrix) {console.log(realPanMatrix.Cluster)}); //prints cluster for each line !
 	
 	//Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
-	//And for more about the map method : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/map
-	//var result = realPanMatrix.map(a => [a.Gen1,a.Gen2,a.Gen3,a.Gen4,a.Gen5,a.Gen6]);
 	
 	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
 	var newMatrix = realPanMatrix.map(function(a) {
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a;
-		return Object.values(rest); //Values transforms properties into an array
-	}); //a => const {ID-position, Sequence IUPAC+,SimilarBlocks, Function, ...rest} = a;);
+		//values must be converted as the are imported as string, it would disrupt the display of panChromosomeBlockCounts
+		return Object.values(rest).map(value => Number(value))/*.forEach(function(a) {a = Number(a);})*/; //Values transforms properties into an array, map creates a new array built from calling a function on all its elements
+		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
+	});
 	
 	console.log(newMatrix);
 	
@@ -28,7 +29,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
 	//My false data
-	var panMatrix = [
+/*	var panMatrix = [
 		[1,1,0,1,1,0,0,0,1,1,0,1],
 		[1,0,1,1,1,0,1,1,1,1,0,1],
 		[1,1,0,1,1,0,1,1,1,1,1,1],
@@ -40,7 +41,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 		[1,0,1,1,1,0,1,1,1,0,0,1],
 		[1,1,0,1,1,0,1,1,1,1,0,1],
 	];
-
+*/
 	//Function created for the transposition of the matrix, is usefull with .reduce
 	function transpose(a) {
 		return Object.keys(a[0]).map(function(c) {
@@ -56,6 +57,9 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 		panChromosomeBlockCounts.push(newMatrix[i].reduce(function(acc, val) { return acc + val; }));
 	};
 	//console.log(panChromosomeBlockCounts);
+	console.log(newMatrix[0]);
+	console.log(newMatrix[0].length);
+	console.log(panChromosomeBlockCounts);
 
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 	//For color, see : https://bl.ocks.org/mbostock/3014589
@@ -68,6 +72,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 			.domain([0,newMatrix[0].length])
 			.interpolate(d3.interpolateHcl)
 			.range([d3.hcl(60, 0,95), d3.hcl(60, 65,70)]);
+
 
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
