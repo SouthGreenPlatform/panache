@@ -15,16 +15,27 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 	
 	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
 	var newMatrix = realPanMatrix.map(function(a) {
+		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a;
-		//values must be converted as the are imported as string, it would disrupt the display of panChromosomeBlockCounts
-		return Object.values(rest).map(value => Number(value))/*.forEach(function(a) {a = Number(a);})*/; //Values transforms properties into an array, map creates a new array built from calling a function on all its elements
+		//values must be converted as they are imported as string, it would disrupt the display of panChromosomeBlockCounts
+		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
 		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
 		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
 	});
-	
 	console.log(newMatrix);
 	
-	//Destructuring objects can be a good way to extract data, cf the rest selection : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
+	//Uncomment for the real version ! -----------------------------------------------
+/*	
+	const nbChromosomes = max(realPanMatrix.map(function(a) {
+		const {ID_Position} = a;
+		return Number(Object.values(ID_Position)[0]);
+	}))+1; //+1 because there is a Chromosome number 0
+	console.log(nbChromosomes);
+*/	
+	
+	//As I am not working on a complete data set I will set this valu myself for now
+	nbChromosomes = 5
+	
 	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
@@ -57,9 +68,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 		panChromosomeBlockCounts.push(newMatrix[i].reduce(function(acc, val) { return acc + val; }));
 	};
 	//console.log(panChromosomeBlockCounts);
-	console.log(newMatrix[0]);
-	console.log(newMatrix[0].length);
-	console.log(panChromosomeBlockCounts);
 
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 	//For color, see : https://bl.ocks.org/mbostock/3014589
@@ -238,8 +246,9 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 
 	//Selecting all previous blocks, and determining their attributes
 	var blocksAttributes = blocks.attr("x", svgContainer.attr("width")*0.55)
-									.attr("width", 15)
-									.attr("height", svgContainer.attr("height")/newMatrix.length)
+									.attr("width", 14)
+//									.attr("height", svgContainer.attr("height")/newMatrix.length)
+									.attr("height", 12)
 									.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
 									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
@@ -299,11 +308,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 		d3.select("#t" + d + "-" + i + "bg").remove();
 	};
 
-	//Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
-	var flatten = transpose(newMatrix).reduce(function(a, b) {
-		return a.concat(b);
-	});
-	//console.log(flatten)
+
 
 	//Creation of the subgroup for the StructureLinks background
 	var structureBackground = svgContainer.append("g").attr("id", "structureLinksBackground")
@@ -315,13 +320,20 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 	//Attributes for structureLinksBackground
 	var structureBackground_Attributes = structureBackground.attr("x",0)
 															.attr("y", function(i,j){return j*blocks.attr("height");})
-															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
-															.attr("height", blocks.attr("height"))
+//															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
+															.attr("width", (nbChromosomes+3)*14)
+															.attr("height", 12)
 															.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 																return color;
 															});
+
+	//Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
+	var flatten = transpose(newMatrix).reduce(function(a, b) {
+		return a.concat(b);
+	});
+	//console.log(flatten)
 
 	//Creation of the subGroup for the PA blocks
 	var matrixPA = svgContainer.append("g").attr("id", "presenceAbsence")
