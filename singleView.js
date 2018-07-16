@@ -1,4 +1,4 @@
-//Fetching data and applying the visualisation to it
+//Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert le then ?
 	//console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
@@ -238,7 +238,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 
 	//Selecting all previous blocks, and determining their attributes
 	var blocksAttributes = blocks.attr("x", svgContainer.attr("width")*0.55)
-									.attr("width", 25)
+									.attr("width", 15)
 									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
 									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
