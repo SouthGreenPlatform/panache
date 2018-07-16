@@ -1,5 +1,6 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
-d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi sert le then ?
+//d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
+d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 	//console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
@@ -33,7 +34,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 	console.log(nbChromosomes);
 */	
 	
-	//As I am not working on a complete data set I will set this valu myself for now
+	//As I am not working on a complete data set I will set this value myself for now
 	nbChromosomes = 5
 	
 	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
@@ -226,7 +227,32 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 	var w = window.innerWidth, h = window.innerHeight;
 	*/
 
+	//Creating a function to apply different color Scale depending on one value
+	function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
+		if (d >= threshold) {
+			return colorScaleMore(d);
+		} return colorScaleLess(d);
+	};	
+	
+	//Creation of the subgroup for the StructureBackground
+	var structureBackground = svgContainer.append("g").attr("id", "structureLinksBackground")
+												.selectAll("rect")
+													.data(panChromosomeBlockCounts)
+													.enter()
+													.append("rect");
 
+	//Attributes for structureBackground
+	var structureBackground_Attributes = structureBackground.attr("x",0)
+															.attr("y", function(i,j){return j*12;})
+//															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
+															.attr("width", (nbChromosomes+3)*14)
+															.attr("height", 12)
+															.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
+																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
+																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
+																return color;
+															});
+	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
@@ -237,19 +263,14 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 								//For more about joins, see : https://bost.ocks.org/mike/join/
 
 
-	//Creating a function to apply different color Scale depending on one value
-	function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
-		if (d >= threshold) {
-			return colorScaleMore(d);
-		} return colorScaleLess(d);
-	};
+
 
 	//Selecting all previous blocks, and determining their attributes
-	var blocksAttributes = blocks.attr("x", svgContainer.attr("width")*0.55)
+	var blocksAttributes = blocks.attr("x", Number(structureBackground.attr("width"))+3)
 									.attr("width", 14)
 //									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("height", 12)
-									.attr("y", function(i,j){return j*blocks.attr("height");}) //y position is index * block height
+									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
 									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
@@ -273,11 +294,11 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 		//Specifies where to put label of text altogether with its properties
 		svgContainer.append("text")
 					.attr("id", "t" + d + "-" + i)
-					.attr("x", Number(d3.select(this).attr("x")) - Number(d3.select(this).attr("width"))/2)
+					.attr("x", Number(d3.select(this).attr("x")) + Number(d3.select(this).attr("width"))*1.5)
 					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
 					.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
 					.attr("font-family", "sans-serif")
-					.attr("text-anchor", "end") //Can be "start", "middle", ou "end"
+					.attr("text-anchor", "start") //Can be "start", "middle", or "end"
 					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments
 					.text(function() {
 						return "This block appears in " + d + " selected genome(s)";  //Text content
@@ -310,24 +331,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 
 
 
-	//Creation of the subgroup for the StructureLinks background
-	var structureBackground = svgContainer.append("g").attr("id", "structureLinksBackground")
-												.selectAll("rect")
-													.data(panChromosomeBlockCounts)
-													.enter()
-													.append("rect");
 
-	//Attributes for structureLinksBackground
-	var structureBackground_Attributes = structureBackground.attr("x",0)
-															.attr("y", function(i,j){return j*blocks.attr("height");})
-//															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
-															.attr("width", (nbChromosomes+3)*14)
-															.attr("height", 12)
-															.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
-																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-																return color;
-															});
 
 	//Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
 	var flatten = transpose(newMatrix).reduce(function(a, b) {
@@ -343,6 +347,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //a quoi s
 													.append("rect");
 
 
+	//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
 	//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 	var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
 			return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
