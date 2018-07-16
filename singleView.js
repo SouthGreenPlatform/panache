@@ -18,6 +18,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var newMatrix = realPanMatrix.map(function(a) {
 		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a;
+		//ATTENTION Depends on the INDEX of the headers from the input file : The first element is linked to the first property, etc...
 		//values must be converted as they are imported as string, it would disrupt the display of panChromosomeBlockCounts
 		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
 		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
@@ -40,20 +41,34 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
-	//My false data
-/*	var panMatrix = [
-		[1,1,0,1,1,0,0,0,1,1,0,1],
-		[1,0,1,1,1,0,1,1,1,1,0,1],
-		[1,1,0,1,1,0,1,1,1,1,1,1],
-		[1,0,0,1,1,1,1,0,1,1,0,1],
-		[1,1,1,1,1,0,1,1,1,1,0,1],
-		[1,1,0,1,1,0,1,0,1,1,0,0],
-		[1,1,0,1,1,0,1,0,1,1,0,1],
-		[1,1,1,1,0,0,0,0,1,1,1,0],
-		[1,0,1,1,1,0,1,1,1,0,0,1],
-		[1,1,0,1,1,0,1,1,1,1,0,1],
-	];
-*/
+
+	similarityEncoding = realPanMatrix.map(function(a) { //ATTENTION Choromosomes must be encoded as number for now
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks} = a;
+		concernedChromosomes = [];
+		SimilarBlocks.split(";").forEach(function(copy) {
+			concernedChromosomes.push(copy.split(":")[0]);
+		});
+		countAsProperty = {};
+		//THIS WORKS AND ITS AWESOME THAT IT DOES---------
+		for (var i = 0; i < nbChromosomes; i++) {
+			countAsProperty[String(i)] = 0
+		};
+		//-----------------------------------------------
+		concernedChromosomes.forEach(function(chrom) {
+			if (countAsProperty[chrom] != undefined) {
+				countAsProperty[chrom] += 1;
+			};
+		});
+		maximum = Math.max(...Object.values(countAsProperty)); //The ... is mandatory to tell that we work with an array
+		proportionAsCell = Object.values(countAsProperty).map(function(count) {
+			if (maximum > 0) {
+				return count/maximum;
+			} else {return 0};
+		});
+		return proportionAsCell;
+	});		
+	console.log(similarityEncoding);
+	
 	//Function created for the transposition of the matrix, is usefull with .reduce
 	function transpose(a) {
 		return Object.keys(a[0]).map(function(c) {
