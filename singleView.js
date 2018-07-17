@@ -45,6 +45,16 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	nbChromosomes = 5
 	//------------------------------------------------------------------------------------
 	
+	//---------------------------------firstNtPositions-----------------------------------
+	
+	const firstNtPositions = realPanMatrix.map(function(a) {
+		const {ID_Position} = a;
+		return Number(ID_Position.split(":")[1]);
+	});
+
+	//------------------------------------------------------------------------------------
+	console.log(firstNtPositions);
+	
 	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
