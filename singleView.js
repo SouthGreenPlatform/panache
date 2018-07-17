@@ -123,7 +123,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var pseudoRainbowColorScale = d3.scaleLinear() //Same construction method
 			.domain([0,newMatrix[0].length]) //max is the highest first nt position of a block, WITHIN A K
 			.interpolate(d3.interpolateHcl)
-			.range([d3.color(0,110,130), d3.color(0,90,200), d3.color(0,160,250), d3.color(0,200,250), d3.color(130,160,190), d3.color(120,50,40), d3.color(190,140,60), d3.color(190,160,120), d3.color(240,240,50), d3.color(250,230,140), d3.color(210, 250,190),)];
+			.range([d3.color(0,110,130), d3.color(0,90,200), d3.color(0,160,250), d3.color(0,200,250), d3.color(130,160,190), d3.color(120,50,40), d3.color(190,140,60), d3.color(190,160,120), d3.color(240,240,50), d3.color(250,230,140), d3.color(210, 250,190)]);
 	//------------------------------------------------------------------------------------
 
 	//Creating the SVG DOM tag
