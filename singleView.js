@@ -303,6 +303,9 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	};
 	//------------------------------------------------------------------------------------
 
+	//------------------------------copyCircles & attributes------------------------------
+	
+	//Creation of the subgroup for the the repeated block encoding (cf similarityEncoding)
 	var copyCircles = svgContainer.append("g").attr("id", "duplicationCircles")
 												.selectAll("circle")
 													.data(flatten(similarityEncoding))
@@ -311,17 +314,14 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//Attributes for copyCircles
 	var copyCircles_Attributes = copyCircles.attr("cx", function(d,i) {return (0.5+i%nbChromosomes)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
-//	return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
-												.attr("cy", function(d,i){return (0.5+Math.floor(i/nbChromosomes))*12;}) //Depends on the data index, and 12 which is the blocks height
+												.attr("cy", function(d,i){return (0.5+Math.floor(i/nbChromosomes))*12;}) //Depends on the data index, and 12, which is the blocks height
 												.attr("r", (d => d*(5-1)+1)) //Depends on the data value
 												.style("fill", d3.hcl(0,0,25))
-												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));
-/*												.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
-													color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-													color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-													return color;
-												});
-*/
+												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));//A one line 'if' statement
+	//------------------------------------------------------------------------------------
+
+	//---------------------------------blocks & attributes--------------------------------
+	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
@@ -330,9 +330,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
 								
 								//For more about joins, see : https://bost.ocks.org/mike/join/
-
-
-
 
 	//Selecting all previous blocks, and determining their attributes
 	var blocksAttributes = blocks.attr("x", Number(structureBackground.attr("width"))+3)
@@ -343,7 +340,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
+	//------------------------------------------------------------------------------------
 
+	//--------------------------------eventDisplayInfoOn()--------------------------------
+	
 	function eventDisplayInfoOn(d, i) {		//Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
 											//http://bl.ocks.org/phil-pedruco/9032348 was useful too
 
@@ -388,7 +388,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			.style("stroke", d3.hcl(86, 5, 80))
 			.style("stroke-opacity", "0.9");
 	};
+	//------------------------------------------------------------------------------------
 
+	//---------------------------------eventDisplayInfoOff()------------------------------
+	
 	function eventDisplayInfoOff(d, i) {
 		//Uses D3 to select element, change color back to normal by overwriting and not recovery
 		d3.select(this).style("fill",function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
@@ -397,13 +400,15 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		d3.select("#t" + d + "-" + i).remove();  // Remove text location slecting the id thanks to #
 		d3.select("#t" + d + "-" + i + "bg").remove();
 	};
-
+	//------------------------------------------------------------------------------------
 
 	
 	//Creating a flattened matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
 	var flattenedPaMatrix = flatten(transpose(newMatrix));
 	//console.log(flattenedPaMatrix)
 
+	//--------------------------------matrixPA & attributes-------------------------------
+	
 	//Creation of the subGroup for the PA blocks
 	var matrixPA = svgContainer.append("g").attr("id", "presenceAbsence")
 												.selectAll("rect")
@@ -415,11 +420,11 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
 	//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 	var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
-			return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
-		})
+											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
+										})
 										.attr("width", blocks.attr("width"))
 										.attr("height", blocks.attr("height"))
 										.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
 										.style("fill", function (d) {return d3.interpolateGreys(d*0.80);});
-
+	//------------------------------------------------------------------------------------
 });
