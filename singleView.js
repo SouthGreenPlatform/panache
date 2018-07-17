@@ -107,7 +107,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var blueColorScale = d3.scaleLinear()
 			.domain([0,newMatrix[0].length]) //We declare the min/max values as input domain, they will be linked to the min/max colors
 			.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
-			.range([d3.hcl(246, 0,95), d3.hcl(246, 65,70)]); //No need to interpolate after range instead of before
+			.range([d3.hcl(246,0,95), d3.hcl(246,65,70)]); //No need to interpolate after range instead of before
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------------orangeColorScale------------------------------------
@@ -115,7 +115,15 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var orangeColorScale = d3.scaleLinear() //Same construction method
 			.domain([0,newMatrix[0].length])
 			.interpolate(d3.interpolateHcl)
-			.range([d3.hcl(60, 0,95), d3.hcl(60, 65,70)]);
+			.range([d3.hcl(60,0,95), d3.hcl(60,65,70)]);
+	//------------------------------------------------------------------------------------
+	
+	//-----------------------------pseudoRainbowColorScale--------------------------------
+	
+	var pseudoRainbowColorScale = d3.scaleLinear() //Same construction method
+			.domain([0,newMatrix[0].length]) //max is the highest first nt position of a block, WITHIN A K
+			.interpolate(d3.interpolateHcl)
+			.range([d3.color(0,110,130), d3.color(0,90,200), d3.color(0,160,250), d3.color(0,200,250), d3.color(130,160,190), d3.color(120,50,40), d3.color(190,140,60), d3.color(190,160,120), d3.color(240,240,50), d3.color(250,230,140), d3.color(210, 250,190),)];
 	//------------------------------------------------------------------------------------
 
 	//Creating the SVG DOM tag
