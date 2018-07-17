@@ -14,6 +14,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
 	
+	//-------------------------------------newMatrix--------------------------------------
+	
 	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
 	var newMatrix = realPanMatrix.map(function(a) {
 		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
@@ -24,11 +26,15 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
 		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
 	});
+	//------------------------------------------------------------------------------------
+	
 	console.log(newMatrix);
 	
-	//Uncomment for the real version ! -----------------------------------------------
+	//-----------------------------------nbChromosomes------------------------------------
+	
+	//Uncomment for the real version ! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /*	
-	const nbChromosomes = max(realPanMatrix.map(function(a) {
+	const nbChromosomes = Math.max(...realPanMatrix.map(function(a) {
 		const {ID_Position} = a;
 		return Number(Object.values(ID_Position)[0]);
 	}))+1; //+1 because there is a Chromosome number 0
@@ -37,37 +43,42 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//As I am not working on a complete data set I will set this value myself for now
 	nbChromosomes = 5
+	//------------------------------------------------------------------------------------
 	
 	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
-
-	similarityEncoding = realPanMatrix.map(function(a) { //ATTENTION Choromosomes must be encoded as number for now
+	//--------------------------------similarityEncoding----------------------------------
+	
+	//Setting the radii size for the circles that indicate copies of blocks
+	similarityEncoding = realPanMatrix.map(function(a) { //ATTENTION Chromosomes must be encoded as number for now
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks} = a;
 		concernedChromosomes = [];
 		SimilarBlocks.split(";").forEach(function(copy) {
-			concernedChromosomes.push(copy.split(":")[0]);
+			concernedChromosomes.push(copy.split(":")[0]); //Extracting the first piece of ID for each copy. Can be a number or "."
 		});
 		countAsProperty = {};
-		//THIS WORKS AND ITS AWESOME THAT IT DOES---------
-		for (var i = 0; i < nbChromosomes; i++) {
+		for (var i = 0; i < nbChromosomes; i++) { //Sets the base value to 0 for the properties "0", "1", "2"... etc
 			countAsProperty[String(i)] = 0
 		};
-		//-----------------------------------------------
 		concernedChromosomes.forEach(function(chrom) {
 			if (countAsProperty[chrom] != undefined) {
-				countAsProperty[chrom] += 1;
+				countAsProperty[chrom] += 1; //Counts the occurences for each chromosome
 			};
 		});
 		maximum = Math.max(...Object.values(countAsProperty)); //The ... is mandatory to tell that we work with an array
-		proportionAsCell = Object.values(countAsProperty).map(function(count) {
+		proportionAsCell = Object.values(countAsProperty).map(function(count) { //Return the array where each occurence is divided by the max occurence number
 			if (maximum > 0) {
 				return count/maximum;
 			} else {return 0};
 		});
 		return proportionAsCell;
 	});		
+	//------------------------------------------------------------------------------------
+	
 	console.log(similarityEncoding);
+	
+	//----------------------------------transpose()---------------------------------------
 	
 	//Function created for the transposition of the matrix, is usefull with .reduce
 	function transpose(a) {
@@ -75,7 +86,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			return a.map(function(r) { return r[c]; });
 		});
 	}
-
+	//------------------------------------------------------------------------------------
+	
+	//----------------------------panChromosomeBlockCounts--------------------------------
+	
 	//JavaScript is not efficient to calculate this, needs for precomputation with Python?, maybe long with big matrices
 	var panChromosomeBlockCounts = [];
 
@@ -83,27 +97,36 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	for (var i = 0; i < newMatrix.length; i++) {
 		panChromosomeBlockCounts.push(newMatrix[i].reduce(function(acc, val) { return acc + val; }));
 	};
+	//------------------------------------------------------------------------------------
 	//console.log(panChromosomeBlockCounts);
 
+	//---------------------------------blueColorScale-------------------------------------
+	
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 	//For color, see : https://bl.ocks.org/mbostock/3014589
 	var blueColorScale = d3.scaleLinear()
 			.domain([0,newMatrix[0].length]) //We declare the min/max values as input domain, they will be linked to the min/max colors
 			.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
 			.range([d3.hcl(246, 0,95), d3.hcl(246, 65,70)]); //No need to interpolate after range instead of before
-
+	//------------------------------------------------------------------------------------
+	
+	//--------------------------------orangeColorScale------------------------------------
+	
 	var orangeColorScale = d3.scaleLinear() //Same construction method
 			.domain([0,newMatrix[0].length])
 			.interpolate(d3.interpolateHcl)
 			.range([d3.hcl(60, 0,95), d3.hcl(60, 65,70)]);
-
+	//------------------------------------------------------------------------------------
 
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
 										.attr("width", 1000).attr("height", 500);
 
+	//----------------------------------coreThreshold-------------------------------------
+	
 	//Calculating the threshold for the change in color scale in panChromosome, arbitrary value for now
 	var coreThreshold = 85/100*newMatrix[0].length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
+	//------------------------------------------------------------------------------------
 
 	//Creating a color gradient for the slider shape
 	//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
@@ -242,23 +265,26 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var w = window.innerWidth, h = window.innerHeight;
 	*/
 
+	//-------------------------------thresholdBasedColor()--------------------------------
+	
 	//Creating a function to apply different color Scale depending on one value
 	function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
 		if (d >= threshold) {
 			return colorScaleMore(d);
 		} return colorScaleLess(d);
 	};	
+	//------------------------------------------------------------------------------------
 	
 	//Creation of the subgroup for the StructureBackground
-	var structureBackground = svgContainer.append("g").attr("id", "structureLinksBackground")
-												.selectAll("rect")
-													.data(panChromosomeBlockCounts)
-													.enter()
-													.append("rect");
+	var structureBackground = svgContainer.append("g").attr("id", "structureBackground")
+														.selectAll("rect")
+															.data(panChromosomeBlockCounts)
+															.enter()
+															.append("rect");
 
 	//Attributes for structureBackground
 	var structureBackground_Attributes = structureBackground.attr("x",0)
-															.attr("y", function(i,j){return j*12;})
+															.attr("y", function(d,i){return i*12;})
 //															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 															.attr("width", (nbChromosomes+3)*14)
 															.attr("height", 12)
@@ -267,7 +293,35 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 																return color;
 															});
+
+	//-------------------------------------flatten()--------------------------------------
+
+	function flatten(array) {
+		return array.reduce(function(a, b) {
+			return a.concat(b);
+		});
+	};
+	//------------------------------------------------------------------------------------
+
+	var copyCircles = svgContainer.append("g").attr("id", "duplicationCircles")
+												.selectAll("circle")
+													.data(flatten(similarityEncoding))
+													.enter()
+													.append("circle");
 	
+	//Attributes for copyCircles
+	var copyCircles_Attributes = copyCircles.attr("cx", function(d,i) {return (0.5+i%nbChromosomes)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
+//	return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
+												.attr("cy", function(d,i){return (0.5+Math.floor(i/nbChromosomes))*12;}) //Depends on the data index, and 12 which is the blocks height
+												.attr("r", (d => d*(5-1)+1)) //Depends on the data value
+												.style("fill", d3.hcl(0,0,25))
+												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));
+/*												.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
+													color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
+													color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
+													return color;
+												});
+*/
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
@@ -345,19 +399,15 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	};
 
 
-
-
-
-	//Creating a flatten matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
-	var flatten = transpose(newMatrix).reduce(function(a, b) {
-		return a.concat(b);
-	});
-	//console.log(flatten)
+	
+	//Creating a flattened matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
+	var flattenedPaMatrix = flatten(transpose(newMatrix));
+	//console.log(flattenedPaMatrix)
 
 	//Creation of the subGroup for the PA blocks
 	var matrixPA = svgContainer.append("g").attr("id", "presenceAbsence")
 												.selectAll("rect")
-													.data(flatten) //There is one rect per (genome x PA block), not just per genome
+													.data(flattenedPaMatrix) //There is one rect per (genome x PA block), not just per genome
 													.enter()
 													.append("rect");
 
@@ -370,6 +420,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 										.attr("width", blocks.attr("width"))
 										.attr("height", blocks.attr("height"))
 										.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
-										.style("fill", function (d) {return d3.interpolateGreys (d*0.80);});
+										.style("fill", function (d) {return d3.interpolateGreys(d*0.80);});
 
 });
