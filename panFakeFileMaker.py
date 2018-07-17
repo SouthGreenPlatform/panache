@@ -53,7 +53,7 @@ with open('myFakePanData.tsv', 'wb') as csvfile:
 			chromosomeIndex += 1
 			startPosition = 0
 			
-	#Linking the ID of similar blocks ------------------------------------------
+	#Linking the ID of similar blocks -----------------------------------------
 	availableBlocks = list(listID)
 	#Limiting the number of similarities to a certain amount
 	similarityNumber = random.randint(3,int(round(blockPopSize/7)))
