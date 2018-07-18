@@ -53,7 +53,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	});
 
 	//------------------------------------------------------------------------------------
-	console.log(firstNtPositions);
+	//console.log(firstNtPositions);
 	
 	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
@@ -127,15 +127,31 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			.interpolate(d3.interpolateHcl)
 			.range([d3.hcl(60,0,95), d3.hcl(60,65,70)]);
 	//------------------------------------------------------------------------------------
-	
-	//-----------------------------pseudoRainbowColorScale--------------------------------
-	
-	var pseudoRainbowColorScale = d3.scaleLinear() //Same construction method
-			.domain([0,newMatrix[0].length]) //max is the highest first nt position of a block, WITHIN A K
-			.interpolate(d3.interpolateHcl)
-			.range([d3.color(0,110,130), d3.color(0,90,200), d3.color(0,160,250), d3.color(0,200,250), d3.color(130,160,190), d3.color(120,50,40), d3.color(190,140,60), d3.color(190,160,120), d3.color(240,240,50), d3.color(250,230,140), d3.color(210, 250,190)]);
-	//------------------------------------------------------------------------------------
 
+	//--------------------------------domainPivotsMaker()---------------------------------
+	
+	function domainPivotsMaker(breakpointsNb,maxValue) {
+		breakpoints = [];
+		for (var i = 0; i < breakpointsNb; i++) {
+//			breakpoints.push(Math.round((1+maxValue/breakpointsNb/(breakpointsNb-1))*i));
+			breakpoints.push(Math.round((i/(breakpointsNb-1))*maxValue));
+		};
+		return(breakpoints);
+	};
+	//------------------------------------------------------------------------------------
+	
+	//------------------------------pseudoRainbowColorScale-------------------------------
+	
+	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
+	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
+	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
+	var pseudoRainbowColorScale = d3.scaleLinear() //Same construction method
+			.domain(domainPivotsMaker(pseudoRainbowList.length,Math.max(...firstNtPositions))) //max is the highest first nt position of a block, WITHIN A K
+			.interpolate(d3.interpolateHcl)
+			.range(pseudoRainbowList); //Each color in the range has a pivot position defined in the domain
+	//------------------------------------------------------------------------------------
+	
+	
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
 										.attr("width", 1000).attr("height", 500);
@@ -293,6 +309,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	};	
 	//------------------------------------------------------------------------------------
 	
+	//--------------------------structureBackground & attributes--------------------------
+	
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = svgContainer.append("g").attr("id", "structureBackground")
 														.selectAll("rect")
@@ -311,6 +329,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 																return color;
 															});
+	//------------------------------------------------------------------------------------
 
 	//-------------------------------------flatten()--------------------------------------
 
@@ -338,6 +357,26 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));//A one line 'if' statement
 	//------------------------------------------------------------------------------------
 
+	//---------------------------------rainbowBlocks & attributes--------------------------------
+	
+	//Binding the data to a DOM element, therefore creating one SVG block per data
+	var rainbowBlocks = svgContainer.append("g").attr("id","panChromosome_Rainbowed")
+								.selectAll("rect")
+									.data(firstNtPositions)
+									.enter()
+									.append("rect");
+
+	//Selecting all previous blocks, and determining their attributes
+	var rainbowBlocks_Attributes = rainbowBlocks.attr("x", Number(structureBackground.attr("width"))+3)
+									.attr("width", 14)
+//									.attr("height", svgContainer.attr("height")/newMatrix.length)
+									.attr("height", 12)
+									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
+									.style("fill", (d => pseudoRainbowColorScale(d)));
+//									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+//									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
+	//------------------------------------------------------------------------------------
+	
 	//---------------------------------blocks & attributes--------------------------------
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
@@ -350,7 +389,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 								//For more about joins, see : https://bost.ocks.org/mike/join/
 
 	//Selecting all previous blocks, and determining their attributes
-	var blocksAttributes = blocks.attr("x", Number(structureBackground.attr("width"))+3)
+	var blocks_Attributes = blocks.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
+//	var blocks_Attributes = blocks.attr("x", Number(structureBackground.attr("width"))+3)
 									.attr("width", 14)
 //									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("height", 12)
