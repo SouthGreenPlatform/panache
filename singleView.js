@@ -55,7 +55,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//------------------------------------------------------------------------------------
 	//console.log(firstNtPositions);
 	
-	//See those too : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/from
+	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
 	//--------------------------------similarityEncoding----------------------------------
@@ -85,8 +85,16 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		return proportionAsCell;
 	});		
 	//------------------------------------------------------------------------------------
-	
 	console.log(similarityEncoding);
+	
+	//---------------------------------similarityNumbers----------------------------------
+	
+	similarityNumbers = realPanMatrix.map(function(a) { //ATTENTION Chromosomes must be encoded as number for now
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks} = a;
+		return SimilarBlocks.split(";").length;
+	});		
+	//------------------------------------------------------------------------------------
+	console.log(similarityNumbers);
 	
 	//----------------------------------transpose()---------------------------------------
 	
@@ -96,6 +104,18 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			return a.map(function(r) { return r[c]; });
 		});
 	}
+	//------------------------------------------------------------------------------------
+	
+	//--------------------------------domainPivotsMaker()---------------------------------
+	
+	function domainPivotsMaker(breakpointsNb,maxValue) {
+		breakpoints = [];
+		for (var i = 0; i < breakpointsNb; i++) {
+//			breakpoints.push(Math.round((1+maxValue/breakpointsNb/(breakpointsNb-1))*i));
+			breakpoints.push(Math.round((i/(breakpointsNb-1))*maxValue));
+		};
+		return(breakpoints);
+	};
 	//------------------------------------------------------------------------------------
 	
 	//----------------------------panChromosomeBlockCounts--------------------------------
@@ -128,16 +148,12 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			.range([d3.hcl(60,0,95), d3.hcl(60,65,70)]);
 	//------------------------------------------------------------------------------------
 
-	//--------------------------------domainPivotsMaker()---------------------------------
+	//--------------------------------purpleColorScale------------------------------------
 	
-	function domainPivotsMaker(breakpointsNb,maxValue) {
-		breakpoints = [];
-		for (var i = 0; i < breakpointsNb; i++) {
-//			breakpoints.push(Math.round((1+maxValue/breakpointsNb/(breakpointsNb-1))*i));
-			breakpoints.push(Math.round((i/(breakpointsNb-1))*maxValue));
-		};
-		return(breakpoints);
-	};
+	var purpleColorScale = d3.scaleLinear() //Same construction method
+			.domain([1,Math.max(...similarityNumbers)])
+			.interpolate(d3.interpolateHcl)
+			.range([d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
@@ -277,12 +293,12 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the panChromosome blocks' colours
-		structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
+/*		structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
 			color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 			color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 			return color;
 		});
-	}
+*/	};
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,7 +330,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = svgContainer.append("g").attr("id", "structureBackground")
 														.selectAll("rect")
-															.data(panChromosomeBlockCounts)
+															.data(similarityNumbers)
 															.enter()
 															.append("rect");
 
@@ -324,7 +340,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 //															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 															.attr("width", (nbChromosomes+3)*14)
 															.attr("height", 12)
-															.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale));
+															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 																return color;
@@ -357,7 +373,24 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));//A one line 'if' statement
 	//------------------------------------------------------------------------------------
 
-	//---------------------------------rainbowBlocks & attributes--------------------------------
+	//-----------------------------similarBlocks & attributes-----------------------------
+	
+	//Binding the data to a DOM element, therefore creating one SVG block per data
+	var similarBlocks = svgContainer.append("g").attr("id","panChromosome_similarCount")
+								.selectAll("rect")
+									.data(similarityNumbers)
+									.enter()
+									.append("rect");
+
+	//Selecting all previous blocks, and determining their attributes
+	var similarBlocks_Attributes = similarBlocks.attr("x", Number(structureBackground.attr("width")))
+									.attr("width", 14)
+									.attr("height", 12)
+									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
+									.style("fill", (d => purpleColorScale(d)));
+	//------------------------------------------------------------------------------------
+
+	//-----------------------------rainbowBlocks & attributes-----------------------------
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var rainbowBlocks = svgContainer.append("g").attr("id","panChromosome_Rainbowed")
@@ -367,14 +400,11 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.append("rect");
 
 	//Selecting all previous blocks, and determining their attributes
-	var rainbowBlocks_Attributes = rainbowBlocks.attr("x", Number(structureBackground.attr("width"))+3)
+	var rainbowBlocks_Attributes = rainbowBlocks.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
 									.attr("width", 14)
-//									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
 									.style("fill", (d => pseudoRainbowColorScale(d)));
-//									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-//									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------blocks & attributes--------------------------------
