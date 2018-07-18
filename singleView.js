@@ -14,6 +14,11 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
 	
+	
+	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//https://www.dashingd3js.com/using-json-to-simplify-code
+	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
 	//-------------------------------------newMatrix--------------------------------------
 	
 	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
@@ -96,6 +101,15 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//------------------------------------------------------------------------------------
 	console.log(similarityNumbers);
 	
+	//------------------------------------functionsID-------------------------------------
+	
+	functionsID = realPanMatrix.map(function(a) { //In my fake data Function range frome 0 to 9
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function} = a;
+		return Function;
+	});		
+	//------------------------------------------------------------------------------------
+	console.log(functionsID);
+	
 	//----------------------------------transpose()---------------------------------------
 	
 	//Function created for the transposition of the matrix, is usefull with .reduce
@@ -130,30 +144,32 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//------------------------------------------------------------------------------------
 	//console.log(panChromosomeBlockCounts);
 
-	//---------------------------------blueColorScale-------------------------------------
+	//--------------------------------colorScaleMaker()-----------------------------------
 	
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 	//For color, see : https://bl.ocks.org/mbostock/3014589
-	var blueColorScale = d3.scaleLinear()
-			.domain([0,newMatrix[0].length]) //We declare the min/max values as input domain, they will be linked to the min/max colors
-			.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
-			.range([d3.hcl(246,0,95), d3.hcl(246,65,70)]); //No need to interpolate after range instead of before
+	
+	function colorScaleMaker(domain, range) {
+		return d3.scaleLinear()
+					.domain(domain) //We declare the min/max values as input domain, they will be linked to the min/max colors
+					.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
+					.range(range); //No need to interpolate after range instead of before
+	};
+	//------------------------------------------------------------------------------------
+	
+	//---------------------------------blueColorScale-------------------------------------
+	
+	var blueColorScale = colorScaleMaker([0,newMatrix[0].length], [d3.hcl(246,0,95), d3.hcl(246,65,70)]);
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------------orangeColorScale------------------------------------
 	
-	var orangeColorScale = d3.scaleLinear() //Same construction method
-			.domain([0,newMatrix[0].length])
-			.interpolate(d3.interpolateHcl)
-			.range([d3.hcl(60,0,95), d3.hcl(60,65,70)]);
+	var orangeColorScale = colorScaleMaker([0,newMatrix[0].length], [d3.hcl(60,0,95), d3.hcl(60,65,70)]);
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------purpleColorScale------------------------------------
 	
-	var purpleColorScale = d3.scaleLinear() //Same construction method
-			.domain([1,Math.max(...similarityNumbers)])
-			.interpolate(d3.interpolateHcl)
-			.range([d3.hcl(325,2,97), d3.hcl(325,86,54)]);
+	var purpleColorScale = colorScaleMaker([1,Math.max(...similarityNumbers)], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
@@ -161,10 +177,11 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
-	var pseudoRainbowColorScale = d3.scaleLinear() //Same construction method
-			.domain(domainPivotsMaker(pseudoRainbowList.length,Math.max(...firstNtPositions))) //max is the highest first nt position of a block, WITHIN A K
-			.interpolate(d3.interpolateHcl)
-			.range(pseudoRainbowList); //Each color in the range has a pivot position defined in the domain
+	
+	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...firstNtPositions)), pseudoRainbowList);
+	
+	//max is the highest first nt position of a block, WITHIN A K
+	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
 	//------------------------------------------------------------------------------------
 	
 	
