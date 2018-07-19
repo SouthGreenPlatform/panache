@@ -32,8 +32,24 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d;
 		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val);
 		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
+
+		//Encoding the proportion of duplicates in each chromosome
+		
+		concernedChromosomes = [];
+		d.SimilarBlocks.split(";").forEach(copy => concernedChromosomes.push(copy.split(":")[0])); //Extracting the first piece of ID for each copy. Can be a number or "."
+		countAsProperty = {};
+		for (var i = 0; i < nbChromosomes; i++) { //Sets the base value to 0 for the properties "0", "1", "2"... etc
+			countAsProperty[String(i)] = 0
+		};
+//		concernedChromosomes.forEach(chrom => if (countAsProperty[chrom] != undefined) countAsProperty[chrom] += 1;); //It does not accept the if statement in this one line statement
+		concernedChromosomes.forEach(function(chrom) {
+			if (countAsProperty[chrom] != undefined) {
+				countAsProperty[chrom] += 1; //Counts the occurences for each chromosome
+			};
+		});
+		maxCount = Math.max(...Object.values(countAsProperty)); //The ... is mandatory to tell that we work with an array
 		for (var i = 0; i < nbChromosomes; i++) {
-			console.log(i);
+			newObject[`copyPptionIn_Chr${i}`] = (maxCount > 0 ? countAsProperty[`${i}`]/maxCount : 0); //Encode the pption as ppty instead of the raw count, not sure if this is better
 		};
 		return newObject;
 	});
@@ -41,25 +57,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN newMatrix
 	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 	
-	//-------------------------------------newMatrix--------------------------------------
-	
-	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
-	var newMatrix = realPanMatrix.map(function(a) {
-		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a; //It has to be the property names
-		//ATTENTION Depends on the INDEX of the headers from the input file : The first element is linked to the first property, etc...
-		//values must be converted as they are imported as string,else it would disrupt the display of the core/dispensable panChromosome
-		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
-		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
-		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
-	});
-	//------------------------------------------------------------------------------------
-	
-	console.log(newMatrix);
-
-	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
-	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
-
 	//--------------------------------similarityEncoding----------------------------------
 	
 	//Setting the radii size for the circles that indicate copies of blocks
@@ -87,7 +84,26 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		return proportionAsCell;
 	});		
 	//------------------------------------------------------------------------------------
-	console.log(similarityEncoding);
+	console.log(similarityEncoding);	
+	
+	//-------------------------------------newMatrix--------------------------------------
+	
+	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
+	var newMatrix = realPanMatrix.map(function(a) {
+		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a; //It has to be the property names
+		//ATTENTION Depends on the INDEX of the headers from the input file : The first element is linked to the first property, etc...
+		//values must be converted as they are imported as string,else it would disrupt the display of the core/dispensable panChromosome
+		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
+		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
+	});
+	//------------------------------------------------------------------------------------
+	
+	console.log(newMatrix);
+
+	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
+	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 	
 	//------------------------------------functionsID-------------------------------------
 	
