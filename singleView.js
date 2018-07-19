@@ -105,7 +105,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//------------------------------------------------------------------------------------
 	console.log(similarityEncoding);
 	
-	//---------------------------------similarityNumbers----------------------------------
+/*	//---------------------------------similarityNumbers----------------------------------
 	
 	similarityNumbers = realPanMatrix.map(function(a) { //ATTENTION Chromosomes must be encoded as number for now
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks} = a;
@@ -113,7 +113,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	});		
 	//------------------------------------------------------------------------------------
 	console.log(similarityNumbers);
-	
+*/	
 	//------------------------------------functionsID-------------------------------------
 	
 	functionsID = realPanMatrix.map(function(a) { //In my fake data Function range frome 0 to 9
@@ -182,7 +182,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 	//--------------------------------purpleColorScale------------------------------------
 	
-	var purpleColorScale = colorScaleMaker([1,Math.max(...similarityNumbers)], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
+	var purpleColorScale = colorScaleMaker([1,Math.max(...improvedDataMatrix.map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
+//	var purpleColorScale = colorScaleMaker([1,Math.max(...similarityNumbers)], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
