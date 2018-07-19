@@ -360,7 +360,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = svgContainer.append("g").attr("id", "structureBackground")
 														.selectAll("rect")
-															.data(similarityNumbers)
+															.data(improvedDataMatrix)
+//															.data(similarityNumbers)
 															.enter()
 															.append("rect");
 
@@ -370,7 +371,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 //															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 															.attr("width", (nbChromosomes+3)*14)
 															.attr("height", 12)
-															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d));
+															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
+//															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 																return color;
@@ -408,7 +410,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var similarBlocks = svgContainer.append("g").attr("id","panChromosome_similarCount")
 								.selectAll("rect")
-									.data(similarityNumbers)
+									.data(improvedDataMatrix)
+//									.data(similarityNumbers)
 									.enter()
 									.append("rect");
 
@@ -417,7 +420,9 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
-									.style("fill", (d => purpleColorScale(d)));
+									.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
+//									.style("fill", (d => purpleColorScale((d.SimilarBlocks.split(";").length != 1 ? d.SimilarBlocks.split(";").length : 0))));
+//									.style("fill", (d => purpleColorScale(d)));
 	//------------------------------------------------------------------------------------
 
 	//-----------------------------rainbowBlocks & attributes-----------------------------
