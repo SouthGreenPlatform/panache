@@ -18,7 +18,19 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//https://www.dashingd3js.com/using-json-to-simplify-code
 	//https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects LOOKING FOR THE MAX WITHIN PROPERTY
+	//We could look for existing ways of updating data in the DOM
 	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	
+	//---------------------------------improvedDataMatrix---------------------------------
+	
+	var improvedDataMatrix = realPanMatrix.map(function(d,i) {
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d;
+		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val);
+		return Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
+	});
+	//------------------------------------------------------------------------------------	
+	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN newMatrix
+	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 	
 	//-------------------------------------newMatrix--------------------------------------
 	
@@ -430,7 +442,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
-									.data(panChromosomeBlockCounts) //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+									.data(improvedDataMatrix)
+//									.data(panChromosomeBlockCounts) //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
 									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
 									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
 								
@@ -443,7 +456,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 //									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
-									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
+									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
+//									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
 	//------------------------------------------------------------------------------------
@@ -455,7 +469,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 		//Uses D3 to select element and change its color based on the previously built color scales
 		d3.select(this).style("fill", function(d) {
-			var color = d3.hcl(thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
+			var color = d3.hcl(thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
 			color.h = color.h+10; //Slight change in hue for better noticing
 			color.c = color.c*1.1; //Slight increase in chroma
 			color.l += (100-color.l)*0.5; //Slight increase in luminance
@@ -468,7 +482,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 		//Specifies where to put label of text altogether with its properties
 		svgContainer.append("text")
-					.attr("id", "t" + d + "-" + i)
+					.attr("id", "t" + d.presenceCounter + "-" + i)
 					.attr("x", Number(d3.select(this).attr("x")) + Number(d3.select(this).attr("width"))*1.5)
 					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
 					.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
@@ -476,15 +490,15 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 					.attr("text-anchor", "start") //Can be "start", "middle", or "end"
 					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments
 					.text(function() {
-						return "This block appears in " + d + " selected genome(s)";  //Text content
+						return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
 					});
 
 		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
-		var bbox = d3.select("#t" + d + "-" + i).node().getBBox(); //Do not know exactly why but node() is needed
+		var bbox = d3.select("#t" + d.presenceCounter + "-" + i).node().getBBox(); //Do not know exactly why but node() is needed
 		//console.log(d3.select("#t" + d + "-" + i).node().getBBox());
 
-		svgContainer.insert("rect", "#t" + d + "-" + i)
-		.attr("id", "t" + d + "-" + i + "bg")
+		svgContainer.insert("rect", "#t" + d.presenceCounter + "-" + i)
+		.attr("id", "t" + d.presenceCounter + "-" + i + "bg")
 			.attr("x", bbox.x - 2)
 			.attr("y", bbox.y - 2)
 			.attr("width", bbox.width + 4)
@@ -500,11 +514,11 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	function eventDisplayInfoOff(d, i) {
 		//Uses D3 to select element, change color back to normal by overwriting and not recovery
-		d3.select(this).style("fill",function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);});
+		d3.select(this).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);});
 
 		//Selects text by id and then removes it
-		d3.select("#t" + d + "-" + i).remove();  // Remove text location slecting the id thanks to #
-		d3.select("#t" + d + "-" + i + "bg").remove();
+		d3.select("#t" + d.presenceCounter + "-" + i).remove();  // Remove text location slecting the id thanks to #
+		d3.select("#t" + d.presenceCounter + "-" + i + "bg").remove();
 	};
 	//------------------------------------------------------------------------------------
 
