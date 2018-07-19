@@ -341,15 +341,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 															});
 	//------------------------------------------------------------------------------------
 
-	//-------------------------------------flatten()--------------------------------------
-
-	function flatten(array) {
-		return array.reduce(function(a, b) {
-			return a.concat(b);
-		});
-	};
-	//------------------------------------------------------------------------------------
-
 	//------------------------------copyCircles & attributes------------------------------
 	
 	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
@@ -486,11 +477,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		d3.select("#t" + d.presenceCounter + "-" + i + "bg").remove();
 	};
 	//------------------------------------------------------------------------------------
-
-	
-	//Creating a flattened matrix, the indexes will be used for the positionning of Presence Absence (PA) blocks
-	var flattenedPaMatrix = flatten(transpose(newMatrix));
-	//console.log(flattenedPaMatrix)
 
 	//--------------------------------matrixPA & attributes-------------------------------	
 	
