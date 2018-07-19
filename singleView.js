@@ -36,8 +36,13 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//---------------------------------improvedDataMatrix---------------------------------
 	
 	var improvedDataMatrix = realPanMatrix.map(function(d,i) {
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d;
-		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val);
+		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
+		//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d; //It has to be the property names
+		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val); // .values() transforms properties into an array, map creates a new array built from calling a function on all its elements. The values must be converted as they are imported as string,else it would disrupt the display of the core/dispensable panChromosome
+		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
+		
 		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
 		
 		//Encoding the proportion of duplicates in each chromosome
@@ -62,24 +67,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
-	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN newMatrix
+	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
 	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-	
-	//-------------------------------------newMatrix--------------------------------------
-	
-	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
-	var newMatrix = realPanMatrix.map(function(a) {
-		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a; //It has to be the property names
-		//ATTENTION Depends on the INDEX of the headers from the input file : The first element is linked to the first property, etc...
-		//values must be converted as they are imported as string,else it would disrupt the display of the core/dispensable panChromosome
-		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
-		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
-		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
-	});
-	//------------------------------------------------------------------------------------
-	
-	console.log(newMatrix);
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
@@ -167,7 +156,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
 	var coreThreshold = 85/100*initialPptyNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
-	//I wil have to change this use of newMatrix but I am not quite sure of how to do it yet
 	//------------------------------------------------------------------------------------
 
 	//Creating a color gradient for the slider shape
@@ -410,7 +398,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var blocks_Attributes = blocks.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
 //	var blocks_Attributes = blocks.attr("x", Number(structureBackground.attr("width"))+3)
 									.attr("width", 14)
-//									.attr("height", svgContainer.attr("height")/newMatrix.length)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
 									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
@@ -483,6 +470,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Creation of the subGroup for the PA blocks
 	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
 	//ATTENTION The for ... in statement does not work well when oreder is important ! Prefer .forEach method instead when working on arrays
+	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 	initialPptyNames.forEach(function(geno, genomeNumber) {
 		var matrixPA = svgContainer.append("g").attr("id", `presence_${geno}`)
 												.selectAll("rect")
