@@ -39,7 +39,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a; //It has to be the property names
 		//ATTENTION Depends on the INDEX of the headers from the input file : The first element is linked to the first property, etc...
-		//values must be converted as they are imported as string, it would disrupt the display of panChromosomeBlockCounts
+		//values must be converted as they are imported as string,else it would disrupt the display of the core/dispensable panChromosome
 		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
 		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
 		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
@@ -62,17 +62,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//As I am not working on a complete data set I will set this value myself for now
 	nbChromosomes = 5
 	//------------------------------------------------------------------------------------
-	
-/*	//---------------------------------firstNtPositions-----------------------------------
-	
-	const firstNtPositions = realPanMatrix.map(function(a) {
-		const {ID_Position} = a;
-		return Number(ID_Position.split(":")[1]);
-	});
-*/
-	//------------------------------------------------------------------------------------
-	//console.log(firstNtPositions);
-	
+
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
@@ -105,15 +95,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//------------------------------------------------------------------------------------
 	console.log(similarityEncoding);
 	
-/*	//---------------------------------similarityNumbers----------------------------------
-	
-	similarityNumbers = realPanMatrix.map(function(a) { //ATTENTION Chromosomes must be encoded as number for now
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks} = a;
-		return SimilarBlocks.split(";").length;
-	});		
-	//------------------------------------------------------------------------------------
-	console.log(similarityNumbers);
-*/	
 	//------------------------------------functionsID-------------------------------------
 	
 	functionsID = realPanMatrix.map(function(a) { //In my fake data Function range frome 0 to 9
@@ -145,18 +126,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	};
 	//------------------------------------------------------------------------------------
 	
-/*	//----------------------------panChromosomeBlockCounts--------------------------------
-	
-	//JavaScript is not efficient to calculate this, needs for precomputation with Python?, maybe long with big matrices
-	var panChromosomeBlockCounts = [];
-
-	//Calculation of each column sum
-	for (var i = 0; i < newMatrix.length; i++) {
-		panChromosomeBlockCounts.push(newMatrix[i].reduce(function(acc, val) { return acc + val; }));
-	};
-*/	//------------------------------------------------------------------------------------
-	//console.log(panChromosomeBlockCounts);
-
 	//--------------------------------colorScaleMaker()-----------------------------------
 	
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
@@ -183,7 +152,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//--------------------------------purpleColorScale------------------------------------
 	
 	var purpleColorScale = colorScaleMaker([1,Math.max(...improvedDataMatrix.map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
-//	var purpleColorScale = colorScaleMaker([1,Math.max(...similarityNumbers)], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
@@ -194,7 +162,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 //	Math.max.apply(Math, array.map(function(object) { return Number(object.ID_Position.split(":")[1]; })))
 	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
 //	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(improvedDataMatrix.ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
-//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...firstNtPositions)), pseudoRainbowList);
 	
 	//max is the highest first nt position of a block, WITHIN A K
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
@@ -207,7 +174,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 	//----------------------------------coreThreshold-------------------------------------
 	
-	//Calculating the threshold for the change in color scale in panChromosome, arbitrary value for now
+	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
 	var coreThreshold = 85/100*newMatrix[0].length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
 	//------------------------------------------------------------------------------------
 
@@ -325,7 +292,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		d3.select(".tick").select("text").attr("x", sliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", orangeColorScale(coreThreshold));
-		blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the panChromosome blocks' colours
+		blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 /*		structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
 			color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 			color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
@@ -364,7 +331,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var structureBackground = svgContainer.append("g").attr("id", "structureBackground")
 														.selectAll("rect")
 															.data(improvedDataMatrix)
-//															.data(similarityNumbers)
 															.enter()
 															.append("rect");
 
@@ -414,7 +380,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var similarBlocks = svgContainer.append("g").attr("id","panChromosome_similarCount")
 								.selectAll("rect")
 									.data(improvedDataMatrix)
-//									.data(similarityNumbers)
 									.enter()
 									.append("rect");
 
@@ -425,7 +390,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
 									.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
 //									.style("fill", (d => purpleColorScale((d.SimilarBlocks.split(";").length != 1 ? d.SimilarBlocks.split(";").length : 0))));
-//									.style("fill", (d => purpleColorScale(d)));
 	//------------------------------------------------------------------------------------
 
 	//-----------------------------rainbowBlocks & attributes-----------------------------
@@ -434,7 +398,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var rainbowBlocks = svgContainer.append("g").attr("id","panChromosome_Rainbowed")
 								.selectAll("rect")
 									.data(improvedDataMatrix)
-//									.data(firstNtPositions)
 									.enter()
 									.append("rect");
 
@@ -444,16 +407,14 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
 									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
-//									.style("fill", (d => pseudoRainbowColorScale(d)));
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------blocks & attributes--------------------------------
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var blocks = svgContainer.append("g").attr("id","panChromosome") //.append("g") allows grouping svg objects
+	var blocks = svgContainer.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
-									.data(improvedDataMatrix)
-//									.data(panChromosomeBlockCounts) //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+									.data(improvedDataMatrix)//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
 									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
 									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
 								
@@ -467,7 +428,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
 									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
-//									.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
 	//------------------------------------------------------------------------------------
@@ -485,7 +445,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			color.l += (100-color.l)*0.5; //Slight increase in luminance
 			return color;
 		});
-		//Here, d is the block value from panChromosomeBlockCounts, i is the index within it
+		//Here, d is a block object from improvedDataMatrix, i is its index within the array
 		//To access values of a block, we need to take "this" as an argument
 
 		//alert(d + " " + i);
@@ -551,12 +511,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 	var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
 											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / improvedDataMatrix.length) * blocks.attr("width"); //x is incremented for each new genome
-//											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
 										})
 										.attr("width", blocks.attr("width"))
 										.attr("height", blocks.attr("height"))
 										.attr("y", function(i,j){return j%improvedDataMatrix.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
-//										.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
 										.style("fill", function (d) {return d3.interpolateGreys(d*0.80);});
 	//------------------------------------------------------------------------------------
 });
