@@ -130,12 +130,12 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//---------------------------------blueColorScale-------------------------------------
 	
-	var blueColorScale = colorScaleMaker([0,newMatrix[0].length], [d3.hcl(246,0,95), d3.hcl(246,65,70)]);
+	var blueColorScale = colorScaleMaker([0, initialPptyNames.length], [d3.hcl(246,0,95), d3.hcl(246,65,70)]);
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------------orangeColorScale------------------------------------
 	
-	var orangeColorScale = colorScaleMaker([0,newMatrix[0].length], [d3.hcl(60,0,95), d3.hcl(60,65,70)]);
+	var orangeColorScale = colorScaleMaker([0, initialPptyNames.length], [d3.hcl(60,0,95), d3.hcl(60,65,70)]);
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------purpleColorScale------------------------------------
@@ -166,7 +166,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//----------------------------------coreThreshold-------------------------------------
 	
 	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
-	var coreThreshold = 85/100*newMatrix[0].length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
+	var coreThreshold = 85/100*initialPptyNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
 	//I wil have to change this use of newMatrix but I am not quite sure of how to do it yet
 	//------------------------------------------------------------------------------------
 
@@ -187,7 +187,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 					.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
 				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
 					.attr("class", "hueSwingingPointLeft") //Class that is used later for dynamic changes
-					.attr("offset", coreThreshold/newMatrix[0].length)
+					.attr("offset", coreThreshold/initialPptyNames.length)
 					.attr("stop-color", blueColorScale(coreThreshold))
 				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 					.attr("class", "hueSwingingPointRight")
@@ -252,7 +252,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 			.attr("r", 7) //The radius
 			.attr("fill", "#fff") //The circle is filled in white
 			.attr("stroke", "#000")
-			.attr("cx", coreThreshold/newMatrix[0].length*100)
+			.attr("cx", coreThreshold/initialPptyNames.length*100)
 			.attr("stroke-opacity", 0.3)
 			.attr("stroke-width", "1.25px");
 
@@ -280,10 +280,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function eventDynamicColorChange(slidePercent) {
 		handle.attr("cx", sliderScale(slidePercent)); //Position change for the handle
-		coreThreshold = slidePercent*newMatrix[0].length; //Updates the value of coreThreshold
+		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", sliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
-		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
-		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/newMatrix[0].length).attr("stop-color", orangeColorScale(coreThreshold));
+		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
+		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 //		blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 /*		structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
