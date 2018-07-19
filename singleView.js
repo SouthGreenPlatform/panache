@@ -26,12 +26,22 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	const nbChromosomes = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
 	//------------------------------------------------------------------------------------
 	
+	//---------------------------------initialPptyNames-----------------------------------
 	//ATTENTION This assume that the PA part is at the end of the file !!!	
 	initialPptyNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(4,) //This select the element with indexes that range from 4 to the end
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
 	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
-	
+	//------------------------------------------------------------------------------------
 	console.log(initialPptyNames);
+	
+	//---------------------------------functionDiversity----------------------------------
+	
+	//In JS 'Set()' can store unique elements, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
+	//Pay attention to the uppercased first letter !
+	//Bonus : what is 'let' : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let
+	var functionDiversity = [...new Set(realPanMatrix.map( d => d.Function))];
+	//------------------------------------------------------------------------------------
+	console.log(functionDiversity);
 	
 	//---------------------------------improvedDataMatrix---------------------------------
 	
@@ -72,15 +82,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
-	
-	//------------------------------------functionsID-------------------------------------
-	
-	functionsID = realPanMatrix.map(function(a) { //In my fake data Function range frome 0 to 9
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function} = a;
-		return Function;
-	});		
-	//------------------------------------------------------------------------------------
-	console.log(functionsID);
 	
 	//----------------------------------transpose()---------------------------------------
 	
