@@ -63,13 +63,13 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	nbChromosomes = 5
 	//------------------------------------------------------------------------------------
 	
-	//---------------------------------firstNtPositions-----------------------------------
+/*	//---------------------------------firstNtPositions-----------------------------------
 	
 	const firstNtPositions = realPanMatrix.map(function(a) {
 		const {ID_Position} = a;
 		return Number(ID_Position.split(":")[1]);
 	});
-
+*/
 	//------------------------------------------------------------------------------------
 	//console.log(firstNtPositions);
 	
@@ -190,8 +190,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
-	
-	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...firstNtPositions)), pseudoRainbowList);
+//	Math.max.apply(Math, array.map(function(object) { return Number(object.ID_Position.split(":")[1]; })))
+	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
+//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(improvedDataMatrix.ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
+//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...firstNtPositions)), pseudoRainbowList);
 	
 	//max is the highest first nt position of a block, WITHIN A K
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
