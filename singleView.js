@@ -50,41 +50,12 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		maxCount = Math.max(...Object.values(countAsProperty)); //The ... is mandatory to tell that we work with an array
 		for (var i = 0; i < nbChromosomes; i++) {
 			newObject[`copyPptionIn_Chr${i}`] = (maxCount > 0 ? countAsProperty[`${i}`]/maxCount : 0); //Encode the pption as ppty instead of the raw count, not sure if this is better
-		};
+		}; //For variables within string, see Template Literals : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
 	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN newMatrix
 	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-	
-	//--------------------------------similarityEncoding----------------------------------
-	
-	//Setting the radii size for the circles that indicate copies of blocks
-	similarityEncoding = realPanMatrix.map(function(a) { //ATTENTION Chromosomes must be encoded as number for now
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks} = a;
-		concernedChromosomes = [];
-		SimilarBlocks.split(";").forEach(function(copy) {
-			concernedChromosomes.push(copy.split(":")[0]); //Extracting the first piece of ID for each copy. Can be a number or "."
-		});
-		countAsProperty = {};
-		for (var i = 0; i < nbChromosomes; i++) { //Sets the base value to 0 for the properties "0", "1", "2"... etc
-			countAsProperty[String(i)] = 0
-		};
-		concernedChromosomes.forEach(function(chrom) {
-			if (countAsProperty[chrom] != undefined) {
-				countAsProperty[chrom] += 1; //Counts the occurences for each chromosome
-			};
-		});
-		maximum = Math.max(...Object.values(countAsProperty)); //The ... is mandatory to tell that we work with an array
-		proportionAsCell = Object.values(countAsProperty).map(function(count) { //Return the array where each occurence is divided by the max occurence number
-			if (maximum > 0) {
-				return count/maximum;
-			} else {return 0};
-		});
-		return proportionAsCell;
-	});		
-	//------------------------------------------------------------------------------------
-	console.log(similarityEncoding);	
 	
 	//-------------------------------------newMatrix--------------------------------------
 	
@@ -369,20 +340,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 	//------------------------------copyCircles & attributes------------------------------
 	
-	//Creation of the subgroup for the the repeated block encoding (cf similarityEncoding)
-	var copyCircles = svgContainer.append("g").attr("id", "duplicationCircles")
-												.selectAll("circle")
-													.data(flatten(similarityEncoding))
-													.enter()
-													.append("circle");
-	
-	//Attributes for copyCircles
-	var copyCircles_Attributes = copyCircles.attr("cx", function(d,i) {return (0.5+i%nbChromosomes)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
-												.attr("cy", function(d,i){return (0.5+Math.floor(i/nbChromosomes))*12;}) //Depends on the data index, and 12, which is the blocks height
-												.attr("r", (d => d*(5-1)+1)) //Depends on the data value; rmax = 5, rmin = 1
-												.style("fill", d3.hcl(0,0,25))
-												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));//A one line 'if' statement
-	
+	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
 	for (var chr = 0; chr < nbChromosomes; chr++) {
 		var copyCircles = svgContainer.append("g").attr("id", `duplicationCircles_Chr${chr}`)
 													.selectAll("circle")
