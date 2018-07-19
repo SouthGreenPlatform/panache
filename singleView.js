@@ -137,6 +137,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
 	
+	//ATTENTION THE RAINBOW STILL WORKS BUT AS IT DEPENDS ON THE LENGTH IT PUTS THE FIRST BLOCKS AS THE SAME COLOR, WITH THE FINAL ONE BEING AT THE OPPOSITE ON THE RANGE OF VALUE
+	
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
