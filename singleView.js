@@ -379,9 +379,24 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Attributes for copyCircles
 	var copyCircles_Attributes = copyCircles.attr("cx", function(d,i) {return (0.5+i%nbChromosomes)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
 												.attr("cy", function(d,i){return (0.5+Math.floor(i/nbChromosomes))*12;}) //Depends on the data index, and 12, which is the blocks height
-												.attr("r", (d => d*(5-1)+1)) //Depends on the data value
+												.attr("r", (d => d*(5-1)+1)) //Depends on the data value; rmax = 5, rmin = 1
 												.style("fill", d3.hcl(0,0,25))
 												.style("fill-opacity", d => (d > 0 ? 1 : 0.20));//A one line 'if' statement
+	
+	for (var chr = 0; chr < nbChromosomes; chr++) {
+		var copyCircles = svgContainer.append("g").attr("id", `duplicationCircles_Chr${chr}`)
+													.selectAll("circle")
+														.data(improvedDataMatrix)
+														.enter()
+														.append("circle");
+		
+		var copyCircles_Attributes = copyCircles.attr("cx", function(d,i) {return (0.5+chr)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
+												.attr("cy", function(d,i){return (0.5+i)*12;}) //Depends on the data index, and 12, which is the blocks height
+												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*(5-1)+1)) //Depends on the data value; rmax = 5, rmin = 1
+												.style("fill", d3.hcl(0,0,25))
+												.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
+	};
+
 	//------------------------------------------------------------------------------------
 
 	//-----------------------------similarBlocks & attributes-----------------------------
