@@ -21,12 +21,21 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//We could look for existing ways of updating data in the DOM
 	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
+	//-----------------------------------nbChromosomes------------------------------------
+	
+	const nbChromosomes = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
+	//------------------------------------------------------------------------------------	
+	
 	//---------------------------------improvedDataMatrix---------------------------------
 	
 	var improvedDataMatrix = realPanMatrix.map(function(d,i) {
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d;
 		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val);
-		return Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
+		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
+		for (var i = 0; i < nbChromosomes; i++) {
+			console.log(i);
+		};
+		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
 	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN newMatrix
@@ -47,21 +56,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//------------------------------------------------------------------------------------
 	
 	console.log(newMatrix);
-	
-	//-----------------------------------nbChromosomes------------------------------------
-	
-	//Uncomment for the real version ! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-/*	
-	const nbChromosomes = Math.max(...realPanMatrix.map(function(a) {
-		const {ID_Position} = a;
-		return Number(Object.values(ID_Position)[0]);
-	}))+1; //+1 because there is a Chromosome number 0
-	console.log(nbChromosomes);
-*/	
-	
-	//As I am not working on a complete data set I will set this value myself for now
-	nbChromosomes = 5
-	//------------------------------------------------------------------------------------
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
