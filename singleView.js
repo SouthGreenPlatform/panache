@@ -37,7 +37,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
 	var newMatrix = realPanMatrix.map(function(a) {
 		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a;
+		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = a; //It has to be the property names
 		//ATTENTION Depends on the INDEX of the headers from the input file : The first element is linked to the first property, etc...
 		//values must be converted as they are imported as string, it would disrupt the display of panChromosomeBlockCounts
 		return Object.values(rest).map(value => Number(value)); //values transforms properties into an array, map creates a new array built from calling a function on all its elements
@@ -425,7 +425,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var rainbowBlocks = svgContainer.append("g").attr("id","panChromosome_Rainbowed")
 								.selectAll("rect")
-									.data(firstNtPositions)
+									.data(improvedDataMatrix)
+//									.data(firstNtPositions)
 									.enter()
 									.append("rect");
 
@@ -434,7 +435,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
-									.style("fill", (d => pseudoRainbowColorScale(d)));
+									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
+//									.style("fill", (d => pseudoRainbowColorScale(d)));
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------blocks & attributes--------------------------------
