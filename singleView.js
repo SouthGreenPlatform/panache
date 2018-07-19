@@ -492,24 +492,27 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	var flattenedPaMatrix = flatten(transpose(newMatrix));
 	//console.log(flattenedPaMatrix)
 
-	//--------------------------------matrixPA & attributes-------------------------------
+	//--------------------------------matrixPA & attributes-------------------------------	
 	
 	//Creation of the subGroup for the PA blocks
-	var matrixPA = svgContainer.append("g").attr("id", "presenceAbsence")
+	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
+	//ATTENTION The for ... in statement does not work well when oreder is important ! Prefer .forEach method instead when working on arrays
+	initialPptyNames.forEach(function(geno, genomeNumber) {
+		var matrixPA = svgContainer.append("g").attr("id", `presence_${geno}`)
 												.selectAll("rect")
-													.data(flattenedPaMatrix) //There is one rect per (genome x PA block), not just per genome
+													.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
 													.enter()
 													.append("rect");
-
-
-	//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
-	//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
-	var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
-											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / improvedDataMatrix.length) * blocks.attr("width"); //x is incremented for each new genome
-										})
-										.attr("width", blocks.attr("width"))
-										.attr("height", blocks.attr("height"))
-										.attr("y", function(i,j){return j%improvedDataMatrix.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
-										.style("fill", function (d) {return d3.interpolateGreys(d*0.80);});
+													
+		//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
+		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
+		var matrixPA_Attributes = matrixPA.attr("x", function (d,i) {
+												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
+											})
+											.attr("width", blocks.attr("width"))
+											.attr("height", blocks.attr("height"))
+											.attr("y", function(d,i){return i*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
+											.style("fill", function (d) {return d3.interpolateGreys(d[`${geno}`]*0.80);});
+	});
 	//------------------------------------------------------------------------------------
 });
