@@ -24,7 +24,14 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//-----------------------------------nbChromosomes------------------------------------
 	
 	const nbChromosomes = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
-	//------------------------------------------------------------------------------------	
+	//------------------------------------------------------------------------------------
+	
+	//ATTENTION This assume that the PA part is at the end of the file !!!	
+	initialPptyNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(4,) //This select the element with indexes that range from 4 to the end
+	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
+	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
+	
+	console.log(initialPptyNames);
 	
 	//---------------------------------improvedDataMatrix---------------------------------
 	
@@ -32,7 +39,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d;
 		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val);
 		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
-
+		
 		//Encoding the proportion of duplicates in each chromosome
 		
 		concernedChromosomes = [];
@@ -51,6 +58,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		for (var i = 0; i < nbChromosomes; i++) {
 			newObject[`copyPptionIn_Chr${i}`] = (maxCount > 0 ? countAsProperty[`${i}`]/maxCount : 0); //Encode the pption as ppty instead of the raw count, not sure if this is better
 		}; //For variables within string, see Template Literals : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+		
 		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
