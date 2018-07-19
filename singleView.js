@@ -145,7 +145,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	};
 	//------------------------------------------------------------------------------------
 	
-	//----------------------------panChromosomeBlockCounts--------------------------------
+/*	//----------------------------panChromosomeBlockCounts--------------------------------
 	
 	//JavaScript is not efficient to calculate this, needs for precomputation with Python?, maybe long with big matrices
 	var panChromosomeBlockCounts = [];
@@ -154,7 +154,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	for (var i = 0; i < newMatrix.length; i++) {
 		panChromosomeBlockCounts.push(newMatrix[i].reduce(function(acc, val) { return acc + val; }));
 	};
-	//------------------------------------------------------------------------------------
+*/	//------------------------------------------------------------------------------------
 	//console.log(panChromosomeBlockCounts);
 
 	//--------------------------------colorScaleMaker()-----------------------------------
@@ -547,11 +547,13 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
 	//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 	var matrixPA_Attributes = matrixPA.attr("x", function (i,j) {
-											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
+											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / improvedDataMatrix.length) * blocks.attr("width"); //x is incremented for each new genome
+//											return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + Math.floor(j / panChromosomeBlockCounts.length) * blocks.attr("width"); //x is incremented for each new genome
 										})
 										.attr("width", blocks.attr("width"))
 										.attr("height", blocks.attr("height"))
-										.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
+										.attr("y", function(i,j){return j%improvedDataMatrix.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
+//										.attr("y", function(i,j){return j%panChromosomeBlockCounts.length*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
 										.style("fill", function (d) {return d3.interpolateGreys(d*0.80);});
 	//------------------------------------------------------------------------------------
 });
