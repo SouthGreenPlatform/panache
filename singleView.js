@@ -150,8 +150,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
-//	Math.max.apply(Math, array.map(function(object) { return Number(object.ID_Position.split(":")[1]; })))
-	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
+	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList);
 //	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(improvedDataMatrix.ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
 	
 	//max is the highest first nt position of a block, WITHIN A K
@@ -291,13 +290,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
-//		blocks.style("fill", function (d) {return thresholdBasedColor(d,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
-/*		structureBackground.style("fill", function (d) {var color = d3.hcl(thresholdBasedColor(d, coreThreshold, blueColorScale, orangeColorScale)); //Updates the background blocks' colours
-			color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-			color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-			return color;
-		});
-*/	};
+	};
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,11 +329,9 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Attributes for structureBackground
 	var structureBackground_Attributes = structureBackground.attr("x",0)
 															.attr("y", function(d,i){return i*12;})
-//															.attr("width", Number(blocks.attr("x"))-Number(structureBackground.attr("x"))-3)
 															.attr("width", (nbChromosomes+3)*14)
 															.attr("height", 12)
 															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
-//															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
 																return color;
@@ -414,7 +405,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 	//Selecting all previous blocks, and determining their attributes
 	var blocks_Attributes = blocks.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
-//	var blocks_Attributes = blocks.attr("x", Number(structureBackground.attr("width"))+3)
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
@@ -456,7 +446,6 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 
 		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
 		var bbox = d3.select("#t" + d.presenceCounter + "-" + i).node().getBBox(); //Do not know exactly why but node() is needed
-		//console.log(d3.select("#t" + d + "-" + i).node().getBBox());
 
 		svgContainer.insert("rect", "#t" + d.presenceCounter + "-" + i)
 		.attr("id", "t" + d.presenceCounter + "-" + i + "bg")
@@ -503,8 +492,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 											})
 											.attr("width", blocks.attr("width"))
 											.attr("height", blocks.attr("height"))
-											.attr("y", function(d,i){return i*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
-											.style("fill", d => functionColorScale(d["Function"]))
+											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
+											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]);
 	});
 	//------------------------------------------------------------------------------------
