@@ -12,6 +12,10 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//console.log(realPanMatrix["Cluster"]); //undefined
 	//realPanMatrix.forEach(function(realPanMatrix) {console.log(realPanMatrix.Cluster)}); //prints cluster for each line !
 	
+	
+	
+	//https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9 This uses buttons it can be nice
+	
 	//Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
 	
 	
@@ -40,6 +44,7 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Pay attention to the uppercased first letter !
 	//Bonus : what is 'let' : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/let
 	var functionDiversity = [...new Set(realPanMatrix.map( d => d.Function))];
+	//ATTENTION IT WILL WORK DIFFERENTLY WITH TRUE GO TERMS !!!
 	//------------------------------------------------------------------------------------
 	console.log(functionDiversity);
 	
@@ -109,12 +114,17 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	
 	//Color Scale, "I want hue" is great for choosing colors, HCL might allow better color handling
 	//For color, see : https://bl.ocks.org/mbostock/3014589
-	
-	function colorScaleMaker(domain, range) {
-		return d3.scaleLinear()
-					.domain(domain) //We declare the min/max values as input domain, they will be linked to the min/max colors
-					.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
-					.range(range); //No need to interpolate after range instead of before
+	function colorScaleMaker(domain, range, scaleLinear = true) {
+		if (scaleLinear) {
+			return d3.scaleLinear()
+						.domain(domain) //We declare the min/max values as input domain, they will be linked to the min/max colors
+						.interpolate(d3.interpolateHcl) //Interpolate makes mostly no difference for orange, but it is visible for blue (better with it)
+						.range(range); //No need to interpolate after range instead of before
+		} else {
+			return d3.scaleOrdinal()
+						.domain(domain) //We declare the min/max values as input domain, they will be linked to the min/max colors
+						.range(range); //ATTENTION As it is scaleOrdinal, we cannot use interpolate !
+		};
 	};
 	//------------------------------------------------------------------------------------
 	
@@ -148,6 +158,12 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
 	//------------------------------------------------------------------------------------
 	
+	//-------------------------------functionColorScale-----------------------------------
+	
+	var colorsForFunctions = domainPivotsMaker(functionDiversity.length,functionDiversity.length).map(intNum => d3.interpolateRainbow(intNum/(functionDiversity.length+1))); //There is +1 in the division so that it will not do a full cyclic rainbow
+	var functionColorScale = colorScaleMaker(functionDiversity, colorsForFunctions, false);
+	//------------------------------------------------------------------------------------
+	console.log(colorsForFunctions);
 	
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
