@@ -158,12 +158,13 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
 	//------------------------------------------------------------------------------------
 	
-	//-------------------------------functionColorScale-----------------------------------
+	//-------------------------------functionColorScale----------------------------------- //Can be improved, cd PanVis !!
 	
 	var colorsForFunctions = domainPivotsMaker(functionDiversity.length,functionDiversity.length).map(intNum => d3.interpolateRainbow(intNum/(functionDiversity.length+1))); //There is +1 in the division so that it will not do a full cyclic rainbow
 	var functionColorScale = colorScaleMaker(functionDiversity, colorsForFunctions, false);
 	//------------------------------------------------------------------------------------
 	console.log(colorsForFunctions);
+	console.log(functionColorScale("9"),functionColorScale.range(),functionColorScale.domain());
 	
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
@@ -503,7 +504,8 @@ d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is 
 											.attr("width", blocks.attr("width"))
 											.attr("height", blocks.attr("height"))
 											.attr("y", function(d,i){return i*blocks.attr("height");}) //y is incremented for each new PA block, and is reset to 0 for each genome
-											.style("fill", function (d) {return d3.interpolateGreys(d[`${geno}`]*0.80);});
+											.style("fill", d => functionColorScale(d["Function"]))
+											.style("fill-opacity", d => d[`${geno}`]);
 	});
 	//------------------------------------------------------------------------------------
 });
