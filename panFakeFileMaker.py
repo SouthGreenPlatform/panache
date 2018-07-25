@@ -30,8 +30,9 @@ def sequenceEncoder(ntSeqLength):
 			seqCode += nt2Add.lower()
 	return seqCode
 
-
-with open('myFakePanData.tsv', 'wb') as csvfile:
+#with open('myFakePanData.tsv', 'wb') as csvfile:
+#The previous line works with python 2., while python 3. needs strings as input instead of bytes , cf https://stackoverflow.com/questions/34283178/typeerror-a-bytes-like-object-is-required-not-str-in-python-and-csv
+with open('myFakePanData.tsv', 'w') as csvfile:
 	writer = csv.writer(csvfile, delimiter='\t')
 	
 	#Encoding the ID/Position -------------------------------------------------
