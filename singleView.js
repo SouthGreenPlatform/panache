@@ -1,6 +1,6 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
-d3.dsv("\t","miniTheFakeData2Use.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 	//console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
