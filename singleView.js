@@ -209,7 +209,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 
 	//1st create a scale that links value to a position in pixel
-	var sliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+	var coreSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 			.domain([0, 1]) //Takes the possible treshold values as an input
 			.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
 			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
@@ -228,7 +228,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//Creation of the SVG for the slider
 	slider.append("path")
-			.datum([[sliderScale.range()[0]-4,0,0],[sliderScale.range()[0],4,-4],[sliderScale.range()[1],4,-4],[sliderScale.range()[1]+4,0,0]])
+			.datum([[coreSliderScale.range()[0]-4,0,0],[coreSliderScale.range()[0],4,-4],[coreSliderScale.range()[1],4,-4],[coreSliderScale.range()[1]+4,0,0]])
 			.attr("fill", "url(#sliderGradient)") //The gradient is used to fill the shape
 			.attr("d", sliderArea) //Calls the sliderArea function on the input data given to the path
 			.attr("stroke", "#000")
@@ -238,8 +238,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	slider.append("line")
 		.attr("class", "track-overlay") //This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
 	//	.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it, as the interactive object is already nothing but a stroke. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
-		.attr("x1", sliderScale.range()[0]) //Calling the first boundary of sliderScale.range (ie left position)
-		.attr("x2", sliderScale.range()[1]) //Calling the second boundary of sliderScale.range (ie right position)
+		.attr("x1", coreSliderScale.range()[0]) //Calling the first boundary of coreSliderScale.range (ie left position)
+		.attr("x2", coreSliderScale.range()[1]) //Calling the second boundary of coreSliderScale.range (ie right position)
 		.attr("stroke-linecap","round") //The line will not have straight tips
 		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
 		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
@@ -248,7 +248,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
 			//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
 	//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
-				.on("start drag", function() { eventDynamicColorChange(sliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
+				.on("start drag", function() { eventDynamicColorChange(coreSliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
 
 	//Creation of the handle circle, thats translates the interaction into visual movement
@@ -272,7 +272,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	slider.insert("text", ".track-overlay")
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
-			.attr("transform", "translate("+sliderScale.range()[1]/2+",0)") //Keeping the value outside of quotes is neede for its calculation
+			.attr("transform", "translate("+coreSliderScale.range()[1]/2+",0)") //Keeping the value outside of quotes is neede for its calculation
 			.attr("dy","-2.5em") //A vertical translation depending on the font size (2em --> two times the font size, enough space for two lines)
 			.attr("text-anchor", "middle")
 			.append("tspan")
@@ -284,9 +284,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function eventDynamicColorChange(slidePercent) {
-		handle.attr("cx", sliderScale(slidePercent)); //Position change for the handle
+		handle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
 		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
-		d3.select(".tick").select("text").attr("x", sliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
+		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
@@ -297,8 +297,34 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//End of the slider creation
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//1st create a scale that links value to a position in pixel
+	var chromosomeSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+			.domain([0, 1]) //Takes the possible treshold values as an input
+			.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
+			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
+
+	//Translation of the whole slider object wherever it is required
+	var slider = svgContainer.append("g") //slider is a subgroup of svgContainer
+					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
+					.attr("transform", "translate(" + 750 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Creation of a chromosome slider !
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	
+	
 
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//End of the chromosome slider
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//Some code for enter, update and exit things :
+	// http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+	// http://d3indepth.com/enterexit/
+	// http://synthesis.sbecker.net/articles/2012/07/09/learning-d3-part-2
+	
 	//Some code for paning and paging http://bl.ocks.org/nicolashery/9627333 ; http://bl.ocks.org/cdagli/728e1f4509671b7de16d5f7f6bfee6f0
 
 
