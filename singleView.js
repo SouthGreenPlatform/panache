@@ -179,15 +179,15 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
 	//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps, I used a path instead of a line here
 	//How to handle dynamic color change for the gradient : http://bl.ocks.org/nbremer/b1fbcc0ff00abe8893a087d85fc8005b
-	var sliderGradient = svgContainer.append("defs")
+	var coreSliderGradient = svgContainer.append("defs")
 										.append("linearGradient")
-										.attr("id", "sliderGradient")
+										.attr("id", "coreSliderGradient")
 										.attr("x1", 0)
 										.attr("x2", 1)
 										.attr("y1", 0)
 										.attr("y2", 0);
 
-	sliderGradient.append("stop") //ATTENTION The order of the stops prevales on their offset
+	coreSliderGradient.append("stop") //ATTENTION The order of the stops prevales on their offset
 					.attr("offset", 0) //Relative position of the stop on the gradient
 					.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
 				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
@@ -215,27 +215,27 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
 	//Translation of the whole slider object wherever it is required
-	var slider = svgContainer.append("g") //slider is a subgroup of svgContainer
+	var coreSlider = svgContainer.append("g") //coreSlider is a subgroup of svgContainer
 					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
 					.attr("transform", "translate(" + 850 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
 
 	//Creation of a function for the path determining the slider shape (as horizontal lines do not the job if mapped to a gradient)
-	var sliderArea = d3.area()
+	var coreSliderArea = d3.area()
 		.x(function(d) { return d[0]; })
 		.y0(function(d) { return d[1]; }) //2nd elements are considered as the lower baseline of the shape
 		.y1(function(d) { return d[2]; }) //3rd elements are considered as the upper baseline of the shape
 		.curve(d3.curveMonotoneY); //Style of the curve, see https://github.com/d3/d3-shape/blob/master/README.md#curves
 
 	//Creation of the SVG for the slider
-	slider.append("path")
+	coreSlider.append("path")
 			.datum([[coreSliderScale.range()[0]-4,0,0],[coreSliderScale.range()[0],4,-4],[coreSliderScale.range()[1],4,-4],[coreSliderScale.range()[1]+4,0,0]])
-			.attr("fill", "url(#sliderGradient)") //The gradient is used to fill the shape
-			.attr("d", sliderArea) //Calls the sliderArea function on the input data given to the path
+			.attr("fill", "url(#coreSliderGradient)") //The gradient is used to fill the shape
+			.attr("d", coreSliderArea) //Calls the sliderArea function on the input data given to the path
 			.attr("stroke", "#000")
 			.attr("stroke-opacity", 0.3)
 
 	//Addition of the interactive zone
-	slider.append("line")
+	coreSlider.append("line")
 		.attr("class", "track-overlay") //This will be the interactivity zone, not displayed but accessible (see how the mouse pointer changes)
 	//	.attr("pointer-event", "stroke") //Indicates that the event should only work when the pointer is on the stroke : https://developer.mozilla.org/fr/docs/Web/CSS/pointer-events ; might work as well without it, as the interactive object is already nothing but a stroke. Can also be "auto" (for all of the surface), "none" (does not apply any mouse change), or "fill" (applies on everything but the stroke) or other
 		.attr("x1", coreSliderScale.range()[0]) //Calling the first boundary of coreSliderScale.range (ie left position)
@@ -252,7 +252,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
 
 	//Creation of the handle circle, thats translates the interaction into visual movement
-	var handle = slider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" class element it finds within slider
+	var coreHandle = coreSlider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" class element it finds within slider
 			.attr("class", "handle") //It is given the class "handle" (useful for easier/universal styling when used with css format)
 			.attr("r", 7) //The radius
 			.attr("fill", "#fff") //The circle is filled in white
@@ -262,14 +262,14 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("stroke-width", "1.25px");
 
 	//Creation of the tick label that will give coreTreshold percent value in real time
-	slider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
+	coreSlider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
 			.attr("class", "tick") //Giving the class "ticks", for styling reasons
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
 			.attr("transform", "translate(0 18)") //One more translation in order to have it right under the rest of the slider
-			.append("text").attr("x", handle.attr("cx")).attr("text-anchor", "middle").text(handle.attr("cx")+"%"); //Text value based on coreThreshold
+			.append("text").attr("x", coreHandle.attr("cx")).attr("text-anchor", "middle").text(coreHandle.attr("cx")+"%"); //Text value based on coreThreshold
 
-	slider.insert("text", ".track-overlay")
+	coreSlider.insert("text", ".track-overlay")
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
 			.attr("transform", "translate("+coreSliderScale.range()[1]/2+",0)") //Keeping the value outside of quotes is neede for its calculation
@@ -284,7 +284,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function eventDynamicColorChange(slidePercent) {
-		handle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
+		coreHandle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
 		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
@@ -297,23 +297,24 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//End of the slider creation
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//1st create a scale that links value to a position in pixel
-	var chromosomeSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-			.domain([0, 1]) //Takes the possible treshold values as an input
-			.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
-			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
-	//Translation of the whole slider object wherever it is required
-	var slider = svgContainer.append("g") //slider is a subgroup of svgContainer
-					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-					.attr("transform", "translate(" + 750 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Creation of a chromosome slider !
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	//1st create a scale that links value to a position in pixel
+	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+			.domain([0, 1]) //Takes the possible treshold values as an input
+			.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
+			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
+
+	//Translation of the whole slider object wherever it is required
+	var chromSlider = svgContainer.append("g") //slider is a subgroup of svgContainer
+					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
+					.attr("transform", "translate(" + 750 + "," + 0 + ")"); //Everything in it will be translated	
 	
-	
+	chromSlider.append("rect").attr("width",15).attr("height",window.innerHeight).style("fill","red");
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
