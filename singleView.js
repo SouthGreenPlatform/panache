@@ -169,7 +169,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Creating the constants for a scalable display
 	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
 	
-	
+	//More about d3 selection : https://bost.ocks.org/mike/selection/
 	
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
@@ -249,7 +249,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		.attr("stroke-linecap","round") //The line will not have straight tips
 		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
 		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
-		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
+		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone, see https://www.w3schools.com/jsref/prop_style_cursor.asp for more cursor options
 			.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
 			//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
 			//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
@@ -320,18 +320,17 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
 					.attr("transform", "translate(" + 750 + "," + 0 + ")"); //Everything in it will be translated	
 	
-	chromSlider.append("rect").attr("width",10).attr("height",windowHeight).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan");
+	chromSlider.append("rect").attr("width",10).attr("height",chromSliderScale.range()[1]).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan");
 
 	//Addition of the interactive zone
-/*	chromSlider.append("rect")
+	chromSlider.append("rect")
 		.attr("class", "track-overlay") //Interactivity zone
-		.attr("width", ) //Calling the first boundary of coreSliderScale.range (ie left position)
-		.attr("height", coreSliderScale.range()[1]) //Calling the second boundary of coreSliderScale.range (ie right position)
-		.attr("stroke-linecap","round") //The line will not have straight tips
-		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
-		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
-		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
-			.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
+		.attr("width", 40)
+		.attr("height", chromSliderScale.range()[1])
+		.attr("x",0-chromSlider.select(".track-overlay").attr("width")/2) //The "." asks to select the first matching element with the written class
+		.style("fill-opacity",0)
+		.attr("cursor", "ns-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
+/*			.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
 			//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
 			//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
 	//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
