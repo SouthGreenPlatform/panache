@@ -1,7 +1,7 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
-	//console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
+	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
 	//The real data I would like to work with, fetched from the csv file
@@ -27,12 +27,13 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//-----------------------------------nbChromosomes------------------------------------
 	
-	const nbChromosomes = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
+//	const nbChromosomes = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
+	const nbChromosomes = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))].length
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------initialPptyNames-----------------------------------
-	//ATTENTION This assume that the PA part is at the end of the file !!!	
-	initialPptyNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(4,) //This select the element with indexes that range from 4 to the end
+	//ATTENTION This assume that the PA part is at the end of the file !!!
+	initialPptyNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(6,) //This select the element with indexes that range from 6 to the end
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
 	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
 	//------------------------------------------------------------------------------------
@@ -53,13 +54,17 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var improvedDataMatrix = realPanMatrix.map(function(d,i) {
 		//Attributing the presence/absence matrix to "rest" by destructuring, see : http://www.deadcoderising.com/2017-03-28-es6-destructuring-an-elegant-way-of-extracting-data-from-arrays-and-objects-in-javascript/
 		//This way we just have to precise the non-genome columns, the rest will be determined automatically no matter the number of genomes
-		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d; //It has to be the property names
+//		const {ID_Position, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d; //It has to be the property names
+		const {"#Chromosome" : Chromosome, FeatureStart, FeatureStop, Sequence_IUPAC_Plus,SimilarBlocks, Function, ...rest} = d; //It has to be the property names
+		delete d["#Chromosome"];
+		
+		//INVALID NAME, this could help, maybe https://stackoverflow.com/questions/38762715/how-to-destructure-object-properties-with-key-names-that-are-invalid-variable-na/38762787
 //		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + val); // .values() transforms properties into an array, map creates a new array built from calling a function on all its elements. The values must be converted as they are imported as string,else it would disrupt the display of the core/dispensable panChromosome
 		var panChrBlockCount = Object.values(rest).map(value => Number(value)).reduce((acc, val) => acc + (val != 0 ? val/val : 0)); // The Presence/Absence matrix can now work with numbers higher than 1, they just are divided by themselves for the sake of the count
 		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
 		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
 		
-		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount}, d);
+		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount, "Chromosome": Chromosome}, d);
 		
 		//Encoding the proportion of duplicates in each chromosome
 		
@@ -83,8 +88,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
-//	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
-	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
+/*	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
@@ -361,13 +366,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
 		blocksDisplay.selectAll(".moveableBlock").attr("y",d => d.index*12-yBlockPosition)
 		blocksDisplay.selectAll(".moveableCircle").attr("cy",d => (d.index+0.5)*12-yBlockPosition);
-		
-/*		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
-		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
-		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
-		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
-		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
-*/	};
+	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//End of the chromosome slider
@@ -578,5 +577,5 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]);
 	});
-	//------------------------------------------------------------------------------------
+*/	//------------------------------------------------------------------------------------
 });
