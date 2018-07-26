@@ -358,6 +358,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function slidingAlongBlocks(yBlockPosition) {
 		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
+		blocksDisplay.selectAll().style("fill","red");
 		
 /*		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
@@ -400,7 +401,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 															.append("rect");
 
 	//Attributes for structureBackground
-	var structureBackground_Attributes = structureBackground.attr("x",0)
+	var structureBackground_Attributes = structureBackground.attr("class", "moveableBlock")
+															.attr("x",0)
 															.attr("y", function(d,i){return i*12;})
 															.attr("width", (nbChromosomes+3)*14)
 															.attr("height", 12)
@@ -421,7 +423,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 														.enter()
 														.append("circle");
 		
-		var copyCircles_Attributes = copyCircles.attr("cx", function(d,i) {return (0.5+chr)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
+		var copyCircles_Attributes = copyCircles.attr("class", "moveableBlock")
+												.attr("cx", function(d,i) {return (0.5+chr)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
 												.attr("cy", function(d,i){return (0.5+i)*12;}) //Depends on the data index, and 12, which is the blocks height
 												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*(5-1)+1)) //Depends on the data value; rmax = 5, rmin = 1
 												.style("fill", d3.hcl(0,0,25))
@@ -440,7 +443,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 									.append("rect");
 
 	//Selecting all previous blocks, and determining their attributes
-	var similarBlocks_Attributes = similarBlocks.attr("x", Number(structureBackground.attr("width")))
+	var similarBlocks_Attributes = similarBlocks.attr("class", "moveableBlock")
+									.attr("x", Number(structureBackground.attr("width")))
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
@@ -458,7 +462,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 									.append("rect");
 
 	//Selecting all previous blocks, and determining their attributes
-	var rainbowBlocks_Attributes = rainbowBlocks.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
+	var rainbowBlocks_Attributes = rainbowBlocks.attr("class", "moveableBlock")
+									.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
@@ -477,7 +482,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 								//For more about joins, see : https://bost.ocks.org/mike/join/
 
 	//Selecting all previous blocks, and determining their attributes
-	var blocks_Attributes = blocks.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
+	var blocks_Attributes = blocks.attr("class", "moveableBlock")
+									.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
@@ -560,7 +566,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 													
 		//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
 		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
-		var matrixPA_Attributes = matrixPA.attr("x", function (d,i) {
+		var matrixPA_Attributes = matrixPA.attr("class", "moveableBlock")
+											.attr("x", function (d,i) {
 												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
 											})
 											.attr("width", blocks.attr("width"))
