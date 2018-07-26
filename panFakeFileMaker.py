@@ -82,7 +82,7 @@ with open('myFakePanData.tsv', 'w') as csvfile:
 	#print(similarBlocks)
 		
 	#Writing the header row ---------------------------------------------------
-	writer.writerow(['ID_Position'] + ['Sequence_IUPAC_Plus'] + ['SimilarBlocks'] + ['Function'] + ['Gen1'] + ['Gen2'] + ['Gen3'] + ['Gen4'] + ['Gen5'] + ['Gen6'])
+	writer.writerow(['#Chromosome'] + ['FeatureStart'] + ['FeatureStop'] + ['Sequence_IUPAC_Plus'] + ['SimilarBlocks'] + ['Function'] + ['Gen1'] + ['Gen2'] + ['Gen3'] + ['Gen4'] + ['Gen5'] + ['Gen6'])
 	
 	for i in listID:
 		#Writing fake sequences in IUPAC+ code --------------------------------
@@ -116,4 +116,4 @@ with open('myFakePanData.tsv', 'w') as csvfile:
 			seqCode = sequenceEncoder(seqLength)
 		
 		#Writing all rows of fake data ----------------------------------------
-		writer.writerow([i] + [seqCode] + [linkedChr] + [random.randint(0,9)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)])
+		writer.writerow([i.split(":")[0]] + [i.split(":")[1]] + [i.split(":")[2]+1] + [seqCode] + [linkedChr] + [random.randint(0,9)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)])
