@@ -174,6 +174,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
 										.attr("width", windowWidth*0.95).attr("height", windowHeight*0.95); //Full proportions won't display correctly
+	
+										
 
 	//----------------------------------coreThreshold-------------------------------------
 	
@@ -207,7 +209,11 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 					.attr("offset", 1)
 					.attr("stop-color", orangeColorScale.range()[1]);
 
-
+	var slidersGroup = svgContainer.append("g")
+										.attr("id", "slidersGroup")
+										
+	var blocksDisplay = svgContainer.append("g")
+										.attr("id", "blocksDisplay")
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Creation of a slider for choosing the core threshold ! see https://bl.ocks.org/mbostock/6452972 for slider example
@@ -221,9 +227,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
 	//Translation of the whole slider object wherever it is required
-	var coreSlider = svgContainer.append("g") //coreSlider is a subgroup of svgContainer
-					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-					.attr("transform", "translate(" + 850 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
+	var coreSlider = slidersGroup.append("g") //coreSlider is a subgroup of slidersGroup
+									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
+									.attr("transform", "translate(" + 850 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
 
 	//Creation of a function for the path determining the slider shape (as horizontal lines do not the job if mapped to a gradient)
 	var coreSliderArea = d3.area()
@@ -311,15 +317,15 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//1st create a scale that links value to a position in pixel
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-//			.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
-			.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
-			.range([0, svgContainer.attr("height")]) //Ranges from and to the slider's extreme length values as an output
-			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
+//								.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
+								.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
+								.range([0, svgContainer.attr("height")]) //Ranges from and to the slider's extreme length values as an output
+								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
 	//Translation of the whole slider object wherever it is required
-	var chromSlider = svgContainer.append("g") //slider is a subgroup of svgContainer
-					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-					.attr("transform", "translate(" + 750 + "," + 0 + ")"); //Everything in it will be translated	
+	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
+									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
+									.attr("transform", "translate(" + 750 + "," + 0 + ")"); //Everything in it will be translated	
 	
 	chromSlider.append("rect").attr("width",10).attr("height",chromSliderScale.range()[1]).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan");
 
@@ -352,6 +358,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function slidingAlongBlocks(yBlockPosition) {
 		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
+		
 /*		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
@@ -386,7 +393,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//--------------------------structureBackground & attributes--------------------------
 	
 	//Creation of the subgroup for the StructureBackground
-	var structureBackground = svgContainer.append("g").attr("id", "structureBackground")
+	var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground")
 														.selectAll("rect")
 															.data(improvedDataMatrix)
 															.enter()
@@ -408,7 +415,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
 	for (var chr = 0; chr < nbChromosomes; chr++) {
-		var copyCircles = svgContainer.append("g").attr("id", `duplicationCircles_Chr${chr}`)
+		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`)
 													.selectAll("circle")
 														.data(improvedDataMatrix)
 														.enter()
@@ -426,7 +433,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//-----------------------------similarBlocks & attributes-----------------------------
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var similarBlocks = svgContainer.append("g").attr("id","panChromosome_similarCount")
+	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount")
 								.selectAll("rect")
 									.data(improvedDataMatrix)
 									.enter()
@@ -444,7 +451,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//-----------------------------rainbowBlocks & attributes-----------------------------
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var rainbowBlocks = svgContainer.append("g").attr("id","panChromosome_Rainbowed")
+	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed")
 								.selectAll("rect")
 									.data(improvedDataMatrix)
 									.enter()
@@ -461,7 +468,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//---------------------------------blocks & attributes--------------------------------
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var blocks = svgContainer.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
+	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
 									.data(improvedDataMatrix)//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
 									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
@@ -545,7 +552,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//ATTENTION The for ... in statement does not work well when oreder is important ! Prefer .forEach method instead when working on arrays
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 	initialPptyNames.forEach(function(geno, genomeNumber) {
-		var matrixPA = svgContainer.append("g").attr("id", `presence_${geno}`)
+		var matrixPA = blocksDisplay.append("g").attr("id", `presence_${geno}`)
 												.selectAll("rect")
 													.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
 													.enter()
