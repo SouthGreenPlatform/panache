@@ -36,7 +36,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
 	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
 	//------------------------------------------------------------------------------------
-	console.log(initialPptyNames);
+//	console.log(initialPptyNames);
 	
 	//---------------------------------functionDiversity----------------------------------
 	
@@ -46,7 +46,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var functionDiversity = [...new Set(realPanMatrix.map( d => d.Function))];
 	//ATTENTION IT WILL WORK DIFFERENTLY WITH TRUE GO TERMS !!!
 	//------------------------------------------------------------------------------------
-	console.log(functionDiversity);
+//	console.log(functionDiversity);
 	
 	//---------------------------------improvedDataMatrix---------------------------------
 	
@@ -82,7 +82,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
-	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
+//	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
 	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
@@ -162,12 +162,11 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var colorsForFunctions = domainPivotsMaker(functionDiversity.length,functionDiversity.length).map(intNum => d3.interpolateRainbow(intNum/(functionDiversity.length+1))); //There is +1 in the division so that it will not do a full cyclic rainbow
 	var functionColorScale = colorScaleMaker(functionDiversity, colorsForFunctions, false);
 	//------------------------------------------------------------------------------------
-	console.log(colorsForFunctions);
-	console.log(functionColorScale("9"),functionColorScale.range(),functionColorScale.domain());
+//	console.log(colorsForFunctions);
+//	console.log(functionColorScale("9"),functionColorScale.range(),functionColorScale.domain());
 	
 	
 	//Creating the constants for a scalable display
-
 	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
 	
 	
@@ -313,7 +312,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//1st create a scale that links value to a position in pixel
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 			.domain([0, 1]) //Takes the possible treshold values as an input
-			.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
+			.range([0, windowHeight]) //Ranges from and to the slider's extreme length values as an output
 			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
 	//Translation of the whole slider object wherever it is required
@@ -321,8 +320,25 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 					.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
 					.attr("transform", "translate(" + 750 + "," + 0 + ")"); //Everything in it will be translated	
 	
-	chromSlider.append("rect").attr("width",15).attr("height",window.innerHeight).style("fill","red");
+	chromSlider.append("rect").attr("width",10).attr("height",windowHeight).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan");
 
+	//Addition of the interactive zone
+/*	chromSlider.append("rect")
+		.attr("class", "track-overlay") //Interactivity zone
+		.attr("width", ) //Calling the first boundary of coreSliderScale.range (ie left position)
+		.attr("height", coreSliderScale.range()[1]) //Calling the second boundary of coreSliderScale.range (ie right position)
+		.attr("stroke-linecap","round") //The line will not have straight tips
+		.attr("stroke-width", "30px") //The interactivity zone is larger than the displayed lines for easier use
+		.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parents lines/slider bars
+		.attr("cursor", "crosshair") //The pointer changes for a cross whenever it reaches that zone
+			.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
+			//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
+			//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
+	//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
+				.on("start drag", function() { eventDynamicColorChange(coreSliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
+				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.	
+*/	
+	
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//End of the chromosome slider
