@@ -165,6 +165,13 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	console.log(colorsForFunctions);
 	console.log(functionColorScale("9"),functionColorScale.range(),functionColorScale.domain());
 	
+	
+	//Creating the constants for a scalable display
+
+	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
+	
+	
+	
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
 										.attr("width", 1000).attr("height", 500);
@@ -329,10 +336,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Some code for paning and paging http://bl.ocks.org/nicolashery/9627333 ; http://bl.ocks.org/cdagli/728e1f4509671b7de16d5f7f6bfee6f0
 
 
-	//Creating the variables for a scalable display
-	/*
-	var w = window.innerWidth, h = window.innerHeight;
-	*/
+
 
 	//-------------------------------thresholdBasedColor()--------------------------------
 	
