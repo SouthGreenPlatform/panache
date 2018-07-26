@@ -89,7 +89,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	});
 	//------------------------------------------------------------------------------------	
 	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
-/*	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
@@ -156,7 +156,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
-	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList);
+//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList);
+	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.FeatureStart)))), pseudoRainbowList);
 //	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(improvedDataMatrix.ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
 	
 	//max is the highest first nt position of a block, WITHIN A K
@@ -468,7 +469,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 									.attr("width", 14)
 									.attr("height", 12)
 									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
-									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
+//									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
+									.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------blocks & attributes--------------------------------
@@ -577,5 +579,5 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]);
 	});
-*/	//------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------
 });
