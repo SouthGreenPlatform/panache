@@ -116,4 +116,4 @@ with open('myFakePanData.tsv', 'w') as csvfile:
 			seqCode = sequenceEncoder(seqLength)
 		
 		#Writing all rows of fake data ----------------------------------------
-		writer.writerow([i.split(":")[0]] + [i.split(":")[1]] + [i.split(":")[2]+1] + [seqCode] + [linkedChr] + [random.randint(0,9)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)])
+		writer.writerow([str(i.split(":")[0])] + [str(i.split(":")[1])] + [str(i.split(":")[2]+1)] + [seqCode] + [linkedChr] + [random.randint(0,9)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)] + [random.randint(0,1)])
