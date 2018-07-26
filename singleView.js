@@ -358,7 +358,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function slidingAlongBlocks(yBlockPosition) {
 		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
-		blocksDisplay.selectAll().style("fill","red");
+		blocksDisplay.selectAll(".moveableBlock").attr("y",d => d.index*12-yBlockPosition);
 		
 /*		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
