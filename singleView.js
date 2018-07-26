@@ -358,7 +358,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function slidingAlongBlocks(yBlockPosition) {
 		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
-		blocksDisplay.selectAll(".moveableBlock").attr("y",d => d.index*12-yBlockPosition);
+		blocksDisplay.selectAll(".moveableBlock").attr("y",d => d.index*12-yBlockPosition)
+		blocksDisplay.selectAll(".moveableCircle").attr("cy",d => (d.index+0.5)*12-yBlockPosition);
 		
 /*		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
@@ -423,7 +424,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 														.enter()
 														.append("circle");
 		
-		var copyCircles_Attributes = copyCircles.attr("class", "moveableBlock")
+		var copyCircles_Attributes = copyCircles.attr("class", "moveableCircle")
 												.attr("cx", function(d,i) {return (0.5+chr)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
 												.attr("cy", function(d,i){return (0.5+i)*12;}) //Depends on the data index, and 12, which is the blocks height
 												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*(5-1)+1)) //Depends on the data value; rmax = 5, rmin = 1
