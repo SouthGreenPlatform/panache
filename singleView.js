@@ -173,7 +173,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
-										.attr("width", 1000).attr("height", 500);
+										.attr("width", windowWidth*0.95).attr("height", windowHeight*0.95); //Full proportions won't display correctly
 
 	//----------------------------------coreThreshold-------------------------------------
 	
@@ -258,7 +258,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
 
 	//Creation of the handle circle, thats translates the interaction into visual movement
-	var coreHandle = coreSlider.insert("circle", ".track-overlay") //Tells to insert a circle element before (so that it will appear behind it) the first "track-overlay" class element it finds within slider
+	var coreHandle = coreSlider.insert("circle", ".track-overlay") //Tells to insert a circle element before (as it is insert and not append) the first "track-overlay" class element it finds within coreSlider (so that it will appear behind it)
 			.attr("class", "handle") //It is given the class "handle" (useful for easier/universal styling when used with css format)
 			.attr("r", 7) //The radius
 			.attr("fill", "#fff") //The circle is filled in white
@@ -311,8 +311,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//1st create a scale that links value to a position in pixel
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-			.domain([0, 1]) //Takes the possible treshold values as an input
-			.range([0, windowHeight]) //Ranges from and to the slider's extreme length values as an output
+//			.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
+			.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
+			.range([0, svgContainer.attr("height")]) //Ranges from and to the slider's extreme length values as an output
 			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
 	//Translation of the whole slider object wherever it is required
@@ -330,14 +331,33 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		.attr("x",0-chromSlider.select(".track-overlay").attr("width")/2) //The "." asks to select the first matching element with the written class
 		.style("fill-opacity",0)
 		.attr("cursor", "ns-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
-/*			.call(d3.drag()	//.drag creates a new drag behavior. The returned behavior, drag, is both an object and a function, and is typically applied to selected elements via selection.call. That is our case here, where drag is called on "track-overlay"
-			//For more info on call and this : https://www.w3schools.com/js/js_function_call.asp ; .call is basically a reuse method on a different object, "With call(), an object can use a method belonging to another object."
-			//It is written : selection.function.call(whatItIsBeingCalledOn, arguments...)
-	//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
-				.on("start drag", function() { eventDynamicColorChange(coreSliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
+			.call(d3.drag()
+				.on("start drag", function() { slidingAlongBlocks(chromSliderScale.invert(d3.event.y)); }));
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.	
-*/	
 	
+	//Creation of the mini window handle, thats translates the interaction into visual movement
+	var miniWindowHandle = chromSlider.insert("rect", ".track-overlay")
+			.attr("class", "handle")
+			.style("stroke", d3.hcl(0,0,25))
+			.style("stroke-width", 3)
+			.attr("width", Number(chromSlider.select("rect").attr("width")) + chromSlider.select(".handle").style("stroke-width")*2) //Reminder : the attributes have to be converted in numberers before beeing added
+			.attr("height", chromSlider.select("rect").attr("width")) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
+			//Plus the height should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
+			.attr("x", 0-chromSlider.select(".handle").attr("width")/2)
+//			.attr("y", 0-Number(miniWindowHandle.attr("height")/2)) //Does not work
+			.attr("y", 0-chromSlider.select(".handle").attr("height")/2)
+			.style("fill-opacity", 0);
+			
+			
+	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
+	function slidingAlongBlocks(yBlockPosition) {
+		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
+/*		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
+		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
+		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
+		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
+		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
+*/	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//End of the chromosome slider
