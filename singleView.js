@@ -379,6 +379,11 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	// http://synthesis.sbecker.net/articles/2012/07/09/learning-d3-part-2
 	
 	//Some code for paning and paging http://bl.ocks.org/nicolashery/9627333 ; http://bl.ocks.org/cdagli/728e1f4509671b7de16d5f7f6bfee6f0
+	
+	//Code for working with canvas and data
+	//https://bocoup.com/blog/d3js-and-canvas (2014)
+	//https://www.visualcinnamon.com/2015/11/learnings-from-a-d3-js-addict-on-starting-with-canvas.html (2015)
+	//https://engineering.mongodb.com/post/d3-round-two-how-to-blend-html5-canvas-with-svg-to-speed-up-rendering (2016)
 
 
 
