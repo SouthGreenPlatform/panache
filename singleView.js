@@ -196,12 +196,18 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	});
 	//------------------------------------------------------------------------------------
 	
-	//----------------------------------svgContainer--------------------------------------
+	//-----------------------------svgContainer_rawBlocks---------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer = d3.select("body").append("svg")
-										.attr("width", windowWidth*0.95).attr("height", windowHeight*0.95); //Full proportions won't display correctly
+	var svgContainer_rawBlocks = d3.select("body").append("svg")
+										.attr("width", windowWidth*0.7).attr("height", windowHeight*0.95); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
+	
+	//--------------------------svgContainer_browsingSlider-------------------------------
+	//Creating the SVG DOM tag
+	var svgContainer_browsingSlider = d3.select("body").append("svg")
+										.attr("width", windowWidth*0.25).attr("height", windowHeight*0.95); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------	
 
 
 	//----------------------------------coreThreshold-------------------------------------
@@ -214,7 +220,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
 	//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps, I used a path instead of a line here
 	//How to handle dynamic color change for the gradient : http://bl.ocks.org/nbremer/b1fbcc0ff00abe8893a087d85fc8005b
-	var coreSliderGradient = svgContainer.append("defs")
+	var coreSliderGradient = svgContainer_rawBlocks.append("defs")
 										.append("linearGradient")
 										.attr("id", "coreSliderGradient")
 										.attr("x1", 0)
@@ -236,10 +242,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 					.attr("offset", 1)
 					.attr("stop-color", orangeColorScale.range()[1]);
 
-	var slidersGroup = svgContainer.append("g")
+	var slidersGroup = svgContainer_browsingSlider.append("g")
 										.attr("id", "slidersGroup")
 										
-	var blocksDisplay = svgContainer.append("g")
+	var blocksDisplay = svgContainer_rawBlocks.append("g")
 										.attr("id", "blocksDisplay")
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +262,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Translation of the whole slider object wherever it is required
 	var coreSlider = slidersGroup.append("g") //coreSlider is a subgroup of slidersGroup
 									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + 850 + "," + svgContainer.attr("height") / 2 + ")"); //Everything in it will be translated
+									.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 2 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")"); //Everything in it will be translated
 
 	//Creation of a function for the path determining the slider shape (as horizontal lines do not the job if mapped to a gradient)
 	var coreSliderArea = d3.area()
@@ -346,13 +352,13 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
 								.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
-								.range([0, svgContainer.attr("height")]) //Ranges from and to the slider's extreme length values as an output
+								.range([0, svgContainer_browsingSlider.attr("height")]) //Ranges from and to the slider's extreme length values as an output
 								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 
 	//Translation of the whole slider object wherever it is required
 	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
 									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + 750 + "," + 0 + ")"); //Everything in it will be translated	
+									.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")"); //Everything in it will be translated	
 	
 	chromSlider.append("rect").attr("width",10).attr("height",chromSliderScale.range()[1]).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan");
 
@@ -551,7 +557,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		//alert(d + " " + i);
 
 		//Specifies where to put label of text altogether with its properties
-		svgContainer.append("text")
+		svgContainer_rawBlocks.append("text")
 					.attr("id", "t" + d.presenceCounter + "-" + i)
 					.attr("x", Number(d3.select(this).attr("x")) + Number(d3.select(this).attr("width"))*1.5)
 					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
@@ -566,7 +572,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
 		var bbox = d3.select("#t" + d.presenceCounter + "-" + i).node().getBBox(); //Do not know exactly why but node() is needed
 
-		svgContainer.insert("rect", "#t" + d.presenceCounter + "-" + i)
+		svgContainer_rawBlocks.insert("rect", "#t" + d.presenceCounter + "-" + i)
 		.attr("id", "t" + d.presenceCounter + "-" + i + "bg")
 			.attr("x", bbox.x - 2)
 			.attr("y", bbox.y - 2)
