@@ -9,9 +9,7 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 		return newObject;
 	});
 	
-	
-	
-	
+
 	//--------------------------------domainPivotsMaker()---------------------------------
 	
 	function domainPivotsMaker(breakpointsNb,maxValue) {
@@ -56,8 +54,10 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 	myFrenchCanvas.id = "myFrenchCanvas";
 	myFrenchCanvas.width = 700;
 	myFrenchCanvas.height = 700;
+	myFrenchCanvas.position = "absolute";
 	
 	var body = document.getElementsByTagName("body")[0];
+	body.position = "relative";
 	body.appendChild(myFrenchCanvas);
 
 	// get the canvas drawing context
@@ -94,7 +94,102 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 		
 	});
 	
+	//-----------------------CANVAS CREATION----------------------------------------------------	
 	
+	var aSecondCanvas = document.createElement('canvas');
+
+	aSecondCanvas.id = "aSecondCanvas";
+	aSecondCanvas.width = 800;
+	aSecondCanvas.height = 700;
+	aSecondCanvas.position = "absolute";
+	
+	body.appendChild(aSecondCanvas);
+
+	// get the canvas drawing context
+	const context2 = aSecondCanvas.getContext('2d');
+	
+	// clear the canvas from previous drawing
+	context2.clearRect(0, 0, aSecondCanvas.width, aSecondCanvas.height);
+			
+
+	improvedDataMatrix.forEach(d => {
+		context2.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		context2.fillRect(Number(d.index)*10, 0, 10, 20);
+		
+	});
+	
+	// create svg and group
+	var svg = d3.select("body").append("div").append("svg")
+		  .attr("width", 500 + "px")
+		  .attr("height", 300 + "px")
+		.append("g");
+	
+	// add foreign object to svg
+	// https://gist.github.com/mbostock/1424037
+	var foreignObject = svg.append("foreignObject")
+		.attr("x", 30)
+		.attr("y", 40)
+		.attr("width", 450)
+		.attr("height", 250)
+		.attr("class","UFO");
+
+	// add embedded body to foreign object
+	var foBody = foreignObject.append("xhtml:body")
+		.style("margin", "0px")
+		.style("padding", "0px")
+		.style("background-color", "none")
+		.style("width", 400 + "px")
+		.style("height", 200 + "px")
+		.style("border", "1px solid lightgray");
+
+	// add embedded canvas to embedded body
+	var canvas = foBody.append("canvas")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", 350)
+		.attr("height", 150)
+		.style("cursor", "crosshair");
+
+	// get drawing context of canvas
+	var ctx = canvas.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		ctx.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		ctx.fillRect(Number(d.index)*10, 0, 10, 20);
+		
+	});
+	
+	// create svg and group
+	var svg2 = d3.select("body").append("svg")
+		  .attr("width", 500 + "px")
+		  .attr("height", 300 + "px")
+		.append("g");
+	
+	// add foreign object to svg
+	// https://gist.github.com/mbostock/1424037
+	var foreignObject2 = svg2.append("foreignObject")
+		.attr("x", 30)
+		.attr("y", 40)
+		.attr("width", 450)
+		.attr("height", 250)
+		.attr("class","UFO");
+
+	// add embedded body to foreign object
+	var canvas2 = foreignObject2.append("xhtml:canvas")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", 350)
+		.attr("height", 150)
+		.style("cursor", "crosshair");
+
+	// get drawing context of canvas
+	var ctx2 = canvas2.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		ctx2.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		ctx2.fillRect(Number(d.index)*10, 0, 10, 20);
+		
+	});	
 
 	
 });
