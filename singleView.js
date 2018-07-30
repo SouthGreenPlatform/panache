@@ -335,6 +335,12 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
+		
+		improvedDataMatrix.forEach(d => {
+			bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
+//			bgBrowser_coreContext.fillStyle = thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);
+			bgBrowser_coreContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);
+		});
 	};
 
 
@@ -371,27 +377,44 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		.attr("y", 0)
 		//.attr("position", "absolute")
 		.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")") //Everything in it will be translated
-		.attr("width", 20)
+		.attr("width", 50)
 		.attr("height", windowHeight*0.95)
 		.attr("class","UFO");
 
 	// add embedded body to foreign object
-	var bgBrowser_Canvas = foreignObject_Browser.append("xhtml:canvas")
+	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("width", 10)
 		.attr("height", windowHeight*0.95);
 
 	// get drawing context of canvas
-	var bgBrowser_Context = bgBrowser_Canvas.node().getContext("2d");
+	var bgBrowser_rainbowContext = bgBrowser_rainbowCanvas.node().getContext("2d");
 	
 	improvedDataMatrix.forEach(d => {
-		bgBrowser_Context.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_Context.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
-	});	
+		bgBrowser_rainbowContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		bgBrowser_rainbowContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
+	});
+	
+	// add embedded body to foreign object
+	var bgBrowser_coreCanvas = foreignObject_Browser.append("xhtml:canvas")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", 10)
+		.attr("height", windowHeight*0.95);
+
+	// get drawing context of canvas
+	var bgBrowser_coreContext = bgBrowser_coreCanvas.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
+//		bgBrowser_coreContext.fillStyle = thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);
+		bgBrowser_coreContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
+	});
+	
 	//------------------------
 	
-	var miniWindowHandleHeight = windowHeight*0.95 * Number(bgBrowser_Canvas.attr("height")) / (12*Number(improvedDataMatrix.length)); // = (displayWindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
+	var miniWindowHandleHeight = windowHeight*0.95 * Number(bgBrowser_rainbowCanvas.attr("height")) / (12*Number(improvedDataMatrix.length)); // = (displayWindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
 	console.log(miniWindowHandleHeight);
 	//Translation of the whole slider object wherever it is required
 	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
@@ -418,7 +441,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("class", "handle")
 			.style("stroke", d3.hcl(0,0,25))
 			.style("stroke-width", 3)
-			.attr("width", Number(bgBrowser_Canvas.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numberers before beeing added
+			.attr("width", Number(bgBrowser_rainbowCanvas.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numberers before beeing added
 //			.attr("height", 12)
 			.attr("height", Number(miniWindowHandleHeight)) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
 			//Plus the height should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
