@@ -53,7 +53,7 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 
 	myFrenchCanvas.id = "myFrenchCanvas";
 	myFrenchCanvas.width = 700;
-	myFrenchCanvas.height = 700;
+	myFrenchCanvas.height = 50;
 	myFrenchCanvas.position = "absolute";
 	
 	var body = document.getElementsByTagName("body")[0];
@@ -100,7 +100,7 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 
 	aSecondCanvas.id = "aSecondCanvas";
 	aSecondCanvas.width = 800;
-	aSecondCanvas.height = 700;
+	aSecondCanvas.height = 50;
 	aSecondCanvas.position = "absolute";
 	
 	body.appendChild(aSecondCanvas);
@@ -121,16 +121,16 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 	// create svg and group
 	var svg = d3.select("body").append("div").append("svg")
 		  .attr("width", 500 + "px")
-		  .attr("height", 300 + "px")
+		  .attr("height", 50 + "px")
 		.append("g");
 	
 	// add foreign object to svg
 	// https://gist.github.com/mbostock/1424037
 	var foreignObject = svg.append("foreignObject")
-		.attr("x", 30)
-		.attr("y", 40)
+		.attr("x", 10)
+		.attr("y", 10)
 		.attr("width", 450)
-		.attr("height", 250)
+		.attr("height", 45)
 		.attr("class","UFO");
 
 	// add embedded body to foreign object
@@ -139,7 +139,7 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 		.style("padding", "0px")
 		.style("background-color", "none")
 		.style("width", 400 + "px")
-		.style("height", 200 + "px")
+		.style("height", 30 + "px")
 		.style("border", "1px solid lightgray");
 
 	// add embedded canvas to embedded body
@@ -147,7 +147,7 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("width", 350)
-		.attr("height", 150)
+		.attr("height", 25)
 		.style("cursor", "crosshair");
 
 	// get drawing context of canvas
@@ -162,16 +162,16 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 	// create svg and group
 	var svg2 = d3.select("body").append("svg")
 		  .attr("width", 500 + "px")
-		  .attr("height", 300 + "px")
+		  .attr("height", 50 + "px")
 		.append("g");
 	
 	// add foreign object to svg
 	// https://gist.github.com/mbostock/1424037
 	var foreignObject2 = svg2.append("foreignObject")
-		.attr("x", 30)
-		.attr("y", 40)
+		.attr("x", 10)
+		.attr("y", 10)
 		.attr("width", 450)
-		.attr("height", 250)
+		.attr("height", 45)
 		.attr("class","UFO");
 
 	// add embedded body to foreign object
@@ -179,7 +179,7 @@ d3.dsv("\t","myFakePanData.tsv").then(function(realPanMatrix) {
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("width", 350)
-		.attr("height", 150)
+		.attr("height", 40)
 		.style("cursor", "crosshair");
 
 	// get drawing context of canvas
