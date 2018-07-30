@@ -160,7 +160,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.FeatureStart)))), pseudoRainbowList);
 //	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(improvedDataMatrix.ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
 	
-	//max is the highest first nt position of a block, WITHIN A K
+	//max is the highest first nt position of a block, WITHIN A CHROMOSOME
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
 	//------------------------------------------------------------------------------------
 	
@@ -373,19 +373,33 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	// add foreign object to svg
 	// https://gist.github.com/mbostock/1424037
 	var foreignObject_Browser = slidersGroup.append("foreignObject")
-		.attr("x", 0-10/2)
+		.attr("x", 0-(10*3+2)/2) //It has to be centered depending on the canvas and slider count
 		.attr("y", 0)
-		//.attr("position", "absolute")
 		.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")") //Everything in it will be translated
-		.attr("width", 50)
+		.attr("width", 10*3+2)
 		.attr("height", windowHeight*0.95)
 		.attr("class","UFO");
 
 	// add embedded body to foreign object
+	var bgBrowser_similarityCanvas = foreignObject_Browser.append("xhtml:canvas")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", 10+1) //+1 to leave a space with the other canvas
+		.attr("height", windowHeight*0.95);
+
+	// get drawing context of canvas
+	var bgBrowser_similarityContext = bgBrowser_similarityCanvas.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		bgBrowser_similarityContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
+		bgBrowser_similarityContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
+	});
+	
+	// add embedded body to foreign object
 	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
 		.attr("x", 0)
 		.attr("y", 0)
-		.attr("width", 10)
+		.attr("width", 10+1) //+1 to leave a space with the other canvas
 		.attr("height", windowHeight*0.95);
 
 	// get drawing context of canvas
@@ -441,7 +455,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("class", "handle")
 			.style("stroke", d3.hcl(0,0,25))
 			.style("stroke-width", 3)
-			.attr("width", Number(bgBrowser_rainbowCanvas.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numberers before beeing added
+			.attr("width", Number(foreignObject_Browser.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numbers before being added + the width depends on the number of slider shown
 //			.attr("height", 12)
 			.attr("height", Number(miniWindowHandleHeight)) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
 			//Plus the height should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
