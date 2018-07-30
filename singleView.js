@@ -354,8 +354,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//1st create a scale that links value to a position in pixel
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
-								.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
-								.range([0+(windowHeight * windowHeight*0.95 / (10*Number(improvedDataMatrix.length)))/2, svgContainer_browsingSlider.attr("height")-(windowHeight * windowHeight*0.95 / (10*Number(improvedDataMatrix.length)))/2]) //Ranges from and to the slider's extreme length values as an output
+								.domain([0, 12*improvedDataMatrix.length-windowHeight*0.95]) //Must be the min and max block positions
+								.range([0+(windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length)))/2, svgContainer_browsingSlider.attr("height")-(windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length)))/2]) //Ranges from and to the slider's extreme length values as an output
+								//windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length))) is the handle height
 								//The margins should depend on the handle height, which depends on the number of blocks and the window height
 								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 	
@@ -390,7 +391,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	});	
 	//------------------------
 	
-	var miniWindowHandleHeight = windowHeight * Number(bgBrowser_Canvas.attr("height")) / (10*Number(improvedDataMatrix.length)); // = (WindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
+	var miniWindowHandleHeight = windowHeight*0.95 * Number(bgBrowser_Canvas.attr("height")) / (12*Number(improvedDataMatrix.length)); // = (displayWindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
 	console.log(miniWindowHandleHeight);
 	//Translation of the whole slider object wherever it is required
 	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
