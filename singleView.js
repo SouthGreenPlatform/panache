@@ -178,7 +178,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//More about d3 selection : https://bost.ocks.org/mike/selection/
 
-	//----------------------------------bgChromCanvas-------------------------------------
+/*	//----------------------------------bgChromCanvas-------------------------------------
 	var bgChromCanvas = document.createElement('canvas');
 
 	bgChromCanvas.id = "chromCanvas";
@@ -194,7 +194,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	contextChrom.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
 	contextChrom.fillRect(Number(d.index)*10, 0, 10, 20);
 	});
-	//------------------------------------------------------------------------------------
+*/	//------------------------------------------------------------------------------------
 	
 	//-----------------------------svgContainer_rawBlocks---------------------------------
 	//Creating the SVG DOM tag
@@ -343,6 +343,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+	
+	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Creation of a chromosome slider !
@@ -354,17 +357,49 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 								.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
 								.range([0, svgContainer_browsingSlider.attr("height")]) //Ranges from and to the slider's extreme length values as an output
 								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
+	
+	
+	//------------------------
+	//Canvas creation for SVG background, code from http://bl.ocks.org/boeric/aa80b0048b7e39dd71c8fbe958d1b1d4
+	
+	// add foreign object to svg
+	// https://gist.github.com/mbostock/1424037
+	var foreignObject_Browser = slidersGroup.append("foreignObject")
+		.attr("x", 0-10/2)
+		.attr("y", 0)
+		//.attr("position", "absolute")
+		.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")") //Everything in it will be translated
+		.attr("width", 20)
+		.attr("height", windowHeight*0.95)
+		.attr("class","UFO");
 
+	// add embedded body to foreign object
+	var bgBrowser_Canvas = foreignObject_Browser.append("xhtml:canvas")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", 10)
+		.attr("height", windowHeight*0.95);
+
+	// get drawing context of canvas
+	var bgBrowser_Context = bgBrowser_Canvas.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		bgBrowser_Context.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		bgBrowser_Context.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
+	});	
+	//------------------------
+	
 	//Translation of the whole slider object wherever it is required
 	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
 									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")"); //Everything in it will be translated	
+									.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")"); //Everything in it will be translated		
 	
-	chromSlider.append("rect").attr("width",10).attr("height",chromSliderScale.range()[1]).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan");
+//	chromSlider.append("rect").attr("width",10).attr("height",chromSliderScale.range()[1]).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan").style("fill-opacity",0.5);
 
 	//Addition of the interactive zone
 	chromSlider.append("rect")
 		.attr("class", "track-overlay") //Interactivity zone
+		//.attr("position", "absolute")
 		.attr("width", 40)
 		.attr("height", chromSliderScale.range()[1])
 		.attr("x",0-chromSlider.select(".track-overlay").attr("width")/2) //The "." asks to select the first matching element with the written class
@@ -379,8 +414,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("class", "handle")
 			.style("stroke", d3.hcl(0,0,25))
 			.style("stroke-width", 3)
-			.attr("width", Number(chromSlider.select("rect").attr("width")) + chromSlider.select(".handle").style("stroke-width")*2) //Reminder : the attributes have to be converted in numberers before beeing added
-			.attr("height", chromSlider.select("rect").attr("width")) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
+			.attr("width", Number(bgBrowser_Canvas.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numberers before beeing added
+			.attr("height", bgBrowser_Canvas.attr("width")) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
 			//Plus the height should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
 			.attr("x", 0-chromSlider.select(".handle").attr("width")/2)
 //			.attr("y", 0-Number(miniWindowHandle.attr("height")/2)) //Does not work
