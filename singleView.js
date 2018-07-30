@@ -355,7 +355,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
 								.domain([0, 12*improvedDataMatrix.length]) //Must be the min and max block positions
-								.range([0, svgContainer_browsingSlider.attr("height")]) //Ranges from and to the slider's extreme length values as an output
+								.range([0+(windowHeight * windowHeight*0.95 / (10*Number(improvedDataMatrix.length)))/2, svgContainer_browsingSlider.attr("height")-(windowHeight * windowHeight*0.95 / (10*Number(improvedDataMatrix.length)))/2]) //Ranges from and to the slider's extreme length values as an output
+								//The margins should depend on the handle height, which depends on the number of blocks and the window height
 								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 	
 	
@@ -389,6 +390,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	});	
 	//------------------------
 	
+	var miniWindowHandleHeight = windowHeight * Number(bgBrowser_Canvas.attr("height")) / (10*Number(improvedDataMatrix.length)); // = (WindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
+	console.log(miniWindowHandleHeight);
 	//Translation of the whole slider object wherever it is required
 	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
 									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
@@ -415,11 +418,12 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.style("stroke", d3.hcl(0,0,25))
 			.style("stroke-width", 3)
 			.attr("width", Number(bgBrowser_Canvas.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numberers before beeing added
-			.attr("height", bgBrowser_Canvas.attr("width")) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
+//			.attr("height", 12)
+			.attr("height", Number(miniWindowHandleHeight)) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
 			//Plus the height should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
 			.attr("x", 0-chromSlider.select(".handle").attr("width")/2)
 //			.attr("y", 0-Number(miniWindowHandle.attr("height")/2)) //Does not work
-			.attr("y", 0-chromSlider.select(".handle").attr("height")/2)
+			.attr("y", 0+Number(chromSliderScale.range()[0])-chromSlider.select(".handle").attr("height")/2)
 			.style("fill-opacity", 0);
 			
 			
