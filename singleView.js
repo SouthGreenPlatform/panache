@@ -177,12 +177,32 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
 	
 	//More about d3 selection : https://bost.ocks.org/mike/selection/
+
+	//----------------------------------bgChromCanvas-------------------------------------
+	var bgChromCanvas = document.createElement('canvas');
+
+	bgChromCanvas.id = "chromCanvas";
+	bgChromCanvas.width = windowWidth; //block width, more or less
+	bgChromCanvas.height = windowHeight; //window height
 	
+	document.getElementsByTagName("body")[0].appendChild(bgChromCanvas);
+
+	// get the canvas drawing context
+	const contextChrom = bgChromCanvas.getContext('2d');
+	
+	improvedDataMatrix.forEach(d => {
+	contextChrom.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+	contextChrom.fillRect(Number(d.index)*10, 0, 10, 20);
+	});
+	//------------------------------------------------------------------------------------
+	
+	//----------------------------------svgContainer--------------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer = d3.select("body").append("svg")
 										.attr("width", windowWidth*0.95).attr("height", windowHeight*0.95); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------
 	
-										
+
 
 	//----------------------------------coreThreshold-------------------------------------
 	
@@ -384,6 +404,18 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//https://bocoup.com/blog/d3js-and-canvas (2014)
 	//https://www.visualcinnamon.com/2015/11/learnings-from-a-d3-js-addict-on-starting-with-canvas.html (2015)
 	//https://engineering.mongodb.com/post/d3-round-two-how-to-blend-html5-canvas-with-svg-to-speed-up-rendering (2016)
+	
+	//How to superimposed canvas and svg
+	//http://bl.ocks.org/sxv/4485778
+	//http://bl.ocks.org/boeric/aa80b0048b7e39dd71c8fbe958d1b1d4 Embedded canvas in svg
+	//Example of foreignObject : https://gist.github.com/jebeck/10699411
+	//and the MDN explanations : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/foreignObject
+	//Using Canvas in SVG : http://www.svgopen.org/2009/papers/12-Using_Canvas_in_SVG/ (2009)
+	
+	//How to position different div within the same space
+	//https://stackoverflow.com/questions/2941189/how-to-overlay-one-div-over-another-div
+	
+	//More about CSS positions : https://developer.mozilla.org/en-US/docs/Web/CSS/position
 
 
 
