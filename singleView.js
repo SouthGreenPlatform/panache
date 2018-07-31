@@ -172,14 +172,17 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 //	console.log(colorsForFunctions);
 //	console.log(functionColorScale("9"),functionColorScale.range(),functionColorScale.domain());
 
-	//----------------------------------coreThreshold-------------------------------------
+	//---------------------------------coreThreshold--------------------------------------
 	
 	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
 	var coreThreshold = 85/100*initialPptyNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
 	//------------------------------------------------------------------------------------	
 	
+	//---------------------------windowWidth, windowHeight--------------------------------
+	
 	//Creating the constants for a scalable display
 	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
+	//------------------------------------------------------------------------------------
 	
 	//More about d3 selection : https://bost.ocks.org/mike/selection/
 
@@ -206,9 +209,12 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var svgContainer_rawBlocks = d3.select("body").append("svg")
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.75); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
-
-
-
+	
+	
+	
+	
+	//--------------------------------coreSliderGradient----------------------------------
+	
 	//Creating a color gradient for the slider shape
 	//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
 	//Here you can find a demo on how to avoid it : http://jsfiddle.net/yv92f9k2/ perhaps, I used a path instead of a line here
@@ -234,6 +240,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 					.select(function() { return this.parentNode; }).append("stop")
 						.attr("offset", 1)
 						.attr("stop-color", orangeColorScale.range()[1]);
+	//------------------------------------------------------------------------------------
 
 	//-----------------------------------slidersGroup-------------------------------------
 						
@@ -251,9 +258,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var displayedBlocksDimensions = {width:12, height:10, borderSpace:1}
 	//------------------------------------------------------------------------------------
 	
-	//-----------------------------browsingBlocksDimensions------------------------------
+	//------------------------------browsingBlocksDimensions------------------------------
 	
-	var browsingBlocksDimensions = {width:12, height:10, borderSpace:1}
+	var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.width/improvedDataMatrix.length)+1, height:10, borderSpace:1}
+	//+1 so that the rectangles overlap and leave no space giving a filling of transparency
 	//------------------------------------------------------------------------------------
 	
 	
@@ -263,17 +271,25 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+	//----------------------------------coreSliderScale-----------------------------------
+	
 	//1st create a scale that links value to a position in pixel
 	var coreSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 			.domain([0, 1]) //Takes the possible treshold values as an input
 			.range([0, 100]) //Ranges from and to the slider's extreme length values as an output
 			.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
-
+	//------------------------------------------------------------------------------------
+	
+	//-------------------------------------coreSlider-------------------------------------
+	
 	//Translation of the whole slider object wherever it is required
-	var coreSlider = slidersGroup.append("g") //coreSlider is a subgroup of slidersGroup
-									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 2 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")"); //Everything in it will be translated
+	var coreSlider = svgContainer_coreSlider.append("g") //coreSlider is nested in svgContainer_coreSlider
+//									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
+									.attr("transform", "translate(" + svgContainer_coreSlider.attr("width") / 2 + "," + svgContainer_coreSlider.attr("height") / 2 + ")"); //Everything in it will be translated
+	//------------------------------------------------------------------------------------
 
+	//---------------------------------coreFillingGradient---------------------------------
+	
 	//Creation of a function for the path determining the slider shape (as horizontal lines do not the job if mapped to a gradient)
 	var coreSliderArea = d3.area()
 		.x(function(d) { return d[0]; })
@@ -288,6 +304,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("d", coreSliderArea) //Calls the sliderArea function on the input data given to the path
 			.attr("stroke", "#000")
 			.attr("stroke-opacity", 0.3)
+	//------------------------------------------------------------------------------------
+	
+	//------------------------------------coreOverlay-------------------------------------
 
 	//Addition of the interactive zone
 	coreSlider.append("line")
@@ -305,7 +324,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//			.on("start.interrupt", function() { slider.interrupt(); }) //interrupt seems to be an event related to the transition the original code had (the slider's handle was moving at the very beginning), see : https://github.com/d3/d3-transition/blob/master/README.md#selection_interrupt . ATTENTION It is not useful here as I did not use the transition from the original code
 				.on("start drag", function() { eventDynamicColorChange(coreSliderScale.invert(d3.event.x)); })); //"start" is the d3.drag event for mousedown AND if it is not just a click : https://github.com/d3/d3-drag . We surely need to call d3.drag() to use this. For more about .on : https://github.com/d3/d3-selection/blob/master/README.md#selection_on
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
-
+	//------------------------------------------------------------------------------------
+	
+	//-------------------------------------coreHandle-------------------------------------
+	
 	//Creation of the handle circle, thats translates the interaction into visual movement
 	var coreHandle = coreSlider.insert("circle", ".track-overlay") //Tells to insert a circle element before (as it is insert and not append) the first "track-overlay" class element it finds within coreSlider (so that it will appear behind it)
 			.attr("class", "handle") //It is given the class "handle" (useful for easier/universal styling when used with css format)
@@ -315,7 +337,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("cx", coreThreshold/initialPptyNames.length*100)
 			.attr("stroke-opacity", 0.3)
 			.attr("stroke-width", "1.25px");
+	//------------------------------------------------------------------------------------
 
+	//--------------------------------------coreTicks-------------------------------------
+	
 	//Creation of the tick label that will give coreTreshold percent value in real time
 	coreSlider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
 			.attr("class", "tick") //Giving the class "ticks", for styling reasons
@@ -323,7 +348,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("font-size", "10px")
 			.attr("transform", "translate(0 18)") //One more translation in order to have it right under the rest of the slider
 			.append("text").attr("x", coreHandle.attr("cx")).attr("text-anchor", "middle").text(coreHandle.attr("cx")+"%"); //Text value based on coreThreshold
-
+	//------------------------------------------------------------------------------------
+	
+	//--------------------------------------coreLabel-------------------------------------
+	
 	coreSlider.insert("text", ".track-overlay")
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
@@ -336,7 +364,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 				.text("to be part of Core")
 				.attr("dy","1.2em");
-
+	//------------------------------------------------------------------------------------
+	
+	//------------------------------eventDynamicColorChange()-----------------------------
+	
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function eventDynamicColorChange(slidePercent) {
 		coreHandle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
@@ -346,99 +377,107 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 		
+		//Updating the colours of the miniature browser
 		improvedDataMatrix.forEach(d => {
 			bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
-//			bgBrowser_coreContext.fillStyle = thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);
-			bgBrowser_coreContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, displayedBlocksDimensions.width, windowHeight*0.95/improvedDataMatrix.length+1); //+1 so that the rect overlap and leave no space giving a filling of transparency
+			bgBrowser_coreContext.fillRect(Number(d.index)*svgContainer_browsingSlider.width/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 		});
 	};
-
-
+	//------------------------------------------------------------------------------------
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//End of the core slider creation
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-	var browsingHandleDimensions = {strokeWidth:3};
-	browsingHandleDimensions.height =
-	browsingHandleDimensions.width = Number(foreignObject_Browser.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2
 	
+	
+	//-------------------------------foreignObject_Browser--------------------------------
+	
+	//Foreign object allows to incorporate objects that are not SVGs into an SVG window
+	//https://gist.github.com/mbostock/1424037
+	var foreignObject_Browser = svgContainer_browsingSlider.append("foreignObject")
+			.attr("width", svgContainer_browsingSlider.attr("width"))
+			.attr("height", browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))
+			.attr("x", 0)
+//			.attr("y", 0 - foreignObject_Browser.attr("height")/2) //It has to be centered depending on the canvas and miniature count
+			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
+			.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
+			.attr("class","UFO");
+	//------------------------------------------------------------------------------------
+	
+	//------------------------------browsingHandleDimensions------------------------------
+	
+	var browsingHandleDimensions = {strokeWidth:3};
+	browsingHandleDimensions.height = Number(foreignObject_Browser.attr("height")) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
+	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(improvedDataMatrix.length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
+	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Creation of a chromosome slider !
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//1st create a scale that links value to a position in pixel
+	//----------------------------------chromSliderScale----------------------------------
+	
+	//Creation of a scale that links value to a position in pixel
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-//								.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
-								.domain([0, displayedBlocksDimensions.height*improvedDataMatrix.length-windowHeight*0.95]) //Must be the min and max block positions
-								.range([0+(windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length)))/2, svgContainer_browsingSlider.attr("height")-(windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length)))/2]) //Ranges from and to the slider's extreme length values as an output
-								//windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length))) is the handle height
-								//The margins should depend on the handle height, which depends on the number of blocks and the window height
+								.domain([0, displayedBlocksDimensions.width*improvedDataMatrix.length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and not empty background when the slider is at the maximum position
+								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
+								//ATTENTION The slider positions correspond to the center of the handle !
+								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
 								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
+	//------------------------------------------------------------------------------------
 	
+	//Canvas creation for background of SVG, code from http://bl.ocks.org/boeric/aa80b0048b7e39dd71c8fbe958d1b1d4
 	
-	//------------------------
-	//Canvas creation for SVG background, code from http://bl.ocks.org/boeric/aa80b0048b7e39dd71c8fbe958d1b1d4
+	//-------------------------------------coreCanvas-------------------------------------
 	
-	// add foreign object to svg
-	// https://gist.github.com/mbostock/1424037
-	var foreignObject_Browser = slidersGroup.append("foreignObject")
-		.attr("x", 0-(10*3+2)/2) //It has to be centered depending on the canvas and slider count
+	//Addition of the first canvas to the foreignObject
+	var bgBrowser_coreCanvas = foreignObject_Browser.append("xhtml:canvas")
+		.attr("x", 0)
 		.attr("y", 0)
-		.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")") //Everything in it will be translated
-		.attr("width", 10*3+2)
-		.attr("height", windowHeight*0.95)
-		.attr("class","UFO");
+		.attr("width", foreignObject_Browser.attr("width"))
+		.attr("height", browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace);
 
-	// add embedded body to foreign object
+	//The context of canvas is needed for drawing
+	var bgBrowser_coreContext = bgBrowser_coreCanvas.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
+		bgBrowser_coreContext.fillRect(Number(d.index)*svgContainer_browsingSlider.width/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+	});
+	//------------------------------------------------------------------------------------
+	
+	//-----------------------------------rainbowCanvas------------------------------------
+	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
+		.attr("x", 0)
+		.attr("y", 0)
+		.attr("width", foreignObject_Browser.attr("width")) //+1 to leave a space with the other canvas
+		.attr("height", browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace);
+
+	var bgBrowser_rainbowContext = bgBrowser_rainbowCanvas.node().getContext("2d");
+	
+	improvedDataMatrix.forEach(d => {
+		bgBrowser_rainbowContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		bgBrowser_rainbowContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1		
+	});	
+	//------------------------------------------------------------------------------------
+
+	//---------------------------------similarityCanvas-----------------------------------
+	
 	var bgBrowser_similarityCanvas = foreignObject_Browser.append("xhtml:canvas")
 		.attr("x", 0)
 		.attr("y", 0)
-		.attr("width", 10+1) //+1 to leave a space with the other canvas
-		.attr("height", windowHeight*0.95);
+		.attr("width", foreignObject_Browser.attr("width"))
+		.attr("height", browsingBlocksDimensions.height);
 
-	// get drawing context of canvas
 	var bgBrowser_similarityContext = bgBrowser_similarityCanvas.node().getContext("2d");
 	
 	improvedDataMatrix.forEach(d => {
 		bgBrowser_similarityContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
 		bgBrowser_similarityContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
 	});
+	//------------------------------------------------------------------------------------
 	
-	// add embedded body to foreign object
-	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", 10+1) //+1 to leave a space with the other canvas
-		.attr("height", windowHeight*0.95);
-
-	// get drawing context of canvas
-	var bgBrowser_rainbowContext = bgBrowser_rainbowCanvas.node().getContext("2d");
-	
-	improvedDataMatrix.forEach(d => {
-		bgBrowser_rainbowContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_rainbowContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
-	});
-	
-	// add embedded body to foreign object
-	var bgBrowser_coreCanvas = foreignObject_Browser.append("xhtml:canvas")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", 10)
-		.attr("height", windowHeight*0.95);
-
-	// get drawing context of canvas
-	var bgBrowser_coreContext = bgBrowser_coreCanvas.node().getContext("2d");
-	
-	improvedDataMatrix.forEach(d => {
-		bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
-//		bgBrowser_coreContext.fillStyle = thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);
-		bgBrowser_coreContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
-	});
-	
-	//------------------------
 	
 	var miniWindowHandleHeight = windowHeight*0.95 * Number(bgBrowser_rainbowCanvas.attr("height")) / (12*Number(improvedDataMatrix.length)); // = (displayWindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
 	console.log(miniWindowHandleHeight);
