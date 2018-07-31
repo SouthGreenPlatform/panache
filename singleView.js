@@ -756,8 +756,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 														.append("circle");
 		
 		var copyCircles_Attributes = copyCircles.attr("class", "moveableCircle")
-												.attr("cy", (d,i) => Number(structureBackground.attr("y")) + ((1+3+0.5)+chr)*displayedBlocksDimensions.height) //1+3+0.5 as there is space between the central panChromosome and the pption information for one row of panChromosome, plus 3 rows of free space, plus 0.5 for centering the circles
-												.attr("cx", (d,i) => (0.5*d.index)*displayedBlocksDimensions.width) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
+												.attr("cy", (d,i) => Number(structureBackground.attr("y")) + ((3+0.5)+chr)*displayedBlocksDimensions.height) //3+0.5 as there is space between the central panChromosome and the pption information : 3 rows of free space, plus 0.5 for centering the circles
+												.attr("cx", (d,i) => (d.index+0.5)*displayedBlocksDimensions.width) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
 												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*((displayedBlocksDimensions.width/2-1)-1)+1)) //Depends on the data value; rmax = displayedBlocksDimensions.width/2-1, rmin = 1
 												.style("fill", d3.hcl(0,0,25))
 												.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
