@@ -255,7 +255,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//-----------------------------displayedBlocksDimensions------------------------------
 	
-	var displayedBlocksDimensions = {width:12, height:14, borderSpace:1}
+	var displayedBlocksDimensions = {width:12, height:14}
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------browsingBlocksDimensions------------------------------
@@ -285,7 +285,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Translation of the whole slider object wherever it is required
 	var coreSlider = svgContainer_coreSlider.append("g") //coreSlider is nested in svgContainer_coreSlider
 //									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + svgContainer_coreSlider.attr("width") / 2 + "," + svgContainer_coreSlider.attr("height") / 2 + ")"); //Everything in it will be translated
+									.attr("transform", "translate(" + (svgContainer_coreSlider.attr("width")-coreSliderScale.range()[1]) / 2 + "," + svgContainer_coreSlider.attr("height") / 2 + ")"); //Everything in it will be translated
 	//------------------------------------------------------------------------------------
 
 	//---------------------------------coreFillingGradient---------------------------------
@@ -452,14 +452,14 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
 		.attr("x", 0)
 		.attr("y", 0)
-		.attr("width", foreignObject_Browser.attr("width")) //+1 to leave a space with the other canvas
+		.attr("width", foreignObject_Browser.attr("width"))
 		.attr("height", browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace);
 
 	var bgBrowser_rainbowContext = bgBrowser_rainbowCanvas.node().getContext("2d");
 	
 	improvedDataMatrix.forEach(d => {
 		bgBrowser_rainbowContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_rainbowContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1		
+		bgBrowser_rainbowContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);
 	});	
 	//------------------------------------------------------------------------------------
 
