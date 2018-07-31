@@ -255,7 +255,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//-----------------------------displayedBlocksDimensions------------------------------
 	
-	var displayedBlocksDimensions = {width:12, height:10, borderSpace:1}
+	var displayedBlocksDimensions = {width:10, height:12, borderSpace:1}
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------browsingBlocksDimensions------------------------------
@@ -448,6 +448,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//------------------------------------------------------------------------------------
 	
 	//-----------------------------------rainbowCanvas------------------------------------
+	
 	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
 		.attr("x", 0)
 		.attr("y", 0)
@@ -478,51 +479,55 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	});
 	//------------------------------------------------------------------------------------
 	
-	
-	var miniWindowHandleHeight = windowHeight*0.95 * Number(bgBrowser_rainbowCanvas.attr("height")) / (12*Number(improvedDataMatrix.length)); // = (displayWindowHeight * SliderHeight) / (nbBlocks * BlocksHeight)
-	console.log(miniWindowHandleHeight);
-	//Translation of the whole slider object wherever it is required
-	var chromSlider = slidersGroup.append("g") //slider is a subgroup of slidersGroup
-									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + svgContainer_browsingSlider.attr("width") / 4 + "," + 0 + ")"); //Everything in it will be translated		
-	
-//	chromSlider.append("rect").attr("width",10).attr("height",chromSliderScale.range()[1]).attr("x",0-chromSlider.select("rect").attr("width")/2).style("fill","cyan").style("fill-opacity",0.5);
 
+	//-----------------------------------chromSlider--------------------------------------
+	
+	//Translation of the whole slider object wherever it is required
+	var chromSlider = svgContainer_browsingSlider.append("g") //chromSlider is a group within svgContainer_browsingSlider, embedded after the foreign object so that it will appear over it
+//									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
+									.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")"); //Everything in it will be translated		
+	//------------------------------------------------------------------------------------
+
+	//--------------------------------miniatureOverlay------------------------------------
 	//Addition of the interactive zone
 	chromSlider.append("rect")
 		.attr("class", "track-overlay") //Interactivity zone
-		//.attr("position", "absolute")
-		.attr("width", 40)
-		.attr("height", chromSliderScale.range()[1])
-		.attr("x",0-chromSlider.select(".track-overlay").attr("width")/2) //The "." asks to select the first matching element with the written class
+//		.attr("width", chromSliderScale.range()[1])
+		.attr("width", svgContainer_browsingSlider.attr("width")) //Clamping should work, not allowing to exceed the position even if the draging zone is wider
+		.attr("height", 40)
+		.attr("y",0-chromSlider.select(".track-overlay").attr("height")/2) //The "." asks to select the first matching element with the written class. Doing this we can center ther overlay
 		.style("fill-opacity",0)
-		.attr("cursor", "ns-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
+		.attr("cursor", "we-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
 			.call(d3.drag()
-				.on("start drag", function() { slidingAlongBlocks(chromSliderScale.invert(d3.event.y)); }));
+				.on("start drag", function() { slidingAlongBlocks(chromSliderScale.invert(d3.event.x)); }));
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.	
+	//------------------------------------------------------------------------------------
 	
+	
+	//--------------------------------miniatureHandle-------------------------------------
 	//Creation of the mini window handle, thats translates the interaction into visual movement
 	var miniWindowHandle = chromSlider.insert("rect", ".track-overlay")
 			.attr("class", "handle")
 			.style("stroke", d3.hcl(0,0,25))
-			.style("stroke-width", 3)
-			.attr("width", Number(foreignObject_Browser.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2) //Reminder : the attributes have to be converted in numbers before being added + the width depends on the number of slider shown
-//			.attr("height", 12)
-			.attr("height", Number(miniWindowHandleHeight)) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
-			//Plus the height should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
-			.attr("x", 0-chromSlider.select(".handle").attr("width")/2)
-//			.attr("y", 0-Number(miniWindowHandle.attr("height")/2)) //Does not work
-			.attr("y", 0+Number(chromSliderScale.range()[0])-chromSlider.select(".handle").attr("height")/2)
+			.style("stroke-width", browsingHandleDimensions.stroke)
+			.attr("width", browsingHandleDimensions.width) //Reminder : the attributes have to be converted in numbers before being added + the width depends on the number of slider shown
+			.attr("height", browsingHandleDimensions.height) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
+			//Plus the width should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
+			.attr("x", 0)
+			.attr("y", 0 - browsingHandleDimensions.height/2)
 			.style("fill-opacity", 0);
-			
-			
-	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
-	function slidingAlongBlocks(yBlockPosition) {
-		miniWindowHandle.attr("y", Number(chromSliderScale(yBlockPosition))-Number(miniWindowHandle.attr("height"))/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
-		blocksDisplay.selectAll(".moveableBlock").attr("y",d => d.index*12-yBlockPosition)
-		blocksDisplay.selectAll(".moveableCircle").attr("cy",d => (d.index+0.5)*12-yBlockPosition);
-	};
+	//------------------------------------------------------------------------------------
 
+	//------------------------------slidingAlongBlocks()----------------------------------
+	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
+	function slidingAlongBlocks(xBlockPosition) {
+		miniWindowHandle.attr("x", Number(chromSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
+		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
+		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
+	};
+	//------------------------------------------------------------------------------------
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//End of the browsing slider
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
