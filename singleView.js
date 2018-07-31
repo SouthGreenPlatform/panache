@@ -255,7 +255,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//-----------------------------displayedBlocksDimensions------------------------------
 	
-	var displayedBlocksDimensions = {width:10, height:12, borderSpace:1}
+	var displayedBlocksDimensions = {width:12, height:14, borderSpace:1}
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------browsingBlocksDimensions------------------------------
@@ -680,7 +680,47 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	};
 	//------------------------------------------------------------------------------------
 	
+	//-----------------------------rainbowBlocks & attributes-----------------------------
 	
+	//Binding the data to a DOM element, therefore creating one SVG block per data
+	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed")
+								.selectAll("rect")
+									.data(improvedDataMatrix)
+									.enter()
+									.append("rect");
+
+	//Selecting all previous blocks, and determining their attributes
+	var rainbowBlocks_Attributes = rainbowBlocks.attr("class", "moveableBlock")
+//									.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
+									.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //x position is index * block width
+									.attr("width", displayedBlocksDimensions.width)
+									.attr("height", displayedBlocksDimensions.height)
+//									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
+									.attr("y", Number(blocks.attr("y")) + displayedBlocksDimensions.height + 3)
+//									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
+									.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
+	//------------------------------------------------------------------------------------	
+	
+	//-----------------------------similarBlocks & attributes-----------------------------
+	
+	//Binding the data to a DOM element, therefore creating one SVG block per data
+	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount")
+								.selectAll("rect")
+									.data(improvedDataMatrix)
+									.enter()
+									.append("rect");
+
+	//Selecting all previous blocks, and determining their attributes
+	var similarBlocks_Attributes = similarBlocks.attr("class", "moveableBlock")
+//									.attr("x", Number(structureBackground.attr("width")))
+									.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //x position is index * block width
+									.attr("width", displayedBlocksDimensions.width)
+									.attr("height", displayedBlocksDimensions.height)
+//									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
+									.attr("y", Number(rainbowBlocks.attr("y")) + displayedBlocksDimensions.height + 3)
+									.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
+//									.style("fill", (d => purpleColorScale((d.SimilarBlocks.split(";").length != 1 ? d.SimilarBlocks.split(";").length : 0))));
+	//------------------------------------------------------------------------------------
 	
 	//--------------------------structureBackground & attributes--------------------------
 	
@@ -724,43 +764,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//------------------------------------------------------------------------------------
 
-	//-----------------------------similarBlocks & attributes-----------------------------
-	
-	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount")
-								.selectAll("rect")
-									.data(improvedDataMatrix)
-									.enter()
-									.append("rect");
 
-	//Selecting all previous blocks, and determining their attributes
-	var similarBlocks_Attributes = similarBlocks.attr("class", "moveableBlock")
-									.attr("x", Number(structureBackground.attr("width")))
-									.attr("width", 14)
-									.attr("height", 12)
-									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
-									.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
-//									.style("fill", (d => purpleColorScale((d.SimilarBlocks.split(";").length != 1 ? d.SimilarBlocks.split(";").length : 0))));
-	//------------------------------------------------------------------------------------
-
-	//-----------------------------rainbowBlocks & attributes-----------------------------
-	
-	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed")
-								.selectAll("rect")
-									.data(improvedDataMatrix)
-									.enter()
-									.append("rect");
-
-	//Selecting all previous blocks, and determining their attributes
-	var rainbowBlocks_Attributes = rainbowBlocks.attr("class", "moveableBlock")
-									.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
-									.attr("width", 14)
-									.attr("height", 12)
-									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
-//									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
-									.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
-	//------------------------------------------------------------------------------------
 	
 
 
