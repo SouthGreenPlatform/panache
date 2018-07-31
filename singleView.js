@@ -164,7 +164,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
 	//------------------------------------------------------------------------------------
 	
-	//-------------------------------functionColorScale----------------------------------- //Can be improved, cd PanVis !!
+	//-------------------------------functionColorScale----------------------------------- //Can be improved, cf PanVis !!
 	
 	var colorsForFunctions = domainPivotsMaker(functionDiversity.length,functionDiversity.length).map(intNum => d3.interpolateRainbow(intNum/(functionDiversity.length+1))); //There is +1 in the division so that it will not do a full cyclic rainbow
 	var functionColorScale = colorScaleMaker(functionDiversity, colorsForFunctions, false);
@@ -195,20 +195,30 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	contextChrom.fillRect(Number(d.index)*10, 0, 10, 20);
 	});
 */	//------------------------------------------------------------------------------------
-	
-	//-----------------------------svgContainer_rawBlocks---------------------------------
+
+	//----------------------------svgContainer_coreSlider---------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer_rawBlocks = d3.select("body").append("svg")
-										.attr("width", windowWidth*0.7).attr("height", windowHeight*0.95); //Full proportions won't display correctly
+	var svgContainer_coreSlider = d3.select("body").append("svg")
+										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.20); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
-	
 	
 	//--------------------------svgContainer_browsingSlider-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_browsingSlider = d3.select("body").append("svg")
-										.attr("width", windowWidth*0.25).attr("height", windowHeight*0.95); //Full proportions won't display correctly
-	//------------------------------------------------------------------------------------	
+										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.20); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------
+	
+	//---------------------------svgContainer_labelsAndTree-------------------------------
+	//Creating the SVG DOM tag
+	var svgContainer_labelsAndTree = d3.select("body").append("svg")
+										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------
 
+	//-----------------------------svgContainer_rawBlocks---------------------------------
+	//Creating the SVG DOM tag
+	var svgContainer_rawBlocks = d3.select("body").append("svg")
+										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------
 
 	//----------------------------------coreThreshold-------------------------------------
 	
@@ -223,31 +233,48 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	var coreSliderGradient = svgContainer_rawBlocks.append("defs")
 										.append("linearGradient")
 										.attr("id", "coreSliderGradient")
-										.attr("x1", 0)
+										.attr("x1", 0) //x1, x2, y1, y2 determine the direction of the gradient
 										.attr("x2", 1)
 										.attr("y1", 0)
 										.attr("y2", 0);
 
-	coreSliderGradient.append("stop") //ATTENTION The order of the stops prevales on their offset
-					.attr("offset", 0) //Relative position of the stop on the gradient
-					.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
-				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
-					.attr("class", "hueSwingingPointLeft") //Class that is used later for dynamic changes
-					.attr("offset", coreThreshold/initialPptyNames.length)
-					.attr("stop-color", blueColorScale(coreThreshold))
-				.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-					.attr("class", "hueSwingingPointRight")
-					.attr("stop-color", orangeColorScale(coreThreshold))
-				.select(function() { return this.parentNode; }).append("stop")
-					.attr("offset", 1)
-					.attr("stop-color", orangeColorScale.range()[1]);
+	coreSliderGradient.append("stop") //ATTENTION The order of the stops prevales on their offset, they therefore have to be declared in the intended order of appearance
+						.attr("offset", 0) //Relative position of the stop on the gradient
+						.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
+					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
+						.attr("class", "hueSwingingPointLeft") //Class that is used later for dynamic changes
+						.attr("offset", coreThreshold/initialPptyNames.length)
+						.attr("stop-color", blueColorScale(coreThreshold))
+					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+						.attr("class", "hueSwingingPointRight")
+						.attr("stop-color", orangeColorScale(coreThreshold))
+					.select(function() { return this.parentNode; }).append("stop")
+						.attr("offset", 1)
+						.attr("stop-color", orangeColorScale.range()[1]);
 
+	//-----------------------------------slidersGroup-------------------------------------
+						
 	var slidersGroup = svgContainer_browsingSlider.append("g")
 										.attr("id", "slidersGroup")
-										
+	//------------------------------------------------------------------------------------
+	
+	//-----------------------------------blocksDisplay------------------------------------
 	var blocksDisplay = svgContainer_rawBlocks.append("g")
 										.attr("id", "blocksDisplay")
-
+	//------------------------------------------------------------------------------------
+	
+	//-----------------------------displayedBlocksDimensions------------------------------
+	
+	var displayedBlocksDimensions = {width:12, height:10, borderSpace:1}
+	//------------------------------------------------------------------------------------
+	
+	//-----------------------------browsingBlocksDimensions------------------------------
+	
+	var browsingBlocksDimensions = {width:12, height:10, borderSpace:1}
+	//------------------------------------------------------------------------------------
+	
+	
+	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//Creation of a slider for choosing the core threshold ! see https://bl.ocks.org/mbostock/6452972 for slider example
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -339,18 +366,20 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		improvedDataMatrix.forEach(d => {
 			bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
 //			bgBrowser_coreContext.fillStyle = thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);
-			bgBrowser_coreContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);
+			bgBrowser_coreContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, displayedBlocksDimensions.width, windowHeight*0.95/improvedDataMatrix.length+1); //+1 so that the rect overlap and leave no space giving a filling of transparency
 		});
 	};
 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//End of the slider creation
+	//End of the core slider creation
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
-	
+	var browsingHandleDimensions = {strokeWidth:3};
+	browsingHandleDimensions.height =
+	browsingHandleDimensions.width = Number(foreignObject_Browser.attr("width")) + Number(chromSlider.select(".handle").style("stroke-width"))*2
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -360,7 +389,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//1st create a scale that links value to a position in pixel
 	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, blocks.attr("height")*improvedDataMatrix.length]) //Must be the min and max block positions
-								.domain([0, 12*improvedDataMatrix.length-windowHeight*0.95]) //Must be the min and max block positions
+								.domain([0, displayedBlocksDimensions.height*improvedDataMatrix.length-windowHeight*0.95]) //Must be the min and max block positions
 								.range([0+(windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length)))/2, svgContainer_browsingSlider.attr("height")-(windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length)))/2]) //Ranges from and to the slider's extreme length values as an output
 								//windowHeight * windowHeight*0.95 / (12*Number(improvedDataMatrix.length))) is the handle height
 								//The margins should depend on the handle height, which depends on the number of blocks and the window height
@@ -473,7 +502,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	};
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//End of the chromosome slider
+	//End of the browsing slider
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	//Some code for enter, update and exit things :
