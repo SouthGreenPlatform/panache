@@ -497,7 +497,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		.attr("height", 40)
 		.attr("y",0-chromSlider.select(".track-overlay").attr("height")/2) //The "." asks to select the first matching element with the written class. Doing this we can center ther overlay
 		.style("fill-opacity",0)
-		.attr("cursor", "we-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
+		.attr("cursor", "ew-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
 			.call(d3.drag()
 				.on("start drag", function() { slidingAlongBlocks(chromSliderScale.invert(d3.event.x)); }));
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.	
