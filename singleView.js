@@ -242,12 +242,12 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 						.attr("stop-color", orangeColorScale.range()[1]);
 	//------------------------------------------------------------------------------------
 
-	//-----------------------------------slidersGroup-------------------------------------
+/*	//-----------------------------------slidersGroup-------------------------------------
 						
 	var slidersGroup = svgContainer_browsingSlider.append("g")
 										.attr("id", "slidersGroup")
 	//------------------------------------------------------------------------------------
-	
+*/	
 	//-----------------------------------blocksDisplay------------------------------------
 	var blocksDisplay = svgContainer_rawBlocks.append("g")
 										.attr("id", "blocksDisplay")
@@ -260,7 +260,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//------------------------------browsingBlocksDimensions------------------------------
 	
-	var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.width/improvedDataMatrix.length)+1, height:10, borderSpace:1}
+	var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length)+1, height:10, borderSpace:1}
 	//+1 so that the rectangles overlap and leave no space giving a filling of transparency
 	//------------------------------------------------------------------------------------
 	
@@ -379,8 +379,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		
 		//Updating the colours of the miniature browser
 		improvedDataMatrix.forEach(d => {
-			bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
-			bgBrowser_coreContext.fillRect(Number(d.index)*svgContainer_browsingSlider.width/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
+			bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 		});
 	};
 	//------------------------------------------------------------------------------------
@@ -429,53 +429,32 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//Canvas creation for background of SVG, code from http://bl.ocks.org/boeric/aa80b0048b7e39dd71c8fbe958d1b1d4
 	
-	//-------------------------------------coreCanvas-------------------------------------
+	//-------------------------------------miniCanvas-------------------------------------
 	
 	//Addition of the first canvas to the foreignObject
-	var bgBrowser_coreCanvas = foreignObject_Browser.append("xhtml:canvas")
+	var bgBrowser_miniCanvas = foreignObject_Browser.append("xhtml:canvas")
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("width", foreignObject_Browser.attr("width"))
-		.attr("height", browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace);
+		.attr("height", (browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace)*3);
 
 	//The context of canvas is needed for drawing
-	var bgBrowser_coreContext = bgBrowser_coreCanvas.node().getContext("2d");
+	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
 	improvedDataMatrix.forEach(d => {
-		bgBrowser_coreContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-		bgBrowser_coreContext.fillRect(Number(d.index)*svgContainer_browsingSlider.width/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
+		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, 10, 10); //fillRect(x, y, width, height)
 	});
-	//------------------------------------------------------------------------------------
-	
-	//-----------------------------------rainbowCanvas------------------------------------
-	
-	var bgBrowser_rainbowCanvas = foreignObject_Browser.append("xhtml:canvas")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", foreignObject_Browser.attr("width"))
-		.attr("height", browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace);
-
-	var bgBrowser_rainbowContext = bgBrowser_rainbowCanvas.node().getContext("2d");
 	
 	improvedDataMatrix.forEach(d => {
-		bgBrowser_rainbowContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_rainbowContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);
-	});	
-	//------------------------------------------------------------------------------------
-
-	//---------------------------------similarityCanvas-----------------------------------
-	
-	var bgBrowser_similarityCanvas = foreignObject_Browser.append("xhtml:canvas")
-		.attr("x", 0)
-		.attr("y", 0)
-		.attr("width", foreignObject_Browser.attr("width"))
-		.attr("height", browsingBlocksDimensions.height);
-
-	var bgBrowser_similarityContext = bgBrowser_similarityCanvas.node().getContext("2d");
+		bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+	});
 	
 	improvedDataMatrix.forEach(d => {
-		bgBrowser_similarityContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
-		bgBrowser_similarityContext.fillRect(0, Number(d.index)*windowHeight*0.95/improvedDataMatrix.length, 10, windowHeight*0.95/improvedDataMatrix.length+1);		
+		bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
+		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 	});
 	//------------------------------------------------------------------------------------
 	
