@@ -733,10 +733,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 
 	//Attributes for structureBackground
 	var structureBackground_Attributes = structureBackground.attr("class", "moveableBlock")
-															.attr("x",0)
-															.attr("y", function(d,i){return i*12;})
-															.attr("width", (nbChromosomes+3)*14)
-															.attr("height", 12)
+															.attr("x", (d,i) => d.index*displayedBlocksDimensions.width)
+															.attr("y", Number(similarBlocks.attr("y")) + displayedBlocksDimensions.height)
+															.attr("width", displayedBlocksDimensions.width)
+															.attr("height", (nbChromosomes+3)*displayedBlocksDimensions.height)
 															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
@@ -747,6 +747,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//------------------------------copyCircles & attributes------------------------------
 	
 	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
+	//Here we could do a forEach loop with every Chr name or ID
 	for (var chr = 0; chr < nbChromosomes; chr++) {
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`)
 													.selectAll("circle")
@@ -755,18 +756,12 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 														.append("circle");
 		
 		var copyCircles_Attributes = copyCircles.attr("class", "moveableCircle")
-												.attr("cx", function(d,i) {return (0.5+chr)*14}) //14 is the stable block width, I should declare blockWidth and Block height variables for further use
-												.attr("cy", function(d,i){return (0.5+i)*12;}) //Depends on the data index, and 12, which is the blocks height
-												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*(5-1)+1)) //Depends on the data value; rmax = 5, rmin = 1
+												.attr("cy", (d,i) => Number(structureBackground.attr("y")) + ((1+3+0.5)+chr)*displayedBlocksDimensions.height) //1+3+0.5 as there is space between the central panChromosome and the pption information for one row of panChromosome, plus 3 rows of free space, plus 0.5 for centering the circles
+												.attr("cx", (d,i) => (0.5*d.index)*displayedBlocksDimensions.width) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
+												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*((displayedBlocksDimensions.width/2-1)-1)+1)) //Depends on the data value; rmax = displayedBlocksDimensions.width/2-1, rmin = 1
 												.style("fill", d3.hcl(0,0,25))
 												.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
 	};
-
 	//------------------------------------------------------------------------------------
-
-
-	
-
-
 
 });
