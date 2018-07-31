@@ -591,13 +591,96 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 											.attr("width", displayedBlocksDimensions.width)
 											.attr("height", displayedBlocksDimensions.height)
 //											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
-											.attr("y", function (d,i) {
-												return genomeNumber*displayedBlocksDimensions.height; //y is incremented for each new genome
-											})
+											.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
 	});
-	//------------------------------------------------------------------------------------	
+	//------------------------------------------------------------------------------------
+	
+	//---------------------------------blocks & attributes--------------------------------
+	
+	//Binding the data to a DOM element, therefore creating one SVG block per data
+	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
+								.selectAll("rect") //First an empty selection of all not yet existing rectangles
+									.data(improvedDataMatrix)//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
+									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
+								
+								//For more about joins, see : https://bost.ocks.org/mike/join/
+
+	//Selecting all previous blocks, and determining their attributes
+	var blocks_Attributes = blocks.attr("class", "moveableBlock")
+//									.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
+									.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //y position is index * block height
+									.attr("width", displayedBlocksDimensions.width)
+									.attr("height", displayedBlocksDimensions.height)
+//									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
+									.attr("y", initialGenomesNames.length*displayedBlocksDimensions.height + 6)
+									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
+									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
+	//------------------------------------------------------------------------------------
+
+	//--------------------------------eventDisplayInfoOn()--------------------------------
+	
+	function eventDisplayInfoOn(d, i) {		//Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
+											//http://bl.ocks.org/phil-pedruco/9032348 was useful too
+
+		//Uses D3 to select element and change its color based on the previously built color scales
+		d3.select(this).style("fill", function(d) {
+			var color = d3.hcl(thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
+			color.h = color.h+10; //Slight change in hue for better noticing
+			color.c = color.c*1.1; //Slight increase in chroma
+			color.l += (100-color.l)*0.5; //Slight increase in luminance without exceeding white
+			return color;
+		});
+		//Here, d is a block object from improvedDataMatrix, i is its index within the array
+		//To access values of a block, we need to take "this" as an argument
+
+		//alert(d + " " + i);
+
+		//Specifies where to put label of text altogether with its properties
+		svgContainer_rawBlocks.append("text")
+					.attr("id", "t" + d.presenceCounter + "-" + d.index)
+					.attr("x", Number(d3.select(this).attr("x")) + Number(d3.select(this).attr("width"))*1.5)
+					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
+					.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
+					.attr("font-family", "sans-serif")
+					.attr("text-anchor", "start") //Can be "start", "middle", or "end"
+					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments
+					.text(function() {
+						return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
+					});
+
+		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
+		var bbox = d3.select("#t" + d.presenceCounter + "-" + d.index).node().getBBox(); //Do not know exactly why but node() is needed
+
+		svgContainer_rawBlocks.insert("rect", "#t" + d.presenceCounter + "-" + d.index)
+		.attr("id", "t" + d.presenceCounter + "-" + d.index + "bg")
+			.attr("x", bbox.x - 2)
+			.attr("y", bbox.y - 2)
+			.attr("width", bbox.width + 4)
+			.attr("height", bbox.height + 4)
+			.style("fill", d3.hcl(83, 4, 96))
+			.style("fill-opacity", "0.8")
+			.style("stroke", d3.hcl(86, 5, 80))
+			.style("stroke-opacity", "0.9");
+	};
+	//------------------------------------------------------------------------------------
+
+	//---------------------------------eventDisplayInfoOff()------------------------------
+	
+	function eventDisplayInfoOff(d, i) {
+		//Uses D3 to select element, change color back to normal by overwriting and not recovery
+		d3.select(this).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);});
+
+		//Selects text by id and then removes it
+		d3.select("#t" + d.presenceCounter + "-" + d.index).remove();  // Remove text location slecting the id thanks to #
+		d3.select("#t" + d.presenceCounter + "-" + d.index + "bg").remove();
+	};
+	//------------------------------------------------------------------------------------
+	
+	
 	
 	//--------------------------structureBackground & attributes--------------------------
 	
@@ -679,86 +762,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 									.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
 	//------------------------------------------------------------------------------------
 	
-	//---------------------------------blocks & attributes--------------------------------
-	
-	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
-								.selectAll("rect") //First an empty selection of all not yet existing rectangles
-									.data(improvedDataMatrix)//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
-									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
-									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
-								
-								//For more about joins, see : https://bost.ocks.org/mike/join/
 
-	//Selecting all previous blocks, and determining their attributes
-	var blocks_Attributes = blocks.attr("class", "moveableBlock")
-									.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
-									.attr("width", 14)
-									.attr("height", 12)
-									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
-									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
-									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
-	//------------------------------------------------------------------------------------
-
-	//--------------------------------eventDisplayInfoOn()--------------------------------
-	
-	function eventDisplayInfoOn(d, i) {		//Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
-											//http://bl.ocks.org/phil-pedruco/9032348 was useful too
-
-		//Uses D3 to select element and change its color based on the previously built color scales
-		d3.select(this).style("fill", function(d) {
-			var color = d3.hcl(thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
-			color.h = color.h+10; //Slight change in hue for better noticing
-			color.c = color.c*1.1; //Slight increase in chroma
-			color.l += (100-color.l)*0.5; //Slight increase in luminance
-			return color;
-		});
-		//Here, d is a block object from improvedDataMatrix, i is its index within the array
-		//To access values of a block, we need to take "this" as an argument
-
-		//alert(d + " " + i);
-
-		//Specifies where to put label of text altogether with its properties
-		svgContainer_rawBlocks.append("text")
-					.attr("id", "t" + d.presenceCounter + "-" + i)
-					.attr("x", Number(d3.select(this).attr("x")) + Number(d3.select(this).attr("width"))*1.5)
-					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
-					.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
-					.attr("font-family", "sans-serif")
-					.attr("text-anchor", "start") //Can be "start", "middle", or "end"
-					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments
-					.text(function() {
-						return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
-					});
-
-		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
-		var bbox = d3.select("#t" + d.presenceCounter + "-" + i).node().getBBox(); //Do not know exactly why but node() is needed
-
-		svgContainer_rawBlocks.insert("rect", "#t" + d.presenceCounter + "-" + i)
-		.attr("id", "t" + d.presenceCounter + "-" + i + "bg")
-			.attr("x", bbox.x - 2)
-			.attr("y", bbox.y - 2)
-			.attr("width", bbox.width + 4)
-			.attr("height", bbox.height + 4)
-			.style("fill", d3.hcl(83, 4, 96))
-			.style("fill-opacity", "0.8")
-			.style("stroke", d3.hcl(86, 5, 80))
-			.style("stroke-opacity", "0.9");
-	};
-	//------------------------------------------------------------------------------------
-
-	//---------------------------------eventDisplayInfoOff()------------------------------
-	
-	function eventDisplayInfoOff(d, i) {
-		//Uses D3 to select element, change color back to normal by overwriting and not recovery
-		d3.select(this).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);});
-
-		//Selects text by id and then removes it
-		d3.select("#t" + d.presenceCounter + "-" + i).remove();  // Remove text location slecting the id thanks to #
-		d3.select("#t" + d.presenceCounter + "-" + i + "bg").remove();
-	};
-	//------------------------------------------------------------------------------------
 
 
 });
