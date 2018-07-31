@@ -587,15 +587,15 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 //											.attr("x", function (d,i) {
 //												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
 //											})
-											.attr("x", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
-											.attr("width", blocks.attr("width"))
-											.attr("height", blocks.attr("height"))
+											.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
+											.attr("width", displayedBlocksDimensions.width)
+											.attr("height", displayedBlocksDimensions.height)
 //											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
 											.attr("y", function (d,i) {
-												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
+												return genomeNumber*displayedBlocksDimensions.height; //y is incremented for each new genome
 											})
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
-											.style("fill-opacity", d => d[`${geno}`]);
+											.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
 	});
 	//------------------------------------------------------------------------------------	
 	
