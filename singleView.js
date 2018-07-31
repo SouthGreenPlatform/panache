@@ -171,30 +171,17 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//------------------------------------------------------------------------------------
 //	console.log(colorsForFunctions);
 //	console.log(functionColorScale("9"),functionColorScale.range(),functionColorScale.domain());
+
+	//----------------------------------coreThreshold-------------------------------------
 	
+	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
+	var coreThreshold = 85/100*initialPptyNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
+	//------------------------------------------------------------------------------------	
 	
 	//Creating the constants for a scalable display
 	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
 	
 	//More about d3 selection : https://bost.ocks.org/mike/selection/
-
-/*	//----------------------------------bgChromCanvas-------------------------------------
-	var bgChromCanvas = document.createElement('canvas');
-
-	bgChromCanvas.id = "chromCanvas";
-	bgChromCanvas.width = windowWidth; //block width, more or less
-	bgChromCanvas.height = windowHeight; //window height
-	
-	document.getElementsByTagName("body")[0].appendChild(bgChromCanvas);
-
-	// get the canvas drawing context
-	const contextChrom = bgChromCanvas.getContext('2d');
-	
-	improvedDataMatrix.forEach(d => {
-	contextChrom.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-	contextChrom.fillRect(Number(d.index)*10, 0, 10, 20);
-	});
-*/	//------------------------------------------------------------------------------------
 
 	//----------------------------svgContainer_coreSlider---------------------------------
 	//Creating the SVG DOM tag
@@ -220,11 +207,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.75); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 
-	//----------------------------------coreThreshold-------------------------------------
-	
-	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
-	var coreThreshold = 85/100*initialPptyNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
-	//------------------------------------------------------------------------------------
+
 
 	//Creating a color gradient for the slider shape
 	//ATTENTION The gradient CANNOT be applied on pure horizontal nor vertical "line" DOM objects
