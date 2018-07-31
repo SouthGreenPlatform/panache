@@ -31,13 +31,13 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	const nbChromosomes = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))].length
 	//------------------------------------------------------------------------------------
 	
-	//---------------------------------initialPptyNames-----------------------------------
+	//-------------------------------initialGenomesNames----------------------------------
 	//ATTENTION This assume that the PA part is at the end of the file !!!
-	initialPptyNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(6,) //This select the element with indexes that range from 6 to the end
+	initialGenomesNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(6,) //This select the element with indexes that range from 6 to the end
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
 	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
 	//------------------------------------------------------------------------------------
-//	console.log(initialPptyNames);
+//	console.log(initialGenomesNames);
 	
 	//---------------------------------functionDiversity----------------------------------
 	
@@ -136,12 +136,12 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	
 	//---------------------------------blueColorScale-------------------------------------
 	
-	var blueColorScale = colorScaleMaker([0, initialPptyNames.length], [d3.hcl(246,0,95), d3.hcl(246,65,70)]);
+	var blueColorScale = colorScaleMaker([0, initialGenomesNames.length], [d3.hcl(246,0,95), d3.hcl(246,65,70)]);
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------------orangeColorScale------------------------------------
 	
-	var orangeColorScale = colorScaleMaker([0, initialPptyNames.length], [d3.hcl(60,0,95), d3.hcl(60,65,70)]);
+	var orangeColorScale = colorScaleMaker([0, initialGenomesNames.length], [d3.hcl(60,0,95), d3.hcl(60,65,70)]);
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------purpleColorScale------------------------------------
@@ -175,7 +175,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//---------------------------------coreThreshold--------------------------------------
 	
 	//Calculating the threshold for the change in color scale in core/dispensable panChromosome, arbitrary for the starting display
-	var coreThreshold = 85/100*initialPptyNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
+	var coreThreshold = 85/100*initialGenomesNames.length; //ATTENTION It is not a percentage but the minimum number of genomes from the pangenome required for a block to be part of the core genome
 	//------------------------------------------------------------------------------------	
 	
 	//---------------------------windowWidth, windowHeight--------------------------------
@@ -232,7 +232,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 						.attr("stop-color", blueColorScale.range()[0]) //Color that should be displayed at that stop
 					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //Duplicates the "stop" object in the DOM and selects the new one
 						.attr("class", "hueSwingingPointLeft") //Class that is used later for dynamic changes
-						.attr("offset", coreThreshold/initialPptyNames.length)
+						.attr("offset", coreThreshold/initialGenomesNames.length)
 						.attr("stop-color", blueColorScale(coreThreshold))
 					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 						.attr("class", "hueSwingingPointRight")
@@ -334,7 +334,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 			.attr("r", 7) //The radius
 			.attr("fill", "#fff") //The circle is filled in white
 			.attr("stroke", "#000")
-			.attr("cx", coreThreshold/initialPptyNames.length*100)
+			.attr("cx", coreThreshold/initialGenomesNames.length*100)
 			.attr("stroke-opacity", 0.3)
 			.attr("stroke-width", "1.25px");
 	//------------------------------------------------------------------------------------
@@ -371,10 +371,10 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	//Function called when dragging the slider's handle, its input "slidePercent" is derived from the pointer position
 	function eventDynamicColorChange(slidePercent) {
 		coreHandle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
-		coreThreshold = slidePercent*initialPptyNames.length; //Updates the value of coreThreshold
+		coreThreshold = slidePercent*initialGenomesNames.length; //Updates the value of coreThreshold
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
-		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
-		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialPptyNames.length).attr("stop-color", orangeColorScale(coreThreshold));
+		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
+		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", orangeColorScale(coreThreshold));
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 		
 		//Updating the colours of the miniature browser
@@ -569,6 +569,36 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	};	
 	//------------------------------------------------------------------------------------
 	
+	//--------------------------------matrixPA & attributes-------------------------------
+	
+	//Creation of the subGroup for the PA blocks
+	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
+	//ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
+	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
+	initialGenomesNames.forEach(function(geno, genomeNumber) {
+		var matrixPA = blocksDisplay.append("g").attr("id", `presence_${geno}`)
+												.selectAll("rect")
+													.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
+													.enter()
+													.append("rect");
+													
+		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
+		var matrixPA_Attributes = matrixPA.attr("class", "moveableBlock")
+//											.attr("x", function (d,i) {
+//												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
+//											})
+											.attr("x", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
+											.attr("width", blocks.attr("width"))
+											.attr("height", blocks.attr("height"))
+//											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
+											.attr("y", function (d,i) {
+												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
+											})
+											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
+											.style("fill-opacity", d => d[`${geno}`]);
+	});
+	//------------------------------------------------------------------------------------	
+	
 	//--------------------------structureBackground & attributes--------------------------
 	
 	//Creation of the subgroup for the StructureBackground
@@ -730,30 +760,5 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 	};
 	//------------------------------------------------------------------------------------
 
-	//--------------------------------matrixPA & attributes-------------------------------	
-	
-	//Creation of the subGroup for the PA blocks
-	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
-	//ATTENTION The for ... in statement does not work well when oreder is important ! Prefer .forEach method instead when working on arrays
-	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
-	initialPptyNames.forEach(function(geno, genomeNumber) {
-		var matrixPA = blocksDisplay.append("g").attr("id", `presence_${geno}`)
-												.selectAll("rect")
-													.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
-													.enter()
-													.append("rect");
-													
-		//ATTENTION There should be a simpler way to encode now, like linking PA directly to a block from PanK
-		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
-		var matrixPA_Attributes = matrixPA.attr("class", "moveableBlock")
-											.attr("x", function (d,i) {
-												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
-											})
-											.attr("width", blocks.attr("width"))
-											.attr("height", blocks.attr("height"))
-											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
-											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
-											.style("fill-opacity", d => d[`${geno}`]);
-	});
-	//------------------------------------------------------------------------------------
+
 });
