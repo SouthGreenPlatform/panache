@@ -621,30 +621,39 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //Th
 		//Specifies where to put label of text altogether with its properties
 		svgContainer_rawBlocks.append("text")
 					.attr("id", "t" + d.presenceCounter + "-" + d.index)
-					.attr("x", Number(d3.select(this).attr("x")) + Number(d3.select(this).attr("width"))*1.5)
-					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
-					.attr("y", Number(d3.select(this).attr("y")) + Number(d3.select(this).attr("height"))/2)
 					.attr("font-family", "sans-serif")
+					.attr("x", svgContainer_rawBlocks.attr("width")+1) //At first the text is not displayed in order to get its dimensions first
+					.attr("y", Number(d3.select(this).attr("y")) + displayedBlocksDimensions.height*2)
+					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
+					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments other than "middle"
 					.attr("text-anchor", "start") //Can be "start", "middle", or "end"
-					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments
 					.text(function() {
 						return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
 					});
-
+		
 		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
 		var bbox = d3.select("#t" + d.presenceCounter + "-" + d.index).node().getBBox(); //Do not know exactly why but node() is needed
+		
+		d3.select("#t" + d.presenceCounter + "-" + d.index).attr("x", function(d) {
+																	if (d3.mouse(this)[0] < bbox.width/2 + 2) { //d3.event.x works only for drag events, not for cursor coordinates
+																		return 2; //Leaving space for the background rectangle
+																	} else if (d3.mouse(this)[0] > svgContainer_rawBlocks.attr("width") - (bbox.width/2+2)){
+																		return svgContainer_rawBlocks.attr("width") - (bbox.width+2);
+																	} else { return d3.mouse(this)[0] - bbox.width/2 }
+																});
 
 		svgContainer_rawBlocks.insert("rect", "#t" + d.presenceCounter + "-" + d.index)
-		.attr("id", "t" + d.presenceCounter + "-" + d.index + "bg")
-			.attr("x", bbox.x - 2)
-			.attr("y", bbox.y - 2)
-			.attr("width", bbox.width + 4)
-			.attr("height", bbox.height + 4)
-			.style("fill", d3.hcl(83, 4, 96))
-			.style("fill-opacity", "0.8")
-			.style("stroke", d3.hcl(86, 5, 80))
-			.style("stroke-opacity", "0.9");
+			.attr("id", "t" + d.presenceCounter + "-" + d.index + "bg")
+				.attr("x", d3.select("#t" + d.presenceCounter + "-" + d.index).attr("x") - 2) //as bbox was created before the text was correctly placed, we cannot use bbox.x
+				.attr("y", bbox.y - 2)
+				.attr("width", bbox.width + 4)
+				.attr("height", bbox.height + 4)
+				.style("fill", d3.hcl(83, 4, 96))
+				.style("fill-opacity", "0.9")
+				.style("stroke", d3.hcl(86, 5, 80))
+				.style("stroke-opacity", "0.9");
 	};
+	//How to trim elements that exceeds a certain length : https://blog.mastykarz.nl/measuring-the-length-of-a-string-in-pixels-using-javascript/
 	//------------------------------------------------------------------------------------
 
 	//---------------------------------eventDisplayInfoOff()------------------------------
