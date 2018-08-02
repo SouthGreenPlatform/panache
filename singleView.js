@@ -1,7 +1,7 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
-//d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-d3.dsv("\t","mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
+//d3.dsv("\t","mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
@@ -305,6 +305,12 @@ d3.dsv("\t","mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //
 			.attr("d", coreSliderArea) //Calls the sliderArea function on the input data given to the path
 			.attr("stroke", "#000")
 			.attr("stroke-opacity", 0.3)
+	//------------------------------------------------------------------------------------
+	
+	//----------Some color circles at the extremities to keep track of the color----------
+	
+	coreSlider.append("circle").attr("r",4).attr("cx",(coreSliderScale.range()[0]-4)-4*2.5).attr("cy",0).style("fill",blueColorScale.range()[1]);
+	coreSlider.append("circle").attr("r",4).attr("cx",(coreSliderScale.range()[1]+4)+4*2.5).attr("cy",0).style("fill",orangeColorScale.range()[1]);
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------------coreOverlay-------------------------------------
