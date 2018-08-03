@@ -203,6 +203,18 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 
+	//---------------------------svgContainer_presenceAbsenceMatrix-------------------------------
+	//Creating the SVG DOM tag
+	var svgContainer_presenceAbsenceMatrix = d3.select("body").append("svg").attr("id", "svgContainer_presenceAbsenceMatrix")
+										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------
+
+	//---------------------------svgContainer_legends-------------------------------
+	//Creating the SVG DOM tag
+	var svgContainer_legends = d3.select("body").append("svg").attr("id", "svgContainer_legends")
+										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+	//------------------------------------------------------------------------------------
+
 	//-----------------------------svgContainer_rawBlocks---------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_rawBlocks = d3.select("body").append("svg").attr("id", "svgContainer_rawBlocks")
