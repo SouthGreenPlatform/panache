@@ -2,7 +2,7 @@
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
-	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
+//	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 	//I have to think about how to work with this JSON format
 
 	//The real data I would like to work with, fetched from the csv file
@@ -389,7 +389,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	function eventDynamicColorChange(slidePercent) {
 		coreHandle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
 		coreThreshold = slidePercent*initialGenomesNames.length; //Updates the value of coreThreshold
-		console.log(coreThreshold);
+//		console.log(coreThreshold);
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", orangeColorScale(coreThreshold));
