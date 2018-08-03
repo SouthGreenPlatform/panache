@@ -152,8 +152,6 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
 	
-	//ATTENTION THE RAINBOW STILL WORKS BUT AS IT DEPENDS ON THE LENGTH IT PUTS THE FIRST BLOCKS AS THE SAME COLOR, WITH THE FINAL ONE BEING AT THE OPPOSITE ON THE RANGE OF VALUE
-	
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
@@ -307,7 +305,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 			.attr("stroke-opacity", 0.3)
 	//------------------------------------------------------------------------------------
 	
-	//----------Some color circles at the extremities to keep track of the color----------
+	//---------Some colour circles at the extremities to keep track of the colour---------
 	
 	coreSlider.append("circle").attr("r",4).attr("cx",(coreSliderScale.range()[0]-4)-4*2.5).attr("cy",0).style("fill",blueColorScale.range()[1]);
 	coreSlider.append("circle").attr("r",4).attr("cx",(coreSliderScale.range()[1]+4)+4*2.5).attr("cy",0).style("fill",orangeColorScale.range()[1]);
@@ -379,6 +377,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	function eventDynamicColorChange(slidePercent) {
 		coreHandle.attr("cx", coreSliderScale(slidePercent)); //Position change for the handle
 		coreThreshold = slidePercent*initialGenomesNames.length; //Updates the value of coreThreshold
+		console.log(coreThreshold);
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", orangeColorScale(coreThreshold));
@@ -386,7 +385,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 		
 		//Updating the colours of the miniature browser
 		improvedDataMatrix.forEach(d => {
-			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]);
+			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]));
 			bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 		});
 	};
@@ -420,13 +419,13 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//Creation of a chromosome slider !
+	//Creation of a miniature chromosome slider !
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	//----------------------------------chromSliderScale----------------------------------
+	//-------------------------------miniatureSliderScale---------------------------------
 	
 	//Creation of a scale that links value to a position in pixel
-	var chromSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 								.domain([0, displayedBlocksDimensions.width*improvedDataMatrix.length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and not empty background when the slider is at the maximum position
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
@@ -449,7 +448,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
 	improvedDataMatrix.forEach(d => {
-		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
+		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
 		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
 //		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, 10, 10); //fillRect(x, y, width, height)
 	});
@@ -478,14 +477,14 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//Addition of the interactive zone
 	chromSlider.append("rect")
 		.attr("class", "track-overlay") //Interactivity zone
-//		.attr("width", chromSliderScale.range()[1])
+//		.attr("width", miniatureSliderScale.range()[1])
 		.attr("width", svgContainer_browsingSlider.attr("width")) //Clamping should work, not allowing to exceed the position even if the draging zone is wider
 		.attr("height", 40)
 		.attr("y",0-chromSlider.select(".track-overlay").attr("height")/2) //The "." asks to select the first matching element with the written class. Doing this we can center ther overlay
 		.style("fill-opacity",0)
 		.attr("cursor", "ew-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
 			.call(d3.drag()
-				.on("start drag", function() { slidingAlongBlocks(chromSliderScale.invert(d3.event.x)); }));
+				.on("start drag", function() { slidingAlongBlocks(miniatureSliderScale.invert(d3.event.x)); }));
 				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.	
 	//------------------------------------------------------------------------------------
 	
@@ -507,7 +506,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//------------------------------slidingAlongBlocks()----------------------------------
 	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
 	function slidingAlongBlocks(xBlockPosition) {
-		miniWindowHandle.attr("x", Number(chromSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
+		miniWindowHandle.attr("x", Number(miniatureSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
 		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
 		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
 	};
