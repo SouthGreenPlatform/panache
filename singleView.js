@@ -566,7 +566,22 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		} return colorScaleLess(d);
 	};	
 	//------------------------------------------------------------------------------------
+
+	//-----------------------------------legend_matrixPA----------------------------------
 	
+	var legend_matrixPA = svgContainer_legends.append("g").attr("id","legend_matrixPA_title")
+					.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
+						.attr("y","1em")
+						.attr("x",svgContainer_legends.attr("width")/2).attr("text-anchor", "middle")
+						.text("1 column is associatied to 1 panBlock")
+					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+						.text("and genomes are clustered by ...")
+						.attr("y","2em");
+	
+	svgContainer_legends.append("g").attr("id","legend_matrixPA_tree")
+						.append("path").attr("d","M 0 25.5 H 15 M 15 37 H 43 M 15 14 H 25 M 25 21 H 43 M 25 7 H 43 M 15 14 V 37 M 25 7 V 21").attr("stroke", "black"); //ATTENTION A H or V instruction does not ask for a delta but for a x or y absolute coordinate
+	//------------------------------------------------------------------------------------
+
 	//----------------------------matrixPA, attributes & labels---------------------------
 	
 	//Creation of the subGroup for the PA blocks
