@@ -182,6 +182,11 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//Creating the constants for a scalable display
 	const windowWidth = window.innerWidth, windowHeight = window.innerHeight;
 	//------------------------------------------------------------------------------------
+
+	//-----------------------------displayedBlocksDimensions------------------------------
+	
+	var displayedBlocksDimensions = {width:12, height:14}
+	//------------------------------------------------------------------------------------
 	
 	//More about d3 selection : https://bost.ocks.org/mike/selection/
 
@@ -197,28 +202,28 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.20); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
-	//---------------------------svgContainer_labelsAndTree-------------------------------
+	//----------------------------svgContainer_genomesTree--------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer_labelsAndTree = d3.select("body").append("svg").attr("id", "svgContainer_labelsAndTree")
-										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+	var svgContainer_genomesTree = d3.select("body").append("svg").attr("id", "svgContainer_genomesTree")
+										.attr("width", windowWidth*0.20).attr("height", displayedBlocksDimensions.height*initialGenomesNames.length); //For now the height will depend on the number of input genomes, it will have to take a maximum height at some point
 	//------------------------------------------------------------------------------------
 
 	//---------------------------svgContainer_presenceAbsenceMatrix-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_presenceAbsenceMatrix = d3.select("body").append("svg").attr("id", "svgContainer_presenceAbsenceMatrix")
-										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.75).attr("height", displayedBlocksDimensions.height*initialGenomesNames.length); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 
 	//---------------------------svgContainer_legends-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_legends = d3.select("body").append("svg").attr("id", "svgContainer_legends")
-										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.20).attr("height", windowHeight*(1-0.2-0.05)-svgContainer_genomesTree.attr("height")); //Total height minus the heights of previous SVGs and with -0.05 
 	//------------------------------------------------------------------------------------
 
 	//-----------------------------svgContainer_rawBlocks---------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_rawBlocks = d3.select("body").append("svg").attr("id", "svgContainer_rawBlocks")
-										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.75); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.75).attr("height", windowHeight*(1-0.2-0.05)-svgContainer_genomesTree.attr("height"));
 	//------------------------------------------------------------------------------------
 	
 	
@@ -262,11 +267,6 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//-----------------------------------blocksDisplay------------------------------------
 	var blocksDisplay = svgContainer_rawBlocks.append("g")
 										.attr("id", "blocksDisplay")
-	//------------------------------------------------------------------------------------
-	
-	//-----------------------------displayedBlocksDimensions------------------------------
-	
-	var displayedBlocksDimensions = {width:12, height:14}
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------browsingBlocksDimensions------------------------------
@@ -519,7 +519,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
 	function slidingAlongBlocks(xBlockPosition) {
 		miniWindowHandle.attr("x", Number(miniatureSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
-		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
+//		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
+		d3.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
 		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
 	};
 	//------------------------------------------------------------------------------------
@@ -573,11 +574,11 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	//ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
-		var matrixPA = blocksDisplay.append("g").attr("id", `presence_${geno}`)
-												.selectAll("rect")
-													.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
-													.enter()
-													.append("rect");
+		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`)
+															.selectAll("rect")
+																.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
+																.enter()
+																.append("rect");
 													
 		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 		var matrixPA_Attributes = matrixPA.attr("class", "moveableBlock")
@@ -592,9 +593,9 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
 		
-		var genomeLabels = svgContainer_labelsAndTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
+		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
 					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
-					.attr("x",svgContainer_labelsAndTree.attr("width")-3).attr("text-anchor", "end")
+					.attr("x",svgContainer_genomesTree.attr("width")-3).attr("text-anchor", "end")
 					.text(function() {
 						return `${geno}`;
 					});
@@ -620,7 +621,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 									.attr("width", displayedBlocksDimensions.width)
 									.attr("height", displayedBlocksDimensions.height)
 //									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
-									.attr("y", initialGenomesNames.length*displayedBlocksDimensions.height + 6)
+									.attr("y", 0)
 									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
 									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
