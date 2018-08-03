@@ -187,25 +187,25 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 
 	//----------------------------svgContainer_coreSlider---------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer_coreSlider = d3.select("body").append("svg")
+	var svgContainer_coreSlider = d3.select("body").append("svg").attr("id", "svgContainer_coreSlider")
 										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.20); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------svgContainer_browsingSlider-------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer_browsingSlider = d3.select("body").append("svg")
+	var svgContainer_browsingSlider = d3.select("body").append("svg").attr("id", "svgContainer_browsingSlider")
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.20); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------svgContainer_labelsAndTree-------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer_labelsAndTree = d3.select("body").append("svg")
+	var svgContainer_labelsAndTree = d3.select("body").append("svg").attr("id", "svgContainer_labelsAndTree")
 										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.75); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 
 	//-----------------------------svgContainer_rawBlocks---------------------------------
 	//Creating the SVG DOM tag
-	var svgContainer_rawBlocks = d3.select("body").append("svg")
+	var svgContainer_rawBlocks = d3.select("body").append("svg").attr("id", "svgContainer_rawBlocks")
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.75); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
@@ -554,7 +554,7 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 	};	
 	//------------------------------------------------------------------------------------
 	
-	//--------------------------------matrixPA & attributes-------------------------------
+	//----------------------------matrixPA, attributes & labels---------------------------
 	
 	//Creation of the subGroup for the PA blocks
 	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
@@ -580,8 +580,8 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
 		
-		var genomeLabels = svgContainer_labelsAndTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif")
-					.attr("y", (d,i) => (genomeNumber+1)*displayedBlocksDimensions.height) //As y is the baseline for the text, we have to add the block height once more
+		var genomeLabels = svgContainer_labelsAndTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
+					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
 					.attr("x",svgContainer_labelsAndTree.attr("width")-3).attr("text-anchor", "end")
 					.text(function() {
 						return `${geno}`;
