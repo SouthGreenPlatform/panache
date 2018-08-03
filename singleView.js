@@ -579,7 +579,15 @@ d3.dsv("\t","miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 											.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
 											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 											.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
+		
+		var genomeLabels = svgContainer_labelsAndTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif")
+					.attr("y", (d,i) => (genomeNumber+1)*displayedBlocksDimensions.height) //As y is the baseline for the text, we have to add the block height once more
+					.attr("x",svgContainer_labelsAndTree.attr("width")-3).attr("text-anchor", "end")
+					.text(function() {
+						return `${geno}`;
+					});
 	});
+
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------blocks & attributes--------------------------------
