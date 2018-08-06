@@ -3,10 +3,7 @@
 d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
-	//I have to think about how to work with this JSON format
 
-	//The real data I would like to work with, fetched from the csv file
-	//ATTENTION I have to check/change the numbers for the lines index, the header names...
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
 	//console.log(realPanMatrix[0][1]); Does not work
 	//console.log(realPanMatrix.Cluster); //undefined
@@ -17,42 +14,24 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9 This uses buttons it can be nice
 	
-	//Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
+	//ATTENTION : As d3 can read object property there is no need to extract columns ! The comment is still here as it can be a useful reminder. Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
 	
 	
 	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	//https://www.dashingd3js.com/using-json-to-simplify-code
-	//https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects LOOKING FOR THE MAX WITHIN PROPERTY
 	//We could look for existing ways of updating data in the DOM
 	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
+	//https://stackoverflow.com/questions/4020796/finding-the-max-value-of-an-attribute-in-an-array-of-objects LOOKING FOR THE MAX WITHIN PROPERTY
+
 	//-----------------------------------chromosomeNames.length------------------------------------
 	
 //	const chromosomeNames.length = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
 	const chromosomeNames = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))]
 	//------------------------------------------------------------------------------------
 	
-	//-----------------------------------------------------------------------
-	
-/*	[...new Set(realPanMatrix.map( d => d["#Chromosome"]))].forEach(function(chr) {
-		var `subArrayChr_${chr}` = realPanMatrix.map(function(d) {
-			if (d["#Chromosome"] === `${chr}`)
-		});
-		
-	});
-*/	
-	
-/*	const chromosomeNames = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))].map(function(d) {
-		let myObject = {};
-		myObject.chromName = d;
-		return myObject;
-	});
-	console.log(chromosomesInfo);
-	console.log(Math.max([3,4,8,'undefined',7,'undefined']));
-*/	//------------------------------------------------------------------------------------
-	
 	//-------------------------------initialGenomesNames----------------------------------
-	//ATTENTION This assume that the PA part is at the end of the file !!!
+	//ATTENTION This assume that the PA part is at the end of the file and that all columns exist!!!
 	initialGenomesNames = Object.getOwnPropertyNames(realPanMatrix[0]).slice(6,) //This select the element with indexes that range from 6 to the end
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
 	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
@@ -114,6 +93,25 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
 
+	
+	//-----------------------------dataGroupedPerChromosome-------------------------------
+	
+	var dataGroupedPerChromosome = chromosomeNames.map(function(chr) {
+		let myObject = {};
+		myObject.chromName = chr;
+		myObject.data = improvedDataMatrix.filter(data => data.Chromosome === chr);
+		myObject.data.map(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
+		return myObject;
+	});
+	//------------------------------------------------------------------------------------
+	console.log(dataGroupedPerChromosome);
+	
+	//--------------------------------currentChromInView----------------------------------
+	
+	var currentChromInView = dataGroupedPerChromosome[0].chromName
+	//------------------------------------------------------------------------------------
+	console.log(currentChromInView);
+	
 	
 	//--------------------------------domainPivotsMaker()---------------------------------
 	
