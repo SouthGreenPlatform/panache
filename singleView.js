@@ -539,6 +539,24 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
 	};
 	//------------------------------------------------------------------------------------
+
+	//--------------------------------miniatureTicksScale---------------------------------
+	
+	//As miniatureSliderScale is cut at its tail for display reasons, it cannot be used as the scale for the ticks that will appear with the miniature
+	var miniatureTicksScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+								.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))])
+								.range([0, svgContainer_browsingSlider.attr("width")]) //Ranges from and to the miniature's extreme length values/positions as an output
+								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded, not sure if it is useful for a ticks axis
+	
+	svgContainer_browsingSlider.append("g") //Code adapted from https://bl.ocks.org/mbostock/9764126
+								.style("font", "10px sans-serif")
+								.attr("transform", "translate(" + 0 + "," + miniWindowHandle.attr("height")*1.7 + ")") //Along with the rest of this svgContainer, this will have to be fixed with absolute px values
+								//.attr("font-family", "sans-serif").attr("font-size", "10px")
+								//.attr("class", "axis")
+								.call(d3.axisBottom(miniatureTicksScale)
+									.ticks(20) //More about ticks and axes here https://github.com/d3/d3-axis
+									.tickFormat(d3.format("~s"))); //More about format of numbers with D3 https://github.com/d3/d3-format
+	//------------------------------------------------------------------------------------
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
