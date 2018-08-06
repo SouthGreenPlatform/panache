@@ -97,12 +97,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//-----------------------------dataGroupedPerChromosome-------------------------------
 	
 	var dataGroupedPerChromosome = {}
-	chromosomeNames.forEach(function(chr) {
-//		let myObject = {};
-		//myObject.chromName = chr;
+	chromosomeNames.forEach(function(chr) { //And not map as we do not want an array as output but an object
 		dataGroupedPerChromosome[`${chr}`] = improvedDataMatrix.filter(data => data.Chromosome === chr); //Filter depending on the chr name https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/filter
-//		myObject[`${chr}`].forEach(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
-//		return myObject;
+		dataGroupedPerChromosome[`${chr}`].forEach(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
 	});
 	//------------------------------------------------------------------------------------
 	console.log(dataGroupedPerChromosome);
