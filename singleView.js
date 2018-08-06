@@ -96,12 +96,13 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//-----------------------------dataGroupedPerChromosome-------------------------------
 	
-	var dataGroupedPerChromosome = chromosomeNames.map(function(chr) {
-		let myObject = {};
+	var dataGroupedPerChromosome = {}
+	chromosomeNames.forEach(function(chr) {
+//		let myObject = {};
 		//myObject.chromName = chr;
-		myObject[`${chr}`] = improvedDataMatrix.filter(data => data.Chromosome === chr);
-		myObject[`${chr}`].map(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
-		return myObject;
+		dataGroupedPerChromosome[`${chr}`] = improvedDataMatrix.filter(data => data.Chromosome === chr); //Filter depending on the chr name https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/filter
+//		myObject[`${chr}`].forEach(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
+//		return myObject;
 	});
 	//------------------------------------------------------------------------------------
 	console.log(dataGroupedPerChromosome);
@@ -111,7 +112,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	var currentChromInView = Object.getOwnPropertyNames(dataGroupedPerChromosome)[0]
 	//------------------------------------------------------------------------------------
 	console.log(currentChromInView);
-	//dataGroupedPerChromosome[`${currentChromInView}`]
+	console.log(dataGroupedPerChromosome[`${currentChromInView}`]);
+//	dataGroupedPerChromosome[`${currentChromInView}`].map(d => console.log(d));
 	
 	//--------------------------------domainPivotsMaker()---------------------------------
 	
@@ -155,6 +157,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//--------------------------------purpleColorScale------------------------------------
 	
+	//var purpleColorScale = colorScaleMaker([1,Math.max(...improvedDataMatrix.map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	var purpleColorScale = colorScaleMaker([1,Math.max(...improvedDataMatrix.map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	//------------------------------------------------------------------------------------
 	
