@@ -405,8 +405,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		
 		//Updating the colours of the miniature browser
 		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]));
-			bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
+//			bgBrowser_miniContext.fillRect(Number(d.index) * svgContainer_browsingSlider.attr("width") / dataGroupedPerChromosome[`${currentChromInView}`].length, 0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 10); //fillRect(x, y, width, height)
 		});
 	};
 	//------------------------------------------------------------------------------------
@@ -435,7 +436,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	var browsingHandleDimensions = {strokeWidth:3};
 	browsingHandleDimensions.height = Number(foreignObject_Browser.attr("height")) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
-	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
+//	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
+	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop)))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,8 +448,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Creation of a scale that links value to a position in pixel
 	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and no empty background when the slider is at the maximum position
-//								.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))])
+//								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and no empty background when the slider is at the maximum position
+								.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))])
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
 								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
@@ -470,18 +472,20 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, 10, 10); //fillRect(x, y, width, height)
+//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 10); //fillRect(x, y, width, height)
 	});
 	
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
 	});
 	
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
-		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
 	});
 	//------------------------------------------------------------------------------------
 	
