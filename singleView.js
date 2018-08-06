@@ -63,7 +63,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		//map is really useful, see : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
 		//return Object.values(rest).forEach(function(a) {a = Number(a);}); Does not work !
 		
-		newObject = Object.assign({"index": i, "presenceCounter": panChrBlockCount, "Chromosome": Chromosome}, d);
+		newObject = Object.assign({"index": FeatureStart, "presenceCounter": panChrBlockCount, "Chromosome": Chromosome}, d);
 		
 		//Encoding the proportion of duplicates in each chromosome
 		
@@ -446,7 +446,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Creation of a scale that links value to a position in pixel
 	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and not empty background when the slider is at the maximum position
+								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and no empty background when the slider is at the maximum position
+//								.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))])
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
 								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
