@@ -1,7 +1,7 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-//d3.dsv("\t","mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -424,18 +424,19 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//https://gist.github.com/mbostock/1424037
 	var foreignObject_Browser = svgContainer_browsingSlider.append("foreignObject")
 			.attr("width", svgContainer_browsingSlider.attr("width"))
-			.attr("height", browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))
+			.attr("height", browsingBlocksDimensions.height*6 + browsingBlocksDimensions.borderSpace*(6-1))
 			.attr("x", 0)
 //			.attr("y", 0 - foreignObject_Browser.attr("height")/2) //It has to be centered depending on the canvas and miniature count
-			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
-			.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
+//			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
+			.attr("y", 0) //It has to be centered depending on the canvas and miniature count
+			//.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
 			.attr("class","UFO");
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------browsingHandleDimensions------------------------------
 	
 	var browsingHandleDimensions = {strokeWidth:3};
-	browsingHandleDimensions.height = Number(foreignObject_Browser.attr("height")) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
+	browsingHandleDimensions.height = browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
 //	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
 	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop)))); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
 	//------------------------------------------------------------------------------------
@@ -465,27 +466,36 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		.attr("x", 0)
 		.attr("y", 0)
 		.attr("width", foreignObject_Browser.attr("width"))
-		.attr("height", (browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace)*3);
+		.attr("height", (browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace)*6);
 
 	//The context of canvas is needed for drawing
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
+		//Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gab within the miniature)
+		bgBrowser_miniContext.fillStyle = "#FFF";
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+		//Colouring the function blocks
+		bgBrowser_miniContext.fillStyle = functionColorScale(Number(d.Function));
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 2*browsingBlocksDimensions.height - (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+	});
+	
+	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
 //		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 10); //fillRect(x, y, width, height)
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
 	});
 	
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
 //		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
 	});
 	
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
 //		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
+		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
 	});
 	//------------------------------------------------------------------------------------
 	
