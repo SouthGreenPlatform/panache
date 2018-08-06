@@ -26,11 +26,30 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//We could look for existing ways of updating data in the DOM
 	//TO SIMPLIFY EXTRACTION OF DATA SEE THIS ABSOLUTELY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
-	//-----------------------------------nbChromosomes------------------------------------
+	//-----------------------------------chromosomeNames.length------------------------------------
 	
-//	const nbChromosomes = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
-	const nbChromosomes = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))].length
+//	const chromosomeNames.length = Math.max(...realPanMatrix.map(obj => Number(obj.ID_Position.split(":")[0])))+1;
+	const chromosomeNames = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))]
 	//------------------------------------------------------------------------------------
+	
+	//-----------------------------------------------------------------------
+	
+/*	[...new Set(realPanMatrix.map( d => d["#Chromosome"]))].forEach(function(chr) {
+		var `subArrayChr_${chr}` = realPanMatrix.map(function(d) {
+			if (d["#Chromosome"] === `${chr}`)
+		});
+		
+	});
+*/	
+	
+/*	const chromosomeNames = [...new Set(realPanMatrix.map( d => d["#Chromosome"]))].map(function(d) {
+		let myObject = {};
+		myObject.chromName = d;
+		return myObject;
+	});
+	console.log(chromosomesInfo);
+	console.log(Math.max([3,4,8,'undefined',7,'undefined']));
+*/	//------------------------------------------------------------------------------------
 	
 	//-------------------------------initialGenomesNames----------------------------------
 	//ATTENTION This assume that the PA part is at the end of the file !!!
@@ -72,7 +91,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		concernedChromosomes = [];
 		d.SimilarBlocks.split(";").forEach(copy => concernedChromosomes.push(copy.split(":")[0])); //Extracting the first piece of ID for each copy. Can be a number or "."
 		countAsProperty = {};
-		for (var i = 0; i < nbChromosomes; i++) { //Sets the base value to 0 for the properties "0", "1", "2"... etc
+		for (var i = 0; i < chromosomeNames.length; i++) { //Sets the base value to 0 for the properties "0", "1", "2"... etc
 			countAsProperty[String(i)] = 0
 		};
 //		concernedChromosomes.forEach(chrom => if (countAsProperty[chrom] != undefined) countAsProperty[chrom] += 1;); //It does not accept the if statement in this one line statement
@@ -82,7 +101,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 			};
 		});
 		maxCount = Math.max(...Object.values(countAsProperty)); //The ... is mandatory to tell that we work with an array
-		for (var i = 0; i < nbChromosomes; i++) {
+		for (var i = 0; i < chromosomeNames.length; i++) {
 			newObject[`copyPptionIn_Chr${i}`] = (maxCount > 0 ? countAsProperty[`${i}`]/maxCount : 0); //Encode the pption as ppty instead of the raw count, not sure if this is better
 		}; //For variables within string, see Template Literals : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 		
@@ -807,7 +826,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 															.attr("x", (d,i) => d.index*displayedBlocksDimensions.width)
 															.attr("y", Number(similarBlocks.attr("y")) + displayedBlocksDimensions.height)
 															.attr("width", displayedBlocksDimensions.width)
-															.attr("height", (nbChromosomes+3)*displayedBlocksDimensions.height)
+															.attr("height", (chromosomeNames.length+3)*displayedBlocksDimensions.height)
 															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
@@ -817,9 +836,12 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//------------------------------copyCircles & attributes------------------------------
 	
+	
+	//ATTENTION Will have to be change using the array of chromosomes info
+	
 	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
 	//Here we could do a forEach loop with every Chr name or ID
-	for (var chr = 0; chr < nbChromosomes; chr++) {
+	for (var chr = 0; chr < chromosomeNames.length; chr++) {
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`)
 													.selectAll("circle")
 														.data(improvedDataMatrix)
