@@ -368,7 +368,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Creation of the tick label that will give coreTreshold percent value in real time
 	coreSlider.insert("g", ".track-overlay") //Insertion of a subgroup before "track-overlay"
-			.attr("class", "tick") //Giving the class "ticks", for styling reasons
+			.attr("class", "tick") //Giving the class "ticks", for styling and calling reasons
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
 			.attr("transform", "translate(0 18)") //One more translation in order to have it right under the rest of the slider
@@ -437,7 +437,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	var browsingHandleDimensions = {strokeWidth:3};
 	browsingHandleDimensions.height = Number(foreignObject_Browser.attr("height")) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
 //	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
-	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop)))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
+	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop)))); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,7 +449,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Creation of a scale that links value to a position in pixel
 	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and no empty background when the slider is at the maximum position
-								.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))])
+								.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)) - svgContainer_rawBlocks.attr("width")])
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
 								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
@@ -533,8 +533,10 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	function slidingAlongBlocks(xBlockPosition) {
 		miniWindowHandle.attr("x", Number(miniatureSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
 //		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
-		d3.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
-		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
+//		d3.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
+		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) - xBlockPosition);
+//		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
+		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
 	};
 	//------------------------------------------------------------------------------------
 	
@@ -654,8 +656,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 //											.attr("x", function (d,i) {
 //												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
 //											})
-											.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
-											.attr("width", displayedBlocksDimensions.width)
+											.attr("x", (d,i) => Number(d.index)) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
+											.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 											.attr("height", displayedBlocksDimensions.height)
 //											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
 											.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
@@ -686,8 +688,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Selecting all previous blocks, and determining their attributes
 	var blocks_Attributes = blocks.attr("class", "moveableBlock")
 //									.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
-									.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //y position is index * block height
-									.attr("width", displayedBlocksDimensions.width)
+									.attr("x", (d,i) => Number(d.index)) //y position is index * block height
+									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 									.attr("height", displayedBlocksDimensions.height)
 //									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
 									.attr("y", 0)
@@ -776,8 +778,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Selecting all previous blocks, and determining their attributes
 	var rainbowBlocks_Attributes = rainbowBlocks.attr("class", "moveableBlock")
 //									.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
-									.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //x position is index * block width
-									.attr("width", displayedBlocksDimensions.width)
+									.attr("x", (d,i) => Number(d.index)) //x position is index * block width
+									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 									.attr("height", displayedBlocksDimensions.height)
 //									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
 									.attr("y", Number(blocks.attr("y")) + displayedBlocksDimensions.height + 3)
@@ -797,8 +799,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Selecting all previous blocks, and determining their attributes
 	var similarBlocks_Attributes = similarBlocks.attr("class", "moveableBlock")
 //									.attr("x", Number(structureBackground.attr("width")))
-									.attr("x", (d,i) => d.index*displayedBlocksDimensions.width) //x position is index * block width
-									.attr("width", displayedBlocksDimensions.width)
+									.attr("x", (d,i) => Number(d.index)) //x position is index * block width
+									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 									.attr("height", displayedBlocksDimensions.height)
 //									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
 									.attr("y", Number(rainbowBlocks.attr("y")) + displayedBlocksDimensions.height + 3)
@@ -817,9 +819,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//Attributes for structureBackground
 	var structureBackground_Attributes = structureBackground.attr("class", "moveableBlock")
-															.attr("x", (d,i) => d.index*displayedBlocksDimensions.width)
+															.attr("x", (d,i) => Number(d.index))
 															.attr("y", Number(similarBlocks.attr("y")) + displayedBlocksDimensions.height)
-															.attr("width", displayedBlocksDimensions.width)
+															.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 															.attr("height", (chromosomeNames.length+3)*displayedBlocksDimensions.height)
 															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
 																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
@@ -844,7 +846,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		
 		var copyCircles_Attributes = copyCircles.attr("class", "moveableCircle")
 												.attr("cy", (d,i) => Number(structureBackground.attr("y")) + ((3+0.5)+chr)*displayedBlocksDimensions.height) //3+0.5 as there is space between the central panChromosome and the pption information : 3 rows of free space, plus 0.5 for centering the circles
-												.attr("cx", (d,i) => (d.index+0.5)*displayedBlocksDimensions.width) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
+												.attr("cx", d => ((Number(d.FeatureStop)-Number(d.FeatureStart))/2) + Number(d.index)) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
 												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*((displayedBlocksDimensions.width/2-1)-1)+1)) //Depends on the data value; rmax = displayedBlocksDimensions.width/2-1, rmin = 1
 												.style("fill", d3.hcl(0,0,25))
 												.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
