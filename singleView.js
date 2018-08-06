@@ -406,8 +406,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		//Updating the colours of the miniature browser
 		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-//			bgBrowser_miniContext.fillRect(Number(d.index) * svgContainer_browsingSlider.attr("width") / dataGroupedPerChromosome[`${currentChromInView}`].length, 0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 10); //fillRect(x, y, width, height)
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
 		});
 	};
 	//------------------------------------------------------------------------------------
@@ -471,6 +470,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//The context of canvas is needed for drawing
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
+	//Drawing of the function histogram
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		//Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gab within the miniature)
 		bgBrowser_miniContext.fillStyle = "#FFF";
@@ -480,21 +480,21 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 2*browsingBlocksDimensions.height - (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
 	});
 	
+	//Drawing of the core/disp miniature
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
 		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
 	});
 	
+	//Drawing of the rainbow miniature
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
 	});
 	
+	//Drawing of the similarity miniature
 	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
-//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
 	});
 	//------------------------------------------------------------------------------------
@@ -505,7 +505,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Translation of the whole slider object wherever it is required
 	var chromSlider = svgContainer_browsingSlider.append("g") //chromSlider is a group within svgContainer_browsingSlider, embedded after the foreign object so that it will appear over it
 //									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")"); //Everything in it will be translated		
+									//.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")"); //Everything in it will be translated		
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------miniatureOverlay------------------------------------
@@ -515,7 +515,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 //		.attr("width", miniatureSliderScale.range()[1])
 		.attr("width", svgContainer_browsingSlider.attr("width")) //Clamping should work, not allowing to exceed the position even if the draging zone is wider
 		.attr("height", 40)
-		.attr("y",0-chromSlider.select(".track-overlay").attr("height")/2) //The "." asks to select the first matching element with the written class. Doing this we can center ther overlay
+		.attr("y",2*browsingBlocksDimensions.height+6 -4) //y position is the y position of the first miniature line, minus 4 as height = 40 = (10*3 + 2*1) + 8
 		.style("fill-opacity",0)
 		.attr("cursor", "ew-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
 			.call(d3.drag()
@@ -525,7 +525,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	
 	//--------------------------------miniatureHandle-------------------------------------
-	//Creation of the mini window handle, thats translates the interaction into visual movement
+	//Creation of the mini window handle, that translates the interaction into visual movement
 	var miniWindowHandle = chromSlider.insert("rect", ".track-overlay")
 			.attr("class", "handle")
 			.style("stroke", d3.hcl(0,0,25))
@@ -534,7 +534,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 			.attr("height", browsingHandleDimensions.height) //ATTENTION The slider should be cut at its extremities so that we always have a full display. IE if position cursor = 0, there is no blank on top of the blocks, and if position = end there is no blank at the bottom
 			//Plus the width should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
 			.attr("x", 0)
-			.attr("y", 0 - browsingHandleDimensions.height/2)
+			.attr("y", 2*browsingBlocksDimensions.height+6 - 3)
 			.style("fill-opacity", 0);
 	//------------------------------------------------------------------------------------
 
@@ -560,7 +560,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	svgContainer_browsingSlider.append("g") //Code adapted from https://bl.ocks.org/mbostock/9764126
 								.style("font", "10px sans-serif")
-								.attr("transform", "translate(" + 0 + "," + miniWindowHandle.attr("height")*1.7 + ")") //Along with the rest of this svgContainer, this will have to be fixed with absolute px values
+								.attr("transform", "translate(" + 0 + "," + 65 + ")") //Along with the rest of this svgContainer, this will have to be fixed with absolute px values
 								//.attr("font-family", "sans-serif").attr("font-size", "10px")
 								//.attr("class", "axis")
 								.call(d3.axisBottom(miniatureTicksScale)
