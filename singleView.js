@@ -154,8 +154,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//--------------------------------purpleColorScale------------------------------------
 	
-	//var purpleColorScale = colorScaleMaker([1,Math.max(...improvedDataMatrix.map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
-	var purpleColorScale = colorScaleMaker([1,Math.max(...improvedDataMatrix.map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
+	//var purpleColorScale = colorScaleMaker([1,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
+	var purpleColorScale = colorScaleMaker([1,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.SimilarBlocks.split(";").length))], [d3.hcl(325,2,97), d3.hcl(325,86,54)]);
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------pseudoRainbowColorScale-------------------------------
@@ -163,9 +163,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//See https://codepen.io/thetallweeks/pen/QNvoNW for more about multiple colors linear scales
 	//For info about color blindness https://knightlab.northwestern.edu/2016/07/18/three-tools-to-help-you-make-colorblind-friendly-graphics/
 	var pseudoRainbowList = [d3.rgb(0,90,200), d3.rgb(0,200,250), d3.rgb(120,50,40), d3.rgb(190,140,60), d3.rgb(240,240,50), d3.rgb(160, 250,130)]
-//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList);
-	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...improvedDataMatrix.map(d => Number(d.FeatureStart)))), pseudoRainbowList);
-//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(improvedDataMatrix.ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
+//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.ID_Position.split(":")[1])))), pseudoRainbowList);
+	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStart)))), pseudoRainbowList);
+//	var pseudoRainbowColorScale = colorScaleMaker(domainPivotsMaker(pseudoRainbowList.length,Math.max(...Number(dataGroupedPerChromosome[`${currentChromInView}`].ID_Position.split(":")[1]))), pseudoRainbowList); //Does not work, we have to find another way of extracting the maximum
 	
 	//max is the highest first nt position of a block, WITHIN A CHROMOSOME
 	//Each color in the range has a pivot position defined in the domain thanks to domainPivotsMaker
@@ -279,7 +279,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//------------------------------browsingBlocksDimensions------------------------------
 	
-	var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length)+1, height:10, borderSpace:1}
+	var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1, height:10, borderSpace:1}
 	//+1 so that the rectangles overlap and leave no space giving a filling of transparency
 	//------------------------------------------------------------------------------------
 	
@@ -404,9 +404,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 		
 		//Updating the colours of the miniature browser
-		improvedDataMatrix.forEach(d => {
+		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]));
-			bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+			bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 		});
 	};
 	//------------------------------------------------------------------------------------
@@ -435,7 +435,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	var browsingHandleDimensions = {strokeWidth:3};
 	browsingHandleDimensions.height = Number(foreignObject_Browser.attr("height")) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
-	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(improvedDataMatrix.length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
+	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,7 +446,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Creation of a scale that links value to a position in pixel
 	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-								.domain([0, displayedBlocksDimensions.width*improvedDataMatrix.length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and not empty background when the slider is at the maximum position
+								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and not empty background when the slider is at the maximum position
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
 								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
@@ -467,20 +467,20 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//The context of canvas is needed for drawing
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
-	improvedDataMatrix.forEach(d => {
+	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length,0, 10, 10); //fillRect(x, y, width, height)
+		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, browsingBlocksDimensions.width, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+//		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length,0, 10, 10); //fillRect(x, y, width, height)
 	});
 	
-	improvedDataMatrix.forEach(d => {
+	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, browsingBlocksDimensions.height+1, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 	});
 	
-	improvedDataMatrix.forEach(d => {
+	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 		bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
-		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/improvedDataMatrix.length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
+		bgBrowser_miniContext.fillRect(Number(d.index)*svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length, (browsingBlocksDimensions.height+1)*2, browsingBlocksDimensions.width, browsingBlocksDimensions.height);
 	});
 	//------------------------------------------------------------------------------------
 	
@@ -634,13 +634,13 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//----------------------------matrixPA, attributes & labels---------------------------
 	
 	//Creation of the subGroup for the PA blocks
-	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
+	//Creation of the subgroup for the the repeated blocks (cf dataGroupedPerChromosome[`${currentChromInView}`][`copyPptionIn_Chr${chr}`])
 	//ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
 		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`)
 															.selectAll("rect")
-																.data(improvedDataMatrix) //There is one rect per (genome x PA block), not just per genome
+																.data(dataGroupedPerChromosome[`${currentChromInView}`]) //There is one rect per (genome x PA block), not just per genome
 																.enter()
 																.append("rect");
 													
@@ -672,7 +672,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
-									.data(improvedDataMatrix)//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+									.data(dataGroupedPerChromosome[`${currentChromInView}`])//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
 									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
 									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
 								
@@ -704,7 +704,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 			color.l += (100-color.l)*0.5; //Slight increase in luminance without exceeding white
 			return color;
 		});
-		//Here, d is a block object from improvedDataMatrix, i is its index within the array
+		//Here, d is a block object from dataGroupedPerChromosome[`${currentChromInView}`], i is its index within the array
 		//To access values of a block, we need to take "this" as an argument
 
 		//alert(d + " " + i);
@@ -764,7 +764,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed")
 								.selectAll("rect")
-									.data(improvedDataMatrix)
+									.data(dataGroupedPerChromosome[`${currentChromInView}`])
 									.enter()
 									.append("rect");
 
@@ -785,7 +785,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount")
 								.selectAll("rect")
-									.data(improvedDataMatrix)
+									.data(dataGroupedPerChromosome[`${currentChromInView}`])
 									.enter()
 									.append("rect");
 
@@ -806,7 +806,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground")
 														.selectAll("rect")
-															.data(improvedDataMatrix)
+															.data(dataGroupedPerChromosome[`${currentChromInView}`])
 															.enter()
 															.append("rect");
 
@@ -828,12 +828,12 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//ATTENTION Will have to be change using the array of chromosomes info
 	
-	//Creation of the subgroup for the the repeated blocks (cf improvedDataMatrix[`copyPptionIn_Chr${chr}`])
+	//Creation of the subgroup for the the repeated blocks (cf dataGroupedPerChromosome[`${currentChromInView}`][`copyPptionIn_Chr${chr}`])
 	//Here we could do a forEach loop with every Chr name or ID
 	for (var chr = 0; chr < chromosomeNames.length; chr++) {
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`)
 													.selectAll("circle")
-														.data(improvedDataMatrix)
+														.data(dataGroupedPerChromosome[`${currentChromInView}`])
 														.enter()
 														.append("circle");
 		
