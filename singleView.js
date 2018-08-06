@@ -113,16 +113,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
 	//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values
-	
-	//----------------------------------transpose()---------------------------------------
-	
-	//Function created for the transposition of the matrix, is usefull with .reduce
-	function transpose(a) {
-		return Object.keys(a[0]).map(function(c) {
-			return a.map(function(r) { return r[c]; });
-		});
-	}
-	//------------------------------------------------------------------------------------
+
 	
 	//--------------------------------domainPivotsMaker()---------------------------------
 	
