@@ -98,9 +98,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	var dataGroupedPerChromosome = chromosomeNames.map(function(chr) {
 		let myObject = {};
-		myObject.chromName = chr;
-		myObject.data = improvedDataMatrix.filter(data => data.Chromosome === chr);
-		myObject.data.map(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
+		//myObject.chromName = chr;
+		myObject[`${chr}`] = improvedDataMatrix.filter(data => data.Chromosome === chr);
+		myObject[`${chr}`].map(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
 		return myObject;
 	});
 	//------------------------------------------------------------------------------------
@@ -108,10 +108,10 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//--------------------------------currentChromInView----------------------------------
 	
-	var currentChromInView = dataGroupedPerChromosome[0].chromName
+	var currentChromInView = Object.getOwnPropertyNames(dataGroupedPerChromosome)[0]
 	//------------------------------------------------------------------------------------
 	console.log(currentChromInView);
-	
+	//dataGroupedPerChromosome[`${currentChromInView}`]
 	
 	//--------------------------------domainPivotsMaker()---------------------------------
 	
