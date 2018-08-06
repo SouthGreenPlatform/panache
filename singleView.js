@@ -201,13 +201,13 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//----------------------------svgContainer_coreSlider---------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_coreSlider = d3.select("body").append("svg").attr("id", "svgContainer_coreSlider")
-										.attr("width", windowWidth*0.20).attr("height", windowHeight*0.20); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.20).attr("height", 95); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------svgContainer_browsingSlider-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_browsingSlider = d3.select("body").append("svg").attr("id", "svgContainer_browsingSlider")
-										.attr("width", windowWidth*0.75).attr("height", windowHeight*0.20); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.75).attr("height", 95); //Full proportions won't display correctly
 	//------------------------------------------------------------------------------------
 	
 	//----------------------------svgContainer_genomesTree--------------------------------
@@ -225,13 +225,13 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//---------------------------svgContainer_legends-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_legends = d3.select("body").append("svg").attr("id", "svgContainer_legends")
-										.attr("width", windowWidth*0.20).attr("height", windowHeight*(1-0.2-0.05)-svgContainer_genomesTree.attr("height")); //Total height minus the heights of previous SVGs and with -0.05 
+										.attr("width", windowWidth*0.20).attr("height", windowHeight*(1-0.05)-svgContainer_coreSlider.attr("height")-svgContainer_genomesTree.attr("height")); //Total height minus the heights of previous SVGs and with -0.05 
 	//------------------------------------------------------------------------------------
 
 	//-----------------------------svgContainer_rawBlocks---------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_rawBlocks = d3.select("body").append("svg").attr("id", "svgContainer_rawBlocks")
-										.attr("width", windowWidth*0.75).attr("height", windowHeight*(1-0.2-0.05)-svgContainer_genomesTree.attr("height"));
+										.attr("width", windowWidth*0.75).attr("height", windowHeight*(1-0.05)-svgContainer_browsingSlider.attr("height")-svgContainer_presenceAbsenceMatrix.attr("height"));
 	//------------------------------------------------------------------------------------
 	
 	
