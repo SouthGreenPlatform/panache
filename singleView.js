@@ -469,33 +469,40 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//The context of canvas is needed for drawing
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
-	//Drawing of the function histogram
-	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-		//Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gab within the miniature)
-		bgBrowser_miniContext.fillStyle = "#FFF";
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-		//Colouring the function blocks
-		bgBrowser_miniContext.fillStyle = functionColorScale(Number(d.Function));
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 2*browsingBlocksDimensions.height - (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-	});
+	function DrawingMiniatureBackground() {
 	
-	//Drawing of the core/disp miniature
-	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-		bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-	});
+		//Drawing of the function histogram
+		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
+			//Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gab within the miniature)
+			bgBrowser_miniContext.fillStyle = "#FFF";
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+			//Colouring the function blocks
+			bgBrowser_miniContext.fillStyle = functionColorScale(Number(d.Function));
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, 2*browsingBlocksDimensions.height - (initialGenomesNames.length-d.presenceCounter)/initialGenomesNames.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+		});
+		
+		//Drawing of the core/disp miniature
+		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
+			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)),2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
+		});
+		
+		//Drawing of the rainbow miniature
+		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
+			bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
+		});
+		
+		//Drawing of the similarity miniature
+		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
+			bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
+			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
+		});
 	
-	//Drawing of the rainbow miniature
-	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-		bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
-	});
+	};
 	
-	//Drawing of the similarity miniature
-	dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-		bgBrowser_miniContext.fillStyle = purpleColorScale(Number(d.SimilarBlocks.split(";").length));
-		bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)), 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))+1, browsingBlocksDimensions.height);
-	});
+	DrawingMiniatureBackground();
+	
 	//------------------------------------------------------------------------------------
 	
 
@@ -695,8 +702,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	dropdownChromChoice.on("change", function(d) {
 		currentChromInView = dropdownChromChoice.node().value;
 		console.log(currentChromInView);
+		DrawingMiniatureBackground();
 	});
-							
+	
 	//------------------------------------------------------------------------------------
 
 	//----------------------------matrixPA, attributes & labels---------------------------
