@@ -678,7 +678,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//About Dropdown menu with javascript and D3 js : http://bl.ocks.org/feyderm/e6cab5931755897c2eb377ccbf9fdf18
 	//Other example : https://codepen.io/tarsusi/pen/reovOV
 	// Properties of a "select" object : https://www.w3schools.com/jsref/dom_obj_select.asp
-	//Styling a dropdown menu only with CSS
+	//Styling a dropdown menu only with CSS : https://codepen.io/ericrasch/pen/zjDBx
 	
 	//------------------------------foreignObject_Dropdown--------------------------------
 	
@@ -697,11 +697,12 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//---------------------------------dropdownChromChoice--------------------------------
 	
-	var dropdownChromChoice = foreignObject_Dropdown.append("xhtml:select").attr("id","dropdownChromChoice");
+	var dropdownChromChoice = foreignObject_Dropdown.append("xhtml:select").attr("id","dropdownChromChoice").style("color", "blue").style("font", "20px sans-serif");
 	
+	//A possible solution to styling the options according to the select element : https://stackoverflow.com/questions/41244238/firefox-dropdown-option-font-size-not-being-rendered
 	
 	chromosomeNames.forEach(function(d,i) {
-		dropdownChromChoice.append("option").attr("value",d).text(d)
+		dropdownChromChoice.append("option").attr("value",d).text(d);
 	});
 	
 	dropdownChromChoice.on("change", function(d) {
