@@ -690,7 +690,12 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	chromosomeNames.forEach(function(d,i) {
 		dropdownChromChoice.append("option").attr("value",d).text(d)
-	})
+	});
+	
+	dropdownChromChoice.on("change", function(d) {
+		currentChromInView = dropdownChromChoice.node().value;
+		console.log(currentChromInView);
+	});
 							
 	//------------------------------------------------------------------------------------
 
