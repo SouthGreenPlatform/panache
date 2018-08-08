@@ -280,6 +280,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1, height:10, borderSpace:1}
 	//+1 so that the rectangles overlap and leave no space giving a filling of transparency
+	//The width is not used anymore, I believe
 	//------------------------------------------------------------------------------------
 	
 	
@@ -470,6 +471,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
 	function DrawingMiniatureBackground() {
+		
+		//Clear existing canvas
+		bgBrowser_miniContext.clearRect(0, 0, bgBrowser_miniCanvas.attr("width"), bgBrowser_miniCanvas.attr("height"));
 	
 		//Drawing of the function histogram
 		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
@@ -565,6 +569,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 								.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded, not sure if it is useful for a ticks axis
 	
 	svgContainer_browsingSlider.append("g") //Code adapted from https://bl.ocks.org/mbostock/9764126
+								.attr("id","miniatureTicks")
 								.style("font", "10px sans-serif")
 								.attr("transform", "translate(" + 0 + "," + 65 + ")") //Along with the rest of this svgContainer, this will have to be fixed with absolute px values
 								//.attr("font-family", "sans-serif").attr("font-size", "10px")
@@ -700,9 +705,26 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	});
 	
 	dropdownChromChoice.on("change", function(d) {
+		
+		//Updating var currentChromInView
 		currentChromInView = dropdownChromChoice.node().value;
 		console.log(currentChromInView);
+		
+		//Updating every display property/function depending on currentChromInView
+		purpleColorScale.domain([1,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.SimilarBlocks.split(";").length))]);
+		pseudoRainbowColorScale.domain(domainPivotsMaker(pseudoRainbowList.length,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStart)))));
+//		browsingBlocksDimensions.width = svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1;
+		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop))));
+		console.log(browsingHandleDimensions.width);
+		miniatureSliderScale.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop)) - svgContainer_rawBlocks.attr("width")]);
+		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
+		miniatureTicksScale.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))]);
+		
+		//Displaying everything that changed again
 		DrawingMiniatureBackground();
+		miniWindowHandle.attr("width", browsingHandleDimensions.width);
+		miniWindowHandle.attr("x", 0);
+		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
 	});
 	
 	//------------------------------------------------------------------------------------
