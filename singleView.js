@@ -11,7 +11,6 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//realPanMatrix.forEach(function(realPanMatrix) {console.log(realPanMatrix.Cluster)}); //prints cluster for each line !
 	
 	
-	
 	//https://bl.ocks.org/pstuffa/3393ff2711a53975040077b7453781a9 This uses buttons it can be nice
 	
 	//ATTENTION : As d3 can read object property there is no need to extract columns ! The comment is still here as it can be a useful reminder. Extracting column from array of objects, see : https://stackoverflow.com/questions/19590865/from-an-array-of-objects-extract-value-of-a-property-as-array
@@ -662,8 +661,37 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 										.text("Colour : Function")
 										.attr("y", 37);
-										
+	//------------------------------------------------------------------------------------
 	
+	//About Dropdown menu with javascript and D3 js : http://bl.ocks.org/feyderm/e6cab5931755897c2eb377ccbf9fdf18
+	//Other example : https://codepen.io/tarsusi/pen/reovOV
+	// Properties of a "select" object : https://www.w3schools.com/jsref/dom_obj_select.asp
+	//Styling a dropdown menu only with CSS
+	
+	//------------------------------foreignObject_Dropdown--------------------------------
+	
+	//Foreign object allows to incorporate objects that are not SVGs into an SVG window
+	//https://gist.github.com/mbostock/1424037
+	var foreignObject_Dropdown = svgContainer_legends.append("foreignObject")
+			.attr("width", svgContainer_legends.attr("width"))
+			.attr("height", browsingBlocksDimensions.height*6 + browsingBlocksDimensions.borderSpace*(6-1))
+			.attr("x", 0)
+//			.attr("y", 0 - foreignObject_Browser.attr("height")/2) //It has to be centered depending on the canvas and miniature count
+//			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
+			.attr("y", 0) //It has to be centered depending on the canvas and miniature count
+			//.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
+			.attr("class","UFO");
+	//------------------------------------------------------------------------------------
+	
+	//---------------------------------dropdownChromChoice--------------------------------
+	
+	var dropdownChromChoice = foreignObject_Dropdown.append("xhtml:select").attr("id","dropdownChromChoice");
+	
+	
+	chromosomeNames.forEach(function(d,i) {
+		dropdownChromChoice.append("option").attr("value",d).text(d)
+	})
+							
 	//------------------------------------------------------------------------------------
 
 	//----------------------------matrixPA, attributes & labels---------------------------
