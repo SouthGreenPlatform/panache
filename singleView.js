@@ -470,7 +470,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//The context of canvas is needed for drawing
 	var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 	
-	function DrawingMiniatureBackground() {
+	function drawingMiniatureBackground() {
 		
 		//Clear existing canvas
 		bgBrowser_miniContext.clearRect(0, 0, bgBrowser_miniCanvas.attr("width"), bgBrowser_miniCanvas.attr("height"));
@@ -505,7 +505,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	};
 	
-	DrawingMiniatureBackground();
+	drawingMiniatureBackground();
 	
 	//------------------------------------------------------------------------------------
 	
@@ -586,6 +586,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Some code for enter, update and exit things :
 	// http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+	//https://bost.ocks.org/mike/join/
 	// http://d3indepth.com/enterexit/
 	// http://synthesis.sbecker.net/articles/2012/07/09/learning-d3-part-2
 	
@@ -697,7 +698,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//---------------------------------dropdownChromChoice--------------------------------
 	
-	var dropdownChromChoice = foreignObject_Dropdown.append("xhtml:select").attr("id","dropdownChromChoice").style("color", "blue").style("font", "20px sans-serif");
+	var dropdownChromChoice = foreignObject_Dropdown.append("xhtml:select").attr("id","dropdownChromChoice").style("font", "10px sans-serif");
 	
 	//A possible solution to styling the options according to the select element : https://stackoverflow.com/questions/41244238/firefox-dropdown-option-font-size-not-being-rendered
 	
@@ -722,10 +723,11 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		miniatureTicksScale.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))]);
 		
 		//Displaying everything that changed again
-		DrawingMiniatureBackground();
+		drawingMiniatureBackground();
 		miniWindowHandle.attr("width", browsingHandleDimensions.width);
 		miniWindowHandle.attr("x", 0);
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
+		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber));
 	});
 	
 	//------------------------------------------------------------------------------------
@@ -736,25 +738,30 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Creation of the subgroup for the the repeated blocks (cf dataGroupedPerChromosome[`${currentChromInView}`][`copyPptionIn_Chr${chr}`])
 	//ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
+	
+	function drawingDisplay_PerGenomePA(geno, genomeNumber) {
+		let newData = d3.select(`#presence_${geno}`).selectAll("rect")
+					.data(dataGroupedPerChromosome[`${currentChromInView}`]); //There is one rect per (genome x PA block), not just per genome
+		
+		newData.exit().remove;
+		
+		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
+		newData.enter().append("rect") //Settings the attribute to the newly created blocks
+						.attr("class", "moveableBlock")
+						.attr("height", displayedBlocksDimensions.height)
+						.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
+				.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+					.attr("x", (d,i) => Number(d.index)) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
+					.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+					.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
+					.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
+	};
+	
+	
+	
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
 		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`)
-															.selectAll("rect")
-																.data(dataGroupedPerChromosome[`${currentChromInView}`]) //There is one rect per (genome x PA block), not just per genome
-																.enter()
-																.append("rect");
-													
-		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
-		var matrixPA_Attributes = matrixPA.attr("class", "moveableBlock")
-//											.attr("x", function (d,i) {
-//												return Number(blocks.attr("x")) + Number(blocks.attr("width")) + 10 + genomeNumber*blocks.attr("width"); //x is incremented for each new genome
-//											})
-											.attr("x", (d,i) => Number(d.index)) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
-											.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
-											.attr("height", displayedBlocksDimensions.height)
-//											.attr("y", (d,i) => i*blocks.attr("height")) //y is incremented for each new PA block, and is reset to 0 for each genome
-											.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
-											.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
-											.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
+		drawingDisplay_PerGenomePA(geno, genomeNumber); //Creates the first occurencesof PA blocks
 		
 		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
 					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
