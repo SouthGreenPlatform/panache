@@ -423,7 +423,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 //			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
 			.attr("y", 0) //It has to be centered depending on the canvas and miniature count
 			//.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
-			.attr("class","UFO");
+			.attr("class","UFO")
+			.style("position", "absolute") //z-index can only work with positionned elements
+			.style("z-index", -1); //Asks to put the foreignObject behind the rest, necessary to a good display with Chrome !
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------browsingHandleDimensions------------------------------
@@ -539,6 +541,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 			//Plus the width should be proportionnal to the zoom level and the number of blocks on display and therefore the total number of blocks
 			.attr("x", 0)
 			.attr("y", 2*browsingBlocksDimensions.height+6 - 3)
+			.style("position", "absolute")
 			.style("fill-opacity", 0);
 	//------------------------------------------------------------------------------------
 
@@ -550,6 +553,10 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//https://philipwalton.com/articles/what-no-one-told-you-about-z-index/
 	
 	//Depending on the canvas size the handle is rendered before or after : 997 < size <= 8193  => ca va bugguer
+	
+	//Something about stacking context
+	//https://svgwg.org/svg2-draft/single-page.html#render-EstablishingStackingContex
+	//https://developer.mozilla.org/fr/docs/Web/CSS/Comprendre_z-index/Empilement_de_couches
 	
 	//------------------------------slidingAlongBlocks()----------------------------------
 	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
