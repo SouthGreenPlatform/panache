@@ -731,6 +731,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		//For the display windows
 		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber));
 		drawingDisplay_BlockCount();
+		drawingDisplay_Rainbow();
 	});
 	
 	//------------------------------------------------------------------------------------
@@ -746,7 +747,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		let newData = d3.select(`#presence_${geno}`).selectAll("rect")
 					.data(dataGroupedPerChromosome[`${currentChromInView}`]); //There is one rect per (genome x PA block), not just per genome
 		
-		newData.exit().remove();
+		newData.exit().remove(); //Removing residual data
 		
 		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 		newData.enter().append("rect") //Settings the attribute to the newly created blocks
@@ -776,7 +777,6 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//---------------------------------blocks & attributes--------------------------------
 	
-	
 	function drawingDisplay_BlockCount() {
 		
 		//Binding the data to a DOM element, therefore creating one SVG block per data
@@ -785,7 +785,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		
 					//For more about joins, see : https://bost.ocks.org/mike/join/
 		
-		newData.exit().remove();
+		newData.exit().remove(); //Removing residual data
 		
 		//Selecting all previous blocks, and determining their attributes
 		newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
@@ -798,7 +798,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
 				.attr("x", (d,i) => Number(d.index))
 				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
-				.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);});
+				.style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale));
 	};
 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
@@ -876,23 +876,32 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//-----------------------------rainbowBlocks & attributes-----------------------------
 	
+	function drawingDisplay_Rainbow() {
+		
+		//Binding the data to a DOM element
+		let newData = d3.select("#panChromosome_Rainbowed").selectAll("rect")
+					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+		
+		newData.exit().remove(); //Removing residual data
+		
+		//Selecting all previous blocks, and determining their attributes
+		newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
+				.append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+				.attr("class", "moveableBlock")
+				.attr("height", displayedBlocksDimensions.height)
+				.attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
+				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+				.attr("x", (d,i) => Number(d.index))
+				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
+	};
+	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed")
-								.selectAll("rect")
-									.data(dataGroupedPerChromosome[`${currentChromInView}`])
-									.enter()
-									.append("rect");
+	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed");
+	drawingDisplay_Rainbow();
 
-	//Selecting all previous blocks, and determining their attributes
-	var rainbowBlocks_Attributes = rainbowBlocks.attr("class", "moveableBlock")
-//									.attr("x", Number(similarBlocks.attr("x"))+Number(similarBlocks.attr("width"))+3)
-									.attr("x", (d,i) => Number(d.index)) //x position is index * block width
-									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
-									.attr("height", displayedBlocksDimensions.height)
-//									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
-									.attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-//									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
-									.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
 	//------------------------------------------------------------------------------------	
 	
 	//-----------------------------similarBlocks & attributes-----------------------------
@@ -911,7 +920,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 									.attr("height", displayedBlocksDimensions.height)
 //									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
-									.attr("y", Number(rainbowBlocks.attr("y")) + displayedBlocksDimensions.height + 3)
+									.attr("y", Number(rainbowBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
 									.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
 //									.style("fill", (d => purpleColorScale((d.SimilarBlocks.split(";").length != 1 ? d.SimilarBlocks.split(";").length : 0))));
 	//------------------------------------------------------------------------------------
