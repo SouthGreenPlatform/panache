@@ -734,6 +734,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		drawingDisplay_Rainbow();
 		drawingDisplay_similarBlocks();
 		drawingDisplay_similarBackground();
+		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr);};
 	});
 	
 	//------------------------------------------------------------------------------------
@@ -970,24 +971,34 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//------------------------------copyCircles & attributes------------------------------
 	
-	
-	//ATTENTION Will have to be change using the array of chromosomes info
-	
 	//Creation of the subgroup for the the repeated blocks (cf dataGroupedPerChromosome[`${currentChromInView}`][`copyPptionIn_Chr${chr}`])
 	//Here we could do a forEach loop with every Chr name or ID
-	for (var chr = 0; chr < chromosomeNames.length; chr++) {
-		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`)
-													.selectAll("circle")
-														.data(dataGroupedPerChromosome[`${currentChromInView}`])
-														.enter()
-														.append("circle");
+	
+	function drawingDisplay_similarityCircles(chr) {
 		
-		var copyCircles_Attributes = copyCircles.attr("class", "moveableCircle")
-												.attr("cy", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + ((3+0.5)+chr)*displayedBlocksDimensions.height) //3+0.5 as there is space between the central panChromosome and the pption information : 3 rows of free space, plus 0.5 for centering the circles
-												.attr("cx", d => ((Number(d.FeatureStop)-Number(d.FeatureStart))/2) + Number(d.index)) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
-												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*((displayedBlocksDimensions.width/2-1)-1)+1)) //Depends on the data value; rmax = displayedBlocksDimensions.width/2-1, rmin = 1
-												.style("fill", d3.hcl(0,0,25))
-												.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
+		//Binding the data to a DOM element
+		let newData = d3.select(`#duplicationCircles_Chr${chr}`).selectAll("circle")
+					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+		
+		newData.exit().remove(); //Removing residual data
+		
+		//Selecting all previous blocks, and determining their attributes
+		newData.enter()
+				.append("circle")
+				.attr("class", "moveableCircle")
+				.attr("cy", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + ((3+0.5)+chr)*displayedBlocksDimensions.height) //3+0.5 as there is space between the central panChromosome and the pption information : 3 rows of free space, plus 0.5 for centering the circles
+				.style("fill", d3.hcl(0,0,25))
+//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+				.attr("cx", d => ((Number(d.FeatureStop)-Number(d.FeatureStart))/2) + Number(d.index)) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
+				.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*((displayedBlocksDimensions.width/2-1)-1)+1)) //Depends on the data value; rmax = displayedBlocksDimensions.width/2-1, rmin = 1
+				.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
+	};
+	
+	for (var chr = 0; chr < chromosomeNames.length; chr++) {
+		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
+		drawingDisplay_similarityCircles(chr);
 	};
 	//------------------------------------------------------------------------------------
 
