@@ -732,6 +732,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber));
 		drawingDisplay_BlockCount();
 		drawingDisplay_Rainbow();
+		drawingDisplay_similarBlocks();
+		drawingDisplay_similarBackground();
 	});
 	
 	//------------------------------------------------------------------------------------
@@ -885,13 +887,13 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		newData.exit().remove(); //Removing residual data
 		
 		//Selecting all previous blocks, and determining their attributes
-		newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
+		newData.enter()
 				.append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
 				.attr("class", "moveableBlock")
 				.attr("height", displayedBlocksDimensions.height)
 				.attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
 				.attr("x", (d,i) => Number(d.index))
 				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
@@ -906,45 +908,64 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//-----------------------------similarBlocks & attributes-----------------------------
 	
+	function drawingDisplay_similarBlocks() {
+		
+		//Binding the data to a DOM element
+		let newData = d3.select("#panChromosome_similarCount").selectAll("rect")
+					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+		
+		newData.exit().remove(); //Removing residual data
+		
+		//Selecting all previous blocks, and determining their attributes
+		newData.enter()
+				.append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+				.attr("class", "moveableBlock")
+				.attr("height", displayedBlocksDimensions.height)
+				.attr("y", Number(rainbowBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
+//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+				.attr("x", (d,i) => Number(d.index))
+				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
+	};
+	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount")
-								.selectAll("rect")
-									.data(dataGroupedPerChromosome[`${currentChromInView}`])
-									.enter()
-									.append("rect");
-
-	//Selecting all previous blocks, and determining their attributes
-	var similarBlocks_Attributes = similarBlocks.attr("class", "moveableBlock")
-//									.attr("x", Number(structureBackground.attr("width")))
-									.attr("x", (d,i) => Number(d.index)) //x position is index * block width
-									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
-									.attr("height", displayedBlocksDimensions.height)
-//									.attr("y", function(d,i){return i*similarBlocks.attr("height");}) //y position is index * block height
-									.attr("y", Number(rainbowBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-									.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
-//									.style("fill", (d => purpleColorScale((d.SimilarBlocks.split(";").length != 1 ? d.SimilarBlocks.split(";").length : 0))));
+	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount");
+	drawingDisplay_similarBlocks();
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------structureBackground & attributes--------------------------
 	
+	function drawingDisplay_similarBackground() {
+		
+		//Binding the data to a DOM element
+		let newData = d3.select("#structureBackground").selectAll("rect")
+					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+		
+		newData.exit().remove(); //Removing residual data
+		
+		//Selecting all previous blocks, and determining their attributes
+		newData.enter()
+				.append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+				.attr("class", "moveableBlock")
+				.attr("height", (chromosomeNames.length+3)*displayedBlocksDimensions.height)
+				.attr("y", Number(similarBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height)
+//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+				.attr("x", (d,i) => Number(d.index))
+				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
+					color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
+					color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
+					return color;
+				});
+	};
+	
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground")
-														.selectAll("rect")
-															.data(dataGroupedPerChromosome[`${currentChromInView}`])
-															.enter()
-															.append("rect");
-
-	//Attributes for structureBackground
-	var structureBackground_Attributes = structureBackground.attr("class", "moveableBlock")
-															.attr("x", (d,i) => Number(d.index))
-															.attr("y", Number(similarBlocks.attr("y")) + displayedBlocksDimensions.height)
-															.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
-															.attr("height", (chromosomeNames.length+3)*displayedBlocksDimensions.height)
-															.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
-																color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-																color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-																return color;
-															});
+	drawingDisplay_similarBackground();
 	//------------------------------------------------------------------------------------
 
 	//------------------------------copyCircles & attributes------------------------------
@@ -962,7 +983,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 														.append("circle");
 		
 		var copyCircles_Attributes = copyCircles.attr("class", "moveableCircle")
-												.attr("cy", (d,i) => Number(structureBackground.attr("y")) + ((3+0.5)+chr)*displayedBlocksDimensions.height) //3+0.5 as there is space between the central panChromosome and the pption information : 3 rows of free space, plus 0.5 for centering the circles
+												.attr("cy", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + ((3+0.5)+chr)*displayedBlocksDimensions.height) //3+0.5 as there is space between the central panChromosome and the pption information : 3 rows of free space, plus 0.5 for centering the circles
 												.attr("cx", d => ((Number(d.FeatureStop)-Number(d.FeatureStart))/2) + Number(d.index)) //Depends on the data index, and the blocks width; the 0.5 centers the circle within a block
 												.attr("r", (d => d[`copyPptionIn_Chr${chr}`]*((displayedBlocksDimensions.width/2-1)-1)+1)) //Depends on the data value; rmax = displayedBlocksDimensions.width/2-1, rmin = 1
 												.style("fill", d3.hcl(0,0,25))
