@@ -264,13 +264,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 						.attr("offset", 1)
 						.attr("stop-color", orangeColorScale.range()[1]);
 	//------------------------------------------------------------------------------------
-
-/*	//-----------------------------------slidersGroup-------------------------------------
-						
-	var slidersGroup = svgContainer_browsingSlider.append("g")
-										.attr("id", "slidersGroup")
-	//------------------------------------------------------------------------------------
-*/	
+	
 	//-----------------------------------blocksDisplay------------------------------------
 	var blocksDisplay = svgContainer_rawBlocks.append("g")
 										.attr("id", "blocksDisplay")
@@ -304,7 +298,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Translation of the whole slider object wherever it is required
 	var coreSlider = svgContainer_coreSlider.append("g") //coreSlider is nested in svgContainer_coreSlider
 //									.attr("class", "slider") //With the class "slider", to access it easily (more general than id which must be unique)
-									.attr("transform", "translate(" + (svgContainer_coreSlider.attr("width")-coreSliderScale.range()[1]) / 2 + "," + svgContainer_coreSlider.attr("height") / 2 + ")"); //Everything in it will be translated
+									.attr("transform", "translate(" + (svgContainer_coreSlider.attr("width")-coreSliderScale.range()[1]) / 2 + "," + 34 + ")"); //Everything in it will be translated
 	//------------------------------------------------------------------------------------
 
 	//---------------------------------coreFillingGradient---------------------------------
@@ -548,6 +542,15 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 			.style("fill-opacity", 0);
 	//------------------------------------------------------------------------------------
 
+	//ATTENTION THE HANDLE IS NOT RENDERED CORRECTLY WITH CHROME UNDER CERTAIN CONDITIONS (CF WINDOW WIDTH) and appears behind the canvas
+	
+	//About z-index:
+	//https://developer.mozilla.org/en-US/docs/Web/CSS/z-index
+	//http://www.dwuser.com/education/content/z-index-property-how-to-control-stacking-in-your-pages/
+	//https://philipwalton.com/articles/what-no-one-told-you-about-z-index/
+	
+	//Depending on the canvas size the handle is rendered before or after : 997 < size <= 8193  => ca va bugguer
+	
 	//------------------------------slidingAlongBlocks()----------------------------------
 	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
 	function slidingAlongBlocks(xBlockPosition) {
@@ -681,17 +684,25 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	// Properties of a "select" object : https://www.w3schools.com/jsref/dom_obj_select.asp
 	//Styling a dropdown menu only with CSS : https://codepen.io/ericrasch/pen/zjDBx
 	
+	svgContainer_coreSlider.append("text")
+			.attr("font-family", "sans-serif")
+			.attr("font-size", "10px")
+			.attr("transform", "translate("+ eval(Number(svgContainer_coreSlider.attr("width"))/3*2-1) +","+72+")") //Keeping the value outside of quotes is neede for its calculation
+			.attr("text-anchor", "end")
+			.attr("dominant-baseline", "middle")
+			.text("Chromosome on display:");
+	
 	//------------------------------foreignObject_Dropdown--------------------------------
 	
 	//Foreign object allows to incorporate objects that are not SVGs into an SVG window
 	//https://gist.github.com/mbostock/1424037
-	var foreignObject_Dropdown = svgContainer_legends.append("foreignObject")
-			.attr("width", svgContainer_legends.attr("width"))
-			.attr("height", browsingBlocksDimensions.height*6 + browsingBlocksDimensions.borderSpace*(6-1))
-			.attr("x", 0)
+	var foreignObject_Dropdown = svgContainer_coreSlider.append("foreignObject")
+			.attr("width", svgContainer_coreSlider.attr("width")/2 -1)
+			.attr("height", 26)
+			.attr("x", svgContainer_coreSlider.attr("width")/3*2 +1)
 //			.attr("y", 0 - foreignObject_Browser.attr("height")/2) //It has to be centered depending on the canvas and miniature count
 //			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
-			.attr("y", 0) //It has to be centered depending on the canvas and miniature count
+			.attr("y", 60) //It has to be centered depending on the canvas and miniature count
 			//.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
 			.attr("class","UFO");
 	//------------------------------------------------------------------------------------
