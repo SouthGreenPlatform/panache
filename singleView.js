@@ -743,7 +743,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		let newData = d3.select(`#presence_${geno}`).selectAll("rect")
 					.data(dataGroupedPerChromosome[`${currentChromInView}`]); //There is one rect per (genome x PA block), not just per genome
 		
-		newData.exit().remove;
+		newData.exit().remove();
 		
 		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 		newData.enter().append("rect") //Settings the attribute to the newly created blocks
@@ -755,26 +755,28 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 					.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 					.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 					.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
+		
+//		newData.exit().remove;
 	};
-	
-	
 	
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
 		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`)
-		drawingDisplay_PerGenomePA(geno, genomeNumber); //Creates the first occurencesof PA blocks
+		drawingDisplay_PerGenomePA(geno, genomeNumber); //Creates the first occurences of PA blocks
 		
 		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
 					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
 					.attr("x",svgContainer_genomesTree.attr("width")-3).attr("text-anchor", "end")
-					.text(function() {
-						return `${geno}`;
-					});
+					.text(d => `${geno}`);
 	});
 
 	//------------------------------------------------------------------------------------
 	
 	//---------------------------------blocks & attributes--------------------------------
 	
+	
+	
+
+
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
 								.selectAll("rect") //First an empty selection of all not yet existing rectangles
