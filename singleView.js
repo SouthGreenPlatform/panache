@@ -401,7 +401,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
 		d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
 		d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/initialGenomesNames.length).attr("stop-color", orangeColorScale(coreThreshold));
-		blocks.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
+		blocks.selectAll("rect").style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 		
 		//Updating the colours of the miniature browser
 		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
@@ -723,11 +723,14 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		miniatureTicksScale.domain([0, Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.FeatureStop))]);
 		
 		//Displaying everything that changed again
+		//For the miniature
 		drawingMiniatureBackground();
 		miniWindowHandle.attr("width", browsingHandleDimensions.width);
 		miniWindowHandle.attr("x", 0);
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
+		//For the display windows
 		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber));
+		drawingDisplay_BlockCount();
 	});
 	
 	//------------------------------------------------------------------------------------
@@ -774,29 +777,33 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//---------------------------------blocks & attributes--------------------------------
 	
 	
-	
-
+	function drawingDisplay_BlockCount() {
+		
+		//Binding the data to a DOM element, therefore creating one SVG block per data
+		let newData = d3.select("#panChromosome_coreVSdispensable").selectAll("rect") //First an empty selection of all not yet existing rectangles
+					.data(dataGroupedPerChromosome[`${currentChromInView}`]); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+		
+					//For more about joins, see : https://bost.ocks.org/mike/join/
+		
+		newData.exit().remove();
+		
+		//Selecting all previous blocks, and determining their attributes
+		newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
+				.append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+				.attr("class", "moveableBlock")
+				.attr("height", displayedBlocksDimensions.height)
+				.attr("y", 0)
+				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+				.attr("x", (d,i) => Number(d.index))
+				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);});
+	};
 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
-								.selectAll("rect") //First an empty selection of all not yet existing rectangles
-									.data(dataGroupedPerChromosome[`${currentChromInView}`])//Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
-									.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
-									.append("rect"); //For each placeholder element created in the previous step, a rectangle element is inserted.
-								
-								//For more about joins, see : https://bost.ocks.org/mike/join/
-
-	//Selecting all previous blocks, and determining their attributes
-	var blocks_Attributes = blocks.attr("class", "moveableBlock")
-//									.attr("x", Number(rainbowBlocks.attr("x"))+Number(rainbowBlocks.attr("width"))+3)
-									.attr("x", (d,i) => Number(d.index)) //y position is index * block height
-									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
-									.attr("height", displayedBlocksDimensions.height)
-//									.attr("y", function(d,i){return i*blocks.attr("height");}) //y position is index * block height
-									.attr("y", 0)
-									.style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);})
-									.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-									.on("mouseout", eventDisplayInfoOff); //Idem with eventDisplayInfoOff
+	drawingDisplay_BlockCount();
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------eventDisplayInfoOn()--------------------------------
@@ -883,7 +890,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 									.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 									.attr("height", displayedBlocksDimensions.height)
 //									.attr("y", function(d,i){return i*rainbowBlocks.attr("height");}) //y position is index * block height
-									.attr("y", Number(blocks.attr("y")) + displayedBlocksDimensions.height + 3)
+									.attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
 //									.style("fill", (d => pseudoRainbowColorScale(Number(d.ID_Position.split(":")[1]))));
 									.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
 	//------------------------------------------------------------------------------------	
