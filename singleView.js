@@ -570,11 +570,23 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		miniWindowHandle.attr("x", Number(miniatureSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
 //		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
 //		d3.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
+
+
+		nucleotideThresholds.left = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))) - browsingHandleDimensions.nucleotideMargin;
+		nucleotideThresholds.right = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) + browsingHandleDimensions.nucleotideMargin;
+		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => (Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ));
+		
+		//For the display windows
+		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View));
+		drawingDisplay_BlockCount(dataFiltered2View);
+		drawingDisplay_Rainbow(dataFiltered2View);
+		drawingDisplay_similarBlocks(dataFiltered2View);
+		drawingDisplay_similarBackground(dataFiltered2View);
+		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);};
+		
 		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) - xBlockPosition);
 //		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
 		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
-//		console.log(miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))));
-//		console.log("Max :" + miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))));
 	};
 	//------------------------------------------------------------------------------------
 
