@@ -1,7 +1,7 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
-d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+//d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
+d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -711,25 +711,31 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	// Properties of a "select" object : https://www.w3schools.com/jsref/dom_obj_select.asp
 	//Styling a dropdown menu only with CSS : https://codepen.io/ericrasch/pen/zjDBx
 	
-	svgContainer_coreSlider.append("text")
+	svgContainer_coreSlider.append("g").attr("id","ChromSelectionGroup").append("text").attr("id","ChromSelectionLabel")
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
-			.attr("transform", "translate("+ eval(Number(svgContainer_coreSlider.attr("width"))/3*2-1) +","+72+")") //Keeping the value outside of quotes is neede for its calculation
-			.attr("text-anchor", "end")
+//			.attr("transform", "translate("+ eval(Number(svgContainer_coreSlider.attr("width"))/3*2-1) +","+72+")") //Keeping the value outside of quotes is needed for its calculation
+			.attr("dy", "1.2em")
+			.attr("text-anchor", "start")
 			.attr("dominant-baseline", "middle")
 			.text("Chromosome on display:");
+	
+//d3.select("#ChromSelectionLabel").node().getBBox();
+	
 	
 	//------------------------------foreignObject_Dropdown--------------------------------
 	
 	//Foreign object allows to incorporate objects that are not SVGs into an SVG window
 	//https://gist.github.com/mbostock/1424037
-	var foreignObject_Dropdown = svgContainer_coreSlider.append("foreignObject")
-			.attr("width", svgContainer_coreSlider.attr("width")/2 -1)
+	var foreignObject_Dropdown = d3.select("#ChromSelectionGroup").append("foreignObject")
+//			.attr("width", svgContainer_coreSlider.attr("width")/2 -1)
+//			.attr("width", 40) //33 - 16 = 17 px for the arrow
 			.attr("height", 26)
-			.attr("x", svgContainer_coreSlider.attr("width")/3*2 +1)
+//			.attr("x", svgContainer_coreSlider.attr("width")/3*2 +1)
+			.attr("x", d3.select("#ChromSelectionLabel").node().getBBox().width +2)
 //			.attr("y", 0 - foreignObject_Browser.attr("height")/2) //It has to be centered depending on the canvas and miniature count
 //			.attr("y", 0 - (browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1))/2) //It has to be centered depending on the canvas and miniature count
-			.attr("y", 60) //It has to be centered depending on the canvas and miniature count
+//			.attr("y", 60) //It has to be centered depending on the canvas and miniature count
 			//.attr("transform", "translate(" + 0 + "," + svgContainer_browsingSlider.attr("height") / 2 + ")") //The foreign object is centered within svgContainer_browsingSlider
 			.attr("class","UFO");
 	//------------------------------------------------------------------------------------
@@ -743,6 +749,12 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	chromosomeNames.forEach(function(d,i) {
 		dropdownChromChoice.append("option").attr("value",d).text(d);
 	});
+	
+	//Centering the label and 'select' group
+	d3.select("#ChromSelectionGroup").attr("transform", "translate("+ 0 +","+0+")"); //offsetWidth is only defined AFTER the group transformation for some reasons...
+	foreignObject_Dropdown.attr("width", d3.select("#dropdownChromChoice").node().offsetWidth); //offsetWitdh is the automatic width of the 'select' element
+	d3.select("#ChromSelectionGroup").attr("transform", "translate("+ eval((Number(svgContainer_coreSlider.attr("width")) - d3.select("#ChromSelectionLabel").node().getBBox().width-d3.select("#dropdownChromChoice").node().offsetWidth)/2) +","+60+")"); //eval is useful for the interpretation of the JS code within the string
+	
 	
 	dropdownChromChoice.on("change", function(d) {
 		
@@ -783,7 +795,6 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		drawingDisplay_similarBackground(dataFiltered2View);
 		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);};
 	});
-	
 	//------------------------------------------------------------------------------------
 
 	//---------------------------------nucleotideThresholds-------------------------------
