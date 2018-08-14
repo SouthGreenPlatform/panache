@@ -536,7 +536,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//------------------------------------------------------------------------------------
 	
 	
-	//--------------------------------miniatureHandle-------------------------------------
+	//--------------------------------miniWindowHandle------------------------------------
 	//Creation of the mini window handle, that translates the interaction into visual movement
 	var miniWindowHandle = chromSlider.insert("rect", ".track-overlay")
 			.attr("class", "handle")
@@ -573,6 +573,8 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) - xBlockPosition);
 //		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
 		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
+//		console.log(miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))));
+//		console.log("Max :" + miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))));
 	};
 	//------------------------------------------------------------------------------------
 
@@ -749,15 +751,18 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
 		miniatureTicksScale.domain([0, maxPositionInNucleotide]);
 		
-		//Updating the first blocks to display depending on the handle's size
-		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`];
-		
 		//Displaying everything that changed again
 		//For the miniature
 		drawingMiniatureBackground();
 		miniWindowHandle.attr("width", browsingHandleDimensions.width);
 		miniWindowHandle.attr("x", 0);
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
+		
+		//Updating the first blocks to display depending on the handle's size and position
+		nucleotideThresholds.left = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))) - browsingHandleDimensions.nucleotideMargin;
+		nucleotideThresholds.right = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) + browsingHandleDimensions.nucleotideMargin;
+		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => (Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ));
+		
 		//For the display windows
 		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View));
 		drawingDisplay_BlockCount(dataFiltered2View);
@@ -769,10 +774,18 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//------------------------------------------------------------------------------------
 
-	//----------------------------------dataFiltered2View---------------------------------
+	//---------------------------------nucleotideThresholds-------------------------------
 	
-	var dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`];
+	var nucleotideThresholds = {}; //Contains the min and max nt positions to consider for the creation of DOM elements
+	nucleotideThresholds.left = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))) - browsingHandleDimensions.nucleotideMargin;
+	nucleotideThresholds.right = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) + browsingHandleDimensions.nucleotideMargin;
 	//------------------------------------------------------------------------------------
+	
+	//----------------------------------dataFiltered2View---------------------------------	
+	
+	var dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => (Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right )); //Data restrained to the displayable features
+	//------------------------------------------------------------------------------------
+//	console.log(dataFiltered2View);
 	
 	//----------------------------matrixPA, attributes & labels---------------------------
 	
