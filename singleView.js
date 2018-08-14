@@ -439,7 +439,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	browsingHandleDimensions.height = browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
 //	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
 	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/maxPositionInNucleotide); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
-	browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2
+	browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2;
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -744,9 +744,13 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/maxPositionInNucleotide);
 //		console.log(browsingHandleDimensions.width);
 		browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2;
+//		console.log(browsingHandleDimensions.nucleotideMargin);
 		miniatureSliderScale.domain([0, maxPositionInNucleotide - svgContainer_rawBlocks.attr("width")]);
 		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
 		miniatureTicksScale.domain([0, maxPositionInNucleotide]);
+		
+		//Updating the first blocks to display depending on the handle's size
+		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`];
 		
 		//Displaying everything that changed again
 		//For the miniature
@@ -755,16 +759,21 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 		miniWindowHandle.attr("x", 0);
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
 		//For the display windows
-		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber));
-		drawingDisplay_BlockCount();
-		drawingDisplay_Rainbow();
-		drawingDisplay_similarBlocks();
-		drawingDisplay_similarBackground();
-		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr);};
+		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View));
+		drawingDisplay_BlockCount(dataFiltered2View);
+		drawingDisplay_Rainbow(dataFiltered2View);
+		drawingDisplay_similarBlocks(dataFiltered2View);
+		drawingDisplay_similarBackground(dataFiltered2View);
+		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);};
 	});
 	
 	//------------------------------------------------------------------------------------
 
+	//----------------------------------dataFiltered2View---------------------------------
+	
+	var dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`];
+	//------------------------------------------------------------------------------------
+	
 	//----------------------------matrixPA, attributes & labels---------------------------
 	
 	//Creation of the subGroup for the PA blocks
@@ -772,9 +781,9 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 	
-	function drawingDisplay_PerGenomePA(geno, genomeNumber) {
+	function drawingDisplay_PerGenomePA(geno, genomeNumber, dataPart) {
 		let newData = d3.select(`#presence_${geno}`).selectAll("rect")
-					.data(dataGroupedPerChromosome[`${currentChromInView}`]); //There is one rect per (genome x PA block), not just per genome
+					.data(dataPart); //There is one rect per (genome x PA block), not just per genome
 		
 		newData.exit().remove(); //Removing residual data
 		
@@ -794,7 +803,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
 		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`)
-		drawingDisplay_PerGenomePA(geno, genomeNumber); //Creates the first occurences of PA blocks
+		drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
 		
 		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
 					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
@@ -806,11 +815,11 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//---------------------------------blocks & attributes--------------------------------
 	
-	function drawingDisplay_BlockCount() {
+	function drawingDisplay_BlockCount(dataPart) {
 		
 		//Binding the data to a DOM element, therefore creating one SVG block per data
 		let newData = d3.select("#panChromosome_coreVSdispensable").selectAll("rect") //First an empty selection of all not yet existing rectangles
-					.data(dataGroupedPerChromosome[`${currentChromInView}`]); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+					.data(dataPart); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
 		
 					//For more about joins, see : https://bost.ocks.org/mike/join/
 		
@@ -832,7 +841,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
-	drawingDisplay_BlockCount();
+	drawingDisplay_BlockCount(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------eventDisplayInfoOn()--------------------------------
@@ -905,11 +914,11 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//-----------------------------rainbowBlocks & attributes-----------------------------
 	
-	function drawingDisplay_Rainbow() {
+	function drawingDisplay_Rainbow(dataPart) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select("#panChromosome_Rainbowed").selectAll("rect")
-					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+					.data(dataPart);
 		
 		newData.exit().remove(); //Removing residual data
 		
@@ -929,17 +938,17 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed");
-	drawingDisplay_Rainbow();
+	drawingDisplay_Rainbow(dataFiltered2View);
 
 	//------------------------------------------------------------------------------------	
 	
 	//-----------------------------similarBlocks & attributes-----------------------------
 	
-	function drawingDisplay_similarBlocks() {
+	function drawingDisplay_similarBlocks(dataPart) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select("#panChromosome_similarCount").selectAll("rect")
-					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+					.data(dataPart);
 		
 		newData.exit().remove(); //Removing residual data
 		
@@ -959,16 +968,16 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount");
-	drawingDisplay_similarBlocks();
+	drawingDisplay_similarBlocks(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------structureBackground & attributes--------------------------
 	
-	function drawingDisplay_similarBackground() {
+	function drawingDisplay_similarBackground(dataPart) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select("#structureBackground").selectAll("rect")
-					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+					.data(dataPart);
 		
 		newData.exit().remove(); //Removing residual data
 		
@@ -992,7 +1001,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground")
-	drawingDisplay_similarBackground();
+	drawingDisplay_similarBackground(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 
 	//------------------------------copyCircles & attributes------------------------------
@@ -1000,11 +1009,11 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	//Creation of the subgroup for the the repeated blocks (cf dataGroupedPerChromosome[`${currentChromInView}`][`copyPptionIn_Chr${chr}`])
 	//Here we could do a forEach loop with every Chr name or ID
 	
-	function drawingDisplay_similarityCircles(chr) {
+	function drawingDisplay_similarityCircles(chr, dataPart) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select(`#duplicationCircles_Chr${chr}`).selectAll("circle")
-					.data(dataGroupedPerChromosome[`${currentChromInView}`]);
+					.data(dataPart);
 		
 		newData.exit().remove(); //Removing residual data
 		
@@ -1024,7 +1033,7 @@ d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPan
 	
 	for (var chr = 0; chr < chromosomeNames.length; chr++) {
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
-		drawingDisplay_similarityCircles(chr);
+		drawingDisplay_similarityCircles(chr, dataFiltered2View);
 	};
 	//------------------------------------------------------------------------------------
 
