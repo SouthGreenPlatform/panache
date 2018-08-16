@@ -1,8 +1,8 @@
 //Fetching data and applying the visualisation to it, I will have to clean the code a bit later
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
-d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
+//d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -112,9 +112,9 @@ d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 	console.log(dataGroupedPerChromosome[`${currentChromInView}`]);
 //	dataGroupedPerChromosome[`${currentChromInView}`].map(d => console.log(d));
 
-	//-------------------------------currentWidestFeature---------------------------------
+	//----------------------------currentWidestFeatureLength------------------------------
 
-	var currentWidestFeature = Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)));
+	var currentWidestFeatureLength = Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)));
 	//------------------------------------------------------------------------------------
 
 	//------------------------------maxPositionInNucleotide-------------------------------
@@ -570,39 +570,37 @@ d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 	//https://svgwg.org/svg2-draft/single-page.html#render-EstablishingStackingContex
 	//https://developer.mozilla.org/fr/docs/Web/CSS/Comprendre_z-index/Empilement_de_couches
 	
+	//----------------------------drawingDisplay_Window()---------------------------------
+	
+	function drawingDisplay_Window(fullChrData,maxWidth,handle,genomesList,chromList){
+		//Draws the svg elements, but they have to be repositionned afterwards
+		
+		//Searching for the element on the far right of the non-displayed elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
+		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )) //Array of all the elements on the left side of the display window
+		let firstDisplayedPosition = underThresholdArray[underThresholdArray.length-1]["index"]; //index of the leftmost element to display, IF THE ARRAY IS ORDERED, ELSE Math.max() HAS TO BE USED ON EVERY NON DISPLAYED ELEMENTS, EVEN THE RIGHTMOST !
+		
+		//Selecting only the elements that would be visible within the display window, others are ignored and therefore will not be created
+		let dataFiltered2View = fullChrData.filter( d => ((Number(d.index) >= firstDisplayedPosition) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(miniWindowHandle.attr("width"))) )));
+//		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ))); //Maybe that is okay in term of speed only because it is a small array ?
+		
+		//Drawing of the SVG for each element
+		genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View)); //PA matrix
+		drawingDisplay_BlockCount(dataFiltered2View); //Blue/orange line
+		drawingDisplay_Rainbow(dataFiltered2View); //Position line
+		drawingDisplay_similarBlocks(dataFiltered2View); //Similarity line
+		drawingDisplay_similarBackground(dataFiltered2View); //Similarity vertical rectangles
+		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
+	};
+	//------------------------------------------------------------------------------------
+	
 	//------------------------------slidingAlongBlocks()----------------------------------
 	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
 	function slidingAlongBlocks(xBlockPosition) {
 		miniWindowHandle.attr("x", Number(miniatureSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
-//		blocksDisplay.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
-//		d3.selectAll(".moveableBlock").attr("x", d => d.index*displayedBlocksDimensions.width - xBlockPosition);
 
-
-//		nucleotideThresholds.left = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))) - browsingHandleDimensions.nucleotideMargin;
-//		nucleotideThresholds.right = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) + browsingHandleDimensions.nucleotideMargin;
-		
-		let underThresholdArray = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => Number(d.index) <= miniatureTicksScale.invert(miniWindowHandle.attr("x"))) //Array of all the elements on the left side of the display window
-//		let firstDisplayedPosition = Math.max(...underThresholdArray.map( d => Number(d.index))); //Searching for the element on the far right of the non-displayed left elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
-
-		let firstDisplayedPosition = underThresholdArray[underThresholdArray.length-1]["index"]; //index of the leftmost element to display
-
-//		console.log(underThresholdArray);
-//		console.log(underThresholdArray[underThresholdArray.length-1]["index"]);
-		
-		
-		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= firstDisplayedPosition) && (Number(d.index) <= miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) )));
-//		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ))); //Maybe that is okay only because it is a small array ?
-		
-		//For the display windows
-		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View));
-		drawingDisplay_BlockCount(dataFiltered2View);
-		drawingDisplay_Rainbow(dataFiltered2View);
-		drawingDisplay_similarBlocks(dataFiltered2View);
-		drawingDisplay_similarBackground(dataFiltered2View);
-		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);};
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames); //Updating the visible SVG elements
 		
 		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) - xBlockPosition);
-//		blocksDisplay.selectAll(".moveableCircle").attr("cx", d => (d.index+0.5)*displayedBlocksDimensions.width - xBlockPosition);
 		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
 	};
 	//------------------------------------------------------------------------------------
@@ -777,7 +775,10 @@ d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 		
 		//Updating var currentChromInView
 		currentChromInView = dropdownChromChoice.node().value; //Accessing the value registered by the dropdown menu
-		console.log(currentChromInView);
+//		console.log(currentChromInView);
+		
+		//Updating information directly dependant of currentChromInView
+		currentWidestFeatureLength = Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)));
 		maxPositionInNucleotide = Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop)));
 		
 		//Updating every display property/function depending on currentChromInView
