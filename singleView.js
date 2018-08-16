@@ -2,6 +2,7 @@
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
+//d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
 d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
@@ -36,7 +37,6 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyNames
 	//And : https://www.w3schools.com/jsref/jsref_slice_array.asp
 	//------------------------------------------------------------------------------------
-//	console.log(initialGenomesNames);
 	
 	//---------------------------------functionDiversity----------------------------------
 	
@@ -575,12 +575,19 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//Draws the svg elements, but they have to be repositionned afterwards
 		
 		//Searching for the element on the far right of the non-displayed elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
-		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )) //Array of all the elements on the left side of the display window
-		let firstDisplayedPosition = underThresholdArray[underThresholdArray.length-1]["index"]; //index of the leftmost element to display, IF THE ARRAY IS ORDERED, ELSE Math.max() HAS TO BE USED ON EVERY NON DISPLAYED ELEMENTS, EVEN THE RIGHTMOST !
+		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )); //Array of all the elements on the left side of the display window
 		
-		//Selecting only the elements that would be visible within the display window, others are ignored and therefore will not be created
-		let dataFiltered2View = fullChrData.filter( d => ((Number(d.index) >= firstDisplayedPosition) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(miniWindowHandle.attr("width"))) )));
-//		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ))); //Maybe that is okay in term of speed only because it is a small array ?
+		let dataFiltered2View = fullChrData[0];
+		
+//		if (underThresholdArray.length === 0) {console.log("Coucou je suis nul")} else {console.log("C'est bon")};
+		if (underThresholdArray.length != 0) {
+			
+			let firstDisplayedPosition = underThresholdArray[underThresholdArray.length-1]["index"]; //index of the leftmost element to display, IF THE ARRAY IS ORDERED, ELSE Math.max() HAS TO BE USED ON EVERY NON DISPLAYED ELEMENTS, EVEN THE RIGHTMOST !
+		
+			//Selecting only the elements that would be visible within the display window, others are ignored and therefore will not be created
+			dataFiltered2View = fullChrData.filter( d => ((Number(d.index) >= firstDisplayedPosition) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(miniWindowHandle.attr("width"))) )));
+//			dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ))); //Maybe that is okay in term of speed only because it is a small array ?
+		};		
 		
 		//Drawing of the SVG for each element
 		genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View)); //PA matrix
@@ -589,6 +596,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		drawingDisplay_similarBlocks(dataFiltered2View); //Similarity line
 		drawingDisplay_similarBackground(dataFiltered2View); //Similarity vertical rectangles
 		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
+//		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityBoxes(chr, dataFiltered2View);};
 	};
 	//------------------------------------------------------------------------------------
 	
@@ -814,6 +822,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	function drawingDisplay_PerGenomePA(geno, genomeNumber, dataPart) {
 		let newData = d3.select(`#presence_${geno}`).selectAll("rect")
 					.data(dataPart); //There is one rect per (genome x PA block), not just per genome
+					
+//		console.log(newData.exit); //"undefined" when empty
 		
 		newData.exit().remove(); //Removing residual data
 		
@@ -1061,6 +1071,34 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.20));//A one line 'if' statement
 	};
 	
+	for (var chr = 0; chr < chromosomeNames.length; chr++) {
+		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
+//		drawingDisplay_similarityCircles(chr, dataFiltered2View);
+	};
+	
+/*		function drawingDisplay_similarityBoxes(chr, dataPart) {
+		
+		//Binding the data to a DOM element
+		let newData = d3.select(`#duplicationCircles_Chr${chr}`).selectAll("circle")
+					.data(dataPart);
+		
+		newData.exit().remove(); //Removing residual data
+		
+		//Selecting all previous blocks, and determining their attributes
+		newData.enter()
+				.append("rect")
+				.attr("class", "moveableBlock")
+				.attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height +1)
+				.style("fill", d3.hcl(0,0,25))
+				.attr("width", d => d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-4) +2 ) //Depends on the data value; what if a block width is less than 2 px ?? It will get past the borders
+				.attr("height", d => displayedBlocksDimensions.height -2 ) //-2 in order to keep the color information provided by the background
+//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
+				.attr("x", d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-4) +2)/2 ) //Depends on the data index and the block's width
+				.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.10));//A one line 'if' statement
+	};
+*/	
 	for (var chr = 0; chr < chromosomeNames.length; chr++) {
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
 //		drawingDisplay_similarityCircles(chr, dataFiltered2View);
