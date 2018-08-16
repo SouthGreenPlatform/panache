@@ -847,7 +847,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
 		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`);
-		drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
+//		drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
 		
 		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
 					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
@@ -885,7 +885,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
-	drawingDisplay_BlockCount(dataFiltered2View);
+//	drawingDisplay_BlockCount(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 
 	//--------------------------------eventDisplayInfoOn()--------------------------------
@@ -982,7 +982,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed");
-	drawingDisplay_Rainbow(dataFiltered2View);
+//	drawingDisplay_Rainbow(dataFiltered2View);
 
 	//------------------------------------------------------------------------------------	
 	
@@ -1012,7 +1012,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
 	var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount");
-	drawingDisplay_similarBlocks(dataFiltered2View);
+//	drawingDisplay_similarBlocks(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------structureBackground & attributes--------------------------
@@ -1045,7 +1045,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//Creation of the subgroup for the StructureBackground
 	var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground")
-	drawingDisplay_similarBackground(dataFiltered2View);
+//	drawingDisplay_similarBackground(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 
 	//------------------------------copyCircles & attributes------------------------------
@@ -1077,8 +1077,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	for (var chr = 0; chr < chromosomeNames.length; chr++) {
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
-		drawingDisplay_similarityCircles(chr, dataFiltered2View);
+//		drawingDisplay_similarityCircles(chr, dataFiltered2View);
 	};
 	//------------------------------------------------------------------------------------
-
+	drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames);
 });
