@@ -787,7 +787,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //		browsingBlocksDimensions.width = svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1;
 		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/maxPositionInNucleotide);
 //		console.log(browsingHandleDimensions.width);
-		browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2;
+//		browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2;
 //		console.log(browsingHandleDimensions.nucleotideMargin);
 		miniatureSliderScale.domain([0, maxPositionInNucleotide - svgContainer_rawBlocks.attr("width")]);
 		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
@@ -800,18 +800,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		miniWindowHandle.attr("x", 0);
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
 		
-		//Updating the first blocks to display depending on the handle's size and position
-		nucleotideThresholds.left = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))) - browsingHandleDimensions.nucleotideMargin;
-		nucleotideThresholds.right = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) + browsingHandleDimensions.nucleotideMargin;
-		dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => (Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ));
-		
-		//For the display windows
-		initialGenomesNames.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View));
-		drawingDisplay_BlockCount(dataFiltered2View);
-		drawingDisplay_Rainbow(dataFiltered2View);
-		drawingDisplay_similarBlocks(dataFiltered2View);
-		drawingDisplay_similarBackground(dataFiltered2View);
-		for (var chr = 0; chr < chromosomeNames.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);};
+		//For the display window
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames);
 	});
 	//------------------------------------------------------------------------------------
 
@@ -856,7 +846,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	};
 	
 	initialGenomesNames.forEach(function(geno, genomeNumber) {
-		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`)
+		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`);
 		drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
 		
 		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
