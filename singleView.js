@@ -804,19 +804,6 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames);
 	});
 	//------------------------------------------------------------------------------------
-
-	//---------------------------------nucleotideThresholds-------------------------------
-	
-	var nucleotideThresholds = {}; //Contains the min and max nt positions to consider for the creation of DOM elements
-	nucleotideThresholds.left = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))) - browsingHandleDimensions.nucleotideMargin;
-	nucleotideThresholds.right = miniatureTicksScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))) + browsingHandleDimensions.nucleotideMargin;
-	//------------------------------------------------------------------------------------
-	
-	//----------------------------------dataFiltered2View---------------------------------	
-	
-	var dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => (Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right )); //Data restrained to the displayable features
-	//------------------------------------------------------------------------------------
-//	console.log(dataFiltered2View);
 	
 	//----------------------------matrixPA, attributes & labels---------------------------
 	
