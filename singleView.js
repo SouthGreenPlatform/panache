@@ -2,8 +2,8 @@
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-//d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
-d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
+//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -577,7 +577,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//Searching for the element on the far right of the non-displayed elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
 		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )); //Array of all the elements on the left side of the display window
 		
-		let dataFiltered2View = fullChrData[0];
+		let dataFiltered2View = [fullChrData[1]];
 		
 //		if (underThresholdArray.length === 0) {console.log("Coucou je suis nul")} else {console.log("C'est bon")};
 		if (underThresholdArray.length != 0) {
@@ -588,7 +588,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 			dataFiltered2View = fullChrData.filter( d => ((Number(d.index) >= firstDisplayedPosition) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(miniWindowHandle.attr("width"))) )));
 //			dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ))); //Maybe that is okay in term of speed only because it is a small array ?
 		};		
-		
+
 		//Drawing of the SVG for each element
 		genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View)); //PA matrix
 		drawingDisplay_BlockCount(dataFiltered2View); //Blue/orange line
