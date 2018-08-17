@@ -844,7 +844,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		newData.enter().append("rect") //Settings the attribute to the newly created blocks
 						.attr("class", "moveableBlock")
 						.attr("height", displayedBlocksDimensions.height)
-						.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
+						.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height - presenceAbsenceMatrixSliderScale.invert(Number(scrollingBar_PresenceAbsenceHandle.attr("cy")) ) ) //y is incremented for each new genome
 //						.style("position","absolute")
 //						.style("z-index", -1)
 				.merge(newData) //Combines enter() and 'update()' selection, to update both at once
@@ -880,7 +880,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//1st create a scale that links a value to a position in pixel
 		var presenceAbsenceMatrixSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 				.domain([0, displayedBlocksDimensions.height*initialGenomesNames.length-svgContainer_presenceAbsenceMatrix.attr("height")]) //Assuming that the total height of the display is 'displayedBlocksDimensions.height*initialGenomesNames.length'; this corresponds to the y position of the top of the svgContainer
-				.range([10, svgContainer_presenceAbsenceMatrix.attr("height")-10]) //The scrolling bar will have approximately the same height than the PA matrix svg
+				.range([0, svgContainer_presenceAbsenceMatrix.attr("height")-20]) //The scrolling bar will have approximately the same height than the PA matrix svg
 				.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
 		//------------------------------------------------------------------------------------
 		
@@ -889,7 +889,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		var presenceAbsenceScrollingSlider = svgContainer_presenceAbsenceMatrix.append("g").attr("class","fadingScrollingBar")
 //										.style("position", "relative").style("z-index",10) //The slider group is positionned in order to have an effective z-index, that will show it in front of every other object within svgContainer_presenceAbsenceMatrix (as the PA blocks do not have any z-index). That's theory, in practice I create it after the creation of the subgroup for the PA matrix and it is just fine
 										.style("opacity", 0)
-										.attr("transform", "translate(" + eval(svgContainer_presenceAbsenceMatrix.attr("width")-10) + "," + presenceAbsenceMatrixSliderScale.range()[0] + ")"); //Everything in it will be translated
+										.attr("transform", "translate(" + eval(svgContainer_presenceAbsenceMatrix.attr("width")-10) + "," + 10 + ")"); //Everything in it will be translated
 		//------------------------------------------------------------------------------------
 		
 		//---------------------------presenceAbsenceScrollingBar------------------------------
@@ -898,7 +898,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//The contour
 		presenceAbsenceScrollingSlider.append("line")//.attr("class","fadingScrollingBar") //That class will be used to react to a hovering event
 			.attr("y1", 0)
-			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]-presenceAbsenceMatrixSliderScale.range()[0]) 
+			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]) 
 			.attr("stroke-linecap","round")
 			.attr("stroke-width", "10px")
 //			.style("position", "absolute") //I still don't get how this works, it seems a bit random OH GOSH THE OPACITY THAT IS WHY
@@ -909,7 +909,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//The fill
 		presenceAbsenceScrollingSlider.append("line")//.attr("class","fadingScrollingBar")
 			.attr("y1", 0)
-			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]-presenceAbsenceMatrixSliderScale.range()[0]) 
+			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]) 
 			.attr("stroke-linecap","round")
 			.attr("stroke-width", "8px")
 			.attr("stroke", d3.hcl(0,0,95));
@@ -918,7 +918,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//-------------------------scrollingBar_PresenceAbsenceHandle-------------------------
 		
 		//Creation of the handle circle, thats translates the interaction into visual movement
-		var scrollingBar_PresenceAbsenceHandle = presenceAbsenceScrollingSlider.append("circle").attr("id", "scrollingBar_PA_Handle")//.attr("class","fadingScrollingBar")
+		var scrollingBar_PresenceAbsenceHandle = presenceAbsenceScrollingSlider.append("circle")//.attr("id", "scrollingBar_PA_Handle")//.attr("class","fadingScrollingBar")
 				.attr("r", 7) //The radius
 				.attr("fill", d3.hcl(0,0,100)) //The circle is filled in white
 				.attr("stroke", d3.hcl(0,0,25))
@@ -932,8 +932,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 
 		//Addition of the interactive zone
 		presenceAbsenceScrollingSlider.append("line")
-			.attr("y1", 0)
-			.attr("y2", svgContainer_presenceAbsenceMatrix.attr("height")) //The interactivity zone will have the same height than svgContainer_presenceAbsenceMatrix
+			.attr("y1", -10)
+			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]+10) //The interactivity zone will have the same height than svgContainer_presenceAbsenceMatrix
 			//.attr("stroke-linecap","round")
 			.attr("stroke-width", "120px") //As the line is centered, this width is /2 if we consider only the space to the left of the slider
 			.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parent lines/slider bars
@@ -953,7 +953,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				console.log("Je bouuuuge pas");
 				scrollingBar_PresenceAbsenceHandle.attr("cy", presenceAbsenceMatrixSliderScale(yPositionOfTop) -10); //Position change for the handle, -10 as the scrolling slider scale does not start at 0, and only when the function is called when scrolling the slider
 			};*/
-			scrollingBar_PresenceAbsenceHandle.attr("cy", presenceAbsenceMatrixSliderScale(yPositionOfTop) -10); //Position change for the handle, -10 as the scrolling slider scale does not start at 0, and only when the function is called when scrolling the slider
+			scrollingBar_PresenceAbsenceHandle.attr("cy", presenceAbsenceMatrixSliderScale(yPositionOfTop) ); //Position change for the handle
 			
 			initialGenomesNames.forEach(function(geno, genomeNumber) {
 				svgContainer_presenceAbsenceMatrix.select(`#presence_${geno}`).selectAll("rect")
