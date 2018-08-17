@@ -840,7 +840,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		
 		newData.exit().remove(); //Removing residual dom elements linked to unbound data
 		
-		console.log(scrollingBar_PresenceAbsenceHandle);
+//		console.log(scrollingBar_PresenceAbsenceHandle);
 		
 		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 		newData.enter().append("rect") //Settings the attribute to the newly created blocks
@@ -1009,37 +1009,74 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	function eventDisplayInfoOn(d, i) {		//Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
 											//http://bl.ocks.org/phil-pedruco/9032348 was useful too
+//	console.log(d3.select(this.parentNode).attr("id"));
 
-		//Uses D3 to select element and change its color based on the previously built color scales
-		d3.select(this).style("fill", function(d) {
-			var color = d3.hcl(thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
-			color.h = color.h+10; //Slight change in hue for better noticing
-			color.c = color.c*1.1; //Slight increase in chroma
-			color.l += (100-color.l)*0.5; //Slight increase in luminance without exceeding white
-			return color;
-		});
-		//Here, d is a block object from dataGroupedPerChromosome[`${currentChromInView}`], i is its index within the array
-		//To access values of a block, we need to take "this" as an argument
-
-		//alert(d + " " + i);
 
 		//Specifies where to put label of text altogether with its properties
 		svgContainer_rawBlocks.append("text")
-					.attr("id", "t" + d.presenceCounter + "-" + d.index)
+					.attr("id", "textThatDisplaysInformationOnBlock_"+d.index)
 					.attr("font-family", "sans-serif")
 					.attr("x", svgContainer_rawBlocks.attr("width")+1) //At first the text is not displayed in order to get its dimensions first
 					.attr("y", Number(d3.select(this).attr("y")) + displayedBlocksDimensions.height*2)
 					//ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
 					.attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments other than "middle"
 					.attr("text-anchor", "start") //Can be "start", "middle", or "end"
-					.text(function() {
+					/*.text(function() {
 						return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
-					});
+					});*/
 		
+
+		switch(d3.select(this.parentNode).attr("id")) { //Function that will display information depending on the selected row
+			case "panChromosome_coreVSdispensable":
+			
+				//Uses D3 to select element and change its color based on the previously built color scales
+				d3.select(this).style("fill", function(d) {
+					var color = d3.hcl(thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
+					color.h = color.h+10; //Slight change in hue for better noticing
+					color.c = color.c*1.1; //Slight increase in chroma
+					color.l += (100-color.l)*0.5; //Slight increase in luminance without exceeding white
+					return color;
+				});
+				//Here, d is a block object from dataGroupedPerChromosome[`${currentChromInView}`], i is its index within the array
+				//To access values of a block, we need to take "this" as an argument
+				
+				d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block appears in " + d.presenceCounter + " selected genome(s)"); //Text content
+				
+				break;
+				
+			case "panChromosome_rainbowed":
+			
+				d3.select(this).style("fill", function(d) {
+					var color = d3.hcl(pseudoRainbowColorScale(Number(d.index)));
+					color.c = color.c*1.1;
+					color.l += (100-color.l)*0.5;
+					return color;
+				});
+				
+				d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block starts on position " + d.FeatureStart + " and is " + eval(d3.format("~s")(d.FeatureStop - d.FeatureStart)) + "b long"); //d3.format is used to have the International System writing, with rounded values
+				
+				break;
+				
+			case "panChromosome_similarCount":
+			
+				d3.select(this).style("fill", function(d) {
+					var color = d3.hcl(purpleColorScale(Number(d.SimilarBlocks.split(";").length)));
+					color.h = color.h+10;
+					color.c = color.c*1.1;
+					color.l += (100-color.l)*0.5;
+					return color;
+				});
+			
+				d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block is repeated " + eval((d.SimilarBlocks.split(";").length >= 2) ? d.SimilarBlocks.split(";").length : 0) + " time(s) within the pangenome");
+			
+				break;
+			
+		};
+
 		//Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
-		var bbox = d3.select("#t" + d.presenceCounter + "-" + d.index).node().getBBox(); //Do not know exactly why but node() is needed
+		var bbox = d3.select("#textThatDisplaysInformationOnBlock_"+d.index).node().getBBox(); //Do not know exactly why but node() is needed
 		
-		d3.select("#t" + d.presenceCounter + "-" + d.index).attr("x", function(d) {
+		d3.select("#textThatDisplaysInformationOnBlock_"+d.index).attr("x", function(d) {
 																	if (d3.mouse(this)[0] < bbox.width/2 + 2) { //d3.event.x works only for drag events, not for cursor coordinates
 																		return 2; //Leaving space for the background rectangle
 																	} else if (d3.mouse(this)[0] > svgContainer_rawBlocks.attr("width") - (bbox.width/2+2)){
@@ -1047,9 +1084,9 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 																	} else { return d3.mouse(this)[0] - bbox.width/2 }
 																});
 
-		svgContainer_rawBlocks.insert("rect", "#t" + d.presenceCounter + "-" + d.index)
-			.attr("id", "t" + d.presenceCounter + "-" + d.index + "bg")
-				.attr("x", d3.select("#t" + d.presenceCounter + "-" + d.index).attr("x") - 2) //as bbox was created before the text was correctly placed, we cannot use bbox.x
+		svgContainer_rawBlocks.insert("rect", "#textThatDisplaysInformationOnBlock_"+d.index)
+			.attr("id", "textThatDisplaysInformationOnBlock_"+d.index + "bg")
+				.attr("x", d3.select("#textThatDisplaysInformationOnBlock_"+d.index).attr("x") - 2) //as bbox was created before the text was correctly placed, so we cannot use bbox.x directly
 				.attr("y", bbox.y - 2)
 				.attr("width", bbox.width + 4)
 				.attr("height", bbox.height + 4)
@@ -1057,19 +1094,35 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.style("fill-opacity", "0.9")
 				.style("stroke", d3.hcl(86, 5, 80))
 				.style("stroke-opacity", "0.9");
+		//How to trim elements that exceeds a certain length : https://blog.mastykarz.nl/measuring-the-length-of-a-string-in-pixels-using-javascript/
+		
+
 	};
-	//How to trim elements that exceeds a certain length : https://blog.mastykarz.nl/measuring-the-length-of-a-string-in-pixels-using-javascript/
 	//------------------------------------------------------------------------------------
 
 	//---------------------------------eventDisplayInfoOff()------------------------------
 	
 	function eventDisplayInfoOff(d, i) {
-		//Uses D3 to select element, change color back to normal by overwriting and not recovery
-		d3.select(this).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);});
 
+		switch(d3.select(this.parentNode).attr("id")) {
+		
+			case "panChromosome_coreVSdispensable":
+				//Uses D3 to select element, change color back to normal by overwriting and not recovery of the original colour
+				d3.select(this).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale); });
+				break;
+				
+			case "panChromosome_rainbowed":
+				d3.select(this).style("fill",function (d) {return d3.hcl(pseudoRainbowColorScale(Number(d.index))); });
+				break;
+				
+			case "panChromosome_similarCount":
+				d3.select(this).style("fill",function (d) {return d3.hcl(purpleColorScale(Number(d.SimilarBlocks.split(";").length))); });
+				break;
+		};
+		
 		//Selects text by id and then removes it
-		d3.select("#t" + d.presenceCounter + "-" + d.index).remove();  // Remove text location slecting the id thanks to #
-		d3.select("#t" + d.presenceCounter + "-" + d.index + "bg").remove();
+		d3.select("#textThatDisplaysInformationOnBlock_"+d.index).remove();  // Remove text location slecting the id thanks to #
+		d3.select("#textThatDisplaysInformationOnBlock_"+d.index + "bg").remove();
 	};
 	//------------------------------------------------------------------------------------
 	
@@ -1078,7 +1131,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	function drawingDisplay_Rainbow(dataPart) {
 		
 		//Binding the data to a DOM element
-		let newData = d3.select("#panChromosome_Rainbowed").selectAll("rect")
+		let newData = d3.select("#panChromosome_rainbowed").selectAll("rect")
 					.data(dataPart);
 		
 		newData.exit().remove(); //Removing residual data
@@ -1089,8 +1142,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.attr("class", "moveableBlock")
 				.attr("height", displayedBlocksDimensions.height)
 				.attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
 				.attr("x", (d,i) => Number(d.index))
 				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
@@ -1098,7 +1151,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	};
 	
 	//Binding the data to a DOM element, therefore creating one SVG block per data
-	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_Rainbowed");
+	var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_rainbowed");
 //	drawingDisplay_Rainbow(dataFiltered2View);
 
 	//------------------------------------------------------------------------------------	
@@ -1119,8 +1172,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.attr("class", "moveableBlock")
 				.attr("height", displayedBlocksDimensions.height)
 				.attr("y", Number(rainbowBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-//				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-//				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
+				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
 				.attr("x", (d,i) => Number(d.index))
 				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
