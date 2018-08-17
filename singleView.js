@@ -87,7 +87,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		return newObject;
 	});
 	//------------------------------------------------------------------------------------	
-	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
+//	console.log(improvedDataMatrix); //ATTENTION WE MUST WORK ON A copy OF THE ARRAY, ELSE THE REST WILL NOT BE DEFINED PROPERLY IN another potential matrix
 	//We can use this : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 
 	//See those too : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
@@ -102,14 +102,14 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		dataGroupedPerChromosome[`${chr}`].forEach(d => delete d.Chromosome); //Deletion of the redundant property "Chromosome" which is already determined by the main group
 	});
 	//------------------------------------------------------------------------------------
-	console.log(dataGroupedPerChromosome);
+//	console.log(dataGroupedPerChromosome);
 	
 	//--------------------------------currentChromInView----------------------------------
 	
 	var currentChromInView = Object.getOwnPropertyNames(dataGroupedPerChromosome)[0]
 	//------------------------------------------------------------------------------------
-	console.log(currentChromInView);
-	console.log(dataGroupedPerChromosome[`${currentChromInView}`]);
+//	console.log(currentChromInView);
+//	console.log(dataGroupedPerChromosome[`${currentChromInView}`]);
 //	dataGroupedPerChromosome[`${currentChromInView}`].map(d => console.log(d));
 
 	//----------------------------currentWidestFeatureLength------------------------------
@@ -211,25 +211,28 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	//----------------------------svgContainer_coreSlider---------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_coreSlider = d3.select("body").append("svg").attr("id", "svgContainer_coreSlider")
-										.attr("width", windowWidth*0.20).attr("height", 95); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.20).attr("height", 95); //Full proportions won't display correctly, so the total height and width must not be set at 100%
 	//------------------------------------------------------------------------------------
 	
 	//--------------------------svgContainer_browsingSlider-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_browsingSlider = d3.select("body").append("svg").attr("id", "svgContainer_browsingSlider")
-										.attr("width", windowWidth*0.75).attr("height", 95); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.75).attr("height", 95);
 	//------------------------------------------------------------------------------------
 	
 	//----------------------------svgContainer_genomesTree--------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_genomesTree = d3.select("body").append("svg").attr("id", "svgContainer_genomesTree")
-										.attr("width", windowWidth*0.20).attr("height", displayedBlocksDimensions.height*initialGenomesNames.length); //For now the height will depend on the number of input genomes, it will have to take a maximum height at some point
+//	var svgContainer_genomesTree = d3.select("body").append("div").attr("width", 100).attr("height", 152).style("overflow-y","scroll").append("svg").attr("id", "svgContainer_genomesTree")
+										.attr("width", windowWidth*0.20).attr("height", (displayedBlocksDimensions.height*initialGenomesNames.length <= (windowHeight*0.95-svgContainer_coreSlider.attr("height"))/3 ? displayedBlocksDimensions.height*initialGenomesNames.length : (windowHeight*0.95-svgContainer_coreSlider.attr("height"))/3)); //The height depends on the height of the previous SVG, the number of genomes and a maximum threshold so that it will not take more than a third of the display window
+//										.attr("height", 20).style("overflow-y","scroll");
 	//------------------------------------------------------------------------------------
 
 	//---------------------------svgContainer_presenceAbsenceMatrix-------------------------------
 	//Creating the SVG DOM tag
 	var svgContainer_presenceAbsenceMatrix = d3.select("body").append("svg").attr("id", "svgContainer_presenceAbsenceMatrix")
-										.attr("width", windowWidth*0.75).attr("height", displayedBlocksDimensions.height*initialGenomesNames.length); //Full proportions won't display correctly
+										.attr("width", windowWidth*0.75).attr("height", (displayedBlocksDimensions.height*initialGenomesNames.length <= (windowHeight*0.95-svgContainer_browsingSlider.attr("height"))/3 ? displayedBlocksDimensions.height*initialGenomesNames.length : (windowHeight*0.95-svgContainer_coreSlider.attr("height"))/3)); //Same height than before
+//										.attr("height", 152).style("overflow-y","scroll");
 	//------------------------------------------------------------------------------------
 
 	//---------------------------svgContainer_legends-------------------------------
@@ -577,7 +580,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		//Searching for the element on the far right of the non-displayed elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
 		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )); //Array of all the elements on the left side of the display window
 		
-		let dataFiltered2View = [fullChrData[1]];
+		let dataFiltered2View = [fullChrData[1]]; //ATTENTION It HAS to be an array for the sake of exit() and enter()
 		
 //		if (underThresholdArray.length === 0) {console.log("Coucou je suis nul")} else {console.log("C'est bon")};
 		if (underThresholdArray.length != 0) {
@@ -825,7 +828,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 					
 //		console.log(newData.exit); //"undefined" when empty
 		
-		newData.exit().remove(); //Removing residual data
+		newData.exit().remove(); //Removing residual dom elements linked to unbound data
 		
 		//ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
 		newData.enter().append("rect") //Settings the attribute to the newly created blocks
