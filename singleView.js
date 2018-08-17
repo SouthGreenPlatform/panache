@@ -2,8 +2,8 @@
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
-//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+//d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
+d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -225,6 +225,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	var svgContainer_genomesTree = d3.select("body").append("svg").attr("id", "svgContainer_genomesTree")
 //	var svgContainer_genomesTree = d3.select("body").append("div").attr("width", 100).attr("height", 152).style("overflow-y","scroll").append("svg").attr("id", "svgContainer_genomesTree")
 										.attr("width", windowWidth*0.20).attr("height", (displayedBlocksDimensions.height*initialGenomesNames.length <= (windowHeight*0.95-svgContainer_coreSlider.attr("height"))/3 ? displayedBlocksDimensions.height*initialGenomesNames.length : (windowHeight*0.95-svgContainer_coreSlider.attr("height"))/3)); //The height depends on the height of the previous SVG, the number of genomes and a maximum threshold so that it will not take more than a third of the display window
+										//ATTENTION If the genomes are clustered with spaces the height will change and some will not be fully displayed
 //										.attr("height", 20).style("overflow-y","scroll");
 	//------------------------------------------------------------------------------------
 
@@ -580,18 +581,19 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		//Searching for the element on the far right of the non-displayed elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
 		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )); //Array of all the elements on the left side of the display window
 		
-		let dataFiltered2View = [fullChrData[1]]; //ATTENTION It HAS to be an array for the sake of exit() and enter()
+		let elementsWithIndexesWithinWindow = fullChrData.filter( d => ( (Number(d.index) >= miniatureTicksScale.invert(Number(handle.attr("x"))) ) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(handle.attr("width"))) ) ));
+		console.log(elementsWithIndexesWithinWindow);
 		
-//		if (underThresholdArray.length === 0) {console.log("Coucou je suis nul")} else {console.log("C'est bon")};
+		let dataFiltered2View = [fullChrData[0]]; //ATTENTION It HAS to be an array for the sake of exit() and enter()
+		
+		//First element of the data is either the very first element of complete data set, or the righmost element within those that have an index smaller than the left threshold and that could be wide enough to be displayed anyway
 		if (underThresholdArray.length != 0) {
-			
-			let firstDisplayedPosition = underThresholdArray[underThresholdArray.length-1]["index"]; //index of the leftmost element to display, IF THE ARRAY IS ORDERED, ELSE Math.max() HAS TO BE USED ON EVERY NON DISPLAYED ELEMENTS, EVEN THE RIGHTMOST !
+			dataFiltered2View = [underThresholdArray[underThresholdArray.length-1]]; //the leftmost element to display, IF THE ARRAY IS ORDERED, ELSE Math.max() HAS TO BE USED ON EVERY NON DISPLAYED ELEMENTS!
+		};
+		console.log(dataFiltered2View);
+		//Selecting only the elements that would be visible within the display window, others are ignored and therefore will not be created
+		elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) ); //Push everything that belongs to the display window within the data to render, no matter if it is empty as if an array is empty nothing can be pushed anyway
 		
-			//Selecting only the elements that would be visible within the display window, others are ignored and therefore will not be created
-			dataFiltered2View = fullChrData.filter( d => ((Number(d.index) >= firstDisplayedPosition) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(miniWindowHandle.attr("width"))) )));
-//			dataFiltered2View = dataGroupedPerChromosome[`${currentChromInView}`].filter( d => ((Number(d.index) >= nucleotideThresholds.left) && (Number(d.index) <= nucleotideThresholds.right ))); //Maybe that is okay in term of speed only because it is a small array ?
-		};		
-
 		//Drawing of the SVG for each element
 		genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View)); //PA matrix
 		drawingDisplay_BlockCount(dataFiltered2View); //Blue/orange line
@@ -639,6 +641,10 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	//End of the browsing slider
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	
+
+	
+	
 	//Some code for enter, update and exit things :
 	// http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
 	//https://bost.ocks.org/mike/join/
@@ -679,6 +685,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 
 	//-----------------------------------legend_matrixPA----------------------------------
 	
+	//Text legend for the PA matrix
 	svgContainer_legends.append("g").attr("id","legend_matrixPA_title")
 					.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
 						.attr("y","1em")
@@ -690,10 +697,12 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	
 	svgContainer_legends.append("g").attr("id","legend_matrixSchema").attr("transform", "translate(0,30)");
 	
+	//Drawing the false tree for the legend
 	d3.select("#legend_matrixSchema").append("g").attr("id","legend_matrixPA_tree")
 							.append("path").attr("d","M 0 25.5 H 15 M 15 37 H 43 M 15 14 H 25 M 25 21 H 43 M 25 7 H 43 M 15 14 V 37 M 25 7 V 21")
 							.attr("stroke", "black"); //ATTENTION A H or V instruction does not ask for a delta but for a x or y absolute coordinate
 	
+	//Adding the names of the genomes next to the legend tree
 	d3.select("#legend_matrixSchema").append("g").attr("id","legend_matrixPA_genoNames")
 					.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
 						.attr("y", 7).attr("dominant-baseline", "middle")
@@ -705,7 +714,8 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 						.text("C")
 						.attr("y", 37);
-	
+						
+	//Drawing multiple blocks for the legend, not using canvas but paths
 	d3.select("#legend_matrixSchema").append("g").attr("id","legend_matrixPA_blocks").attr("transform", "translate(10,0)")
 							.append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 30 H 57 V 44 H 45 Z").attr("fill", functionColorScale(1))
 						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
@@ -835,12 +845,15 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 						.attr("class", "moveableBlock")
 						.attr("height", displayedBlocksDimensions.height)
 						.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height) //y is incremented for each new genome
+//						.style("position","absolute")
+//						.style("z-index", -1)
 				.merge(newData) //Combines enter() and 'update()' selection, to update both at once
 					.attr("x", (d,i) => Number(d.index)) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
 					.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
 					.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 					.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or 1 of every genome
 		
+//		eventScrollingPresenceAbsence(presenceAbsenceMatrixSliderScale.invert(d3.select("#scrollingBar_PA_Handle").attr("cy"))) //Ask to use eventScrollingPresenceAbsence but without redefining the cy position of the handle
 //		newData.exit().remove;
 	};
 	
@@ -848,13 +861,115 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`);
 //		drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
 		
-		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno} label`).attr("font-family", "sans-serif").attr("font-size", "10px")
+		var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno}_label`).attr("font-family", "sans-serif").attr("font-size", "10px")
 					.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
 					.attr("x",svgContainer_genomesTree.attr("width")-3).attr("text-anchor", "end")
 					.text(d => `${geno}`);
 	});
 
 	//------------------------------------------------------------------------------------
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Creation of a slider for scrolling the PA Matrix
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	if (displayedBlocksDimensions.height*initialGenomesNames.length > svgContainer_presenceAbsenceMatrix.attr("height")) {
+		//The slider will be created only if needed, supposes that the svg size will not change, though
+	
+		//--------------------------presenceAbsenceMatrixSliderScale--------------------------
+		
+		//1st create a scale that links a value to a position in pixel
+		var presenceAbsenceMatrixSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+				.domain([0, displayedBlocksDimensions.height*initialGenomesNames.length-svgContainer_presenceAbsenceMatrix.attr("height")]) //Assuming that the total height of the display is 'displayedBlocksDimensions.height*initialGenomesNames.length'; this corresponds to the y position of the top of the svgContainer
+				.range([10, svgContainer_presenceAbsenceMatrix.attr("height")-10]) //The scrolling bar will have approximately the same height than the PA matrix svg
+				.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded
+		//------------------------------------------------------------------------------------
+		
+		//---------------------------presenceAbsenceScrollingSlider---------------------------
+		
+		var presenceAbsenceScrollingSlider = svgContainer_presenceAbsenceMatrix.append("g").attr("class","fadingScrollingBar")
+//										.style("position", "relative").style("z-index",10) //The slider group is positionned in order to have an effective z-index, that will show it in front of every other object within svgContainer_presenceAbsenceMatrix (as the PA blocks do not have any z-index). That's theory, in practice I create it after the creation of the subgroup for the PA matrix and it is just fine
+										.style("opacity", 0)
+										.attr("transform", "translate(" + eval(svgContainer_presenceAbsenceMatrix.attr("width")-10) + "," + presenceAbsenceMatrixSliderScale.range()[0] + ")"); //Everything in it will be translated
+		//------------------------------------------------------------------------------------
+		
+		//---------------------------presenceAbsenceScrollingBar------------------------------
+
+		//Drawing of the line for the scrolling bar
+		//The contour
+		presenceAbsenceScrollingSlider.append("line")//.attr("class","fadingScrollingBar") //That class will be used to react to a hovering event
+			.attr("y1", 0)
+			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]-presenceAbsenceMatrixSliderScale.range()[0]) 
+			.attr("stroke-linecap","round")
+			.attr("stroke-width", "10px")
+//			.style("position", "absolute") //I still don't get how this works, it seems a bit random OH GOSH THE OPACITY THAT IS WHY
+//			.style("z-index", 10)
+			.attr("stroke", d3.hcl(0,0,25))
+			.attr("stroke-opacity", 0.3);
+			
+		//The fill
+		presenceAbsenceScrollingSlider.append("line")//.attr("class","fadingScrollingBar")
+			.attr("y1", 0)
+			.attr("y2", presenceAbsenceMatrixSliderScale.range()[1]-presenceAbsenceMatrixSliderScale.range()[0]) 
+			.attr("stroke-linecap","round")
+			.attr("stroke-width", "8px")
+			.attr("stroke", d3.hcl(0,0,95));
+		//------------------------------------------------------------------------------------
+		
+		//-------------------------scrollingBar_PresenceAbsenceHandle-------------------------
+		
+		//Creation of the handle circle, thats translates the interaction into visual movement
+		var scrollingBar_PresenceAbsenceHandle = presenceAbsenceScrollingSlider.append("circle").attr("id", "scrollingBar_PA_Handle")//.attr("class","fadingScrollingBar")
+				.attr("r", 7) //The radius
+				.attr("fill", d3.hcl(0,0,100)) //The circle is filled in white
+				.attr("stroke", d3.hcl(0,0,25))
+				.attr("cy", 0)
+				.attr("stroke-opacity", 0.3)
+				.attr("stroke-width", "1.25px");
+//				.style("visibility","hidden");
+		//------------------------------------------------------------------------------------
+		
+		//------------------------------presenceAbsenceOverlay--------------------------------
+
+		//Addition of the interactive zone
+		presenceAbsenceScrollingSlider.append("line")
+			.attr("y1", 0)
+			.attr("y2", svgContainer_presenceAbsenceMatrix.attr("height")) //The interactivity zone will have the same height than svgContainer_presenceAbsenceMatrix
+			//.attr("stroke-linecap","round")
+			.attr("stroke-width", "120px") //As the line is centered, this width is /2 if we consider only the space to the left of the slider
+			.attr("stroke", "transparent") //That zone is made invisible, but is still displayed over its parent lines/slider bars
+			.attr("cursor", "ns-resize") //The pointer changes for a double-edged arrow whenever it reaches that zone
+				.call(d3.drag()
+						.on("start drag", function() { eventScrollingPresenceAbsence(presenceAbsenceMatrixSliderScale.invert(d3.event.y)); }))
+				.on("mouseover", function() {d3.selectAll(".fadingScrollingBar").transition().style("opacity",1)})
+				.on("mouseout", function() {d3.selectAll(".fadingScrollingBar").transition().style("opacity",0)});
+				//About transitions : http://bl.ocks.org/Kcnarf/9e4813ba03ef34beac6e
+		//------------------------------------------------------------------------------------
+		
+		//---------------------------eventScrollingPresenceAbsence()--------------------------
+		
+		//Function called when dragging the slider's handle, its input "yPositionOfTop" is derived from the pointer position
+		function eventScrollingPresenceAbsence(yPositionOfTop) {
+			/*if (isScrolling === true) {
+				console.log("Je bouuuuge pas");
+				scrollingBar_PresenceAbsenceHandle.attr("cy", presenceAbsenceMatrixSliderScale(yPositionOfTop) -10); //Position change for the handle, -10 as the scrolling slider scale does not start at 0, and only when the function is called when scrolling the slider
+			};*/
+			scrollingBar_PresenceAbsenceHandle.attr("cy", presenceAbsenceMatrixSliderScale(yPositionOfTop) -10); //Position change for the handle, -10 as the scrolling slider scale does not start at 0, and only when the function is called when scrolling the slider
+			
+			initialGenomesNames.forEach(function(geno, genomeNumber) {
+				svgContainer_presenceAbsenceMatrix.select(`#presence_${geno}`).selectAll("rect")
+						.attr("y", (d,i) => genomeNumber*displayedBlocksDimensions.height - yPositionOfTop); //Of course this y position will not be exactly the same if the genomes are clustered with space between them
+
+				svgContainer_genomesTree.select(`#${geno}_label`)
+							.attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height - yPositionOfTop); //idem
+			});
+		};
+		//------------------------------------------------------------------------------------
+	
+	};
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//End of the PA Matrix scrolling bar
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	
 	//---------------------------------blocks & attributes--------------------------------
 	
