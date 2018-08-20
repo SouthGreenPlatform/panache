@@ -250,7 +250,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//--------------------------currentNucleotidesWidthInPixel----------------------------
 
-	var currentNucleotidesWidthInPixel = Number(svgContainer_presenceAbsenceMatrix.attr("width"))/15/(dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length); // = Width of the display window / (nb of displayed features * mean width of features)
+	var currentNucleotidesWidthInPixel = Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (15 * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)); // = Width of the display window / (nb of displayed features * mean width of features)
 	//------------------------------------------------------------------------------------
 //	console.log(dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length);
 //	console.log(currentNucleotidesWidthInPixel);
