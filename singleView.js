@@ -600,8 +600,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		drawingDisplay_Rainbow(dataFiltered2View); //Position line
 		drawingDisplay_similarBlocks(dataFiltered2View); //Similarity line
 		drawingDisplay_similarBackground(dataFiltered2View); //Similarity vertical rectangles
-		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
-//		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityBoxes(chr, dataFiltered2View);};
+//		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
+		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityBoxes(chr, dataFiltered2View);};
 	};
 	//------------------------------------------------------------------------------------
 	
@@ -1250,10 +1250,10 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //		drawingDisplay_similarityCircles(chr, dataFiltered2View);
 	};
 	
-/*		function drawingDisplay_similarityBoxes(chr, dataPart) {
+	function drawingDisplay_similarityBoxes(chr, dataPart) {
 		
 		//Binding the data to a DOM element
-		let newData = d3.select(`#duplicationCircles_Chr${chr}`).selectAll("circle")
+		let newData = d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
 					.data(dataPart);
 		
 		newData.exit().remove(); //Removing residual data
@@ -1261,21 +1261,21 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//Selecting all previous blocks, and determining their attributes
 		newData.enter()
 				.append("rect")
-				.attr("class", "moveableBlock")
-				.attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height +1)
+				.attr("class", "moveableSomething")
+				.attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height)
 				.style("fill", d3.hcl(0,0,25))
 				.attr("width", d => d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-4) +2 ) //Depends on the data value; what if a block width is less than 2 px ?? It will get past the borders
-				.attr("height", d => displayedBlocksDimensions.height -2 ) //-2 in order to keep the color information provided by the background
+				.attr("height", d => displayedBlocksDimensions.height ) //-2 in order to keep the color information provided by the background
 //				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 //				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
 				.attr("x", d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-4) +2)/2 ) //Depends on the data index and the block's width
-				.style("fill-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 1 : 0.10));//A one line 'if' statement
+				.style("fill-opacity", d => d[`copyPptionIn_Chr${chr}`]*0.75);//A one line 'if' statement
 	};
-*/	
+	
 	for (var chr = 0; chr < chromosomeNames.length; chr++) {
-		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
-//		drawingDisplay_similarityCircles(chr, dataFiltered2View);
+		var copyBoxes = blocksDisplay.append("g").attr("id", `duplicationBoxes_Chr${chr}`);
+//		drawingDisplay_similarityBoxes(chr, dataGroupedPerChromosome[`${currentChromInView}`]);
 	};
 	//------------------------------------------------------------------------------------
 	drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames);
