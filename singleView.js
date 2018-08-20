@@ -452,7 +452,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	var browsingHandleDimensions = {strokeWidth:3};
 	browsingHandleDimensions.height = browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
 //	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
-	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/maxPositionInNucleotide); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
+	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel)); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -464,7 +464,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	//Creation of a scale that links value to a position in pixel
 	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and no empty background when the slider is at the maximum position
-								.domain([0, maxPositionInNucleotide - svgContainer_rawBlocks.attr("width")])
+								.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel - svgContainer_rawBlocks.attr("width")]) //From 0 to the last pixel to show at the left of the display window
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
 								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
@@ -545,7 +545,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		.attr("cursor", "ew-resize") //The pointer changes for a double edged arrow whenever it reaches that zone
 			.call(d3.drag()
 				.on("start drag", function() { slidingAlongBlocks(miniatureSliderScale.invert(d3.event.x)); }));
-				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.	
+				//invert uses the same scale, but goes from range to domain, can be useful for returning data from mouse position : The container of a drag gesture determines the coordinate system of subsequent drag events, affecting event.x and event.y. The element returned by the container accessor is subsequently passed to d3.mouse or d3.touch, as appropriate, to determine the local coordinates of the pointer.
 	//------------------------------------------------------------------------------------
 	
 	
@@ -579,13 +579,13 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//----------------------------drawingDisplay_Window()---------------------------------
 	
-	function drawingDisplay_Window(fullChrData,maxWidth,handle,genomesList,chromList){
+	function drawingDisplay_Window(fullChrData, maxWidth, handle, genomesList, chromList, nucleotideWidth){
 		//Draws the svg elements, but they have to be repositionned afterwards
 		
 		//Searching for the element on the far right of the non-displayed elements, which index is not within the display window thresholds, but whose width makes that it has to be displayed too.
-		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )); //Array of all the elements on the left side of the display window
+		let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) )); //Array of all the elements on the left side of the display window, and whose width are necessarily inferior or equal to the max feature size; it is the same with or without *nucleotideWidth so it is not necessary to write it
 		
-		let elementsWithIndexesWithinWindow = fullChrData.filter( d => ( (Number(d.index) >= miniatureTicksScale.invert(Number(handle.attr("x"))) ) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(handle.attr("width"))) ) ));
+		let elementsWithIndexesWithinWindow = fullChrData.filter( d => ( (Number(d.index) >= miniatureTicksScale.invert(Number(handle.attr("x"))) ) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(handle.attr("width"))) ) )); //Here too *nucleotideWidth is unnecessary
 //		console.log(elementsWithIndexesWithinWindow);
 		
 		let dataFiltered2View = [fullChrData[0]]; //ATTENTION It HAS to be an array for the sake of exit() and enter()
@@ -599,29 +599,32 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) ); //Push everything that belongs to the display window within the data to render, no matter if it is empty as if an array is empty nothing can be pushed anyway
 		
 		//Drawing of the SVG for each element
-		genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View)); //PA matrix
-		drawingDisplay_BlockCount(dataFiltered2View); //Blue/orange line
-		drawingDisplay_Rainbow(dataFiltered2View); //Position line
-		drawingDisplay_similarBlocks(dataFiltered2View); //Similarity line
-		drawingDisplay_similarBackground(dataFiltered2View); //Similarity vertical rectangles
+		genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View, nucleotideWidth)); //PA matrix
+		drawingDisplay_BlockCount(dataFiltered2View, nucleotideWidth); //Blue/orange line
+		drawingDisplay_Rainbow(dataFiltered2View, nucleotideWidth); //Position line
+		drawingDisplay_similarBlocks(dataFiltered2View, nucleotideWidth); //Similarity line
+		drawingDisplay_similarBackground(dataFiltered2View, nucleotideWidth); //Similarity vertical rectangles
 //		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
-		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityBoxes(chr, dataFiltered2View);};
+		for (var chr = 0; chr < chromList.length; chr++) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
 	};
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------slidingAlongBlocks()----------------------------------
-	//Function called when dragging the slider's handle, its input "xBlockPosition" is derived from the pointer position
-	function slidingAlongBlocks(xBlockPosition) {
-		miniWindowHandle.attr("x", Number(miniatureSliderScale(xBlockPosition))-browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
-
-		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames); //Updating the visible SVG elements
+	//Function called when dragging the slider's handle, its input "xPosition_displayedPixel" is derived from the pointer position
+	function slidingAlongBlocks(xPosition_displayedPixel) {
+		let mouse_xPosition = Number(miniatureSliderScale(xPosition_displayedPixel));
 		
-		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) - xBlockPosition);
+		miniWindowHandle.attr("x", mouse_xPosition - browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
+
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel); //Updating the visible SVG elements
+		
+		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel - xPosition_displayedPixel);
 		for (var chr = 0; chr < chromosomeNames.length; chr++) {
 			d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
-				.attr("x", d => Number(d.index) - Number(xBlockPosition) + (Number(d.FeatureStop)-Number(d.FeatureStart))/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2)));
+				.attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel - xPosition_displayedPixel  + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel-2)));
+//				.attr("x", d => (Number(d.index) - Number(xPosition_displayedPixel)) * currentNucleotidesWidthInPixel + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel-2)));
 			}; //d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2) )/2
-//		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
+//		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xPosition_displayedPixel + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
 	};
 	//------------------------------------------------------------------------------------
 
@@ -813,11 +816,11 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		purpleColorScale.domain([1,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.SimilarBlocks.split(";").length))]);
 		pseudoRainbowColorScale.domain(domainPivotsMaker(pseudoRainbowList.length,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStart)))));
 //		browsingBlocksDimensions.width = svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1;
-		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/maxPositionInNucleotide);
+		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel));
 //		console.log(browsingHandleDimensions.width);
 //		browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2;
 //		console.log(browsingHandleDimensions.nucleotideMargin);
-		miniatureSliderScale.domain([0, maxPositionInNucleotide - svgContainer_rawBlocks.attr("width")]);
+		miniatureSliderScale.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel - svgContainer_rawBlocks.attr("width")]);
 		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
 		miniatureTicksScale.domain([0, maxPositionInNucleotide]);
 		
@@ -829,7 +832,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
 		
 		//For the display window
-		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames);
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel);
 	});
 	//------------------------------------------------------------------------------------
 	
@@ -840,7 +843,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	//ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
 	//See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 	
-	function drawingDisplay_PerGenomePA(geno, genomeNumber, dataPart) {
+	function drawingDisplay_PerGenomePA(geno, genomeNumber, dataPart, nucleotideWidth) {
 		let newData = d3.select(`#presence_${geno}`).selectAll("rect")
 					.data(dataPart); //There is one rect per (genome x PA block), not just per genome
 					
@@ -859,8 +862,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //						.style("position","absolute")
 //						.style("z-index", -1)
 				.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-					.attr("x", (d,i) => Number(d.index)) //x is incremented for each new PA block, and is reseted to 0 for each genome 'geno'
-					.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+					.attr("x", (d,i) => Number(d.index)*nucleotideWidth) //x is the position of the block within the filtered dataset (that is why index is used instead of FeatureStart), with the width of nucleotides taken into account
+					.attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
 					.style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
 					.style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
 		
@@ -984,7 +987,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//---------------------------------blocks & attributes--------------------------------
 	
-	function drawingDisplay_BlockCount(dataPart) {
+	function drawingDisplay_BlockCount(dataPart, nucleotideWidth) {
 		
 		//Binding the data to a DOM element, therefore creating one SVG block per data
 		let newData = d3.select("#panChromosome_coreVSdispensable").selectAll("rect") //First an empty selection of all not yet existing rectangles
@@ -1003,8 +1006,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-				.attr("x", (d,i) => Number(d.index))
-				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.attr("x", (d,i) => Number(d.index)*nucleotideWidth)
+				.attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
 				.style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale));
 	};
 
@@ -1136,7 +1139,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//-----------------------------rainbowBlocks & attributes-----------------------------
 	
-	function drawingDisplay_Rainbow(dataPart) {
+	function drawingDisplay_Rainbow(dataPart, nucleotideWidth) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select("#panChromosome_rainbowed").selectAll("rect")
@@ -1153,8 +1156,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-				.attr("x", (d,i) => Number(d.index))
-				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.attr("x", (d,i) => Number(d.index)*nucleotideWidth)
+				.attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
 				.style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
 	};
 	
@@ -1166,7 +1169,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//-----------------------------similarBlocks & attributes-----------------------------
 	
-	function drawingDisplay_similarBlocks(dataPart) {
+	function drawingDisplay_similarBlocks(dataPart, nucleotideWidth) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select("#panChromosome_similarCount").selectAll("rect")
@@ -1183,8 +1186,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-				.attr("x", (d,i) => Number(d.index))
-				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.attr("x", (d,i) => Number(d.index)*nucleotideWidth)
+				.attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
 				.style("fill", (d => purpleColorScale(d.SimilarBlocks.split(";").length)));
 	};
 	
@@ -1195,7 +1198,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	
 	//--------------------------structureBackground & attributes--------------------------
 	
-	function drawingDisplay_similarBackground(dataPart) {
+	function drawingDisplay_similarBackground(dataPart, nucleotideWidth) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select("#structureBackground").selectAll("rect")
@@ -1212,8 +1215,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 //				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-				.attr("x", (d,i) => Number(d.index))
-				.attr("width", d => Number(d.FeatureStop)-Number(d.FeatureStart))
+				.attr("x", (d,i) => Number(d.index)*nucleotideWidth)
+				.attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
 				.style("fill", function (d) {var color = d3.hcl(purpleColorScale(d.SimilarBlocks.split(";").length));
 					color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
 					color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
@@ -1226,7 +1229,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //	drawingDisplay_similarBackground(dataFiltered2View);
 	//------------------------------------------------------------------------------------
 
-	//------------------------------copyCircles & attributes------------------------------
+/*	//------------------------------copyCircles & attributes------------------------------
 	
 	//Creation of the subgroup for the the repeated blocks (cf dataGroupedPerChromosome[`${currentChromInView}`][`copyPptionIn_Chr${chr}`])
 	//Here we could do a forEach loop with every Chr name or ID
@@ -1257,8 +1260,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		var copyCircles = blocksDisplay.append("g").attr("id", `duplicationCircles_Chr${chr}`);
 //		drawingDisplay_similarityCircles(chr, dataFiltered2View);
 	};
-	
-	function drawingDisplay_similarityBoxes(chr, dataPart) {
+*/	
+	function drawingDisplay_similarityBoxes(chr, dataPart, nucleotideWidth) {
 		
 		//Binding the data to a DOM element
 		let newData = d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
@@ -1278,8 +1281,8 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 //				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-				.attr("x", d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2)) /2 ) //Depends on the data index and the block's width, those boxes are centered !
-				.attr("width", d => d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2)) //The width can be equal to 0, but cannot exceed the total width of the block (margin of 1px); should be modified depending on the zoom
+				.attr("x", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth/2 + Number(d.index)*nucleotideWidth - (d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth-2)) /2 ) //Depends on the data index and the block's width, those boxes are centered !
+				.attr("width", d => d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth-2)) //The width can be equal to 0, but cannot exceed the total width of the block (margin of 1px); should be modified depending on the zoom
 				.style("fill-opacity", d => d[`copyPptionIn_Chr${chr}`]*0.75) //The filling is directly dependant to the repartition of the similarities
 				.style("stroke-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 0.8 : 0) ); //The stroke will be displayed only if there is filling, and always has the same opacity so that even chrom with few repetitions will be visible
 	};
@@ -1289,5 +1292,5 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 //		drawingDisplay_similarityBoxes(chr, dataGroupedPerChromosome[`${currentChromInView}`]);
 	};
 	//------------------------------------------------------------------------------------
-	drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames);
+	drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel);
 });
