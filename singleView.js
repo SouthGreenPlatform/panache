@@ -248,7 +248,10 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*(1-0.05)-svgContainer_browsingSlider.attr("height")-svgContainer_presenceAbsenceMatrix.attr("height"));
 	//------------------------------------------------------------------------------------
 	
-	
+	//--------------------------currentNucleotidesWidthInPixel----------------------------
+
+	var currentNucleotidesWidthInPixel = 1;
+	//------------------------------------------------------------------------------------
 	
 	
 	//--------------------------------coreSliderGradient----------------------------------
