@@ -613,7 +613,11 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`],currentWidestFeatureLength,miniWindowHandle,initialGenomesNames,chromosomeNames); //Updating the visible SVG elements
 		
 		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) - xBlockPosition);
-		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
+		for (var chr = 0; chr < chromosomeNames.length; chr++) {
+			d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
+				.attr("x", d => Number(d.index) - Number(xBlockPosition) + (Number(d.FeatureStop)-Number(d.FeatureStart))/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2)));
+			}; //d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2) )/2
+//		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xBlockPosition + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
 	};
 	//------------------------------------------------------------------------------------
 
@@ -1261,16 +1265,19 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		//Selecting all previous blocks, and determining their attributes
 		newData.enter()
 				.append("rect")
-				.attr("class", "moveableSomething")
-				.attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height)
+				.attr("class", "moveableBoxes")
+				.attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height) //Each line corresponds to a chromosome
 				.style("fill", d3.hcl(0,0,25))
-				.attr("width", d => d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-4) +2 ) //Depends on the data value; what if a block width is less than 2 px ?? It will get past the borders
-				.attr("height", d => displayedBlocksDimensions.height ) //-2 in order to keep the color information provided by the background
+				.attr("height", d => displayedBlocksDimensions.height )
+				.style("stroke", d3.hcl(0,0,25))
+				.style("stroke-width", 0.5)
 //				.on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 //				.on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
 			.merge(newData) //Combines enter() and 'update()' selection, to update both at once
-				.attr("x", d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-4) +2)/2 ) //Depends on the data index and the block's width
-				.style("fill-opacity", d => d[`copyPptionIn_Chr${chr}`]*0.75);//A one line 'if' statement
+				.attr("x", d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2)) /2 ) //Depends on the data index and the block's width, those boxes are centered !
+				.attr("width", d => d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2)) //The width can be equal to 0, but cannot exceed the total width of the block (margin of 1px); should be modified depending on the zoom
+				.style("fill-opacity", d => d[`copyPptionIn_Chr${chr}`]*0.75) //The filling is directly dependant to the repartition of the similarities
+				.style("stroke-opacity", d => (d[`copyPptionIn_Chr${chr}`] > 0 ? 0.8 : 0) ); //The stroke will be displayed only if there is filling, and always has the same opacity so that even chrom with few repetitions will be visible
 	};
 	
 	for (var chr = 0; chr < chromosomeNames.length; chr++) {
