@@ -2,8 +2,8 @@
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-//d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
-d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
+//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -1064,7 +1064,12 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 					return color;
 				});
 				
-				d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block starts on position " + d.FeatureStart + " and is " + eval(d3.format("~s")(d.FeatureStop - d.FeatureStart)) + "b long"); //d3.format is used to have the International System writing, with rounded values
+//				console.log("#textThatDisplaysInformationOnBlock_"+d.index);
+//				console.log("This block starts on position " + d.FeatureStart);
+//				console.log(" and is " + d3.format("~s")(Number(d.FeatureStop) - Number(d.FeatureStart)) + "b long");
+				
+				d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block starts on position " + d.FeatureStart + " and is " + d3.format("~s")(Number(d.FeatureStop) - Number(d.FeatureStart)) + "b long"); //d3.format is used to have the International System writing, with rounded values
+				//ATTENTION for float values such as 1.586 for instance eval() considered the "." to be the announcement of a property (586, property of the object 1), therefore an ID error occured
 				
 				break;
 				
