@@ -400,14 +400,18 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 			.attr("font-family", "sans-serif")
 			.attr("font-size", "10px")
 			.attr("transform", "translate("+coreSliderScale.range()[1]/2+",0)") //Keeping the value outside of quotes is neede for its calculation
-			.attr("dy","-2.5em") //A vertical translation depending on the font size (2em --> two times the font size, enough space for two lines)
+			.attr("dy","-1.3em") //A vertical translation depending on the font size (2em --> two times the font size, enough space for two lines)
 			.attr("text-anchor", "middle")
 			.append("tspan")
-				.text("Minimal Presence ratio")
-				.attr("x", 0) //Needed for the carriage return
+				.text("to be part of ")
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-				.text("to be part of Core")
-				.attr("dy","1.2em");
+				.text("Core")
+				.style("fill",d3.hcl(60,65,70))
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+				.attr("x", 0) //Needed for the correct carriage return
+				.text("Minimal Presence ratio")
+				.attr("dy","-1.2em")
+				.style("fill", "black");	
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------eventDynamicColorChange()-----------------------------
@@ -709,7 +713,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 						.attr("x",svgContainer_legends.attr("width")/2).attr("text-anchor", "middle")
 						.text("1 column is associated to 1 panBlock")
 					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-						.text("and genomes are clustered by Phil Leitr")
+						.text("and genomes are clustered by ...")
 						.attr("y","2em");
 	
 	svgContainer_legends.append("g").attr("id","legend_matrixSchema").attr("transform", "translate(0,30)");
