@@ -250,7 +250,13 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	
 	//--------------------------currentNucleotidesWidthInPixel----------------------------
 
-	var currentNucleotidesWidthInPixel = Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (15 * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)); // = Width of the display window / (nb of displayed features * mean width of features)
+	var currentNucleotidesWidthInPixel = {};
+	
+	currentNucleotidesWidthInPixel.minGlobal = Number(svgContainer_presenceAbsenceMatrix.attr("width"))/maxPositionInNucleotide;
+	currentNucleotidesWidthInPixel.minEfficiency = Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (150 * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)); //The minimum size  that allows a "smooth" display, it is set at 150 features which is kind of already slow to show
+	//ATTENTION It depends on the total number of displayed elements ! The more genome/chromosomes there are, the slower it is !
+	currentNucleotidesWidthInPixel.max = 10;
+	currentNucleotidesWidthInPixel.effective = Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (15 * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)); // = Width of the display window / (nb of displayed features * mean width of features)
 	//------------------------------------------------------------------------------------
 //	console.log(dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length);
 //	console.log(currentNucleotidesWidthInPixel);
@@ -452,7 +458,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	var browsingHandleDimensions = {strokeWidth:3};
 	browsingHandleDimensions.height = browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1) + Number(browsingHandleDimensions.strokeWidth)*2; //Normal height + contour
 //	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(displayedBlocksDimensions.width*Number(dataGroupedPerChromosome[`${currentChromInView}`].length))); // = SliderWidth * displayWindowWidth/(nbBlocks * BlocksWidth)
-	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel)); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
+	browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective)); // = SliderWidth * displayWindowWidth/(total size of display; here it is max(FeatureStop) as we consider 1 nt with a width of 1 px)
 	//------------------------------------------------------------------------------------
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -464,7 +470,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	//Creation of a scale that links value to a position in pixel
 	var miniatureSliderScale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
 //								.domain([0, displayedBlocksDimensions.width*dataGroupedPerChromosome[`${currentChromInView}`].length - svgContainer_rawBlocks.attr("width")]) //Must be the min and max block positions, with a gap in order to always show blocks, and no empty background when the slider is at the maximum position
-								.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel - svgContainer_rawBlocks.attr("width")]) //From 0 to the last pixel to show at the left of the display window
+								.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective - svgContainer_rawBlocks.attr("width")]) //From 0 to the last pixel to show at the left of the display window
 								.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) //Ranges from and to the slider's extreme length values/positions as an output
 								//ATTENTION The slider positions correspond to the center of the handle !
 								//The margins are dependant of the handle width, which depends on the number of blocks and the window's width
@@ -616,13 +622,13 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		
 		miniWindowHandle.attr("x", mouse_xPosition - browsingHandleDimensions.width/2); //Position change for the handle ATTENTION The scale is useful for not exceeding the max coordinates
 
-		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel); //Updating the visible SVG elements
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel.effective); //Updating the visible SVG elements
 		
-		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel - xPosition_displayedPixel);
+		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel);
 		for (var chr = 0; chr < chromosomeNames.length; chr++) {
 			d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
-				.attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel - xPosition_displayedPixel  + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel-2)));
-//				.attr("x", d => (Number(d.index) - Number(xPosition_displayedPixel)) * currentNucleotidesWidthInPixel + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel-2)));
+				.attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel  + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
+//				.attr("x", d => (Number(d.index) - Number(xPosition_displayedPixel)) * currentNucleotidesWidthInPixel.effective + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
 			}; //d => (Number(d.FeatureStop)-Number(d.FeatureStart))/2 + Number(d.index) - (d[`copyPptionIn_Chr${chr}`]*(Number(d.FeatureStop)-Number(d.FeatureStart)-2) )/2
 //		d3.selectAll(".moveableCircle").attr("cx", d => Number(d.index) - xPosition_displayedPixel + (Number(d.FeatureStop)-Number(d.FeatureStart))/2);
 	};
@@ -816,11 +822,11 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		purpleColorScale.domain([1,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => d.SimilarBlocks.split(";").length))]);
 		pseudoRainbowColorScale.domain(domainPivotsMaker(pseudoRainbowList.length,Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStart)))));
 //		browsingBlocksDimensions.width = svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1;
-		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel));
+		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective));
 //		console.log(browsingHandleDimensions.width);
 //		browsingHandleDimensions.nucleotideMargin = maxPositionInNucleotide / dataGroupedPerChromosome[`${currentChromInView}`].length *2;
 //		console.log(browsingHandleDimensions.nucleotideMargin);
-		miniatureSliderScale.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel - svgContainer_rawBlocks.attr("width")]);
+		miniatureSliderScale.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective - svgContainer_rawBlocks.attr("width")]);
 		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
 		miniatureTicksScale.domain([0, maxPositionInNucleotide]);
 		
@@ -832,7 +838,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
 		
 		//For the display window
-		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel);
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel.effective);
 	});
 	//------------------------------------------------------------------------------------
 	
@@ -1297,5 +1303,5 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 //		drawingDisplay_similarityBoxes(chr, dataGroupedPerChromosome[`${currentChromInView}`]);
 	};
 	//------------------------------------------------------------------------------------
-	drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel);
+	drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel.effective);
 });
