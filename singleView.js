@@ -780,21 +780,26 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	//------------------------------------------------------------------------------------
 	
 	//----------------------------------legend_zoomLevel----------------------------------
+	
+	//Group for the zoom slider and its legend
 	svgContainer_legends.append("g").attr("id", "legend_zoomLevel")
-			.attr("transform", "translate(90,"+eval(30 + 20 + d3.select("#legend_matrixSchema").node().getBBox().height) +")")
+			.attr("transform", "translate("+eval(Number(svgContainer_legends.attr("width"))/2)+","+eval(30 + 20 + d3.select("#legend_matrixSchema").node().getBBox().height) +")")
 			.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
-			.text("Zoom level").attr("text-anchor", "middle");
+				.text("Zoom level").attr("text-anchor", "middle");
 			
 	var zoomSlider = d3.select("#legend_zoomLevel").append("g").attr("transform","translate(0,8)");
 	
+	//Scale use for the zoom slider
 	var zoomScale = d3.scaleLinear() //Linear Scale in two parts as low values are more important than "high" values that would not be displayed properly anyway, it has the number of features to display as an input
 							.domain([dataGroupedPerChromosome[`${currentChromInView}`].length, 150, featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.max, dataGroupedPerChromosome[`${currentChromInView}`])]) //Last pivot is the "number" of features displayed when nt width == 10px
 							.range([-90, -30, 90]) //Ranges from and to the miniature's extreme length values/positions as an output
 							.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded, not sure if it is useful for a ticks axis
 	
+	//Drawing the zoom slider
 	zoomSlider.append("path").attr("d", "M -90 11 L 90 4 V 18 Z").style("fill", d3.hcl(0,0,50));
 	zoomSlider.append("rect").attr("x", -90).attr("y",0).attr("height", 22).attr("width", zoomScale.range()[1]-zoomScale.range()[0]) //That width depends on the efficiency limit, arbitrarily set to 150 for now
-			.style("fill-opacity", 0.5).style("fill", d3.hcl(70,80,100));
+			.style("fill-opacity", 0.5).style("fill", d3.hcl(70,80,100))
+			.attr("stroke", d3.hcl(70,100,75));
 	zoomSlider.append("line").attr("y1",0).attr("y2",22).attr("x1", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("x2", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("stroke-width", 2).attr("stroke","black");
 	zoomSlider.append("text").attr("y",-3).attr("x", -90).attr("dominant-baseline", "hanging")
 		.attr("font-family", "sans-serif").attr("font-size", "18px")
@@ -839,6 +844,14 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		};
 	};
 	
+	d3.select("#legend_zoomLevel")
+		.append("text").attr("font-family", "sans-serif").attr("font-size", "10px").attr("text-anchor", "middle")
+			.style("fill", d3.hcl(70,100,75)).attr("y", 50)
+			.append("tspan").attr("x", 0)
+				.text("* At this zoom levels")
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+				.text("lag might occur")
+				.attr("dy","1em");
 	//------------------------------------------------------------------------------------
 	
 	
