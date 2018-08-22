@@ -4,7 +4,7 @@ This tool is used to visualise and explore pangenomes, chromosome per chromosome
 
 ## Launching
 
-Pañata is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice. Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
+Pañata is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice (see [here](###-How-to-run-it) for a summary on how to run Pañata). Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
 
 ### File content
 
@@ -40,7 +40,7 @@ Html file that calls the script. It is **the file that should be opened in the w
 
 * **singleView.js**
 
-JavaScript file used to create all the display. It works with D3.js and uses a .tsv file to display visual insights of it. See [below](#File-format-specifications) for more information about the file format in use.
+JavaScript file used to create all the display. It works with D3.js and uses a .tsv file to display visual insights of it. See [below](##File-format-specifications) for more information about the file format in use.
 The first line must be changed according to the file on display :
 
 ```
@@ -55,7 +55,7 @@ It is possible to specify another delimiter if the input file is not tab-delimit
 
 * **mediumFakeDataWithAllBlocks.tsv, or myFile.tsv**
 
-*singleView.js* visualises the data inside a value-separated file. You can try it with one of the test files (*mediumFakeDataWithAllBlocks.tsv*) but the best is to try with your own *myFile.tsv* file. It has to be a delimited file, either comma- or tab- separated will work fine as long as it is specified in the first line of *singleView.js*. **See [below](#File-format-specifications) for details about the file format.**
+*singleView.js* visualises the data inside a value-separated file. You can try it with one of the test files (*mediumFakeDataWithAllBlocks.tsv*) but the best is to try with your own *myFile.tsv* file. It has to be a delimited file, either comma- or tab- separated will work fine as long as it is specified in the first line of *singleView.js*. **See [below](##File-format-specifications) for details about the file format.**
 
 * README.md (*facultative*)
 
@@ -92,9 +92,34 @@ File used to test how to draw SVGs and to try things with their properties
 
 ### How to run it
 
+First of all the path to the data file that will be on displayed must be written on the first (uncommented) line of *singleView.js* :
+```
+d3.dsv("\t","a/path/to/myFile.tsv").then(function(realPanMatrix) {
+
+    ...
+
+};
+```
+The first parameter corresponds to the file delimiter. It is possible to change it to match those of your own file, however **":" and ";" must not be used !**
+
+Pañata can be launched by opening singleView.html in the web browser of your choice. It has been developped under Mozilla Firefox, but works on Google Chrome too. Support by Microsoft Edge is unknown, and Internet Explorer cannot run it (*obviously*).
+If you want to try it with Google Chrome you might have to open it through a virtual machine, as Google Chrome does not allow to open .html files directly.
+
+If your data file is really big (hundred thousands of features per chromosome or more), it might take a little time before everything is displayed, just wait a few seconds. It is the drawing of the miniature canvas that is time consuming. This will reload everytime you change the displayed chromosome, but navigating should be fast once it is loaded.
+
+Once everything is loaded, just play around with it, or see [the instructions](##Instructions) to learn how to use it !
+
 ## File format specifications
+### Nature of the data
+(Do not forget to talk about data with holes)
+### Header
+### Body
 
 ## Instructions
+### Components of the interface
+### Changing the displayed chromosome
+### Using the sliders
+### Hovering to have information
 
 ## Author
 
