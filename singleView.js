@@ -248,10 +248,17 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*(1-0.05)-svgContainer_browsingSlider.attr("height")-svgContainer_presenceAbsenceMatrix.attr("height"));
 	//------------------------------------------------------------------------------------
 	
-	//----------------------------ntWidthDependingOnFeatureNb-----------------------------
+	//---------------------------ntWidthDependingOnFeatureNb()----------------------------
 	
 	function ntWidthDependingOnFeatureNb(windowWidth, nbFeature2Display, dataset) {
 		return windowWidth / (nbFeature2Display * dataset.map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataset.length); // = Width of the display window / (nb of displayed features * mean width of features);
+	};
+	//------------------------------------------------------------------------------------
+	
+	//---------------------------featureNbDependingOnNtWidth()----------------------------
+	
+	function featureNbDependingOnNtWidth(windowWidth, nucleotideWidth, dataset) {
+		return windowWidth /(nucleotideWidth * dataset.map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataset.length);
 	};
 	//------------------------------------------------------------------------------------
 	
@@ -777,16 +784,15 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 			
 	var zoomSlider = d3.select("#legend_zoomLevel").append("g").attr("transform","translate(0,8)");
 	
-	var zoomScale = d3.scaleLinear() //Linear Scale in two parts as low values are more important than "high" values that would not be displayed properly anyway
-							.domain([currentNucleotidesWidthInPixel.minGlobal, currentNucleotidesWidthInPixel.minEfficiency, currentNucleotidesWidthInPixel.max])
+	var zoomScale = d3.scaleLinear() //Linear Scale in two parts as low values are more important than "high" values that would not be displayed properly anyway, it has the number of features to display as an input
+							.domain([dataGroupedPerChromosome[`${currentChromInView}`].length, 150, featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.max, dataGroupedPerChromosome[`${currentChromInView}`])]) //Last pivot is the "number" of features displayed when nt width == 10px
 							.range([-90, -30, 90]) //Ranges from and to the miniature's extreme length values/positions as an output
 							.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded, not sure if it is useful for a ticks axis
 	
-	
 	zoomSlider.append("path").attr("d", "M -90 11 L 90 4 V 18 Z").style("fill", d3.hcl(0,0,50));
-	zoomSlider.append("rect").attr("x", -90).attr("y",0).attr("height", 22).attr("width", zoomScale(currentNucleotidesWidthInPixel.minEfficiency)) //That width depends on the efficiency limit
+	zoomSlider.append("rect").attr("x", -90).attr("y",0).attr("height", 22).attr("width", zoomScale.range()[1]-zoomScale.range()[0]) //That width depends on the efficiency limit, arbitrarily set to 150 for now
 			.style("fill-opacity", 0.5).style("fill", d3.hcl(70,80,100));
-	zoomSlider.append("line").attr("y1",0).attr("y2",22).attr("x1", zoomScale(currentNucleotidesWidthInPixel.effective)).attr("x2", zoomScale(currentNucleotidesWidthInPixel.effective)).attr("stroke-width", 2).attr("stroke","black");
+	zoomSlider.append("line").attr("y1",0).attr("y2",22).attr("x1", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("x2", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("stroke-width", 2).attr("stroke","black");
 	zoomSlider.append("text").attr("y",-3).attr("x", -90).attr("dominant-baseline", "hanging")
 		.attr("font-family", "sans-serif").attr("font-size", "18px")
 		.style("fill", d3.hcl(70,100,75))
@@ -798,9 +804,8 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 			.call(d3.drag()
 				.on("start drag", function() { eventChangingZoom(zoomScale.invert(d3.event.x)); }));
 	
-	function eventChangingZoom(zoomLevel) {
-		zoomSlider.select("line").attr("x1", zoomScale(zoomLevel)).attr("x2", zoomScale(zoomLevel));
-		console.log(zoomLevel)
+	function eventChangingZoom(nbOfFeatures) {
+		zoomSlider.select("line").attr("x1", zoomScale(nbOfFeatures)).attr("x2", zoomScale(nbOfFeatures));
 		
 	};
 	
