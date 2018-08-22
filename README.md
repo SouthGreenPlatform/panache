@@ -40,7 +40,7 @@ Html file that calls the script. It is **the file that should be opened in the w
 
 * **singleView.js**
 
-JavaScript file used to create all the display. It works with D3.js and uses a .tsv file to display visual insights of it. See [below](##File-format-specifications) for more information about the file format in use.
+JavaScript file used to create all the display. It works with D3.js and uses a .tsv file to display visual insights of it. See [below](#file-format-specifications) for more information about the file format in use.
 The first line must be changed according to the file on display :
 
 ```
@@ -55,7 +55,7 @@ It is possible to specify another delimiter if the input file is not tab-delimit
 
 * **mediumFakeDataWithAllBlocks.tsv, or myFile.tsv**
 
-*singleView.js* visualises the data inside a value-separated file. You can try it with one of the test files (*mediumFakeDataWithAllBlocks.tsv*) but the best is to try with your own *myFile.tsv* file. It has to be a delimited file, either comma- or tab- separated will work fine as long as it is specified in the first line of *singleView.js*. **See [below](##File-format-specifications) for details about the file format.**
+*singleView.js* visualises the data inside a value-separated file. You can try it with one of the test files (*mediumFakeDataWithAllBlocks.tsv*) but the best is to try with your own *myFile.tsv* file. It has to be a delimited file, either comma- or tab- separated will work fine as long as it is specified in the first line of *singleView.js*. **See [below](#file-format-specifications) for details about the file format.**
 
 * README.md (*facultative*)
 
@@ -107,7 +107,7 @@ If you want to try it with Google Chrome you might have to open it through a vir
 
 If your data file is really big (hundred thousands of features per chromosome or more), it might take a little time before everything is displayed, just wait a few seconds. It is the drawing of the miniature canvas that is time consuming. This will reload everytime you change the displayed chromosome, but navigating should be fast once it is loaded.
 
-Once everything is loaded, just play around with it, or see [the instructions](##Instructions) to learn how to use it !
+Once everything is loaded, just play around with it, or see [the instructions](##instructions) to learn how to use it !
 
 ## File format specifications
 ### Nature of the data
