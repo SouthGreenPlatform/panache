@@ -637,7 +637,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 	//------------------------------------------------------------------------------------
 	
 	//------------------------------slidingAlongBlocks()----------------------------------
-	//Function called when dragging the slider's handle, its input "xPosition_displayedPixel" is derived from the pointer position
+	//Function called when dragging the slider's handle, its input "xPosition_displayedPixel" is derived from the pointer position, through miniatureSliderScale
 	function slidingAlongBlocks(xPosition_displayedPixel) {
 		let mouse_xPosition = Number(miniatureSliderScale(xPosition_displayedPixel));
 		
@@ -808,8 +808,35 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 				.on("start drag", function() { eventChangingZoom(zoomScale.invert(d3.event.x)); }));
 	
 	function eventChangingZoom(nbOfFeatures) {
-		zoomSlider.select("line").attr("x1", zoomScale(nbOfFeatures)).attr("x2", zoomScale(nbOfFeatures));
+		zoomSlider.select("line").attr("x1", zoomScale(nbOfFeatures)).attr("x2", zoomScale(nbOfFeatures)); //as the first line of zoomSlider is the one we want, there is no use to specify more
 		
+		//Updating the value of the nucleotideWidth
+		currentNucleotidesWidthInPixel.effective = ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), nbOfFeatures, dataGroupedPerChromosome[`${currentChromInView}`]);
+		
+		//Changing the size of the miniWindowHandle
+		browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective));
+		miniWindowHandle.attr("width", browsingHandleDimensions.width);
+		
+		//Updating the range of SliderScale
+		miniatureSliderScale.range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]);
+		miniatureSliderScale.domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective - svgContainer_rawBlocks.attr("width")]);
+		
+		//Changing the x position so that the handle will not exceed the miniature dimensions
+		if (Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width")) > Number(svgContainer_browsingSlider.attr("width"))) {
+			//Changing the x position so that the handle will not exceed the miniature dimensions
+			miniWindowHandle.attr("x", Number(svgContainer_browsingSlider.attr("width"))-Number(miniWindowHandle.attr("width")));
+		};
+		
+		//Updating the blocks that have to be displayed
+		drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, initialGenomesNames, chromosomeNames, currentNucleotidesWidthInPixel.effective);
+		
+		//And their positions
+		//Using Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2 as it is the position of the center of the windowHandle that gives the position of the first pixel to display, through miniatureSliderScale
+		d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel.effective - miniatureSliderScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2) );
+		for (var chr = 0; chr < chromosomeNames.length; chr++) {
+			d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
+				.attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - miniatureSliderScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2) + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
+		};
 	};
 	
 	//------------------------------------------------------------------------------------
@@ -894,6 +921,9 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		miniatureTicksScale.domain([0, maxPositionInNucleotide]);
 		
 		//Displaying everything that changed again
+		//For the zoomSlider
+		zoomSlider.select("line").attr("x1", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("x2", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`])))
+		
 		//For the miniature
 		drawingMiniatureBackground();
 		miniWindowHandle.attr("width", browsingHandleDimensions.width);
