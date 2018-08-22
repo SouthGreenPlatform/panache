@@ -4,7 +4,7 @@ This tool is used to visualise and explore pangenomes, chromosome per chromosome
 
 ## Launching
 
-Pañata is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice (see [here](###-How-to-run-it) for a summary on how to run Pañata). Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
+Pañata is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice (see [here](#how-to-run-it) for a summary on how to run Pañata). Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
 
 ### File content
 
@@ -107,13 +107,77 @@ If you want to try it with Google Chrome you might have to open it through a vir
 
 If your data file is really big (hundred thousands of features per chromosome or more), it might take a little time before everything is displayed, just wait a few seconds. It is the drawing of the miniature canvas that is time consuming. This will reload everytime you change the displayed chromosome, but navigating should be fast once it is loaded.
 
-Once everything is loaded, just play around with it, or see [the instructions](##instructions) to learn how to use it !
+Once everything is loaded, just play around with it, or see [the instructions](#instructions) to learn how to use it !
 
 ## File format specifications
+
+Pañata is designed to visualise pangenomes, but there is no standard for the file format yet. Therefore *myFile.tsv* do not corresponds exactly to a universal file format either, and must have some specificities in order to work properly with Pañata.
+
 ### Nature of the data
-(Do not forget to talk about data with holes)
+
+*myFile.tsv* is derived from both a .bed format and a presence/absence matrix, that tells for different genomes if a certain feature belongs to them. Those presence/absence are linked to a linear reference structure (a linear pangenome or a reference genome) by setting start and stop position for every feature (thats is the .bed part). Pañata does not offer tools for converting your data into a readable file directly and only uses ready-to-read files, so they have to be built beforehand.
+
+**The features have to be ordered depending on their FeatureStart values !**
+
+Although it will be able to display features covering the same part of the reference sequence, it is better to use file with no overlap so that no feature will be hidden because of another one. Moreover, even if it supposed to work with completely sequenced references gaps are allowed and you can use file where features are not directly next to each other.
+
+The file is by default structured as a tab-delimited file, but you could use any derivative (.csv...) as long as the delimiter is something else than ":" or ";". Those symbols are indeed used by Pañata to decompose elements into a column, and therefore should not be used as column delimiters. See [how to specify it](#how-to-run-it).
+
 ### Header
+
+The header row of *myFile.tsv* is very specific and **must always start that way, with those exact column names, case-specific** :
+```
+#Chromosome FeatureStart    FeatureStop Sequence_IUPAC_Plus SimilarBlocks   Function
+```
+It has to be the first line of *myFile.tsv*, and there sould be no other commented line in the entire file. Those six columns are mandatory, even if you do not have available information for them. See [how to fill them](#body) if that is your case. **Do not forget the "#" as first character !**
+
+Added to these columns are the genome names used for comparison. They can be as much as you want it to be, as long as they are placed after the andatory columns. For instance, for a file where six genomes are compared a possible header row can be :
+
+```
+#Chromosome FeatureStart    FeatureStop Sequence_IUPAC_Plus SimilarBlocks   Function    Geno1-Kenobi   Geno2   genome_3    g4 genFive  Basix
+```
+As long as no fancy characters (".","é","?", "/" and so on) are used, any name should work. Try to avoid digits for the first character though, it might cause trouble.
+
 ### Body
+
+* #Chromosome
+Corresponds to the first column of a .bed file. This should be a string, with the name of the chromosome that has the feature. It can be a word or only a number, either way works. If there is no different chromosome, just put the same name for every feature. Example of possible values :
+```
+1
+2
+chr_One
+Chromosome2
+chr42
+```
+
+* FeatureStart
+Corresponds to the second column of a .bed file. It is a number giving the starting position of the feature, in nucleotides. The initial position being 0. That column must be filled with a real position, or at least an estimation. **These value must be classed in growing order**, for each chromosome.
+
+* FeatureStop
+Same as FeatureStart, but for the end position. That value is the first nucleotide that is not part of the feature : if two features are next to each other the first one will have the same value in FeatureStop than FeatureStart in the second one. Examples :
+
+```
+FeatureStart FeatureStop
+182 1030
+1030    2250
+80001   80503
+```
+
+* Sequence_IUPAC_Plus
+It is not used yet so you can write anything you like, it will not be displayed anyway. It was supposed to be the written nucleotide sequence, in FASTA format and with IUPAC syntax (arranged for the pangenomes : possible deletion are written with lowercase characters), but it has not been used eventually. As it has not been removed yet, it is still needed along with the other columns. Examples :
+
+```
+GATTAcA NNAGcgTTATT ATGCCnAAAWGc
+```
+
+* SimilarBlocks
+
+
+* Function
+
+
+* Genome columns
+
 
 ## Instructions
 ### Components of the interface
