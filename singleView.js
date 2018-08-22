@@ -248,15 +248,22 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 										.attr("width", windowWidth*0.75).attr("height", windowHeight*(1-0.05)-svgContainer_browsingSlider.attr("height")-svgContainer_presenceAbsenceMatrix.attr("height"));
 	//------------------------------------------------------------------------------------
 	
+	//----------------------------ntWidthDependingOnFeatureNb-----------------------------
+	
+	function ntWidthDependingOnFeatureNb(windowWidth, nbFeature2Display, dataset) {
+		return windowWidth / (nbFeature2Display * dataset.map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataset.length); // = Width of the display window / (nb of displayed features * mean width of features);
+	};
+	//------------------------------------------------------------------------------------
+	
 	//--------------------------currentNucleotidesWidthInPixel----------------------------
 
 	var currentNucleotidesWidthInPixel = {};
 	
 	currentNucleotidesWidthInPixel.minGlobal = Number(svgContainer_presenceAbsenceMatrix.attr("width"))/maxPositionInNucleotide;
-	currentNucleotidesWidthInPixel.minEfficiency = Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (150 * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)); //The minimum size  that allows a "smooth" display, it is set at 150 features which is kind of already slow to show
+	currentNucleotidesWidthInPixel.minEfficiency = ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]); //The minimum size  that allows a "smooth" display, it is set at 150 features which is kind of already slow to show
 	//ATTENTION It depends on the total number of displayed elements ! The more genome/chromosomes there are, the slower it is !
 	currentNucleotidesWidthInPixel.max = 10;
-	currentNucleotidesWidthInPixel.effective = ( (Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (0.1*dataGroupedPerChromosome[`${currentChromInView}`].length * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)) < currentNucleotidesWidthInPixel.minEfficiency) ? currentNucleotidesWidthInPixel.minEfficiency : Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (0.1*dataGroupedPerChromosome[`${currentChromInView}`].length * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length)) ); // = Width of the display window / (nb of displayed features * mean width of features); The default value cannot be less than the minEfficiency value
+	currentNucleotidesWidthInPixel.effective = ( ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 0.1*dataGroupedPerChromosome[`${currentChromInView}`].length, dataGroupedPerChromosome[`${currentChromInView}`]) < currentNucleotidesWidthInPixel.minEfficiency ? currentNucleotidesWidthInPixel.minEfficiency : ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 0.1*dataGroupedPerChromosome[`${currentChromInView}`].length, dataGroupedPerChromosome[`${currentChromInView}`]) ); // = Width of the display window / (nb of displayed features * mean width of features); The default value cannot be less than the minEfficiency value
 	//------------------------------------------------------------------------------------
 //	console.log(dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length);
 //	console.log(currentNucleotidesWidthInPixel);
@@ -407,7 +414,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 				.text("Core")
 				.style("fill",d3.hcl(60,65,70))
-			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); }) //The first line is created after as I do not want the previous tspan to have the same x attribute when cloning
 				.attr("x", 0) //Needed for the correct carriage return
 				.text("Minimal Presence ratio")
 				.attr("dy","-1.2em")
@@ -762,6 +769,45 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 										.attr("y", 37);
 	//------------------------------------------------------------------------------------
 	
+	//----------------------------------legend_zoomLevel----------------------------------
+	svgContainer_legends.append("g").attr("id", "legend_zoomLevel")
+			.attr("transform", "translate(90,"+eval(30 + 20 + d3.select("#legend_matrixSchema").node().getBBox().height) +")")
+			.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
+			.text("Zoom level").attr("text-anchor", "middle");
+			
+	var zoomSlider = d3.select("#legend_zoomLevel").append("g").attr("transform","translate(0,8)");
+	
+	var zoomScale = d3.scaleLinear() //Linear Scale in two parts as low values are more important than "high" values that would not be displayed properly anyway
+							.domain([currentNucleotidesWidthInPixel.minGlobal, currentNucleotidesWidthInPixel.minEfficiency, currentNucleotidesWidthInPixel.max])
+							.range([-90, -30, 90]) //Ranges from and to the miniature's extreme length values/positions as an output
+							.clamp(true); //.clamp(true) tells that the domains has 'closed' boundaries, that won't be exceeded, not sure if it is useful for a ticks axis
+	
+	
+	zoomSlider.append("path").attr("d", "M -90 11 L 90 4 V 18 Z").style("fill", d3.hcl(0,0,50));
+	zoomSlider.append("rect").attr("x", -90).attr("y",0).attr("height", 22).attr("width", zoomScale(currentNucleotidesWidthInPixel.minEfficiency)) //That width depends on the efficiency limit
+			.style("fill-opacity", 0.5).style("fill", d3.hcl(70,80,100));
+	zoomSlider.append("line").attr("y1",0).attr("y2",22).attr("x1", zoomScale(currentNucleotidesWidthInPixel.effective)).attr("x2", zoomScale(currentNucleotidesWidthInPixel.effective)).attr("stroke-width", 2).attr("stroke","black");
+	zoomSlider.append("text").attr("y",-3).attr("x", -90).attr("dominant-baseline", "hanging")
+		.attr("font-family", "sans-serif").attr("font-size", "18px")
+		.style("fill", d3.hcl(70,100,75))
+		.text("*");
+
+	zoomSlider.append("line").attr("class", "overlay")
+			.attr("y1", 11).attr("y2", 11).attr("x1", -110).attr("x2", 110)
+			.attr("stroke-width", 24).attr("stroke","transparent").attr("cursor", "ew-resize")
+			.call(d3.drag()
+				.on("start drag", function() { eventChangingZoom(zoomScale.invert(d3.event.x)); }));
+	
+	function eventChangingZoom(zoomLevel) {
+		zoomSlider.select("line").attr("x1", zoomScale(zoomLevel)).attr("x2", zoomScale(zoomLevel));
+		console.log(zoomLevel)
+		
+	};
+	
+	//------------------------------------------------------------------------------------
+	
+	
+	
 	//About Dropdown menu with javascript and D3 js : http://bl.ocks.org/feyderm/e6cab5931755897c2eb377ccbf9fdf18
 	//Other example : https://codepen.io/tarsusi/pen/reovOV
 	// Properties of a "select" object : https://www.w3schools.com/jsref/dom_obj_select.asp
@@ -824,7 +870,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		
 		//Updating the zoom information
 		currentNucleotidesWidthInPixel.minGlobal = Number(svgContainer_presenceAbsenceMatrix.attr("width"))/maxPositionInNucleotide;
-		currentNucleotidesWidthInPixel.minEfficiency = Number(svgContainer_presenceAbsenceMatrix.attr("width")) / (150 * (dataGroupedPerChromosome[`${currentChromInView}`].map( d => Number(d.FeatureStop) - Number(d.FeatureStart)).reduce( (acc, val) => acc + val)/dataGroupedPerChromosome[`${currentChromInView}`].length));
+		currentNucleotidesWidthInPixel.minEfficiency = ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]);
 		if (currentNucleotidesWidthInPixel.effective < currentNucleotidesWidthInPixel.minGlobal) { currentNucleotidesWidthInPixel.effective = currentNucleotidesWidthInPixel.minGlobal }; //Changing the zoom value only if it exceeds the total length of the new chromosome
 		
 		//Updating every display property/function depending on currentChromInView
