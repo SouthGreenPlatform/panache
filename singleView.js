@@ -441,6 +441,9 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 		blocks.selectAll("rect").style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 		
 		//Updating the colours of the miniature browser
+		bgBrowser_miniContext.fillStyle = "#fff";
+		bgBrowser_miniContext.fillRect(0,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width"), browsingBlocksDimensions.height); //Applying a white background on the line before drawing it again
+		
 		dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
 			bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
 			bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
