@@ -45,9 +45,7 @@ The first line must be changed according to the file on display :
 
 ```
 d3.dsv("\t","a/path/to/myFile.tsv").then(function(realPanMatrix) {
-
     ...
-
 };
 ```
 
@@ -57,11 +55,11 @@ It is possible to specify another delimiter if the input file is not tab-delimit
 
 *singleView.js* visualises the data inside a value-separated file. You can try it with one of the test files (*mediumFakeDataWithAllBlocks.tsv*) but the best is to try with your own *myFile.tsv* file. It has to be a delimited file, either comma- or tab- separated will work fine as long as it is specified in the first line of *singleView.js*. **See [below](#file-format-specifications) for details about the file format.**
 
-* README.md (*facultative*)
+* **README.md** (*facultative*)
 
 File providing information about the project, it is the one you are currently reading.
 
-* panFakeFileMaker.py (*facultative*)
+* **panFakeFileMaker.py** (*facultative*)
 
 Executable working with **Python v3** to create ready-to-run fake data files that can be visualised with Pañata. In command line you can use it this way :
 
@@ -78,15 +76,15 @@ python panFakeFileMaker.py 10000 5
 python panFakeFileMaker.py 2000 1
 ```
 
-* partOfBigFile.tsv, miniTheFakeData2Use.tsv, ... .tsv (*facultative*)
+* **partOfBigFile.tsv, miniTheFakeData2Use.tsv, ... .tsv** (*facultative*)
 
 Other fake files used for testing during development
 
-* canvasTest.html, canvasTest.js (*facultative*)
+* **canvasTest.html, canvasTest.js** (*facultative*)
 
 Files used to test how to draw canvas through JavaScript
 
-* testSVG.html (*facultative*)
+* **testSVG.html** (*facultative*)
 
 File used to test how to draw SVGs and to try things with their properties
 
@@ -95,9 +93,7 @@ File used to test how to draw SVGs and to try things with their properties
 First of all the path to the data file that will be on displayed must be written on the first (uncommented) line of *singleView.js* :
 ```
 d3.dsv("\t","a/path/to/myFile.tsv").then(function(realPanMatrix) {
-
     ...
-
 };
 ```
 The first parameter corresponds to the file delimiter. It is possible to change it to match those of your own file, however **":" and ";" must not be used !**
@@ -127,20 +123,20 @@ The file is by default structured as a tab-delimited file, but you could use any
 
 The header row of *myFile.tsv* is very specific and **must always start that way, with those exact column names, case-specific** :
 ```
-#Chromosome FeatureStart    FeatureStop Sequence_IUPAC_Plus SimilarBlocks   Function
+#Chromosome	FeatureStart	FeatureStop	Sequence_IUPAC_Plus	SimilarBlocks	Function
 ```
 It has to be the first line of *myFile.tsv*, and there sould be no other commented line in the entire file. Those six columns are mandatory, even if you do not have available information for them. See [how to fill them](#body) if that is your case. **Do not forget the "#" as first character !**
 
 Added to these columns are the genome names used for comparison. They can be as much as you want it to be, as long as they are placed after the andatory columns. For instance, for a file where six genomes are compared a possible header row can be :
 
 ```
-#Chromosome FeatureStart    FeatureStop Sequence_IUPAC_Plus SimilarBlocks   Function    Geno1-Kenobi   Geno2   genome_3    g4 genFive  Basix
+#Chromosome	FeatureStart	FeatureStop	Sequence_IUPAC_Plus	SimilarBlocks	Function	Geno1-Kenobi	Geno2	genome_3	g4	genFive	Basix
 ```
 As long as no fancy characters (".","é","?", "/" and so on) are used, any name should work. Try to avoid digits for the first character though, it might cause trouble.
 
 ### Body
 
-* #Chromosome
+* **#Chromosome**
 Corresponds to the first column of a .bed file. This should be a string, with the name of the chromosome that has the feature. It can be a word or only a number, either way works. If there is no different chromosome, just put the same name for every feature. Example of possible values :
 ```
 1
@@ -149,35 +145,78 @@ chr_One
 Chromosome2
 chr42
 ```
+**Please do notice that different syntaxes will be considered to be different chromosomes.**
 
-* FeatureStart
+* **FeatureStart**
 Corresponds to the second column of a .bed file. It is a number giving the starting position of the feature, in nucleotides. The initial position being 0. That column must be filled with a real position, or at least an estimation. **These value must be classed in growing order**, for each chromosome.
 
-* FeatureStop
+* **FeatureStop**
 Same as FeatureStart, but for the end position. That value is the first nucleotide that is not part of the feature : if two features are next to each other the first one will have the same value in FeatureStop than FeatureStart in the second one. Examples :
 
 ```
-FeatureStart FeatureStop
-182 1030
-1030    2250
-80001   80503
+FeatureStart	FeatureStop
+182	1030
+1030	2250
+80001	80503
 ```
 
-* Sequence_IUPAC_Plus
+* **Sequence_IUPAC_Plus**
 It is not used yet so you can write anything you like, it will not be displayed anyway. It was supposed to be the written nucleotide sequence, in FASTA format and with IUPAC syntax (arranged for the pangenomes : possible deletion are written with lowercase characters), but it has not been used eventually. As it has not been removed yet, it is still needed along with the other columns. Examples :
 
 ```
 GATTAcA NNAGcgTTATT ATGCCnAAAWGc
 ```
 
-* SimilarBlocks
+* **SimilarBlocks**
+This column gives references to features with a similar sequence in the whole pangenome. For instance, if the feature is a piece of nucleotide sequence that is duplicated somewhere else in the pangenome, **the IDs of *both* features will be written in the column SimilarBlocks**. The IDs are written with a given pattern : chromosomeName:startPosition:endPosition . Moreover the IDs are separated from one another with ";", and this is why [these characters should not be used as column delimiters.](#how-to-run-it)
 
+It is highly probable that this information will be missing from your file. If there is no way to access this similarity information, or **if a block is never repeated, use a dot sign "." instead.** Examples :
 
-* Function
+```
+#Chromosome	FeatureStart	FeatureStop	...	SimilarBlocks
+chr1	156	283	...	chr1:156:283;chr3:82:209	//This sequence appears two times, once in chr1 and once in chr3
+chr1	542	620	...	.                       	//A feature with no similar sequence
+...
+chr3	82	209	...	chr1:156:283;chr3:82:209	//This is the feature with a sequence similar to the one in chr1:156:283
+```
 
+* **Function**
+If the feature is linked to a biological function, it can be added here. Unfortunately it does not accept standard format yet (GO terms, for instance, *cannot be used*) but only integers. Each integer is linked to a color on screen, allowing to look for specific functions within the reference. **If the function information is not available, use the same number for every feature.** Example :
+```
+Function
+1	//Those two have the same 'function' (it can be that they both have no or unknown function)
+1	//Those two have the same 'function' (it can be that they both have no function)
+2
+0
+```
 
-* Genome columns
+* **Genome columns**
+Those columns give the presence/absence status of a given feature for every genome. It has to be a **numeric matrix**, filled with integer. An absence is always encoded as a "0" in the matrix. Presence however, can be encoded with "1", or any other positive integer (it can be read count data if it is easier to create your file this way). **Negative values are forbidden.** Proportions (float numbers between 0 and 1) are not recommended, as the presence will be way harder to see, being linked to the opacity of displayed elements. *For a given pangenome, the display will be the same for a binary matrix and a matrix with count data, so choose the easiest to use.* Examples :
 
+```
+Geno1	Geno2	Geno3																Geno1	Geno2	Geno3
+0	1	1																			0	3	7
+1	1	1							will have the same display than					20	45	63
+0	0	0																			0	0	0
+0	0	1																			0	0	18
+```
+### Representative example
+
+Here is a shortened file giving an overview of every syntaxes that can be used with Pañata :
+
+```
+#Chromosome	FeatureStart	FeatureStop	Sequence_IUPAC_Plus	SimilarBlocks	Function	Geno1	gen_2	genomeThree
+1	45	56	ATCTGGaTttA	.	0	1	1	0
+1	56	78	AAaTNNATCGCGTacGTCATTA	.	7	0	0	23
+1	210	230	ATTCNNatTWCCAGgaGATT	.	4	16	0	17
+chr2	30	43	CAGWggTGACNNT	chr2:30:43;C_Four:120:133	3	12	1	1
+chr2	74	96	tTTAGAaANNNAATAAGgACTAC	chr2:74:96;C_Four:133:155;chrom-5:0:23	5	0	25	6
+Chromosome3	780	789	TATacGTGN	.	0	1	1	1
+C_Four	120	133	CAGWggTGACNNT	chr2:30:43;C_Four:120:133	3	0	12	13
+C_Four	133	155	tTTAGAaANNNTTTAAGgACTAC	chr2:74:96;C_Four:133:155;chrom-5:0:23	5	0	0	0
+chrom-5	0	23	tTTAGAaANNTTTAAGgACTACAA	chr2:74:96;C_Four:133:155;chrom-5:0:23	5	8	0	0
+chrom-5	345	351	ATTACA	.	7	23	34	42
+```
 
 ## Instructions
 ### Components of the interface
