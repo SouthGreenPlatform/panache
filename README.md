@@ -109,7 +109,7 @@ Once everything is loaded, just play around with it, or see [the instructions](#
 
 ## File format specifications
 
-Pañata is designed to visualise pangenomes, but there is no standard for the file format yet. Therefore *myFile.tsv* do not corresponds exactly to a universal file format either, and must have some specificities in order to work properly with Pañata.
+Pañata is designed to visualise pangenomes, but there is no standard for the file format yet. Therefore *myFile.tsv* do not corresponds exactly to a universal file format either, and must have some specificities in order to work properly with Pañata. [Here](#representative-example) is an example.
 
 ### Nature of the data
 
@@ -235,7 +235,58 @@ chrom-5	345	351	ATTACA	.	7	23	34	42
 ```
 
 ## Instructions
+
+Pañata is a data visualisation and exploration tool, therefore many parts are interactive and can be choosen by users. You can find here instructions on how to use and interpret the data on display.
+
 ### Components of the interface
+
+Pañata is mainly divided into four parts, each having its own functions : Data selection, Overview, Display Window and Display Options/legends.
+
+!!!!Add an image here!!!!
+
+* **Data Selection**
+
+!!!!Add an image here!!!!
+
+The upper-left part of the display is dedicated to the selction of the data that should be displayed. Here you can find out or set which chromosome is currently displayed in the display window, as well as the threshold used to distinguish *dispensable genome* and *core genome*. Features for which the presence proportion is under the threshold will be considered as part of the *dispensable genome* and will be painted in blue. The others are considered to be part of the *core genome* and will be painted in orange. Chroma is proportionnal to the number of genomes owning a feature : white-ish blocks means few genomes contain this feature.
+
+* **Overview**
+
+!!!!Add an image here!!!!
+
+This piece is displayed in the upper-right part of the screen. It is basically a **miniature of the whole display**, with the starting position on the left and the end position on the right.
+
+The first part is a **histogram** representing the presence/absence matrix : bar heights corresponds to the number of genomes that own the feature at this position. Colour corresponds to the linked biological function, if any.
+
+Then are three lines giving different information about the features along the reference chromosome. First one represents the features depending on their **appartenance to *core*** (feature painted in orange) or *dispensable* (feature painted in blue) *genomes*.
+Second one encodes the **origin position** of features on the reference thanks to a pseudo-rainbow colour code. This will be useful when filter options are implemented, to keep track of the initial position of a feature. Moreover, the **colour code is colour-blind proof !**
+Third and last one reflects the **number of existing similar features** throughout the whole pangenome. Features that are not repeated will be coloured in pale grey, while highly repeated features will have an intense purple hue.
+
+As those tracks are a representation of the whole display, a rectangular grey **handle** shows which part of it is currently visible in the display window.
+
+Finally a **scale** shows the length in bp of the reference, so that users can see where the display window is located.
+
+* **Display Window**
+
+!!!!Add an image here!!!!
+
+This is the main display of Pañata. Every visible elements are parts of a larger display, and the handle in the Overview tells the user which part of it is currently visible. Every feature from *myFile.tsv* corresponds to a column of multiple blocks.
+
+The top part is the graphic representation of a presence/absence matrix, features being represented as columns and genomes as rows. If a feature is present in a genome, the block at the crossroads will be filled and coloured depending on the functionnal information. If the feature is absent, however, the block will stay empty and will appear as blank.
+
+Then are three tracks providing information about the feature. As for the Overview, the first one represents the features depending on their **appartenance to *core*** (feature painted in orange) or *dispensable* (feature painted in blue) *genomes*. The chroma encodes the proportion of genomes containing a given feature.
+Second one encodes the **origin position** of features on the reference thanks to a pseudo-rainbow colour code. This will be useful when filter options are implemented, to keep track of the initial position of a feature. Moreover, the **colour code is colour-blind proof !**
+Third and last one reflects the **number of existing similar features** throughout the whole pangenome. Features that are not repeated will be coloured in pale grey, while highly repeated features will have an intense purple hue.
+
+The bottom part is a bit trickier, but is still linked to the number of similar features. The background keeps the information provided by the third track. Grey rectangles are also displayed when a similarity information is available, giving precision on the location/distribution of those similar features. Each row corresponds to a chromosome, and both the **width and the opacity of the rectangles encode the repartition of the similar features between those chromosomes**. A rectangle that has the same width than the feature block means than the majority of the similar features appear in the corresponding chromosome. The width of the other rectangles is then proportional to this and to the number of similar features in other chromosomes.
+
+* **Display Options**
+
+!!!!Add an image here!!!!
+
+It is quite self explanatory as it is the legend, along with the zoom level information. The current zoom level is represented by a bar on a gradient of all possible zoom levels. The more on the right it is, the bigger the features will be displayed.
+*Do note that there might be performance issues when the number of displayed element is too high (leftmost part of the gradient).*
+
 ### Changing the displayed chromosome
 ### Using the sliders
 ### Hovering to have information
