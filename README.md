@@ -91,11 +91,13 @@ File used to test how to draw SVGs and to try things with their properties
 ### How to run it
 
 First of all the path to the data file that will be on displayed must be written on the first (uncommented) line of *singleView.js* :
+
 ```
 d3.dsv("\t","a/path/to/myFile.tsv").then(function(realPanMatrix) {
     ...
 };
 ```
+
 The first parameter corresponds to the file delimiter. It is possible to change it to match those of your own file, however **":" and ";" must not be used !**
 
 Pañata can be launched by opening singleView.html in the web browser of your choice. It has been developped under Mozilla Firefox, but works on Google Chrome too. Support by Microsoft Edge is unknown, and Internet Explorer cannot run it (*obviously*).
@@ -122,9 +124,11 @@ The file is by default structured as a tab-delimited file, but you could use any
 ### Header
 
 The header row of *myFile.tsv* is very specific and **must always start that way, with those exact column names, case-specific** :
+
 ```
 #Chromosome	FeatureStart	FeatureStop	Sequence_IUPAC_Plus	SimilarBlocks	Function
 ```
+
 It has to be the first line of *myFile.tsv*, and there sould be no other commented line in the entire file. Those six columns are mandatory, even if you do not have available information for them. See [how to fill them](#body) if that is your case. **Do not forget the "#" as first character !**
 
 Added to these columns are the genome names used for comparison. They can be as much as you want it to be, as long as they are placed after the andatory columns. For instance, for a file where six genomes are compared a possible header row can be :
@@ -132,12 +136,15 @@ Added to these columns are the genome names used for comparison. They can be as 
 ```
 #Chromosome	FeatureStart	FeatureStop	Sequence_IUPAC_Plus	SimilarBlocks	Function	Geno1-Kenobi	Geno2	genome_3	g4	genFive	Basix
 ```
+
 As long as no fancy characters (".","é","?", "/" and so on) are used, any name should work. Try to avoid digits for the first character though, it might cause trouble.
 
 ### Body
 
 * **#Chromosome**
+
 Corresponds to the first column of a .bed file. This should be a string, with the name of the chromosome that has the feature. It can be a word or only a number, either way works. If there is no different chromosome, just put the same name for every feature. Example of possible values :
+
 ```
 1
 2
@@ -145,12 +152,15 @@ chr_One
 Chromosome2
 chr42
 ```
+
 **Please do notice that different syntaxes will be considered to be different chromosomes.**
 
 * **FeatureStart**
+
 Corresponds to the second column of a .bed file. It is a number giving the starting position of the feature, in nucleotides. The initial position being 0. That column must be filled with a real position, or at least an estimation. **These value must be classed in growing order**, for each chromosome.
 
 * **FeatureStop**
+
 Same as FeatureStart, but for the end position. That value is the first nucleotide that is not part of the feature : if two features are next to each other the first one will have the same value in FeatureStop than FeatureStart in the second one. Examples :
 
 ```
@@ -161,6 +171,7 @@ FeatureStart	FeatureStop
 ```
 
 * **Sequence_IUPAC_Plus**
+
 It is not used yet so you can write anything you like, it will not be displayed anyway. It was supposed to be the written nucleotide sequence, in FASTA format and with IUPAC syntax (arranged for the pangenomes : possible deletion are written with lowercase characters), but it has not been used eventually. As it has not been removed yet, it is still needed along with the other columns. Examples :
 
 ```
@@ -168,6 +179,7 @@ GATTAcA NNAGcgTTATT ATGCCnAAAWGc
 ```
 
 * **SimilarBlocks**
+
 This column gives references to features with a similar sequence in the whole pangenome. For instance, if the feature is a piece of nucleotide sequence that is duplicated somewhere else in the pangenome, **the IDs of *both* features will be written in the column SimilarBlocks**. The IDs are written with a given pattern : chromosomeName:startPosition:endPosition . Moreover the IDs are separated from one another with ";", and this is why [these characters should not be used as column delimiters.](#how-to-run-it)
 
 It is highly probable that this information will be missing from your file. If there is no way to access this similarity information, or **if a block is never repeated, use a dot sign "." instead.** Examples :
@@ -181,7 +193,9 @@ chr3	82	209	...	chr1:156:283;chr3:82:209	//This is the feature with a sequence s
 ```
 
 * **Function**
+
 If the feature is linked to a biological function, it can be added here. Unfortunately it does not accept standard format yet (GO terms, for instance, *cannot be used*) but only integers. Each integer is linked to a color on screen, allowing to look for specific functions within the reference. **If the function information is not available, use the same number for every feature.** Example :
+
 ```
 Function
 1	//Those two have the same 'function' (it can be that they both have no or unknown function)
@@ -191,6 +205,7 @@ Function
 ```
 
 * **Genome columns**
+
 Those columns give the presence/absence status of a given feature for every genome. It has to be a **numeric matrix**, filled with integer. An absence is always encoded as a "0" in the matrix. Presence however, can be encoded with "1", or any other positive integer (it can be read count data if it is easier to create your file this way). **Negative values are forbidden.** Proportions (float numbers between 0 and 1) are not recommended, as the presence will be way harder to see, being linked to the opacity of displayed elements. *For a given pangenome, the display will be the same for a binary matrix and a matrix with count data, so choose the easiest to use.* Examples :
 
 ```
@@ -200,6 +215,7 @@ Geno1	Geno2	Geno3																Geno1	Geno2	Geno3
 0	0	0																			0	0	0
 0	0	1																			0	0	18
 ```
+
 ### Representative example
 
 Here is a shortened file giving an overview of every syntaxes that can be used with Pañata :
