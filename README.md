@@ -6,7 +6,7 @@ This tool is used to visualise and explore pangenomes, chromosome per chromosome
 
 Pañata is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice (see [here](#how-to-run-it) for a summary on how to run Pañata). Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
 
-### File content
+### Repository content
 
 Many files are still part of the project for testing and development purposes so they are not all mandatory. Here are their descriptions and some information about their use, in order of usefulness.
 
@@ -248,7 +248,7 @@ Pañata is mainly divided into four parts, each having its own functions : Data 
 
 ![You can choose the threshold of what should be consider as *core genome*, as well as the chromosome on display](imagesReadMe/Paniata_interface_DataSelection.png?raw=true "Choice of chromosome on display and core threshold")
 
-The upper-left part of the display is dedicated to the selction of the data that should be displayed. Here you can find out or set which chromosome is currently displayed in the display window, as well as the threshold used to distinguish *dispensable genome* and *core genome*. Features for which the presence proportion is under the threshold will be considered as part of the *dispensable genome* and will be painted in blue. The others are considered to be part of the *core genome* and will be painted in orange. Chroma is proportionnal to the number of genomes owning a feature : white-ish blocks means few genomes contain this feature.
+The upper-left part of the display is dedicated to the selction of the data that should be displayed. Here you can find out or [set which chromosome is currently displayed](#changing-the-displayed-chromosome) in the display window, as well as the [threshold used to distinguish *dispensable genome* and *core genome*](#using-the-sliders). Features for which the presence proportion is under the threshold will be considered as part of the *dispensable genome* and will be painted in blue. The others are considered to be part of the *core genome* and will be painted in orange. Chroma is proportionnal to the number of genomes owning a feature : white-ish blocks means few genomes contain this feature.
 
 * **Overview**
 
@@ -262,7 +262,7 @@ Then are three lines giving different information about the features along the r
 Second one encodes the **origin position** of features on the reference thanks to a pseudo-rainbow colour code. This will be useful when filter options are implemented, to keep track of the initial position of a feature. Moreover, the **colour code is colour-blind proof !**
 Third and last one reflects the **number of existing similar features** throughout the whole pangenome. Features that are not repeated will be coloured in pale grey, while highly repeated features will have an intense purple hue.
 
-As those tracks are a representation of the whole display, a rectangular grey **handle** shows which part of it is currently visible in the display window.
+As those tracks are a representation of the whole display, a rectangular grey **handle** shows [which part of it is currently visible in the display window](#using-the-sliders).
 
 Finally a **scale** shows the length in bp of the reference, so that users can see where the display window is located.
 
@@ -274,7 +274,7 @@ This is the main display of Pañata. Every visible elements are parts of a large
 
 The top part is the graphic representation of a presence/absence matrix, features being represented as columns and genomes as rows. If a feature is present in a genome, the block at the crossroads will be filled and coloured depending on the functionnal information. If the feature is absent, however, the block will stay empty and will appear as blank.
 
-Then are three tracks providing information about the feature. As for the Overview, the first one represents the features depending on their **appartenance to *core*** (feature painted in orange) or *dispensable* (feature painted in blue) *genomes*. The chroma encodes the proportion of genomes containing a given feature.
+Then are three tracks [providing information about the feature](#hovering-to-have-information). As for the Overview, the first one represents the features depending on their **appartenance to *core*** (feature painted in orange) or *dispensable* (feature painted in blue) *genomes*. The chroma encodes the proportion of genomes containing a given feature.
 Second one encodes the **origin position** of features on the reference thanks to a pseudo-rainbow colour code. This will be useful when filter options are implemented, to keep track of the initial position of a feature. Moreover, the **colour code is colour-blind proof !**
 Third and last one reflects the **number of existing similar features** throughout the whole pangenome. Features that are not repeated will be coloured in pale grey, while highly repeated features will have an intense purple hue.
 
@@ -288,8 +288,16 @@ It is quite self explanatory as it is the legend, along with the zoom level info
 *Do note that there might be performance issues when the number of displayed element is too high (leftmost part of the gradient).*
 
 ### Changing the displayed chromosome
+
+Pañata offers a 'per-chromosome' view. Therefore only one (pan)chromosome is displayed at a time. In order to change it you can choose another one in the dropdown menu accessible in the Data Selection part of your screen. *If there are many features in the selected chromosome it might take a few seconds before everything is diplayed accordingly.*
+
 ### Using the sliders
+
+
+
 ### Hovering to have information
+
+
 
 ## Author
 
