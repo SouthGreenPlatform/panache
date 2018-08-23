@@ -242,17 +242,17 @@ Pañata is a data visualisation and exploration tool, therefore many parts are i
 
 Pañata is mainly divided into four parts, each having its own functions : Data selection, Overview, Display Window and Display Options/legends.
 
-!!!!Add an image here!!!!
+![Pañata has four parts, one for each corner of your screen](imagesReadMe/Paniata_interface_4pieces.png?raw=true "Pañata interfaces")
 
 * **Data Selection**
 
-!!!!Add an image here!!!!
+![You can choose the threshold of what should be consider as *core genome*, as well as the chromosome on display](imagesReadMe/Paniata_interface_DataSelection.png?raw=true "Choice of chromosome on display and core threshold")
 
 The upper-left part of the display is dedicated to the selction of the data that should be displayed. Here you can find out or set which chromosome is currently displayed in the display window, as well as the threshold used to distinguish *dispensable genome* and *core genome*. Features for which the presence proportion is under the threshold will be considered as part of the *dispensable genome* and will be painted in blue. The others are considered to be part of the *core genome* and will be painted in orange. Chroma is proportionnal to the number of genomes owning a feature : white-ish blocks means few genomes contain this feature.
 
 * **Overview**
 
-!!!!Add an image here!!!!
+![A miniature of the display helps to locate the visible part of the chromosome](imagesReadMe/Paniata_interface_Overview.png?raw=true "Miniature panchromosome")
 
 This piece is displayed in the upper-right part of the screen. It is basically a **miniature of the whole display**, with the starting position on the left and the end position on the right.
 
@@ -268,7 +268,7 @@ Finally a **scale** shows the length in bp of the reference, so that users can s
 
 * **Display Window**
 
-!!!!Add an image here!!!!
+![Every column gives information about a feature, rows might correspond to a genome, a quantity, a position, or a similarity information](imagesReadMe/Paniata_interface_DisplayWindow.png?raw=true "Display Window")
 
 This is the main display of Pañata. Every visible elements are parts of a larger display, and the handle in the Overview tells the user which part of it is currently visible. Every feature from *myFile.tsv* corresponds to a column of multiple blocks.
 
@@ -282,7 +282,7 @@ The bottom part is a bit trickier, but is still linked to the number of similar 
 
 * **Display Options**
 
-!!!!Add an image here!!!!
+![Pañata is supposed to be self-explanatory enough so the legend is visible, and you can choose the zoom level](imagesReadMe/Paniata_interface_DisplayOptions.png?raw=true "Legend and zoom level")
 
 It is quite self explanatory as it is the legend, along with the zoom level information. The current zoom level is represented by a bar on a gradient of all possible zoom levels. The more on the right it is, the bigger the features will be displayed.
 *Do note that there might be performance issues when the number of displayed element is too high (leftmost part of the gradient).*
