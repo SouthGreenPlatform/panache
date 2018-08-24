@@ -293,12 +293,56 @@ Pañata offers a 'per-chromosome' view. Therefore only one (pan)chromosome is di
 
 ### Using the sliders
 
+There is a total of 3.5 five sliders you can play with in Pañata : three of them will always be available, the last one only appears when needed.
 
+* **Choice of the *core*/*dispensable* threshold**
+
+![Users can set the core threshold](imagesReadMe/Paniata_slider_dispVScore.png?raw=true "Core slider")
+
+Available in the Data Selection corner, this slider allows the user to determine the percentage of genomes that must contain a given feature for this feature to be considered as part of the *core genome*. Features categorised as "*dispensable*" are coloured in blue on the corresponding track, while feature categorised as "*core*" are coloured in orange.
+**Changes of this value are dynamically rendered in both the Display Window and the Overview.**
+
+* **Choice of the zoom level**
+
+![Users can set the zoom level](imagesReadMe/Paniata_slider_zoomLevel.png?raw=true "Zoom slider")
+
+Placed in the Data Options corner, it is used to change the width of the elements within the Display Window. As too many rendered elements would lead to performance issues, the main part of the slider only allows to zoom within  a range of 1 to 150 displayed features at once. It is still possible to exceed this threshold by selecting a zoom level within the "non-optimal zone", highlighted in orange. However **those zoom levels are not suitable for data exploration**.
+
+* **Choice of the displayed elements**
+
+![Users can set the displayed part of the pangenome](imagesReadMe/Paniata_slider_miniatureHandle.png?raw=true "Overview handle")
+
+By moving the handle along the tracks of the Overview, it is possible to display different part of the pangenome. Changes in position are rendered in real time (*depending on the zoom level and number of displayed elements*) in the Display Window. The inside of the handle always represents what is currently displayed in the Display Window.
+
+* **Displaying other genome** (*facultative*)
+
+![Users can see multiple genomes](imagesReadMe/Paniata_slider_browsingGenomes.png?raw=true "Browser slider")
+
+In case your pangenome is composed of many different genomes, there will not be enough space to display all of their presence/absence information at once ! Therefore you can find by hovering on the right of the presence/absence matrix a hidden slider, allowing to browse the different genomes. This slider will only be displayed if there is not enough space to show every genome, and **if the mouse is hovering the rightmost part of the screen** ! That way it will not disturb the global display.
 
 ### Hovering to have information
 
+Currently three elements can show information when the cursor moves to their position : the three main tracks. *The features for which information is given are highlighted.*
 
+* **Number of genomes containing the feature**
+
+![The number of genomes containing a given feature can be displayed when the corresponding track is hovered](imagesReadMe/Paniata_hovering_core.png?raw=true "Core hovering")
+
+* **Position and feature's size**
+
+![The position and size in bp can be displayed when the corresponding track is hovered](imagesReadMe/Paniata_hovering_rainbow.png?raw=true "Position hovering")
+
+* **Number of similar features**
+
+![The number of features similar to the one highlighted can be displayed when the corresponding track is hovered](imagesReadMe/Paniata_hovering_similarities.png?raw=true "Similarity hovering")
 
 ## Author
 
-## Shout-out
+Éloi DURANT, MSc2 student, within the scope of GenomeHarvest project.
+For any complementary information or request, please contact me via GitHub.
+
+## *Shout-out*
+
+This work would not have been the same without the help of great musics, especially :
+- The album *Lys* by the band L.E.A.F, featuring Kati Ran, for lovers of Nordic and medieval-ish feels.
+- Most of the songs by **Darren Korb** who does an awesome job at composing video game musics for Supergiant Games. *Transistor*, *Pyre* and *Bastion*'s Original SoundTracks have a special place in my heart.
