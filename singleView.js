@@ -728,7 +728,7 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 					.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
 						.attr("y","1em")
 						.attr("x",svgContainer_legends.attr("width")/2).attr("text-anchor", "middle")
-						.text("1 column is associated to 1 panBlock")
+						.text("1 column represents one panBlock")
 					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 						.text("and genomes are clustered by ...")
 						.attr("y","2em");
