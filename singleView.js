@@ -2,8 +2,8 @@
 //d3.dsv("\t","theFakeData2Use.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/partOfBigFile.tsv").then(function(realPanMatrix) {
 //d3.dsv("\t","PanChromosome/miniFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) {
-d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
-//d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
+//d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {	
+d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realPanMatrix) { //This is a JavaScript promise, that returns value under certain conditions
 //	console.log(realPanMatrix); //Array(71725) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, … ]
 
 	//console.log(realPanMatrix[0]); //Object { Cluster: "OG0026472", Musac: "0", Maban: "1", Mabur: "1", Mazeb: "0", Musba: "0" }
@@ -728,20 +728,25 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 					.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
 						.attr("y","1em")
 						.attr("x",svgContainer_legends.attr("width")/2).attr("text-anchor", "middle")
-						.text("1 column represents one panBlock")
-					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+						.text("One column represents one panBlock")
+//Uncomment when clustering is available !!!!
+/*					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 						.text("and genomes are clustered by ...")
 						.attr("y","2em");
-	
-	svgContainer_legends.append("g").attr("id","legend_matrixSchema").attr("transform", "translate(0,30)");
-	
-	//Drawing the false tree for the legend
-	d3.select("#legend_matrixSchema").append("g").attr("id","legend_matrixPA_tree")
+*/
+
+	svgContainer_legends.append("g").attr("id", "legend_matrixPA_blocks")
+							.append("g").attr("id","legend_matrixSchema");
+
+//Uncomment when clustering is available !!!!
+/*	//Drawing the false tree for the legend
+	d3.select("#legend_matrixSchema").append("g")//.attr("id","legend_matrixPA_tree")
 							.append("path").attr("d","M 0 25.5 H 15 M 15 37 H 43 M 15 14 H 25 M 25 21 H 43 M 25 7 H 43 M 15 14 V 37 M 25 7 V 21")
 							.attr("stroke", "black"); //ATTENTION A H or V instruction does not ask for a delta but for a x or y absolute coordinate
-	
+*/
+
 	//Adding the names of the genomes next to the legend tree
-	d3.select("#legend_matrixSchema").append("g").attr("id","legend_matrixPA_genoNames")
+	d3.select("#legend_matrixSchema").append("g")
 					.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
 						.attr("y", 7).attr("dominant-baseline", "middle")
 						.attr("x", 45)
@@ -751,10 +756,12 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 						.attr("y", 21)
 					.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 						.text("C")
-						.attr("y", 37);
+						.attr("y", 35);
+//Uncomment when clustering is available !!!!
+/*						.attr("y", 37);
 						
 	//Drawing multiple blocks for the legend, not using canvas but paths
-	d3.select("#legend_matrixSchema").append("g").attr("id","legend_matrixPA_blocks").attr("transform", "translate(10,0)")
+	d3.select("#legend_matrixSchema").append("g").attr("transform", "translate(10,0)")
 							.append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 30 H 57 V 44 H 45 Z").attr("fill", functionColorScale(1))
 						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 							.attr("d","M 57 30 H 69 V 44 H 57 Z").attr("fill", functionColorScale(8))
@@ -765,8 +772,23 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 							.attr("d","M 93 30 H 105 V 44 H 93 Z").attr("fill", functionColorScale(5));
 							//ATTENTION The colours depends on the values accepted by functionColorScale, if it is linked to GO number this have to be modified
+*/	
+
+//Erase these paths when blocks are clustered !
+	//Drawing multiple blocks for the legend, not using canvas but paths
+	d3.select("#legend_matrixSchema").append("g").attr("transform", "translate(10,0)")
+							.append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 28 H 57 V 42 H 45 Z").attr("fill", functionColorScale(1))
+						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+							.attr("d","M 57 28 H 69 V 42 H 57 Z").attr("fill", functionColorScale(8))
+						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+							.attr("d","M 69 14 H 81 V 28 H 69 Z M 69 28 H 81 V 42 H 69 Z").attr("fill", functionColorScale(6))
+						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+							.attr("d","M 81 0 H 93 V 14 H 81 Z M 81 14 H 93 V 28 H 81 Z").attr("fill", functionColorScale(4))
+						.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+							.attr("d","M 93 28 H 105 V 42 H 93 Z").attr("fill", functionColorScale(5));
+							//ATTENTION The colours depends on the values accepted by functionColorScale, if it is linked to GO number this have to be modified
 	
-	svgContainer_legends.append("g").attr("id","legend_matrixMeanings").attr("transform", "translate(130,30)")
+	d3.select("#legend_matrixPA_blocks").append("g").attr("id","legend_matrixMeanings").attr("transform", "translate(130,0)")
 									.append("text").attr("font-family", "sans-serif").attr("font-size", "10px")
 										.attr("y", 7).attr("dominant-baseline", "middle")
 										.text("Filled : Presence")
@@ -777,6 +799,8 @@ d3.dsv("\t","PanChromosome/allGenes_Bar.bedPAV").then(function(realPanMatrix) {
 									.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 										.text("Colour : Function")
 										.attr("y", 37);
+	
+	d3.select("#legend_matrixPA_blocks").attr("transform","translate("+ eval( Number(svgContainer_legends.attr("width"))/2 - 0.5*d3.select("#legend_matrixPA_blocks").node().getBBox().width - d3.select("#legend_matrixPA_blocks").node().getBBox().x ) +",30)")
 	//------------------------------------------------------------------------------------
 	
 	//----------------------------------legend_zoomLevel----------------------------------
