@@ -267,7 +267,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 	var currentNucleotidesWidthInPixel = {};
 	
 	currentNucleotidesWidthInPixel.minGlobal = Number(svgContainer_presenceAbsenceMatrix.attr("width"))/maxPositionInNucleotide;
-	currentNucleotidesWidthInPixel.minEfficiency = ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]); //The minimum size  that allows a "smooth" display, it is set at 150 features which is kind of already slow to show
+	currentNucleotidesWidthInPixel.minEfficiency = ( ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]) > currentNucleotidesWidthInPixel.minGlobal ? ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]) : currentNucleotidesWidthInPixel.minGlobal*0.999 ); //The minimum size  that allows a "smooth" display, it is set at 150 features which is kind of already slow to show, and it cannot exceed the global min (if there are less than 150 features, for instance)
 	//ATTENTION It depends on the total number of displayed elements ! The more genome/chromosomes there are, the slower it is !
 	currentNucleotidesWidthInPixel.max = 10;
 	currentNucleotidesWidthInPixel.effective = ( ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 0.1*dataGroupedPerChromosome[`${currentChromInView}`].length, dataGroupedPerChromosome[`${currentChromInView}`]) < currentNucleotidesWidthInPixel.minEfficiency ? currentNucleotidesWidthInPixel.minEfficiency : ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 0.1*dataGroupedPerChromosome[`${currentChromInView}`].length, dataGroupedPerChromosome[`${currentChromInView}`]) ); // = Width of the display window / (nb of displayed features * mean width of features); The default value cannot be less than the minEfficiency value
@@ -942,7 +942,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		
 		//Updating the zoom information
 		currentNucleotidesWidthInPixel.minGlobal = Number(svgContainer_presenceAbsenceMatrix.attr("width"))/maxPositionInNucleotide;
-		currentNucleotidesWidthInPixel.minEfficiency = ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]);
+		currentNucleotidesWidthInPixel.minEfficiency = ( ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]) > currentNucleotidesWidthInPixel.minGlobal ? ntWidthDependingOnFeatureNb(Number(svgContainer_presenceAbsenceMatrix.attr("width")), 150, dataGroupedPerChromosome[`${currentChromInView}`]) : currentNucleotidesWidthInPixel.minGlobal*0.999 );
 		if (currentNucleotidesWidthInPixel.effective < currentNucleotidesWidthInPixel.minGlobal) { currentNucleotidesWidthInPixel.effective = currentNucleotidesWidthInPixel.minGlobal }; //Changing the zoom value only if it exceeds the total length of the new chromosome
 		
 		//Updating every display property/function depending on currentChromInView
