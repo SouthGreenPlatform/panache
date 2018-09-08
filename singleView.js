@@ -872,7 +872,7 @@ d3.dsv("\t","PanChromosome/mediumFakeDataWithAllBlocks.tsv").then(function(realP
 		.append("text").attr("font-family", "sans-serif").attr("font-size", "10px").attr("text-anchor", "middle")
 			.style("fill", d3.hcl(70,100,75)).attr("y", 50)
 			.append("tspan").attr("x", 0)
-				.text("* At this zoom levels")
+				.text("* At these zoom levels")
 			.select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 				.text("lag might occur")
 				.attr("dy","1em");
