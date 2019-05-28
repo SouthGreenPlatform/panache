@@ -1,10 +1,10 @@
-# Pañata
+# Panache
 
 This tool is used to visualise and explore pangenomes, chromosome per chromosome. It is designed to be interactive and users are encouraged to play around with the sliders and to hover on elements that seem interesting.
 
 ## Launching
 
-Pañata is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice (see [here](#how-to-run-it) for a summary on how to run Pañata). Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
+Panache is not deployed on any website yet so in order to use it the Git folder must be downloaded, and *singleView.html* must be opened in the web browser of your choice (see [here](#how-to-run-it) for a summary on how to run Panache). Although it works well on both Mozilla Firefox and Google Chrome, the later one might need to be used with a virtual machine in order to access the file.
 
 ### Repository content
 
@@ -12,7 +12,7 @@ Many files are still part of the project for testing and development purposes so
 
 * **d3js**
 
-Pañata is a visualisation tool written in JavaScript and is heavily based on the library D3.js by *Mike Bostock*. D3.js **v5** has been used, and some functions are not supported in versions older than D3.js v4. For instance many linear scales are created with the v5 syntax :
+Panache is a visualisation tool written in JavaScript and is heavily based on the library D3.js by *Mike Bostock*. D3.js **v5** has been used, and some functions are not supported in versions older than D3.js v4. For instance many linear scales are created with the v5 syntax :
 
 ```
 var myLinearScale_v5 = d3.scaleLinear().domain([0,1]).range([0,100]);
@@ -61,7 +61,7 @@ File providing information about the project, it is the one you are currently re
 
 * **panFakeFileMaker.py** (*facultative*)
 
-Executable working with **Python v3** to create ready-to-run fake data files that can be visualised with Pañata. In command line you can use it this way :
+Executable working with **Python v3** to create ready-to-run fake data files that can be visualised with Panache. In command line you can use it this way :
 
 ```
 python panFakeFileMaker.py numberOfFeatures numberOfChromosomes
@@ -100,7 +100,7 @@ d3.dsv("\t","a/path/to/myFile.tsv").then(function(realPanMatrix) {
 
 The first parameter corresponds to the file delimiter. It is possible to change it to match those of your own file, however **":" and ";" must not be used !**
 
-Pañata can be launched by opening singleView.html in the web browser of your choice. It has been developped under Mozilla Firefox, but works on Google Chrome too. Support by Microsoft Edge is unknown, and Internet Explorer cannot run it (*obviously*).
+Panache can be launched by opening singleView.html in the web browser of your choice. It has been developped under Mozilla Firefox, but works on Google Chrome too. Support by Microsoft Edge is unknown, and Internet Explorer cannot run it (*obviously*).
 If you want to try it with Google Chrome you might have to open it through a virtual machine, as Google Chrome does not allow to open .html files directly.
 
 If your data file is really big (hundred thousands of features per chromosome or more), it might take a little time before everything is displayed, just wait a few seconds. It is the drawing of the miniature canvas that is time consuming. This will reload everytime you change the displayed chromosome, but navigating should be fast once it is loaded.
@@ -109,17 +109,17 @@ Once everything is loaded, just play around with it, or see [the instructions](#
 
 ## File format specifications
 
-Pañata is designed to visualise pangenomes, but there is no standard for the file format yet. Therefore *myFile.tsv* do not corresponds exactly to a universal file format either, and must have some specificities in order to work properly with Pañata. [Here](#representative-example) is an example.
+Panache is designed to visualise pangenomes, but there is no standard for the file format yet. Therefore *myFile.tsv* do not corresponds exactly to a universal file format either, and must have some specificities in order to work properly with Panache. [Here](#representative-example) is an example.
 
 ### Nature of the data
 
-*myFile.tsv* is derived from both a .bed format and a presence/absence matrix, that tells for different genomes if a certain feature belongs to them. Those presence/absence are linked to a linear reference structure (a linear pangenome or a reference genome) by setting start and stop position for every feature (thats is the .bed part). Pañata does not offer tools for converting your data into a readable file directly and only uses ready-to-read files, so they have to be built beforehand.
+*myFile.tsv* is derived from both a .bed format and a presence/absence matrix, that tells for different genomes if a certain feature belongs to them. Those presence/absence are linked to a linear reference structure (a linear pangenome or a reference genome) by setting start and stop position for every feature (thats is the .bed part). Panache does not offer tools for converting your data into a readable file directly and only uses ready-to-read files, so they have to be built beforehand.
 
 **The features have to be ordered depending on their FeatureStart values !**
 
 Although it will be able to display features covering the same part of the reference sequence, it is better to use file with no overlap so that no feature will be hidden because of another one. Moreover, even if it supposed to work with completely sequenced references gaps are allowed and you can use file where features are not directly next to each other.
 
-The file is by default structured as a tab-delimited file, but you could use any derivative (.csv...) as long as the delimiter is something else than ":" or ";". Those symbols are indeed used by Pañata to decompose elements into a column, and therefore should not be used as column delimiters. See [how to specify it](#how-to-run-it).
+The file is by default structured as a tab-delimited file, but you could use any derivative (.csv...) as long as the delimiter is something else than ":" or ";". Those symbols are indeed used by Panache to decompose elements into a column, and therefore should not be used as column delimiters. See [how to specify it](#how-to-run-it).
 
 ### Header
 
@@ -218,7 +218,7 @@ Geno1	Geno2	Geno3																Geno1	Geno2	Geno3
 
 ### Representative example
 
-Here is a shortened file giving an overview of every syntaxes that can be used with Pañata :
+Here is a shortened file giving an overview of every syntaxes that can be used with Panache :
 
 ```
 #Chromosome	FeatureStart	FeatureStop	Sequence_IUPAC_Plus	SimilarBlocks	Function	Geno1	gen_2	genomeThree
@@ -236,13 +236,13 @@ chrom-5	345	351	ATTACA	.	7	23	34	42
 
 ## Instructions
 
-Pañata is a data visualisation and exploration tool, therefore many parts are interactive and can be choosen by users. You can find here instructions on how to use and interpret the data on display.
+Panache is a data visualisation and exploration tool, therefore many parts are interactive and can be choosen by users. You can find here instructions on how to use and interpret the data on display.
 
 ### Components of the interface
 
-Pañata is mainly divided into four parts, each having its own functions : Data selection, Overview, Display Window and Display Options/legends.
+Panache is mainly divided into four parts, each having its own functions : Data selection, Overview, Display Window and Display Options/legends.
 
-![Pañata has four parts, one for each corner of your screen](imagesReadMe/Paniata_interface_4pieces.png?raw=true "Pañata interfaces")
+![Panache has four parts, one for each corner of your screen](imagesReadMe/Paniata_interface_4pieces.png?raw=true "Panache interfaces")
 
 * **Data Selection**
 
@@ -270,7 +270,7 @@ Finally a **scale** shows the length in bp of the reference, so that users can s
 
 ![Every column gives information about a feature, rows might correspond to a genome, a quantity, a position, or a similarity information](imagesReadMe/Paniata_interface_DisplayWindow.png?raw=true "Display Window")
 
-This is the main display of Pañata. Every visible elements are parts of a larger display, and the handle in the Overview tells the user which part of it is currently visible. Every feature from *myFile.tsv* corresponds to a column of multiple blocks.
+This is the main display of Panache. Every visible elements are parts of a larger display, and the handle in the Overview tells the user which part of it is currently visible. Every feature from *myFile.tsv* corresponds to a column of multiple blocks.
 
 The top part is the graphic representation of a presence/absence matrix, features being represented as columns and genomes as rows. If a feature is present in a genome, the block at the crossroads will be filled and coloured depending on the functionnal information. If the feature is absent, however, the block will stay empty and will appear as blank.
 
@@ -282,18 +282,18 @@ The bottom part is a bit trickier, but is still linked to the number of similar 
 
 * **Display Options**
 
-![Pañata is supposed to be self-explanatory enough so the legend is visible, and you can choose the zoom level](imagesReadMe/Paniata_interface_DisplayOptions.png?raw=true "Legend and zoom level")
+![Panache is supposed to be self-explanatory enough so the legend is visible, and you can choose the zoom level](imagesReadMe/Paniata_interface_DisplayOptions.png?raw=true "Legend and zoom level")
 
 It is quite self explanatory as it is the legend, along with the zoom level information. The current zoom level is represented by a bar on a gradient of all possible zoom levels. The more on the right it is, the bigger the features will be displayed.
 *Do note that there might be performance issues when the number of displayed element is too high (leftmost part of the gradient).*
 
 ### Changing the displayed chromosome
 
-Pañata offers a 'per-chromosome' view. Therefore only one (pan)chromosome is displayed at a time. In order to change it you can choose another one in the dropdown menu accessible in the Data Selection part of your screen. *If there are many features in the selected chromosome it might take a few seconds before everything is diplayed accordingly.*
+Panache offers a 'per-chromosome' view. Therefore only one (pan)chromosome is displayed at a time. In order to change it you can choose another one in the dropdown menu accessible in the Data Selection part of your screen. *If there are many features in the selected chromosome it might take a few seconds before everything is diplayed accordingly.*
 
 ### Using the sliders
 
-There is a total of 3.5 five sliders you can play with in Pañata : three of them will always be available, the last one only appears when needed.
+There is a total of 3.5 five sliders you can play with in Panache : three of them will always be available, the last one only appears when needed.
 
 * **Choice of the *core*/*dispensable* threshold**
 
