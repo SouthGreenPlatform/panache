@@ -193,11 +193,9 @@ function renderD3Visualisation(file_URL) {
       let countAsProperty = {};
       // Sets the base value to 0 for the properties "0", "1", "2"... etc, one
       // number being one chromosome.
-      for (var i = 0; i < CHROMOSOME_NAMES.length; ++i) {
-        countAsProperty[String(i)] = 0
-      }
+      CHROMOSOME_NAMES.forEach(chromName => countAsProperty[`${chromName}`] = 0);
       //concernedChromosomes.forEach(chrom => if (countAsProperty[chrom] != undefined) countAsProperty[chrom] += 1;);
-      concernedChromosomes.forEach(function(chrom) {
+      concernedChromosomes.forEach(function(chromName) {
         /* The if statement must be on another line than the function
            declaration. It is mandatory to check if it is not undefined
            because concernetChromosome can be ["."], but there is no chrom
@@ -205,8 +203,8 @@ function renderD3Visualisation(file_URL) {
            If a chromosome has one copy or more of the considered block, then
            every occurence is added to the count.
         */
-        if (undefined != countAsProperty[chrom]) {
-          countAsProperty[chrom] += 1;
+        if (undefined != countAsProperty[chromName]) {
+          countAsProperty[chromName] += 1;
         }
       });
 
@@ -219,13 +217,13 @@ function renderD3Visualisation(file_URL) {
          * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals}
          */
         newObject[`copyPptionIn_Chr${i}`] =
-          (maxCount > 0 ? countAsProperty[`${i}`]/maxCount : 0);
+          (maxCount > 0 ? countAsProperty[`${CHROMOSOME_NAMES[i]}`]/maxCount : 0);
       }
 
       return newObject;
     });
     //--------------------------------------------------------------------------
-    console.log(improvedDataMatrix);
+    console.log("Matrix loaded");
 
     /**
      * ATTENTION We must work on a copy of the original array, else the rest
@@ -871,6 +869,7 @@ function renderD3Visualisation(file_URL) {
     document.body.append(myPixiApplication.view);
 
     function drawingPixiBackground() {
+      let beginning = performance.now();
 
       //Drawing of the function histogram
       dataGroupedPerChromosome[`${currentChromInView}`].forEach((d,i) => {
@@ -934,6 +933,9 @@ function renderD3Visualisation(file_URL) {
         myPixiApplication.stage.addChild(rectangle);
 
       });
+
+      let end = performance.now();
+      console.log("Call to draw Miniature took " + (beginning - end) + " milliseconds.");
 
     };
 
