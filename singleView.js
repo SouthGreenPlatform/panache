@@ -842,7 +842,7 @@ function renderD3Visualisation(file_URL) {
         //Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gap within the miniature)
         let rectangle = new PIXI.Graphics();
         rectangle.beginFill(0xFFFFFF);
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))
+        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //x, y, width, height
 
         rectangle.endFill(); //Use endFill when you’re done drawing
         myPixiApplication.stage.addChild(rectangle);
@@ -850,7 +850,7 @@ function renderD3Visualisation(file_URL) {
         //Colouring the function blocks
         let functionColour = (functionDiversity.length === 1 ? d3.interpolateRainbow((i%14)/14) : functionColorScale(d["Function"]));
         rectangle.beginFill(d3.color(functionColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlo
+        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, 2*browsingBlocksDimensions.height - (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //x, y, width, height
 
         rectangle.endFill(); //Use endFill when you’re done drawing
         myPixiApplication.stage.addChild(rectangle);
@@ -863,7 +863,7 @@ function renderD3Visualisation(file_URL) {
         //Using Pixi's Graphic Primitives
         let coreDispColour = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]));
         rectangle.beginFill(d3.color(coreDispColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.Fea
+        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //x, y, width, height
 
         rectangle.endFill(); //Use endFill when you’re done drawing
         myPixiApplication.stage.addChild(rectangle);
@@ -877,7 +877,7 @@ function renderD3Visualisation(file_URL) {
         //Using Pixi's Graphic Primitives
         let rainbowColour = pseudoRainbowColorScale(Number(d.FeatureStart));
         rectangle.beginFill(d3.color(rainbowColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsin
+        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //x, y, width, height
 
         rectangle.endFill(); //Use endFill when you’re done drawing
         myPixiApplication.stage.addChild(rectangle);
@@ -892,7 +892,7 @@ function renderD3Visualisation(file_URL) {
         //Using Pixi's Graphic Primitives
         let rainbowColour = greenColorScale(Number(d.SimilarBlocks.split(";").length));
         rectangle.beginFill(d3.color(rainbowColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_bro
+        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //x, y, width, height
 
         rectangle.endFill(); //Use endFill when you’re done drawing
         myPixiApplication.stage.addChild(rectangle);
