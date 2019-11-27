@@ -1,4 +1,5 @@
 import {domainPivotsMaker, colorScaleMaker} from './modules/colorScales.mjs';
+import * as drawBlock from './modules/blockScale/drawing.mjs';
 
 /**
  * @fileOverview    Pangenome visualizer using JavaScript.
@@ -830,49 +831,22 @@ function renderD3Visualisation(file_URL) {
     //The context of canvas is needed for drawing
     var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 
-    function drawingMiniatureBackground() {
-
-      let t0 = performance.now();
-
-      //Clear existing canvas
-      bgBrowser_miniContext.clearRect(0, 0, bgBrowser_miniCanvas.attr("width"), bgBrowser_miniCanvas.attr("height"));
-
-      //Drawing of the function histogram
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach((d,i) => {
-        //Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gap within the miniature)
-        bgBrowser_miniContext.fillStyle = "#FFF";
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-        //Colouring the function blocks
-//        bgBrowser_miniContext.fillStyle = functionColorScale(Number(d.Function));
-        bgBrowser_miniContext.fillStyle = (functionDiversity.length === 1 ? d3.interpolateRainbow((correspondancePosColor.get(d["FeatureStart"])%14)/14) : functionColorScale(d["Function"]));
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, 2*browsingBlocksDimensions.height - (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-      });
-
-      //Drawing of the core/disp miniature
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-        bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-      });
-
-      //Drawing of the rainbow miniature
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-        bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height);
-      });
-
-      //Drawing of the similarity miniature
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-        bgBrowser_miniContext.fillStyle = greenColorScale(Number(d.SimilarBlocks.split(";").length));
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height);
-      });
-
-      let t1 = performance.now();
-
-      console.log("Call to draw Miniature took " + (t0 - t1) + " milliseconds.");
-
-    };
-
-    drawingMiniatureBackground();
+    drawBlock.miniatureBg(
+      bgBrowser_miniCanvas,
+      bgBrowser_miniContext,
+      dataGroupedPerChromosome[`${currentChromInView}`],
+      svgContainer_browsingSlider.attr("width"),
+      maxPositionInNucleotide,
+      INITIAL_GENOMES_NAMES,
+      browsingBlocksDimensions,
+      coreThreshold,
+      functionDiversity,
+      correspondancePosColor,
+      functionColorScale,
+      orangeColorScale,
+      blueColorScale,
+      pseudoRainbowColorScale,
+      greenColorScale);
 
     //--------------------------------------------------------------------------
 
@@ -1296,7 +1270,23 @@ function renderD3Visualisation(file_URL) {
       zoomSlider.select("line").attr("x1", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("x2", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`])))
 
       //For the miniature
-      drawingMiniatureBackground();
+      drawBlock.miniatureBg(
+        bgBrowser_miniCanvas,
+        bgBrowser_miniContext,
+        dataGroupedPerChromosome[`${currentChromInView}`],
+        svgContainer_browsingSlider.attr("width"),
+        maxPositionInNucleotide,
+        INITIAL_GENOMES_NAMES,
+        browsingBlocksDimensions,
+        coreThreshold,
+        functionDiversity,
+        correspondancePosColor,
+        functionColorScale,
+        orangeColorScale,
+        blueColorScale,
+        pseudoRainbowColorScale,
+        greenColorScale);
+
       miniWindowHandle.attr("width", browsingHandleDimensions.width);
       miniWindowHandle.attr("x", 0);
       d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
