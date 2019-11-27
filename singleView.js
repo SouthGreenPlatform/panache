@@ -1,3 +1,5 @@
+import {domainPivotsMaker, colorScaleMaker} from './modules/colorScales.mjs';
+
 /**
  * @fileOverview    Pangenome visualizer using JavaScript.
  *
@@ -7,8 +9,6 @@
  *                  Copyright 2018 Mike Bostock.
  */
 
-/**imports */
-import {domainPivotsMaker, colorScaleMaker} from './modules/colorScales.mjs';
 
 
 /** {@link https://developer.mozilla.org/fr/docs/Web/API/File/Using_files_from_web_applications} */
@@ -178,7 +178,7 @@ function renderD3Visualisation(file_URL) {
        * - 'presenceCounter': number of genomes that own this block
        * Its creation is based on .assign(): {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign}
        */
-      newObject = Object.assign({"index": FeatureStart,
+      let newObject = Object.assign({"index": FeatureStart,
         "presenceCounter": panChrBlockCount, "Chromosome": Chromosome}, d);
 
       /**
@@ -214,7 +214,7 @@ function renderD3Visualisation(file_URL) {
 
       // Calculation of the proportions from the occurence count
       //The ... is mandatory to tell that we work with an array
-      maxCount = Math.max(...Object.values(countAsProperty));
+      let maxCount = Math.max(...Object.values(countAsProperty));
       for (var i = 0; i < CHROMOSOME_NAMES.length; ++i) {
         /**
          * For variables within string, see Template Literals:
@@ -820,84 +820,50 @@ function renderD3Visualisation(file_URL) {
 
     //-------------------------------------miniCanvas-------------------------------------
 
-    //Create a Pixi Application
-    let myPixiApplication = new PIXI.Application({
-      width: foreignObject_Browser.attr("width"),
-      height: (browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace)*6,
-      antialias: true,
-      transparent: true,
-      resolution: 1
-    });
+//Addition of the first canvas to the foreignObject
+    var bgBrowser_miniCanvas = foreignObject_Browser.append("xhtml:canvas")
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("width", foreignObject_Browser.attr("width"))
+      .attr("height", (browsingBlocksDimensions.height + browsingBlocksDimensions.borderSpace)*6);
 
-    //Add the canvas that Pixi automatically created for you to the HTML document
-    document.body.append(myPixiApplication.view);
+    //The context of canvas is needed for drawing
+    var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 
-    function drawingPixiBackground() {
+    function drawingMiniatureBackground() {
 
       let t0 = performance.now();
 
+      //Clear existing canvas
+      bgBrowser_miniContext.clearRect(0, 0, bgBrowser_miniCanvas.attr("width"), bgBrowser_miniCanvas.attr("height"));
+
       //Drawing of the function histogram
       dataGroupedPerChromosome[`${currentChromInView}`].forEach((d,i) => {
-        //Using Pixi's Graphic Primitives
         //Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gap within the miniature)
-        let rectangle = new PIXI.Graphics();
-        rectangle.beginFill(0xFFFFFF);
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //x, y, width, height
-
-        rectangle.endFill(); //Use endFill when you’re done drawing
-        myPixiApplication.stage.addChild(rectangle);
-
+        bgBrowser_miniContext.fillStyle = "#FFF";
+        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
         //Colouring the function blocks
-        let functionColour = (functionDiversity.length === 1 ? d3.interpolateRainbow((i%14)/14) : functionColorScale(d["Function"]));
-        rectangle.beginFill(d3.color(functionColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, 2*browsingBlocksDimensions.height - (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //x, y, width, height
-
-        rectangle.endFill(); //Use endFill when you’re done drawing
-        myPixiApplication.stage.addChild(rectangle);
+//        bgBrowser_miniContext.fillStyle = functionColorScale(Number(d.Function));
+        bgBrowser_miniContext.fillStyle = (functionDiversity.length === 1 ? d3.interpolateRainbow((correspondancePosColor.get(d["FeatureStart"])%14)/14) : functionColorScale(d["Function"]));
+        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, 2*browsingBlocksDimensions.height - (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
       });
 
       //Drawing of the core/disp miniature
       dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-
-        let rectangle = new PIXI.Graphics();
-        //Using Pixi's Graphic Primitives
-        let coreDispColour = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1]));
-        rectangle.beginFill(d3.color(coreDispColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //x, y, width, height
-
-        rectangle.endFill(); //Use endFill when you’re done drawing
-        myPixiApplication.stage.addChild(rectangle);
-
+        bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
+        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
       });
 
       //Drawing of the rainbow miniature
       dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-
-        let rectangle = new PIXI.Graphics();
-        //Using Pixi's Graphic Primitives
-        let rainbowColour = pseudoRainbowColorScale(Number(d.FeatureStart));
-        rectangle.beginFill(d3.color(rainbowColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //x, y, width, height
-
-        rectangle.endFill(); //Use endFill when you’re done drawing
-        myPixiApplication.stage.addChild(rectangle);
-
-
+        bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
+        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height);
       });
 
       //Drawing of the similarity miniature
       dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-
-        let rectangle = new PIXI.Graphics();
-        //Using Pixi's Graphic Primitives
-        let rainbowColour = greenColorScale(Number(d.SimilarBlocks.split(";").length));
-        rectangle.beginFill(d3.color(rainbowColour).hex().replace(/#/,"0x"));
-        rectangle.drawRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //x, y, width, height
-
-        rectangle.endFill(); //Use endFill when you’re done drawing
-        myPixiApplication.stage.addChild(rectangle);
-
-
+        bgBrowser_miniContext.fillStyle = greenColorScale(Number(d.SimilarBlocks.split(";").length));
+        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height);
       });
 
       let t1 = performance.now();
@@ -906,7 +872,7 @@ function renderD3Visualisation(file_URL) {
 
     };
 
-    drawingPixiBackground();
+    drawingMiniatureBackground();
 
     //--------------------------------------------------------------------------
 
@@ -1330,7 +1296,7 @@ function renderD3Visualisation(file_URL) {
       zoomSlider.select("line").attr("x1", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("x2", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`])))
 
       //For the miniature
-      drawingPixiBackground();
+      drawingMiniatureBackground();
       miniWindowHandle.attr("width", browsingHandleDimensions.width);
       miniWindowHandle.attr("x", 0);
       d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
