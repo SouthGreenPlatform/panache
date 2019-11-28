@@ -7,8 +7,6 @@
  *                  Copyright 2018 Mike Bostock.
  */
 
- import * as d3 from '../d3js/d3.min.js'
-
 //-----------------------------domainPivotsMaker()------------------------------
 
 /**
@@ -17,7 +15,7 @@
  * @param {numeric}  maxValue       - Extent of the desired numeric range
  * @return {numeric[]} List of values evenly distributed between 0 and maxValue
  */
-function domainPivotsMaker(breakpointsNb,maxValue) {
+export function domainPivotsMaker(breakpointsNb,maxValue) {
     let breakpoints = [];
 
     for (var i = 0; i < breakpointsNb; ++i) {
@@ -39,7 +37,7 @@ function domainPivotsMaker(breakpointsNb,maxValue) {
  * RGB colour scheme, see: {@link https://bl.ocks.org/mbostock/3014589}.
  * "I want hue" is a great tool for choosing colours: {@link http://tools.medialab.sciences-po.fr/iwanthue/}
  */
-function colorScaleMaker(domain, range, scaleLinear = true) {
+export function colorScaleMaker(domain, range, scaleLinear = true) {
     if (scaleLinear) {
         return d3.scaleLinear()
             // Minimal and Maximal values are declared as input domain, they
@@ -56,4 +54,22 @@ function colorScaleMaker(domain, range, scaleLinear = true) {
             .domain(domain)
             .range(range);
     };
+};
+
+//----------------------------thresholdBasedColor()-----------------------------
+
+//Function for applying different color Scales depending on one value
+/**
+ * @function thresholdBasedColor
+ * @param {numeric}  d               - Data numeric value that might exceed a threshold
+ * @param {numeric}  threshold       - Number used for comparison with d
+ * @param {object}   colorScaleLess  - d3 colorScale to apply when d < threshold
+ * @param {object}   colorScaleMore  - d3 colorScale to apply when d >= threshold
+ * Choose between two different colorScales to apply depending on the
+ * comparison of a value against a numeric threshold.
+ */
+export function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
+    if (d >= threshold) {
+        return colorScaleMore(d);
+    } return colorScaleLess(d);
 };

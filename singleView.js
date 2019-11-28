@@ -1,4 +1,4 @@
-import {domainPivotsMaker, colorScaleMaker} from './modules/colorScales.mjs';
+import {domainPivotsMaker, colorScaleMaker, thresholdBasedColor} from './modules/colorScales.mjs';
 import * as drawBlock from './modules/blockScale/drawing.mjs';
 
 /**
@@ -1008,17 +1008,6 @@ function renderD3Visualisation(file_URL) {
     //More about CSS positions : https://developer.mozilla.org/en-US/docs/Web/CSS/position
 
 
-
-
-    //-------------------------------thresholdBasedColor()--------------------------------
-
-    //Creating a function to apply different color Scale depending on one value
-    function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
-      if (d >= threshold) {
-        return colorScaleMore(d);
-      } return colorScaleLess(d);
-    };
-    //--------------------------------------------------------------------------
 
     //-----------------------------------legend_matrixPA----------------------------------
 
