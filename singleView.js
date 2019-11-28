@@ -925,7 +925,16 @@ function renderD3Visualisation(file_URL) {
       elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) ); //Push everything that belongs to the display window within the data to render, no matter if it is empty as if an array is empty nothing can be pushed anyway
 
       //Drawing of the SVG for each element
-      genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View, nucleotideWidth)); //PA matrix
+      genomesList.forEach((geno, genomeNumber) => drawBlock.pavBlocks(geno,
+        genomeNumber,
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        presenceAbsenceMatrixSliderScale,
+        scrollingBar_PresenceAbsenceHandle,
+        functionDiversity,
+        correspondancePosColor,
+        functionColorScale)); //PA matrix
       drawingDisplay_BlockCount(dataFiltered2View, nucleotideWidth); //Blue/orange line
       drawingDisplay_Rainbow(dataFiltered2View, nucleotideWidth); //Position line
       drawingDisplay_similarBlocks(dataFiltered2View, nucleotideWidth); //Similarity line
@@ -1292,38 +1301,8 @@ function renderD3Visualisation(file_URL) {
     //ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
     //See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 
-    function drawingDisplay_PerGenomePA(geno, genomeNumber, dataPart, nucleotideWidth) {
-      let newData = d3.select(`#presence_${geno}`).selectAll("rect")
-            .data(dataPart); //There is one rect per (genome x PA block), not just per genome
-
-//      console.log(newData.exit); //"undefined" when empty
-
-      newData.exit().remove(); //Removing residual dom elements linked to unbound data
-
-//      console.log(scrollingBar_PresenceAbsenceHandle);
-
-      //ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
-      newData.enter().append("rect") //Settings the attribute to the newly created blocks
-              .attr("class", "moveableBlock")
-              .attr("height", displayedBlocksDimensions.height)
-              //y is incremented for each new genome, and depends on the position of the scroll bar's handle if existing
-              .attr("y", genomeNumber*displayedBlocksDimensions.height - presenceAbsenceMatrixSliderScale.invert(Number(scrollingBar_PresenceAbsenceHandle.attr("cy"))) ) //(d,i) => (scrollingBar_PresenceAbsenceHandle === "undefined") ? genomeNumber*displayedBlocksDimensions.height : genomeNumber*displayedBlocksDimensions.height - presenceAbsenceMatrixSliderScale.invert(Number(scrollingBar_PresenceAbsenceHandle.attr("cy"))) )
-//              .style("position","absolute")
-//              .style("z-index", -1)
-          .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-            .attr("x", (d,i) => Number(d.index)*nucleotideWidth) //x is the position of the block within the filtered dataset (that is why index is used instead of FeatureStart), with the width of nucleotides taken into account
-            .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-//            .style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
-            .style("fill", (d,i) => (functionDiversity.length === 1 ? d3.interpolateRainbow((correspondancePosColor.get(d["FeatureStart"])%14)/14) : functionColorScale(d["Function"]))) //Do not forget the ""... Also if there is the same "function" for every block within the pangenome then each block will be painted with a rainbow color which differs from those of its neighbours
-            .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
-
-//      eventScrollingPresenceAbsence(presenceAbsenceMatrixSliderScale.invert(d3.select("#scrollingBar_PA_Handle").attr("cy"))) //Ask to use eventScrollingPresenceAbsence but without redefining the cy position of the handle
-//      newData.exit().remove;
-    };
-
     INITIAL_GENOMES_NAMES.forEach(function(geno, genomeNumber) {
       var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`);
-//      drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
 
       var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno}_label`).attr("font-family", "sans-serif").attr("font-size", "10px")
             .attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label

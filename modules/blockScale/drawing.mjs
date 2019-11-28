@@ -87,3 +87,29 @@ export function miniatureBg(canvas, canvasContext, chromData, svgWidth,
     console.log("Call to draw Miniature took " + (t0 - t1) + " milliseconds.");
 
 };
+
+//-----------------------------pavBlocks_genome()-------------------------------
+
+export function pavBlocks(geno, genomeNumber, dataPart,
+    nucleotideWidth, blockDims, sliderScale, handle, funcDiv, colorMap,
+    funcColScale) {
+
+    let newData = d3.select(`#presence_${geno}`).selectAll("rect")
+          .data(dataPart); //There is one rect per (genome x PA block), not just per genome
+
+    newData.exit().remove(); //Removing residual dom elements linked to unbound data
+
+    //entered data are common for every elements of this kind, and will not need to be updated
+    //Here such attributes are set
+    newData.enter().append("rect")
+            .attr("class", "moveableBlock")
+            .attr("height", blockDims.height)
+            //y is incremented for each new genome, and depends on the position of the scroll bar's handle if existing
+            .attr("y", genomeNumber*blockDims.height - sliderScale.invert(Number(handle.attr("cy"))) )
+
+        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
+          .attr("x", (d,i) => Number(d.index)*nucleotideWidth) //x is the position of the block within the filtered dataset (that is why index is used instead of FeatureStart), with the width of nucleotides taken into account
+          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
+          .style("fill", (d,i) => (funcDiv.length === 1 ? d3.interpolateRainbow((colorMap.get(d["FeatureStart"])%14)/14) : funcColScale(d["Function"]))) //Do not forget the ""... Also if there is the same "function" for every block within the pangenome then each block will be painted with a rainbow color which differs from those of its neighbours
+          .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
+};
