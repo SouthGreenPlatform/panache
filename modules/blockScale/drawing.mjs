@@ -1,3 +1,5 @@
+import {thresholdBasedColor} from '../colorScales.mjs';
+
 /**
  * @fileOverview    Modules for drawing and display functions
  *
@@ -113,3 +115,30 @@ export function pavBlocks(geno, genomeNumber, dataPart,
           .style("fill", (d,i) => (funcDiv.length === 1 ? d3.interpolateRainbow((colorMap.get(d["FeatureStart"])%14)/14) : funcColScale(d["Function"]))) //Do not forget the ""... Also if there is the same "function" for every block within the pangenome then each block will be painted with a rainbow color which differs from those of its neighbours
           .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
 };
+
+//--------------------------------trackCoreDisp()-------------------------------
+
+export function trackCoreDisp(selectedID, dataPart, nucleotideWidth, blockDims,
+    yPos, eventOn, eventOff, coreThreshold, colorScaleLess, colorScaleMore) {
+
+    //Binding the data to a DOM element, therefore creating one SVG block per data
+    let newData = d3.select(selectedID).selectAll("rect") //First an empty selection of all not yet existing rectangles
+          .data(dataPart); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+
+          //For more about joins, see : https://bost.ocks.org/mike/join/
+
+    newData.exit().remove(); //Removing residual data
+
+    //Selecting all previous blocks, and determining their attributes
+    newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
+        .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+        .attr("class", "moveableBlock")
+        .attr("height", blockDims.height)
+        .attr("y", yPos)
+        .on("mouseover", eventOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+        .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
+      .merge(newData) //Combines enter() and 'update()' selection, to update both at once
+        .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
+        .attr("width", d => ( Number(d.FeatureStop)-Number(d.FeatureStart) ) * nucleotideWidth)
+        .style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,colorScaleLess,colorScaleMore));
+  };

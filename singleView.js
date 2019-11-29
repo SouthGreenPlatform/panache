@@ -925,6 +925,7 @@ function renderD3Visualisation(file_URL) {
       elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) ); //Push everything that belongs to the display window within the data to render, no matter if it is empty as if an array is empty nothing can be pushed anyway
 
       //Drawing of the SVG for each element
+      //PAV Matrix
       genomesList.forEach((geno, genomeNumber) => drawBlock.pavBlocks(geno,
         genomeNumber,
         dataFiltered2View,
@@ -934,8 +935,18 @@ function renderD3Visualisation(file_URL) {
         scrollingBar_PresenceAbsenceHandle,
         functionDiversity,
         correspondancePosColor,
-        functionColorScale)); //PA matrix
-      drawingDisplay_BlockCount(dataFiltered2View, nucleotideWidth); //Blue/orange line
+        functionColorScale));
+      //Core / Disp track
+      drawBlock.trackCoreDisp(panChromosome_coreVSdispensable,
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        0,
+        eventDisplayInfoOn,
+        eventDisplayInfoOff,
+        coreThreshold,
+        blueColorScale,
+        orangeColorScale)
       drawingDisplay_Rainbow(dataFiltered2View, nucleotideWidth); //Position line
       drawingDisplay_similarBlocks(dataFiltered2View, nucleotideWidth); //Similarity line
       drawingDisplay_similarBackground(dataFiltered2View, nucleotideWidth); //Similarity vertical rectangles
@@ -1415,30 +1426,6 @@ function renderD3Visualisation(file_URL) {
 
 
     //---------------------------------blocks & attributes--------------------------------
-
-    function drawingDisplay_BlockCount(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element, therefore creating one SVG block per data
-      let newData = d3.select("#panChromosome_coreVSdispensable").selectAll("rect") //First an empty selection of all not yet existing rectangles
-            .data(dataPart); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
-
-            //For more about joins, see : https://bost.ocks.org/mike/join/
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", displayedBlocksDimensions.height)
-          .attr("y", 0)
-          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-          .style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale));
-    };
 
     //Binding the data to a DOM element, therefore creating one SVG block per data
     var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
