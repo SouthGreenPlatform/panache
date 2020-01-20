@@ -116,79 +116,58 @@ export function pavBlocks(geno, genomeNumber, dataPart,
           .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
 };
 
+
+//----------------------------------track()-------------------------------------
+
+function trackCoreDisp(selectedID, dataPart, nucleotideWidth, blockDims,
+  yPos, eventOn, eventOff, fillFunction) {
+
+  //Binding the data to a DOM element, therefore creating one SVG block per data
+  let newData = d3.select(selectedID).selectAll("rect") //First an empty selection of all not yet existing rectangles
+        .data(dataPart); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
+
+        //For more about joins, see : https://bost.ocks.org/mike/join/
+
+  newData.exit().remove(); //Removing residual data
+
+  //Selecting all previous blocks, and determining their attributes
+  newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
+      .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+      .attr("class", "moveableBlock")
+      .attr("height", blockDims.height)
+      .attr("y", yPos)
+      .on("mouseover", eventOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+      .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
+    .merge(newData) //Combines enter() and 'update()' selection, to update both at once
+      .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
+      .attr("width", d => ( Number(d.FeatureStop) - Number(d.FeatureStart) ) * nucleotideWidth)
+      .style("fill", fillFunction(d));
+};
+
+
 //------------------------------trackCoreDisp()---------------------------------
 
 export function trackCoreDisp(selectedID, dataPart, nucleotideWidth, blockDims,
-    yPos, eventOn, eventOff, coreThreshold, colorScaleLess, colorScaleMore) {
+  yPos, eventOn, eventOff, coreThreshold, colorScaleLess, colorScaleMore) {
 
-    //Binding the data to a DOM element, therefore creating one SVG block per data
-    let newData = d3.select(selectedID).selectAll("rect") //First an empty selection of all not yet existing rectangles
-          .data(dataPart); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
-
-          //For more about joins, see : https://bost.ocks.org/mike/join/
-
-    newData.exit().remove(); //Removing residual data
-
-    //Selecting all previous blocks, and determining their attributes
-    newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
-        .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-        .attr("class", "moveableBlock")
-        .attr("height", blockDims.height)
-        .attr("y", yPos)
-        .on("mouseover", eventOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-        .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
-      .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-        .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
-        .attr("width", d => ( Number(d.FeatureStop) - Number(d.FeatureStart) ) * nucleotideWidth)
-        .style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,colorScaleLess,colorScaleMore));
+  track(selectedID, dataPart, nucleotideWidth, blockDims, yPos, eventOn, eventOff,
+    d => thresholdBasedColor(d.presenceCounter,coreThreshold,colorScaleLess,colorScaleMore))
 };
 
 //-------------------------------trackPosition()--------------------------------
 
 export function trackPosition(selectedID, dataPart, nucleotideWidth, blockDims,
-    yPos, eventOn, eventOff, colorScale) {
+  yPos, eventOn, eventOff, colorScale) {
 
-  //Binding the data to a DOM element
-  let newData = d3.select(selectedID).selectAll("rect")
-        .data(dataPart);
-
-  newData.exit().remove(); //Removing residual data
-
-  //Selecting all previous blocks, and determining their attributes
-  newData.enter()
-      .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-      .attr("class", "moveableBlock")
-      .attr("height", blockDims.height)
-      .attr("y", yPos)
-      .on("mouseover", eventOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-      .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
-    .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-      .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
-      .attr("width", d => (Number(d.FeatureStop) - Number(d.FeatureStart)) * nucleotideWidth)
-      .style("fill", (d => colorScale(Number(d.FeatureStart))));
+  track(selectedID, dataPart, nucleotideWidth, blockDims, yPos, eventOn, eventOff,
+    d => colorScale(Number(d.FeatureStart)))
 };
 
 //------------------------------trackOccurences()-------------------------------
 
 export function trackOccurences(selectedID, dataPart, nucleotideWidth, blockDims,
-    yPos, eventOn, eventOff, colorScale) {
+  yPos, eventOn, eventOff, colorScale) {
 
-  //Binding the data to a DOM element
-  let newData = d3.select(selectedID).selectAll("rect")
-        .data(dataPart);
-
-  newData.exit().remove(); //Removing residual data
-
-  //Selecting all previous blocks, and determining their attributes
-  newData.enter()
-      .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-      .attr("class", "moveableBlock")
-      .attr("height", blockDims.height)
-      .attr("y", yPos)
-      .on("mouseover", eventOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-      .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
-    .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-      .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
-      .attr("width", d => (Number(d.FeatureStop) - Number(d.FeatureStart)) * nucleotideWidth)
-      .style("fill", (d => colorScale(d.SimilarBlocks.split(";").length)));
+  track(selectedID, dataPart, nucleotideWidth, blockDims, yPos, eventOn, eventOff,
+    d => colorScale(d.SimilarBlocks.split(";").length))
 };
