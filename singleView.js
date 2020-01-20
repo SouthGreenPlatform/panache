@@ -1,5 +1,5 @@
 import {domainPivotsMaker, colorScaleMaker, thresholdBasedColor} from './modules/colorScales.mjs';
-import * as drawBlock from './modules/blockScale/drawing.mjs';
+import * as drawBlock from './modules/blockLevel/drawing.mjs';
 
 /**
  * @fileOverview    Pangenome visualizer using JavaScript.
@@ -754,7 +754,7 @@ function renderD3Visualisation(file_URL) {
       d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
       d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/INITIAL_GENOMES_NAMES.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
       d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/INITIAL_GENOMES_NAMES.length).attr("stop-color", orangeColorScale(coreThreshold));
-      blocks.selectAll("rect").style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
+      d3.select("#panChromosome_coreVSdispensable").selectAll("rect").style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 
       //Updating the colours of the miniature browser
       bgBrowser_miniContext.fillStyle = "#fff";
@@ -937,7 +937,7 @@ function renderD3Visualisation(file_URL) {
         correspondancePosColor,
         functionColorScale));
       //Core / Disp track
-      drawBlock.trackCoreDisp(panChromosome_coreVSdispensable,
+      drawBlock.trackCoreDisp("#panChromosome_coreVSdispensable",
         dataFiltered2View,
         nucleotideWidth,
         displayedBlocksDimensions,
@@ -947,7 +947,15 @@ function renderD3Visualisation(file_URL) {
         coreThreshold,
         blueColorScale,
         orangeColorScale)
-      drawingDisplay_Rainbow(dataFiltered2View, nucleotideWidth); //Position line
+      //Position track
+      drawBlock.trackPosition("#panChromosome_rainbowed",
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        Number(d3.select("#panChromosome_coreVSdispensable").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
+        eventDisplayInfoOn,
+        eventDisplayInfoOff,
+        pseudoRainbowColorScale)
       drawingDisplay_similarBlocks(dataFiltered2View, nucleotideWidth); //Similarity line
       drawingDisplay_similarBackground(dataFiltered2View, nucleotideWidth); //Similarity vertical rectangles
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
@@ -1428,8 +1436,7 @@ function renderD3Visualisation(file_URL) {
     //---------------------------------blocks & attributes--------------------------------
 
     //Binding the data to a DOM element, therefore creating one SVG block per data
-    var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
-//    drawingDisplay_BlockCount(dataFiltered2View);
+    blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable"); //.append("g") allows grouping svg objects
     //--------------------------------------------------------------------------
 
     //--------------------------------eventDisplayInfoOn()--------------------------------
@@ -1557,30 +1564,6 @@ function renderD3Visualisation(file_URL) {
       d3.select("#textThatDisplaysInformationOnBlock_"+d.index + "bg").remove();
     };
     //--------------------------------------------------------------------------
-
-    //-----------------------------rainbowBlocks & attributes-----------------------------
-
-    function drawingDisplay_Rainbow(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element
-      let newData = d3.select("#panChromosome_rainbowed").selectAll("rect")
-            .data(dataPart);
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter()
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", displayedBlocksDimensions.height)
-          .attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-          .style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
-    };
 
     //Binding the data to a DOM element, therefore creating one SVG block per data
     var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_rainbowed");

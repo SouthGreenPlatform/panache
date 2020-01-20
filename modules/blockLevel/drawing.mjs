@@ -139,6 +139,31 @@ export function trackCoreDisp(selectedID, dataPart, nucleotideWidth, blockDims,
         .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
       .merge(newData) //Combines enter() and 'update()' selection, to update both at once
         .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
-        .attr("width", d => ( Number(d.FeatureStop)-Number(d.FeatureStart) ) * nucleotideWidth)
+        .attr("width", d => ( Number(d.FeatureStop) - Number(d.FeatureStart) ) * nucleotideWidth)
         .style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,colorScaleLess,colorScaleMore));
   };
+
+//-------------------------------trackPosition()--------------------------------
+
+export function trackPosition(selectedID, dataPart, nucleotideWidth, blockDims,
+    yPos, eventOn, eventOff, colorScale) {
+
+  //Binding the data to a DOM element
+  let newData = d3.select(selectedID).selectAll("rect")
+        .data(dataPart);
+
+  newData.exit().remove(); //Removing residual data
+
+  //Selecting all previous blocks, and determining their attributes
+  newData.enter()
+      .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
+      .attr("class", "moveableBlock")
+      .attr("height", blockDims.height)
+      .attr("y", yPos)
+      .on("mouseover", eventOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
+      .on("mouseout", eventOff) //Idem with eventDisplayInfoOff
+    .merge(newData) //Combines enter() and 'update()' selection, to update both at once
+      .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
+      .attr("width", d => (Number(d.FeatureStop) - Number(d.FeatureStart)) * nucleotideWidth)
+      .style("fill", (d => colorScale(Number(d.FeatureStart))));
+};
