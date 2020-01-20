@@ -965,7 +965,6 @@ function renderD3Visualisation(file_URL) {
         eventDisplayInfoOn,
         eventDisplayInfoOff,
         greenColorScale);
-      drawingDisplay_similarBackground(dataFiltered2View, nucleotideWidth); //Similarity vertical rectangles
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
       for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
     };
@@ -1583,40 +1582,6 @@ function renderD3Visualisation(file_URL) {
 
     //--------------------------------------------------------------------------
 
-    //--------------------------structureBackground & attributes--------------------------
-
-    function drawingDisplay_similarBackground(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element
-      let newData = d3.select("#structureBackground").selectAll("rect")
-            .data(dataPart);
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter()
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", (CHROMOSOME_NAMES.length+3)*displayedBlocksDimensions.height)
-          .attr("y", Number(d3.select("#panChromosome_similarCount").selectAll("rect").attr("y")) + displayedBlocksDimensions.height)
-//          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-//          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-/*          .style("fill", function (d) {var color = d3.hcl(greenColorScale(d.SimilarBlocks.split(";").length));
-            color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-            color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-            return color;
-          })
-*/          .style("fill", "white"); //Line to remove after the presentation
-    };
-
-    //Creation of the subgroup for the StructureBackground
-    var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground");
-//    drawingDisplay_similarBackground(dataFiltered2View);
-    //--------------------------------------------------------------------------
-
 
     //Creation of the fading legend blocks for the bottom part
 
@@ -1671,7 +1636,7 @@ function renderD3Visualisation(file_URL) {
       newData.enter()
           .append("rect")
           .attr("class", "moveableBoxes")
-          .attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height) //Each line corresponds to a chromosome
+          .attr("y", (d,i) => Number(d3.select("#panChromosome_similarCount").select("rect").attr("y")) + (4+chr)*displayedBlocksDimensions.height) //Each line corresponds to a chromosome
           //.style("fill", d3.hcl(0,0,25))
           //As the color will now depend on the x index, it will be styled within "merge", idem for the stroke
           .attr("height", d => displayedBlocksDimensions.height )
