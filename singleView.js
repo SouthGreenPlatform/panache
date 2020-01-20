@@ -955,8 +955,16 @@ function renderD3Visualisation(file_URL) {
         Number(d3.select("#panChromosome_coreVSdispensable").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
         eventDisplayInfoOn,
         eventDisplayInfoOff,
-        pseudoRainbowColorScale)
-      drawingDisplay_similarBlocks(dataFiltered2View, nucleotideWidth); //Similarity line
+        pseudoRainbowColorScale);
+      //Occurences track
+      drawBlock.trackOccurences("#panChromosome_similarCount",
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        Number(d3.select("#panChromosome_rainbowed").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
+        eventDisplayInfoOn,
+        eventDisplayInfoOff,
+        greenColorScale);
       drawingDisplay_similarBackground(dataFiltered2View, nucleotideWidth); //Similarity vertical rectangles
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
       for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
@@ -1566,38 +1574,13 @@ function renderD3Visualisation(file_URL) {
     //--------------------------------------------------------------------------
 
     //Binding the data to a DOM element, therefore creating one SVG block per data
-    var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_rainbowed");
-//    drawingDisplay_Rainbow(dataFiltered2View);
+    blocksDisplay.append("g").attr("id","panChromosome_rainbowed");
 
     //--------------------------------------------------------------------------
 
-    //-----------------------------similarBlocks & attributes-----------------------------
-
-    function drawingDisplay_similarBlocks(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element
-      let newData = d3.select("#panChromosome_similarCount").selectAll("rect")
-            .data(dataPart);
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter()
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", displayedBlocksDimensions.height)
-          .attr("y", Number(rainbowBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-          .style("fill", (d => greenColorScale(d.SimilarBlocks.split(";").length)));
-    };
-
     //Binding the data to a DOM element, therefore creating one SVG block per data
-    var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount");
-//    drawingDisplay_similarBlocks(dataFiltered2View);
+    blocksDisplay.append("g").attr("id","panChromosome_similarCount");
+
     //--------------------------------------------------------------------------
 
     //--------------------------structureBackground & attributes--------------------------
@@ -1615,7 +1598,7 @@ function renderD3Visualisation(file_URL) {
           .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
           .attr("class", "moveableBlock")
           .attr("height", (CHROMOSOME_NAMES.length+3)*displayedBlocksDimensions.height)
-          .attr("y", Number(similarBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height)
+          .attr("y", Number(d3.select("#panChromosome_similarCount").selectAll("rect").attr("y")) + displayedBlocksDimensions.height)
 //          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
 //          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
         .merge(newData) //Combines enter() and 'update()' selection, to update both at once
