@@ -39,6 +39,9 @@ export function eventDisplayInfoOn(svgObject, svgContainer, data, distance2point
   //Specifies where to put label of text altogether with its properties
   createHoverTooltip(svgObject, svgContainer, data, distance2pointer);
 
+  //Keeps memory of previous color
+  d3.select("#textThatDisplaysInformationOnBlock_"+data.index).attr('originColor', d3.select(svgObject).style('fill'));
+
 
   switch(d3.select(svgObject.parentNode).attr("id")) { //Function that will display information depending on the selected row
 
@@ -221,28 +224,13 @@ function eventDisplayInfoOn(d, i) {    //Takes most of its code from http://bl.o
 //When not selected the elements will retrieve their original colors
 //------------------------------eventDisplayInfoOff()---------------------------
 
-//A TESTER
-export function eventDisplayInfoOff(svgObject, d) {
+export function eventDisplayInfoOff(svgObject, data) {
 
-    switch(d3.select(svgObject.parentNode).attr("id")) {
+  //Uses D3 to select element, change color back to normal, recovering the saved original color
+  d3.select(svgObject).style("fill", d3.select("#textThatDisplaysInformationOnBlock_" + data.index).attr('originColor'));
 
-        //Look what kind of info block is displayed
-        case "panChromosome_coreVSdispensable":
-        //Uses D3 to select element, change color back to normal by overwriting and not recovery of the original colour
-        d3.select(svgObject).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale); });
-        break;
-
-        case "panChromosome_rainbowed":
-        d3.select(svgObject).style("fill",function (d) {return d3.hcl(pseudoRainbowColorScale(Number(d.index))); });
-        break;
-
-        case "panChromosome_similarCount":
-        d3.select(svgObject).style("fill",function (d) {return d3.hcl(greenColorScale(Number(d.SimilarBlocks.split(";").length))); });
-        break;
-    };
-
-    //Selects text by id and then removes it
-    d3.select("#textThatDisplaysInformationOnBlock_" + d.index).remove();  // Remove text location selecting the id thanks to #
-    d3.select("#textThatDisplaysInformationOnBlock_" + d.index + "bg").remove();
-    };
+  //Selects text by id and then removes it
+  d3.select("#textThatDisplaysInformationOnBlock_" + data.index).remove();  // Remove text location selecting the id thanks to #
+  d3.select("#textThatDisplaysInformationOnBlock_" + data.index + "bg").remove();
+};
 //--------------------------------------------------------------------------

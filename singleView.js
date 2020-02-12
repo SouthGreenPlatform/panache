@@ -944,7 +944,7 @@ function renderD3Visualisation(file_URL) {
         displayedBlocksDimensions,
         0,
         function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height * 2, coreThreshold, blueColorScale, orangeColorScale)},
-        eventDisplayInfoOff,
+        function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         coreThreshold,
         blueColorScale,
         orangeColorScale)
