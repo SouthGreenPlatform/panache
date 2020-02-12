@@ -955,7 +955,7 @@ function renderD3Visualisation(file_URL) {
         displayedBlocksDimensions,
         Number(d3.select("#panChromosome_coreVSdispensable").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
         eventDisplayInfoOn,
-        eventDisplayInfoOff,
+        function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         pseudoRainbowColorScale);
       //Occurences track
       drawBlock.trackOccurences("#panChromosome_similarCount",
@@ -964,7 +964,7 @@ function renderD3Visualisation(file_URL) {
         displayedBlocksDimensions,
         Number(d3.select("#panChromosome_rainbowed").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
         eventDisplayInfoOn,
-        eventDisplayInfoOff,
+        function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         greenColorScale);
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
       for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
@@ -1466,7 +1466,7 @@ function renderD3Visualisation(file_URL) {
             /*.text(function() {
               return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
             });*/
-
+      d3.select("#textThatDisplaysInformationOnBlock_"+d.index).attr('originColor', d3.select(this).style('fill'));
 
       switch(d3.select(this.parentNode).attr("id")) { //Function that will display information depending on the selected row
         case "panChromosome_coreVSdispensable":
