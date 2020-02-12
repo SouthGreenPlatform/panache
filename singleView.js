@@ -1,5 +1,6 @@
 import {domainPivotsMaker, colorScaleMaker, thresholdBasedColor} from './modules/colorScales.mjs';
 import * as drawBlock from './modules/blockLevel/drawing.mjs';
+import * as eventsImported from './modules/events.mjs';
 
 /**
  * @fileOverview    Pangenome visualizer using JavaScript.
@@ -163,11 +164,11 @@ function renderD3Visualisation(file_URL) {
        * they just are divided by themselves when != 0 in order to have a binary
        * PAV matrix, so that the count really is the number of genomes owning a
        * given block.
-       * @type {number}
+       * @type {number|string}
        */
-      let panChrBlockCount = Object.values(rest)
-        .map(value => Number(value))
-        .reduce((acc, val) => acc + (val != 0 ? val/val : 0));
+      //We adapt the panChrBlockCount to named value of Presence (gene-ids) or Absence (0)
+      let panChrBlockCount = [0].concat(Object.values(rest))
+        .reduce((acc, val) => acc + (Number(val) != 0 ? 1 : 0));
       // return Object.values(rest).forEach(function(a) {a = Number(a);});
       // --> Does not work !
 
@@ -942,7 +943,7 @@ function renderD3Visualisation(file_URL) {
         nucleotideWidth,
         displayedBlocksDimensions,
         0,
-        eventDisplayInfoOn,
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height * 2, coreThreshold, blueColorScale, orangeColorScale)},
         eventDisplayInfoOff,
         coreThreshold,
         blueColorScale,

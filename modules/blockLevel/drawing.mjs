@@ -119,7 +119,7 @@ export function pavBlocks(geno, genomeNumber, dataPart,
 
 //----------------------------------track()-------------------------------------
 
-function trackCoreDisp(selectedID, dataPart, nucleotideWidth, blockDims,
+function track(selectedID, dataPart, nucleotideWidth, blockDims,
   yPos, eventOn, eventOff, fillFunction) {
 
   //Binding the data to a DOM element, therefore creating one SVG block per data
@@ -141,7 +141,7 @@ function trackCoreDisp(selectedID, dataPart, nucleotideWidth, blockDims,
     .merge(newData) //Combines enter() and 'update()' selection, to update both at once
       .attr("x", (d,i) => Number(d.index) * nucleotideWidth)
       .attr("width", d => ( Number(d.FeatureStop) - Number(d.FeatureStart) ) * nucleotideWidth)
-      .style("fill", fillFunction(d));
+      .style("fill", d => fillFunction(d));
 };
 
 
