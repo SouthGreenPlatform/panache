@@ -13,9 +13,8 @@ import {thresholdBasedColor} from './colorScales.mjs';
 
 // svgContainer = svgContainer_rawBlocks
 // data = d
-// distance2pointer = displayedBlocksDimensions.height*2
 //can be called in singleView.js with function(d) {eventsImported.createHoverTooltip(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height*2)},
-function createHoverTooltip(svgObject, svgContainer, data, distance2pointer) {
+function createHoverTooltip(svgObject, svgContainer, data) {
   //Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
   //http://bl.ocks.org/phil-pedruco/9032348 was useful too
 
@@ -25,8 +24,8 @@ function createHoverTooltip(svgObject, svgContainer, data, distance2pointer) {
     .attr("font-family", "sans-serif")
     //At first the text is not displayed in order to get its dimensions first
     .attr("x", svgContainer.attr("width") + 1)
-    //Originally, 'this' is supposed to be the svg element on which the event is called
-    .attr("y", Number(d3.select(svgObject).attr("y")) + distance2pointer)
+    //y has no importance right now
+    .attr("y", 0)
     //ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
 //    .attr("dominant-baseline", "middle") //Vertical alignment
     .attr("text-anchor", "start"); //Can be "start", "middle", or "end"
@@ -128,12 +127,12 @@ function insertTooltipBg(txtToFrame, svgContainer) {
 
 //-----------------------------eventDisplayInfoOn()-----------------------------
 
-export function eventDisplayInfoOn(svgObject, svgContainer, data, distance2pointer) {
+export function eventDisplayInfoOn(svgObject, svgContainer, data) {
   //Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
   //http://bl.ocks.org/phil-pedruco/9032348 was useful too
 
   //Specifies where to put label of text altogether with its properties
-  createHoverTooltip(svgObject, svgContainer, data, distance2pointer);
+  createHoverTooltip(svgObject, svgContainer, data);
   let selectedText = d3.select("#textThatDisplaysInformationOnBlock_" + data.index);
 
   //Keeps memory of previous color
