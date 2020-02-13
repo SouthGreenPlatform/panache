@@ -28,7 +28,7 @@ function createHoverTooltip(svgObject, svgContainer, data, distance2pointer) {
     //Originally, 'this' is supposed to be the svg element on which the event is called
     .attr("y", Number(d3.select(svgObject).attr("y")) + distance2pointer)
     //ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
-    .attr("dominant-baseline", "middle") //Vertical alignment
+//    .attr("dominant-baseline", "middle") //Vertical alignment
     .attr("text-anchor", "start"); //Can be "start", "middle", or "end"
 };
 //------------------------------------------------------------------------------
@@ -57,14 +57,19 @@ function placeTextWithinSvg(txtToMove, svgContainer, axis='x') {
   let margin = 2; //Background for the text will be a bit bigger by that margin
 
   //Determines if we are working on height or width
-  let sizeBbox, sizeContainer, mouseCoord;
+  let sizeBbox, sizeContainer, mouseCoord, offset, minBorder, maxBorder, belowBorderPos, beyondBorderPos;
   switch (axis) {
 
     //Working on width
     case 'x':
       sizeBbox = bbox.width;
       sizeContainer = svgContainer.attr('width');
-      mouseCoord = d3.mouse(txtToMove.node())[0]; //d3.event.x works only for drag events, not for cursor coordinates
+      mouseCoord = d3.mouse(txtToMove.node())[0]; //d3.event.x works only for drag events, not for cursor coordinates*
+      offset = 20;
+      minBorder = margin + offset; //Leaving space for the background rectangle
+      maxBorder = sizeContainer - (sizeBbox + margin);
+      belowBorderPos = minBorder;
+      beyondBorderPos = mouseCoord - sizeBbox - offset; //Text is now displayed on the left
       break;
 
     //Working on height
@@ -72,19 +77,27 @@ function placeTextWithinSvg(txtToMove, svgContainer, axis='x') {
       sizeBbox = bbox.height;
       sizeContainer = svgContainer.attr('height');
       mouseCoord = d3.mouse(txtToMove.node())[1];
+      offset = sizeBbox / 2; //For a y-centered text
+      //Borders are not the same since pos of a text elt is at its bottom-left
+      //y-axis has not the same origin than the svgContainer !
+      minBorder = margin + sizeBbox;
+      maxBorder = sizeContainer - margin;
+      belowBorderPos = minBorder;
+      beyondBorderPos = maxBorder;
       break;
   };
 
   //Repositions text element to its right place depending on its size
+  let potentialPos = mouseCoord + offset;
   txtToMove.attr(axis, function() {
     //If mouse too close to min border...
-    if (sizeBbox / 2 + margin > mouseCoord) {
-      return margin; //Leaving space for the background rectangle
+    if (potentialPos < minBorder) {
+      return belowBorderPos;
     //If mouse too close to max border...
-    } else if (sizeContainer - (sizeBbox / 2 + margin) < mouseCoord){
-      return sizeContainer - (sizeBbox + margin);
+    } else if (potentialPos > maxBorder) {
+      return beyondBorderPos;
     //If mouse within acceptable range...
-    } else { return mouseCoord - sizeBbox / 2 }
+    } else { return potentialPos }
   });
 };
 //------------------------------------------------------------------------------
@@ -118,7 +131,6 @@ function insertTooltipBg(txtToFrame, svgContainer) {
 export function eventDisplayInfoOn(svgObject, svgContainer, data, distance2pointer) {
   //Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
   //http://bl.ocks.org/phil-pedruco/9032348 was useful too
-  //    console.log(d3.select(this.parentNode).attr("id"));
 
   //Specifies where to put label of text altogether with its properties
   createHoverTooltip(svgObject, svgContainer, data, distance2pointer);
@@ -151,7 +163,8 @@ export function eventDisplayInfoOn(svgObject, svgContainer, data, distance2point
   selectedText.text(textToDisplay);
 
   //Repositions text element to its right place depending on its size
-  placeTextWithinSvg(selectedText, svgContainer);
+  placeTextWithinSvg(selectedText, svgContainer, 'x');
+  placeTextWithinSvg(selectedText, svgContainer, 'y');
 
   //Adding a background to the displayed text, fitting the size
   insertTooltipBg(selectedText, svgContainer);
