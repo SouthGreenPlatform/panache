@@ -943,7 +943,7 @@ function renderD3Visualisation(file_URL) {
         nucleotideWidth,
         displayedBlocksDimensions,
         0,
-        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height * 2, coreThreshold, blueColorScale, orangeColorScale)},
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height * 2)},
         function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         coreThreshold,
         blueColorScale,
@@ -954,7 +954,7 @@ function renderD3Visualisation(file_URL) {
         nucleotideWidth,
         displayedBlocksDimensions,
         Number(d3.select("#panChromosome_coreVSdispensable").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
-        eventDisplayInfoOn,
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height * 2)},
         function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         pseudoRainbowColorScale);
       //Occurences track
@@ -963,7 +963,7 @@ function renderD3Visualisation(file_URL) {
         nucleotideWidth,
         displayedBlocksDimensions,
         Number(d3.select("#panChromosome_rainbowed").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
-        eventDisplayInfoOn,
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d, displayedBlocksDimensions.height * 2)},
         function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         greenColorScale);
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
