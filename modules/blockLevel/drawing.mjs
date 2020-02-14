@@ -116,7 +116,7 @@ export function pavBlocks(geno, genomeNumber, dataPart,
           .attr("x", (d,i) => Number(d.index)*nucleotideWidth) //x is the position of the block within the filtered dataset (that is why index is used instead of FeatureStart), with the width of nucleotides taken into account
           .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
           .style("fill", (d,i) => (funcDiv.length === 1 ? d3.interpolateRainbow((colorMap.get(d["FeatureStart"])%14)/14) : funcColScale(d["Function"]))) //Do not forget the ""... Also if there is the same "function" for every block within the pangenome then each block will be painted with a rainbow color which differs from those of its neighbours
-          .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
+          .style("fill-opacity", d => ( isNaN(Number(d[`${geno}`])) ? 1 : d[`${geno}`])); //Opacity is linked to the value 0 or >=1 of every genome
 };
 
 //----------------------------------track()-------------------------------------
