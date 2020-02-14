@@ -1,4 +1,5 @@
 import {thresholdBasedColor} from '../colorScales.mjs';
+import * as eventsImported from '../events.mjs';
 
 /**
  * @fileOverview    Modules for drawing and display functions
@@ -108,6 +109,8 @@ export function pavBlocks(geno, genomeNumber, dataPart,
             .attr("height", blockDims.height)
             //y is incremented for each new genome, and depends on the position of the scroll bar's handle if existing
             .attr("y", genomeNumber*blockDims.height - sliderScale.invert(Number(handle.attr("cy"))) )
+            .on("mouseover", function(d) {if (isNaN(Number(d[`${geno}`]))) { eventsImported.eventDisplayInfoOn(this, d3.select(this.parentNode.parentNode), d)} }) //the svg container is the grandparent node
+            .on("mouseout", function(d) {if (isNaN(Number(d[`${geno}`]))) { eventsImported.eventDisplayInfoOff(this, d)} })
 
         .merge(newData) //Combines enter() and 'update()' selection, to update both at once
           .attr("x", (d,i) => Number(d.index)*nucleotideWidth) //x is the position of the block within the filtered dataset (that is why index is used instead of FeatureStart), with the width of nucleotides taken into account
@@ -115,7 +118,6 @@ export function pavBlocks(geno, genomeNumber, dataPart,
           .style("fill", (d,i) => (funcDiv.length === 1 ? d3.interpolateRainbow((colorMap.get(d["FeatureStart"])%14)/14) : funcColScale(d["Function"]))) //Do not forget the ""... Also if there is the same "function" for every block within the pangenome then each block will be painted with a rainbow color which differs from those of its neighbours
           .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
 };
-
 
 //----------------------------------track()-------------------------------------
 

@@ -141,21 +141,29 @@ export function eventDisplayInfoOn(svgObject, svgContainer, data) {
   //Uses D3 to select element and change its color to highlight it
   highlightSvg(svgObject);
 
+  //To use RegEx with switch instructions, see : https://stackoverflow.com/questions/47281147/switch-case-statement-for-regex-matching-in-javascript
   //Creates case specific texts to display within tooltip
   let textToDisplay;
-  switch(d3.select(svgObject.parentNode).attr("id")) { //Function that will display information depending on the selected row
+  let parentNodeId = d3.select(svgObject.parentNode).attr("id");
+  switch(true) { //Function that will display information depending on the selected row
 
-    case "panChromosome_coreVSdispensable":
+    case ("panChromosome_coreVSdispensable" === parentNodeId):
       textToDisplay = "This block appears in " + data.presenceCounter + " selected genome(s)" //Text content
       break;
 
-    case "panChromosome_rainbowed":
+    case ("panChromosome_rainbowed" === parentNodeId):
       textToDisplay = "This block starts on position " + data.FeatureStart + " and is " + d3.format("~s")(Number(data.FeatureStop) - Number(data.FeatureStart)) + "b long" //d3.format is used to have the International System writing, with rounded values
       //ATTENTION for float values such as 1.586 for instance eval() considered the "." to be the announcement of a property (586, property of the object 1), therefore an ID error occured
       break;
 
-    case "panChromosome_similarCount":
+    case ("panChromosome_similarCount" === parentNodeId):
       textToDisplay = "This block is repeated " + eval((data.SimilarBlocks.split(";").length >= 2) ? data.SimilarBlocks.split(";").length : 0) + " time(s) within the pangenome"
+      break;
+
+    case (/^presence_/.test(parentNodeId) ):
+      //Gets the genome name, to retrieve the correct PAV info from *data*
+      let genomeName = `${parentNodeId}`.split('presence_')[1];
+      textToDisplay = data[genomeName]; //Displays what's in the PAV matrix for the corresponding genome
       break;
   };
 
