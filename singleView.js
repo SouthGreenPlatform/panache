@@ -1101,15 +1101,15 @@ function renderD3Visualisation(file_URL) {
 //Erase these paths when blocks are clustered !
     //Drawing multiple blocks for the legend, not using canvas but paths
     d3.select("#legend_matrixSchema").append("g").attr("transform", "translate(10,0)")
-                .append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 28 H 57 V 42 H 45 Z").attr("fill", functionColorScale(1))
+                .append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 28 H 57 V 42 H 45 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(131, 245, 87) : functionColorScale(1)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 57 28 H 69 V 42 H 57 Z").attr("fill", functionColorScale(8))
+                .attr("d","M 57 28 H 69 V 42 H 57 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(80, 105, 217) : functionColorScale(8)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 69 14 H 81 V 28 H 69 Z M 69 28 H 81 V 42 H 69 Z").attr("fill", functionColorScale(6))
+                .attr("d","M 69 14 H 81 V 28 H 69 Z M 69 28 H 81 V 42 H 69 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(184, 60, 176) : functionColorScale(6)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 81 0 H 93 V 14 H 81 Z M 81 14 H 93 V 28 H 81 Z").attr("fill", functionColorScale(4))
+                .attr("d","M 81 0 H 93 V 14 H 81 Z M 81 14 H 93 V 28 H 81 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(56, 241, 122) : functionColorScale(4)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 93 28 H 105 V 42 H 93 Z").attr("fill", functionColorScale(5));
+                .attr("d","M 93 28 H 105 V 42 H 93 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(110, 64, 170) : functionColorScale(5)));
                 //ATTENTION The colours depends on the values accepted by functionColorScale, if it is linked to GO number this have to be modified
 
     d3.select("#legend_matrixPA_blocks").append("g").attr("id","legend_matrixMeanings").attr("transform", "translate(130,0)")
