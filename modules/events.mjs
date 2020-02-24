@@ -125,6 +125,19 @@ function insertTooltipBg(txtToFrame, svgContainer) {
 };
 //------------------------------------------------------------------------------
 
+//---------------------------------claimGeneID()--------------------------------
+
+function claimGeneID(svgObject, data) {
+
+  let parentNodeId = d3.select(svgObject.parentNode).attr("id");
+  //Gets genome name from parentNode to know which part of *data* should be retrieved
+  let genomeName = `${parentNodeId}`.split('presence_')[1];
+  let geneID = data[genomeName]; //For a given gene set, we get info about what genomeName has, ie the corresponding gene ID
+
+  return geneID;
+};
+//------------------------------------------------------------------------------
+
 //-----------------------------eventDisplayInfoOn()-----------------------------
 
 export function eventDisplayInfoOn(svgObject, svgContainer, data) {
@@ -162,8 +175,7 @@ export function eventDisplayInfoOn(svgObject, svgContainer, data) {
 
     case (/^presence_/.test(parentNodeId) ):
       //Gets the genome name, to retrieve the correct PAV info from *data*
-      let genomeName = `${parentNodeId}`.split('presence_')[1];
-      textToDisplay = data[genomeName]; //Displays what's in the PAV matrix for the corresponding genome
+      textToDisplay = claimGeneID(svgObject, data); //Retrieving the geneID to display
       break;
   };
 
