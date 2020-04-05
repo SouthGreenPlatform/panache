@@ -217,7 +217,7 @@ function renderD3Visualisation(file_URL) {
       // Calculation of the proportions from the occurence count
       //The ... is mandatory to tell that we work with an array
       let maxCount = Math.max(...Object.values(countAsProperty));
-      for (var i = 0; i < CHROMOSOME_NAMES.length; ++i) {
+      for (let i = 0; i < CHROMOSOME_NAMES.length; ++i) {
         /**
          * For variables within string, see Template Literals:
          * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals}
@@ -629,7 +629,7 @@ function renderD3Visualisation(file_URL) {
     //------------------------------browsingBlocksDimensions------------------------------
 
     var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1, height:10, borderSpace:1}
-    //+1 so that the rectangles overlap and leave no space giving a filling of transparency
+    //+1 so that the rectangles overlap and leave no space giving a feeling of transparency
     //The width is not used anymore, I believe
     //--------------------------------------------------------------------------
 
@@ -967,7 +967,7 @@ function renderD3Visualisation(file_URL) {
         function(d) {eventsImported.eventDisplayInfoOff(this, d)},
         greenColorScale);
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
-      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
+      for (let chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
     };
     //--------------------------------------------------------------------------
 
@@ -981,7 +981,7 @@ function renderD3Visualisation(file_URL) {
       drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, INITIAL_GENOMES_NAMES, CHROMOSOME_NAMES, currentNucleotidesWidthInPixel.effective); //Updating the visible SVG elements
 
       d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel);
-      for (var chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
+      for (let chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
         d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
           .attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel  + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
 //          .attr("x", d => (Number(d.index) - Number(xPosition_displayedPixel)) * currentNucleotidesWidthInPixel.effective + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
@@ -1186,7 +1186,7 @@ function renderD3Visualisation(file_URL) {
       //And their positions
       //Using Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2 as it is the position of the center of the windowHandle that gives the position of the first pixel to display, through miniatureSliderScale
       d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel.effective - miniatureSliderScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2) );
-      for (var chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
+      for (let chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
         d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
           .attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - miniatureSliderScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2) + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
       };
