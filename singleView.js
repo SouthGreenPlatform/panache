@@ -35,10 +35,10 @@ function eventFileSelection() {
      ATTENTION: Do not forget the <tt>d3</tt> in
      <tt>d3.event.target.files[0]</tt>.
   */
-  var inputFile = d3.event.target.files[0];
+  let inputFile = d3.event.target.files[0];
   // About FileReader: https://developer.mozilla.org/fr/docs/Web/API/FileReader,
   // allows an asynchronous reading.
-  var reader = new FileReader();
+  let reader = new FileReader();
 
   // Manages the load event, i.e. anytime a reading operation is correctly done,
   // see https://developer.mozilla.org/en-US/docs/Web/API/FileReader/onload .
