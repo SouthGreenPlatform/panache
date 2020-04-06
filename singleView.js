@@ -1,3 +1,7 @@
+import {domainPivotsMaker, colorScaleMaker, thresholdBasedColor} from './modules/colorScales.mjs';
+import * as drawBlock from './modules/blockLevel/drawing.mjs';
+import * as eventsImported from './modules/events.mjs';
+
 /**
  * @fileOverview    Pangenome visualizer using JavaScript.
  *
@@ -6,6 +10,8 @@
  * @requires        EXTERNAL:{@link https://d3js.org} Version 5.4.0.
  *                  Copyright 2018 Mike Bostock.
  */
+
+
 
 /** {@link https://developer.mozilla.org/fr/docs/Web/API/File/Using_files_from_web_applications} */
 /** Adapted from {@link https://stackoverflow.com/questions/28584548//how-to-get-a-filename-in-html-and-use-it-in-d3-js-javascript} */
@@ -29,10 +35,10 @@ function eventFileSelection() {
      ATTENTION: Do not forget the <tt>d3</tt> in
      <tt>d3.event.target.files[0]</tt>.
   */
-  var inputFile = d3.event.target.files[0];
+  let inputFile = d3.event.target.files[0];
   // About FileReader: https://developer.mozilla.org/fr/docs/Web/API/FileReader,
   // allows an asynchronous reading.
-  var reader = new FileReader();
+  let reader = new FileReader();
 
   // Manages the load event, i.e. anytime a reading operation is correctly done,
   // see https://developer.mozilla.org/en-US/docs/Web/API/FileReader/onload .
@@ -158,11 +164,11 @@ function renderD3Visualisation(file_URL) {
        * they just are divided by themselves when != 0 in order to have a binary
        * PAV matrix, so that the count really is the number of genomes owning a
        * given block.
-       * @type {number}
+       * @type {number|string}
        */
-      let panChrBlockCount = Object.values(rest)
-        .map(value => Number(value))
-        .reduce((acc, val) => acc + (val != 0 ? val/val : 0));
+      //We adapt the panChrBlockCount to named value of Presence (gene-ids) or Absence (0)
+      let panChrBlockCount = [0].concat(Object.values(rest))
+        .reduce((acc, val) => acc + (Number(val) != 0 ? 1 : 0));
       // return Object.values(rest).forEach(function(a) {a = Number(a);});
       // --> Does not work !
 
@@ -174,7 +180,7 @@ function renderD3Visualisation(file_URL) {
        * - 'presenceCounter': number of genomes that own this block
        * Its creation is based on .assign(): {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign}
        */
-      newObject = Object.assign({"index": FeatureStart,
+      let newObject = Object.assign({"index": FeatureStart,
         "presenceCounter": panChrBlockCount, "Chromosome": Chromosome}, d);
 
       /**
@@ -210,8 +216,8 @@ function renderD3Visualisation(file_URL) {
 
       // Calculation of the proportions from the occurence count
       //The ... is mandatory to tell that we work with an array
-      maxCount = Math.max(...Object.values(countAsProperty));
-      for (var i = 0; i < CHROMOSOME_NAMES.length; ++i) {
+      let maxCount = Math.max(...Object.values(countAsProperty));
+      for (let i = 0; i < CHROMOSOME_NAMES.length; ++i) {
         /**
          * For variables within string, see Template Literals:
          * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals}
@@ -281,57 +287,6 @@ function renderD3Visualisation(file_URL) {
 
     // What is the last nucleotide to show ?
     var maxPositionInNucleotide = Math.max(...dataGroupedPerChromosome[`${currentChromInView}`].map(d => Number(d.FeatureStop)));
-    //--------------------------------------------------------------------------
-
-    //---------------------------domainPivotsMaker()----------------------------
-
-    /**
-     * @function domainPivotsMaker
-     * @param {numeric}  breakpointsNb  - Number of values to create
-     * @param {numeric}  maxValue       - Extent of the desired numeric range
-     * @return {numeric[]} List of values evenly distributed between 0 and maxValue
-     */
-    function domainPivotsMaker(breakpointsNb,maxValue) {
-      breakpoints = [];
-      for (var i = 0; i < breakpointsNb; ++i) {
-        // breakpoints.push(Math.round((1+maxValue/breakpointsNb/(breakpointsNb-1))*i));
-        breakpoints.push(Math.round( (i / (breakpointsNb - 1) ) * maxValue));
-      }
-      return(breakpoints);
-    };
-    //--------------------------------------------------------------------------
-
-    //---------------------------colorScaleMaker()------------------------------
-
-    /**
-     * @function colorScaleMaker
-     * @param {numeric[]}  domain       - List of input breakpoints that should be linked/translated to other output values
-     * @param {object[]}   range        - List of output colours, linked to those of domain
-     * @param {boolean}    scaleLinear  - Boolean that tells if the scale should be Linear or Ordinal
-     * This function allows to make d3 scales that link numeric values to
-     * colours. A good practice is to choose from an HCL colour palette as
-     * their changes are linearly percepted by a human eye, unlike the usual
-     * RGB colour scheme, see: {@link https://bl.ocks.org/mbostock/3014589}.
-     * "I want hue" is a great tool for choosing colours: {@link http://tools.medialab.sciences-po.fr/iwanthue/}
-     */
-    function colorScaleMaker(domain, range, scaleLinear = true) {
-      if (scaleLinear) {
-        return d3.scaleLinear()
-              // Minimal and Maximal values are declared as input domain, they
-              // will be linked to corresponding min/max colours.
-              .domain(domain)
-              // Interpolate makes mostly no difference for orange, but it is
-              // visible for blue (better with it).
-              // .interpolate() can be written anywhere in the scale definition
-              .interpolate(d3.interpolateHcl)
-              .range(range);
-      } else {
-        // ATTENTION As it is scale*Ordinal*, we cannot use interpolate!
-        return d3.scaleOrdinal()
-              .domain(domain)
-              .range(range);
-      };
-    };
     //--------------------------------------------------------------------------
 
     //----------------------------blueColorScale--------------------------------
@@ -674,7 +629,7 @@ function renderD3Visualisation(file_URL) {
     //------------------------------browsingBlocksDimensions------------------------------
 
     var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1, height:10, borderSpace:1}
-    //+1 so that the rectangles overlap and leave no space giving a filling of transparency
+    //+1 so that the rectangles overlap and leave no space giving a feeling of transparency
     //The width is not used anymore, I believe
     //--------------------------------------------------------------------------
 
@@ -800,7 +755,7 @@ function renderD3Visualisation(file_URL) {
       d3.select(".tick").select("text").attr("x", coreSliderScale(slidePercent)).text(Math.round(slidePercent*100) + "%"); //Position change for the label
       d3.select(".hueSwingingPointLeft").attr("offset", coreThreshold/INITIAL_GENOMES_NAMES.length).attr("stop-color", blueColorScale(coreThreshold)); //The gradient is dynamically changed to display different hues for each extremity of the slider
       d3.select(".hueSwingingPointRight").attr("offset", coreThreshold/INITIAL_GENOMES_NAMES.length).attr("stop-color", orangeColorScale(coreThreshold));
-      blocks.selectAll("rect").style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
+      d3.select("#panChromosome_coreVSdispensable").selectAll("rect").style("fill", function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale);}); //Updates the core/dispensable panChromosome blocks' colours
 
       //Updating the colours of the miniature browser
       bgBrowser_miniContext.fillStyle = "#fff";
@@ -867,7 +822,7 @@ function renderD3Visualisation(file_URL) {
 
     //-------------------------------------miniCanvas-------------------------------------
 
-    //Addition of the first canvas to the foreignObject
+//Addition of the first canvas to the foreignObject
     var bgBrowser_miniCanvas = foreignObject_Browser.append("xhtml:canvas")
       .attr("x", 0)
       .attr("y", 0)
@@ -877,49 +832,22 @@ function renderD3Visualisation(file_URL) {
     //The context of canvas is needed for drawing
     var bgBrowser_miniContext = bgBrowser_miniCanvas.node().getContext("2d");
 
-    function drawingMiniatureBackground() {
-
-      let t0 = performance.now();
-
-      //Clear existing canvas
-      bgBrowser_miniContext.clearRect(0, 0, bgBrowser_miniCanvas.attr("width"), bgBrowser_miniCanvas.attr("height"));
-
-      //Drawing of the function histogram
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach((d,i) => {
-        //Colouring white blocks (those are used to overlay the coloured blocks that have a width slightly larger than what they should have, in order to show no gap within the miniature)
-        bgBrowser_miniContext.fillStyle = "#FFF";
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 0, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-        //Colouring the function blocks
-//        bgBrowser_miniContext.fillStyle = functionColorScale(Number(d.Function));
-        bgBrowser_miniContext.fillStyle = (functionDiversity.length === 1 ? d3.interpolateRainbow((correspondancePosColor.get(d["FeatureStart"])%14)/14) : functionColorScale(d["Function"]));
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, 2*browsingBlocksDimensions.height - (INITIAL_GENOMES_NAMES.length-d.presenceCounter)/INITIAL_GENOMES_NAMES.length * 2*browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-      });
-
-      //Drawing of the core/disp miniature
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-        bgBrowser_miniContext.fillStyle = (Number(d.presenceCounter) === 0 ? "#fff" : (Number(d.presenceCounter) >= coreThreshold ? orangeColorScale.range()[1] : blueColorScale.range()[1])); //Here we chose a yes/no colorScale instead of the one used in the display, for a better readibility
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide,2*browsingBlocksDimensions.height+6, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height); //fillRect(x, y, width, height)
-      });
-
-      //Drawing of the rainbow miniature
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-        bgBrowser_miniContext.fillStyle = pseudoRainbowColorScale(Number(d.FeatureStart));
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + browsingBlocksDimensions.height+1, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height);
-      });
-
-      //Drawing of the similarity miniature
-      dataGroupedPerChromosome[`${currentChromInView}`].forEach(d => {
-        bgBrowser_miniContext.fillStyle = greenColorScale(Number(d.SimilarBlocks.split(";").length));
-        bgBrowser_miniContext.fillRect(svgContainer_browsingSlider.attr("width") * Number(d.index)/maxPositionInNucleotide, 2*browsingBlocksDimensions.height+6 + (browsingBlocksDimensions.height+1)*2, svgContainer_browsingSlider.attr("width") * (Number(d.FeatureStop)-Number(d.FeatureStart))/maxPositionInNucleotide+1, browsingBlocksDimensions.height);
-      });
-
-      let t1 = performance.now();
-
-      console.log("Call to draw Miniature took " + (t0 - t1) + " milliseconds.");
-
-    };
-
-    drawingMiniatureBackground();
+    drawBlock.miniatureBg(
+      bgBrowser_miniCanvas,
+      bgBrowser_miniContext,
+      dataGroupedPerChromosome[`${currentChromInView}`],
+      svgContainer_browsingSlider.attr("width"),
+      maxPositionInNucleotide,
+      INITIAL_GENOMES_NAMES,
+      browsingBlocksDimensions,
+      coreThreshold,
+      functionDiversity,
+      correspondancePosColor,
+      functionColorScale,
+      orangeColorScale,
+      blueColorScale,
+      pseudoRainbowColorScale,
+      greenColorScale);
 
     //--------------------------------------------------------------------------
 
@@ -998,13 +926,48 @@ function renderD3Visualisation(file_URL) {
       elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) ); //Push everything that belongs to the display window within the data to render, no matter if it is empty as if an array is empty nothing can be pushed anyway
 
       //Drawing of the SVG for each element
-      genomesList.forEach((geno, genomeNumber) => drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View, nucleotideWidth)); //PA matrix
-      drawingDisplay_BlockCount(dataFiltered2View, nucleotideWidth); //Blue/orange line
-      drawingDisplay_Rainbow(dataFiltered2View, nucleotideWidth); //Position line
-      drawingDisplay_similarBlocks(dataFiltered2View, nucleotideWidth); //Similarity line
-      drawingDisplay_similarBackground(dataFiltered2View, nucleotideWidth); //Similarity vertical rectangles
+      //PAV Matrix
+      genomesList.forEach((geno, genomeNumber) => drawBlock.pavBlocks(geno,
+        genomeNumber,
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        presenceAbsenceMatrixSliderScale,
+        scrollingBar_PresenceAbsenceHandle,
+        functionDiversity,
+        correspondancePosColor,
+        functionColorScale));
+      //Core / Disp track
+      drawBlock.trackCoreDisp("#panChromosome_coreVSdispensable",
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        0,
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d)},
+        function(d) {eventsImported.eventDisplayInfoOff(this, d)},
+        coreThreshold,
+        blueColorScale,
+        orangeColorScale)
+      //Position track
+      drawBlock.trackPosition("#panChromosome_rainbowed",
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        Number(d3.select("#panChromosome_coreVSdispensable").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d)},
+        function(d) {eventsImported.eventDisplayInfoOff(this, d)},
+        pseudoRainbowColorScale);
+      //Occurences track
+      drawBlock.trackOccurences("#panChromosome_similarCount",
+        dataFiltered2View,
+        nucleotideWidth,
+        displayedBlocksDimensions,
+        Number(d3.select("#panChromosome_rainbowed").selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3,
+        function(d) {eventsImported.eventDisplayInfoOn(this, svgContainer_rawBlocks, d)},
+        function(d) {eventsImported.eventDisplayInfoOff(this, d)},
+        greenColorScale);
 //      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityCircles(chr, dataFiltered2View);}; //Similarity proportions
-      for (var chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
+      for (let chr = 0; chr < chromList.length; ++chr) {drawingDisplay_similarityBoxes(chr, dataFiltered2View, nucleotideWidth);};
     };
     //--------------------------------------------------------------------------
 
@@ -1018,7 +981,7 @@ function renderD3Visualisation(file_URL) {
       drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, INITIAL_GENOMES_NAMES, CHROMOSOME_NAMES, currentNucleotidesWidthInPixel.effective); //Updating the visible SVG elements
 
       d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel);
-      for (var chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
+      for (let chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
         d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
           .attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel  + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
 //          .attr("x", d => (Number(d.index) - Number(xPosition_displayedPixel)) * currentNucleotidesWidthInPixel.effective + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
@@ -1082,17 +1045,6 @@ function renderD3Visualisation(file_URL) {
 
 
 
-
-    //-------------------------------thresholdBasedColor()--------------------------------
-
-    //Creating a function to apply different color Scale depending on one value
-    function thresholdBasedColor(d, threshold, colorScaleLess, colorScaleMore) {
-      if (d >= threshold) {
-        return colorScaleMore(d);
-      } return colorScaleLess(d);
-    };
-    //--------------------------------------------------------------------------
-
     //-----------------------------------legend_matrixPA----------------------------------
 
     //Text legend for the PA matrix
@@ -1149,15 +1101,15 @@ function renderD3Visualisation(file_URL) {
 //Erase these paths when blocks are clustered !
     //Drawing multiple blocks for the legend, not using canvas but paths
     d3.select("#legend_matrixSchema").append("g").attr("transform", "translate(10,0)")
-                .append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 28 H 57 V 42 H 45 Z").attr("fill", functionColorScale(1))
+                .append("path").attr("d","M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 28 H 57 V 42 H 45 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(131, 245, 87) : functionColorScale(1)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 57 28 H 69 V 42 H 57 Z").attr("fill", functionColorScale(8))
+                .attr("d","M 57 28 H 69 V 42 H 57 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(80, 105, 217) : functionColorScale(8)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 69 14 H 81 V 28 H 69 Z M 69 28 H 81 V 42 H 69 Z").attr("fill", functionColorScale(6))
+                .attr("d","M 69 14 H 81 V 28 H 69 Z M 69 28 H 81 V 42 H 69 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(184, 60, 176) : functionColorScale(6)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 81 0 H 93 V 14 H 81 Z M 81 14 H 93 V 28 H 81 Z").attr("fill", functionColorScale(4))
+                .attr("d","M 81 0 H 93 V 14 H 81 Z M 81 14 H 93 V 28 H 81 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(56, 241, 122) : functionColorScale(4)))
               .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-                .attr("d","M 93 28 H 105 V 42 H 93 Z").attr("fill", functionColorScale(5));
+                .attr("d","M 93 28 H 105 V 42 H 93 Z").attr("fill", (d,i) => (functionDiversity.length === 1 ? d3.rgb(110, 64, 170) : functionColorScale(5)));
                 //ATTENTION The colours depends on the values accepted by functionColorScale, if it is linked to GO number this have to be modified
 
     d3.select("#legend_matrixPA_blocks").append("g").attr("id","legend_matrixMeanings").attr("transform", "translate(130,0)")
@@ -1234,7 +1186,7 @@ function renderD3Visualisation(file_URL) {
       //And their positions
       //Using Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2 as it is the position of the center of the windowHandle that gives the position of the first pixel to display, through miniatureSliderScale
       d3.selectAll(".moveableBlock").attr("x", d => Number(d.index) * currentNucleotidesWidthInPixel.effective - miniatureSliderScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2) );
-      for (var chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
+      for (let chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
         d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
           .attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - miniatureSliderScale.invert(Number(miniWindowHandle.attr("x"))+Number(miniWindowHandle.attr("width"))/2) + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
       };
@@ -1343,7 +1295,23 @@ function renderD3Visualisation(file_URL) {
       zoomSlider.select("line").attr("x1", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`]))).attr("x2", zoomScale(featureNbDependingOnNtWidth(Number(svgContainer_presenceAbsenceMatrix.attr("width")), currentNucleotidesWidthInPixel.effective, dataGroupedPerChromosome[`${currentChromInView}`])))
 
       //For the miniature
-      drawingMiniatureBackground();
+      drawBlock.miniatureBg(
+        bgBrowser_miniCanvas,
+        bgBrowser_miniContext,
+        dataGroupedPerChromosome[`${currentChromInView}`],
+        svgContainer_browsingSlider.attr("width"),
+        maxPositionInNucleotide,
+        INITIAL_GENOMES_NAMES,
+        browsingBlocksDimensions,
+        coreThreshold,
+        functionDiversity,
+        correspondancePosColor,
+        functionColorScale,
+        orangeColorScale,
+        blueColorScale,
+        pseudoRainbowColorScale,
+        greenColorScale);
+
       miniWindowHandle.attr("width", browsingHandleDimensions.width);
       miniWindowHandle.attr("x", 0);
       d3.select("#miniatureTicks").call(d3.axisBottom(miniatureTicksScale).ticks(20).tickFormat(d3.format("~s")));
@@ -1360,38 +1328,8 @@ function renderD3Visualisation(file_URL) {
     //ATTENTION The for ... in statement does not work well when order is important ! Prefer .forEach method instead when working on arrays
     //See : https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in
 
-    function drawingDisplay_PerGenomePA(geno, genomeNumber, dataPart, nucleotideWidth) {
-      let newData = d3.select(`#presence_${geno}`).selectAll("rect")
-            .data(dataPart); //There is one rect per (genome x PA block), not just per genome
-
-//      console.log(newData.exit); //"undefined" when empty
-
-      newData.exit().remove(); //Removing residual dom elements linked to unbound data
-
-//      console.log(scrollingBar_PresenceAbsenceHandle);
-
-      //ATTENTION .attr()+.attr() concatenates and does NOT an addition !!
-      newData.enter().append("rect") //Settings the attribute to the newly created blocks
-              .attr("class", "moveableBlock")
-              .attr("height", displayedBlocksDimensions.height)
-              //y is incremented for each new genome, and depends on the position of the scroll bar's handle if existing
-              .attr("y", genomeNumber*displayedBlocksDimensions.height - presenceAbsenceMatrixSliderScale.invert(Number(scrollingBar_PresenceAbsenceHandle.attr("cy"))) ) //(d,i) => (scrollingBar_PresenceAbsenceHandle === "undefined") ? genomeNumber*displayedBlocksDimensions.height : genomeNumber*displayedBlocksDimensions.height - presenceAbsenceMatrixSliderScale.invert(Number(scrollingBar_PresenceAbsenceHandle.attr("cy"))) )
-//              .style("position","absolute")
-//              .style("z-index", -1)
-          .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-            .attr("x", (d,i) => Number(d.index)*nucleotideWidth) //x is the position of the block within the filtered dataset (that is why index is used instead of FeatureStart), with the width of nucleotides taken into account
-            .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-//            .style("fill", d => functionColorScale(d["Function"])) //Do not forget the ""...
-            .style("fill", (d,i) => (functionDiversity.length === 1 ? d3.interpolateRainbow((correspondancePosColor.get(d["FeatureStart"])%14)/14) : functionColorScale(d["Function"]))) //Do not forget the ""... Also if there is the same "function" for every block within the pangenome then each block will be painted with a rainbow color which differs from those of its neighbours
-            .style("fill-opacity", d => d[`${geno}`]); //Opacity is linked to the value 0 or >=1 of every genome
-
-//      eventScrollingPresenceAbsence(presenceAbsenceMatrixSliderScale.invert(d3.select("#scrollingBar_PA_Handle").attr("cy"))) //Ask to use eventScrollingPresenceAbsence but without redefining the cy position of the handle
-//      newData.exit().remove;
-    };
-
     INITIAL_GENOMES_NAMES.forEach(function(geno, genomeNumber) {
       var matrixPA = svgContainer_presenceAbsenceMatrix.append("g").attr("id", `presence_${geno}`);
-//      drawingDisplay_PerGenomePA(geno, genomeNumber, dataFiltered2View); //Creates the first occurences of PA blocks
 
       var genomeLabels = svgContainer_genomesTree.append("text").attr("id", `${geno}_label`).attr("font-family", "sans-serif").attr("font-size", "10px")
             .attr("y", (d,i) => (genomeNumber+0.5)*displayedBlocksDimensions.height).attr("dominant-baseline", "middle") //As y is the baseline for the text, we have to add the block height once more, /2 to center the label
@@ -1505,252 +1443,19 @@ function renderD3Visualisation(file_URL) {
 
     //---------------------------------blocks & attributes--------------------------------
 
-    function drawingDisplay_BlockCount(dataPart, nucleotideWidth) {
+    //Binding the data to a DOM element, therefore creating one SVG block per data
+    blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable"); //.append("g") allows grouping svg objects
 
-      //Binding the data to a DOM element, therefore creating one SVG block per data
-      let newData = d3.select("#panChromosome_coreVSdispensable").selectAll("rect") //First an empty selection of all not yet existing rectangles
-            .data(dataPart); //Joining data to the selection, one rectangle for each as there is no key. It returns 3 virtual selections : enter, update, exit. The enter selection contains placeholder for any missing element. The update selection contains existing elements, bound to data. Any remaining elements ends up in the exit selection for removal.
-
-            //For more about joins, see : https://bost.ocks.org/mike/join/
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter() //The D3.js Enter Method returns the virtual enter selection from the Data Operator. This method only works on the Data Operator because the Data Operator is the only one that returns three virtual selections. However, it is important to note that this reference only allows chaining of append, insert and select operators to be used on it.
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", displayedBlocksDimensions.height)
-          .attr("y", 0)
-          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-          .style("fill", (d) => thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale));
-    };
+    //--------------------------------------------------------------------------
 
     //Binding the data to a DOM element, therefore creating one SVG block per data
-    var blocks = blocksDisplay.append("g").attr("id","panChromosome_coreVSdispensable") //.append("g") allows grouping svg objects
-//    drawingDisplay_BlockCount(dataFiltered2View);
+    blocksDisplay.append("g").attr("id","panChromosome_rainbowed");
+
     //--------------------------------------------------------------------------
-
-    //--------------------------------eventDisplayInfoOn()--------------------------------
-
-    function eventDisplayInfoOn(d, i) {    //Takes most of its code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
-                        //http://bl.ocks.org/phil-pedruco/9032348 was useful too
-//    console.log(d3.select(this.parentNode).attr("id"));
-
-
-      //Specifies where to put label of text altogether with its properties
-      svgContainer_rawBlocks.append("text")
-            .attr("id", "textThatDisplaysInformationOnBlock_"+d.index)
-            .attr("font-family", "sans-serif")
-            .attr("x", svgContainer_rawBlocks.attr("width")+1) //At first the text is not displayed in order to get its dimensions first
-            .attr("y", Number(d3.select(this).attr("y")) + displayedBlocksDimensions.height*2)
-            //ATTENTION The text should not appear where the mouse pointer is, in order to not disrupt the mouseover event
-            .attr("dominant-baseline", "middle") //Vertical alignment, can take many different arguments other than "middle"
-            .attr("text-anchor", "start") //Can be "start", "middle", or "end"
-            /*.text(function() {
-              return "This block appears in " + d.presenceCounter + " selected genome(s)";  //Text content
-            });*/
-
-
-      switch(d3.select(this.parentNode).attr("id")) { //Function that will display information depending on the selected row
-        case "panChromosome_coreVSdispensable":
-
-          //Uses D3 to select element and change its color based on the previously built color scales
-          d3.select(this).style("fill", function(d) {
-            var color = d3.hcl(thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale)); //It's important to precise d3.hcl() to use .h .c or .l attributes
-            color.h = color.h+10; //Slight change in hue for better noticing
-            color.c = color.c*1.1; //Slight increase in chroma
-            color.l += (100-color.l)*0.5; //Slight increase in luminance without exceeding white
-            return color;
-          });
-          //Here, d is a block object from dataGroupedPerChromosome[`${currentChromInView}`], i is its index within the array
-          //To access values of a block, we need to take "this" as an argument
-
-          d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block appears in " + d.presenceCounter + " selected genome(s)"); //Text content
-
-          break;
-
-        case "panChromosome_rainbowed":
-
-          d3.select(this).style("fill", function(d) {
-            var color = d3.hcl(pseudoRainbowColorScale(Number(d.index)));
-            color.c = color.c*1.1;
-            color.l += (100-color.l)*0.5;
-            return color;
-          });
-
-//          console.log("#textThatDisplaysInformationOnBlock_"+d.index);
-//          console.log("This block starts on position " + d.FeatureStart);
-//          console.log(" and is " + d3.format("~s")(Number(d.FeatureStop) - Number(d.FeatureStart)) + "b long");
-
-          d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block starts on position " + d.FeatureStart + " and is " + d3.format("~s")(Number(d.FeatureStop) - Number(d.FeatureStart)) + "b long"); //d3.format is used to have the International System writing, with rounded values
-          //ATTENTION for float values such as 1.586 for instance eval() considered the "." to be the announcement of a property (586, property of the object 1), therefore an ID error occured
-
-          break;
-
-        case "panChromosome_similarCount":
-
-          d3.select(this).style("fill", function(d) {
-            var color = d3.hcl(greenColorScale(Number(d.SimilarBlocks.split(";").length)));
-            color.h = color.h+10;
-            color.c = color.c*1.1;
-            color.l += (100-color.l)*0.5;
-            return color;
-          });
-
-          d3.select("#textThatDisplaysInformationOnBlock_"+d.index).text("This block is repeated " + eval((d.SimilarBlocks.split(";").length >= 2) ? d.SimilarBlocks.split(";").length : 0) + " time(s) within the pangenome");
-
-          break;
-
-      };
-
-      //Getting the text shape, see : https://bl.ocks.org/mbostock/1160929 and http://bl.ocks.org/andreaskoller/7674031
-      var bbox = d3.select("#textThatDisplaysInformationOnBlock_"+d.index).node().getBBox(); //Do not know exactly why but node() is needed
-
-      d3.select("#textThatDisplaysInformationOnBlock_"+d.index).attr("x", function(d) {
-                                    if (d3.mouse(this)[0] < bbox.width/2 + 2) { //d3.event.x works only for drag events, not for cursor coordinates
-                                      return 2; //Leaving space for the background rectangle
-                                    } else if (d3.mouse(this)[0] > svgContainer_rawBlocks.attr("width") - (bbox.width/2+2)){
-                                      return svgContainer_rawBlocks.attr("width") - (bbox.width+2);
-                                    } else { return d3.mouse(this)[0] - bbox.width/2 }
-                                  });
-
-      svgContainer_rawBlocks.insert("rect", "#textThatDisplaysInformationOnBlock_"+d.index)
-        .attr("id", "textThatDisplaysInformationOnBlock_"+d.index + "bg")
-          .attr("x", d3.select("#textThatDisplaysInformationOnBlock_"+d.index).attr("x") - 2) //as bbox was created before the text was correctly placed, so we cannot use bbox.x directly
-          .attr("y", bbox.y - 2)
-          .attr("width", bbox.width + 4)
-          .attr("height", bbox.height + 4)
-          .style("fill", d3.hcl(83, 4, 96))
-          .style("fill-opacity", "0.9")
-          .style("stroke", d3.hcl(86, 5, 80))
-          .style("stroke-opacity", "0.9");
-      //How to trim elements that exceeds a certain length : https://blog.mastykarz.nl/measuring-the-length-of-a-string-in-pixels-using-javascript/
-
-
-    };
-    //--------------------------------------------------------------------------
-
-    //---------------------------------eventDisplayInfoOff()------------------------------
-
-    function eventDisplayInfoOff(d, i) {
-
-      switch(d3.select(this.parentNode).attr("id")) {
-
-        case "panChromosome_coreVSdispensable":
-          //Uses D3 to select element, change color back to normal by overwriting and not recovery of the original colour
-          d3.select(this).style("fill",function (d) {return thresholdBasedColor(d.presenceCounter,coreThreshold,blueColorScale,orangeColorScale); });
-          break;
-
-        case "panChromosome_rainbowed":
-          d3.select(this).style("fill",function (d) {return d3.hcl(pseudoRainbowColorScale(Number(d.index))); });
-          break;
-
-        case "panChromosome_similarCount":
-          d3.select(this).style("fill",function (d) {return d3.hcl(greenColorScale(Number(d.SimilarBlocks.split(";").length))); });
-          break;
-      };
-
-      //Selects text by id and then removes it
-      d3.select("#textThatDisplaysInformationOnBlock_"+d.index).remove();  // Remove text location slecting the id thanks to #
-      d3.select("#textThatDisplaysInformationOnBlock_"+d.index + "bg").remove();
-    };
-    //--------------------------------------------------------------------------
-
-    //-----------------------------rainbowBlocks & attributes-----------------------------
-
-    function drawingDisplay_Rainbow(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element
-      let newData = d3.select("#panChromosome_rainbowed").selectAll("rect")
-            .data(dataPart);
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter()
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", displayedBlocksDimensions.height)
-          .attr("y", Number(blocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-          .style("fill", (d => pseudoRainbowColorScale(Number(d.FeatureStart))));
-    };
 
     //Binding the data to a DOM element, therefore creating one SVG block per data
-    var rainbowBlocks = blocksDisplay.append("g").attr("id","panChromosome_rainbowed");
-//    drawingDisplay_Rainbow(dataFiltered2View);
+    blocksDisplay.append("g").attr("id","panChromosome_similarCount");
 
-    //--------------------------------------------------------------------------
-
-    //-----------------------------similarBlocks & attributes-----------------------------
-
-    function drawingDisplay_similarBlocks(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element
-      let newData = d3.select("#panChromosome_similarCount").selectAll("rect")
-            .data(dataPart);
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter()
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", displayedBlocksDimensions.height)
-          .attr("y", Number(rainbowBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height + 3)
-          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-          .style("fill", (d => greenColorScale(d.SimilarBlocks.split(";").length)));
-    };
-
-    //Binding the data to a DOM element, therefore creating one SVG block per data
-    var similarBlocks = blocksDisplay.append("g").attr("id","panChromosome_similarCount");
-//    drawingDisplay_similarBlocks(dataFiltered2View);
-    //--------------------------------------------------------------------------
-
-    //--------------------------structureBackground & attributes--------------------------
-
-    function drawingDisplay_similarBackground(dataPart, nucleotideWidth) {
-
-      //Binding the data to a DOM element
-      let newData = d3.select("#structureBackground").selectAll("rect")
-            .data(dataPart);
-
-      newData.exit().remove(); //Removing residual data
-
-      //Selecting all previous blocks, and determining their attributes
-      newData.enter()
-          .append("rect") //For each placeholder element created in the previous step, a rectangle element is inserted.
-          .attr("class", "moveableBlock")
-          .attr("height", (CHROMOSOME_NAMES.length+3)*displayedBlocksDimensions.height)
-          .attr("y", Number(similarBlocks.selectAll("rect").attr("y")) + displayedBlocksDimensions.height)
-//          .on("mouseover", eventDisplayInfoOn) //Link to eventDisplayInfoOn whenever the pointer is on the block
-//          .on("mouseout", eventDisplayInfoOff) //Idem with eventDisplayInfoOff
-        .merge(newData) //Combines enter() and 'update()' selection, to update both at once
-          .attr("x", (d,i) => Number(d.index)*nucleotideWidth)
-          .attr("width", d => (Number(d.FeatureStop)-Number(d.FeatureStart))*nucleotideWidth)
-/*          .style("fill", function (d) {var color = d3.hcl(greenColorScale(d.SimilarBlocks.split(";").length));
-            color.c = color.c*0.65; //Reducing the chroma (ie 'colorness')
-            color.l += (100-color.l)*0.3; //Augmenting the lightness without exceeding white's
-            return color;
-          })
-*/          .style("fill", "white"); //Line to remove after the presentation
-    };
-
-    //Creation of the subgroup for the StructureBackground
-    var structureBackground = blocksDisplay.append("g").attr("id", "structureBackground");
-//    drawingDisplay_similarBackground(dataFiltered2View);
     //--------------------------------------------------------------------------
 
 
@@ -1807,7 +1512,7 @@ function renderD3Visualisation(file_URL) {
       newData.enter()
           .append("rect")
           .attr("class", "moveableBoxes")
-          .attr("y", (d,i) => Number(structureBackground.selectAll("rect").attr("y")) + (3+chr)*displayedBlocksDimensions.height) //Each line corresponds to a chromosome
+          .attr("y", (d,i) => Number(d3.select("#panChromosome_similarCount").select("rect").attr("y")) + (4+chr)*displayedBlocksDimensions.height) //Each line corresponds to a chromosome
           //.style("fill", d3.hcl(0,0,25))
           //As the color will now depend on the x index, it will be styled within "merge", idem for the stroke
           .attr("height", d => displayedBlocksDimensions.height )
