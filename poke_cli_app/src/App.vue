@@ -27,7 +27,7 @@ export default {
 
 .mainTabBar {
   background-color: #F8F8FF;
-  height: 50rem;
+  height: 49rem;
   margin-left: 18rem;
   width: 100% - 15rem;
 }

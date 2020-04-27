@@ -60,6 +60,7 @@ export default {
         background-color: #F8F8FF;
     }
     .graph {
-      margin-left: 17rem;
+      margin-top: 40px;
+      margin-left: 19rem;
     }
 </style>
