@@ -81,7 +81,8 @@ export default {
             })
             .attr("height", function(d) {
                 return height - y(d.tweets);
-            });
+            })
+            .on("click", this.onBarClick);
 
         // add the x axis
         svg.append("g")
@@ -105,7 +106,16 @@ export default {
             .attr("dy", "1rem")
             .style("text-anchor", "middle")
             .text("Tweets");
-    }
+    },
+
+    onBarClick: function(data) {
+        console.log(data.user);
+        this.$emit('clicked', data.user);
+    },
+  },  
+
+  computed: {
+      
   }
 };
 </script>

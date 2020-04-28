@@ -21,8 +21,7 @@
         </div>
     </template>
     <template>
-        <global-graph class="graph" :tweetData=loadData @clicked="onClickChild" />
-        <local-graph class="graph" :user=user />
+        <global-graph class="graph" :tweetData=loadData />
     </template>
   </div>
 </template>
@@ -31,18 +30,15 @@
 import * as d3 from 'd3';
 
 import GlobalGraph from './GlobalGraph.vue';
-import LocalGraph from './LocalGraph.vue';
 
 export default {
   name: 'MainTabBar',
   components: {
-      GlobalGraph,
-      LocalGraph
+      GlobalGraph
   },
   data: function() {
     return {
-      loadData: [],
-      user: ""
+      loadData: []
     };
   },
   mounted() {
@@ -53,10 +49,6 @@ export default {
     async fetchData() {
       let data = await d3.json("./tweets.json");
       this.loadData = data;
-    },
-
-    onClickChild(data) {
-      this.user = data;
     }
   }
 };
