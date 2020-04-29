@@ -69,6 +69,5 @@ export default {
     }
     .graph {
       margin-top: 40px;
-      margin-left: 19rem;
     }
 </style>

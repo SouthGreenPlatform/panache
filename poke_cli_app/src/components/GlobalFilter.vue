@@ -1,5 +1,5 @@
 <template>
-  <div class="m-4">
+  <div>
     <img class="logo" alt="Vue logo" src="../assets/logo.png">
     <hr class="blueBar"/>
     <strong>Active Filter</strong>
@@ -41,10 +41,6 @@ export default {
 <style scoped>
   .blueBar {
     color: grey;
-  }
-
-  .filterTab {
-    width: 15rem;
   }
 
   .logo {
