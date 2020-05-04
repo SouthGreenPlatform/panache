@@ -28,7 +28,7 @@ export default {
   },
   methods: {
     async fetchData() {
-      let pcaPromise = d3.json("./coordinatesPilars.json");
+      let pcaPromise = d3.json("./coordinatesMerci.json");
 
       let pca = await pcaPromise;
       this.pcaData = pca;
