@@ -1,7 +1,9 @@
 <template>
   <div id="app">
-    <global-filter class="filterTab"/>
-    <b-navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark">
+    <global-filter v-if="this.$route.name === 'Global'" class="filterTab"/>
+    <local-filter v-if="this.$route.name === 'Local'" class="filterTab"/>
+    <sample-filter v-if="this.$route.name === 'PCA'" class="filterTab"/>
+    <b-navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark" v-if="this.$route.name !== 'Organism'">
         <b-navbar-nav class="ml">
             <b-nav-form>
                 <b-form-input size="sm" class="ml-sm-2" placeholder="Search"></b-form-input>
@@ -10,8 +12,10 @@
         </b-navbar-nav>
         <b-navbar-brand class="text-dark mx-auto">Title</b-navbar-brand>
     </b-navbar>
-    <div id="nav">
-      <router-link to="/">Global diversity</router-link> |
+    <div id="nav" v-if="this.$route.name !== 'Organism'">
+      <router-link to="/">Organism</router-link> |
+      <router-link to="/pca">Sample diversity</router-link> |
+      <router-link to="/global">Global diversity</router-link> |
       <router-link :to="{ name: 'Local', params: { user: user } }">Local diversity</router-link>
     </div>
     <router-view/>
@@ -20,32 +24,30 @@
 
 <script>
 
-import GlobalFilter from '@/components/GlobalFilter.vue'
+import GlobalFilter from '@/components/GlobalFilter.vue';
+import LocalFilter from '@/components/LocalFilter.vue';
+import SampleFilter from '@/components/SampleFilter.vue';
 
 export default {
   name: 'App',
   components: {
-    GlobalFilter
+    GlobalFilter,
+    LocalFilter,
+    SampleFilter
   },
   data () {
     return {
-      user: 'Sam'
+      user: 'Sam',
+      route: 'global',
+      routePath: this.$route.name
     }
   },
-  /*beforRouterEnter (to, from, next) {
-    
-    getPost(to.params.id, (post) => {
-      next(vm => vm.setData( post))
-    })
-  },
-  beforeRoutingEnter (to, from, next) {
-    console.log(`Updating slug from ${from} to ${to}`)
-    next() //make sure you always call next()
-  },*/
   methods: {
-    // setData (err, user) {
-    //   this.user = user;
-    // }
+  },
+  computed: {
+    getRoute: function(){
+      return console.log(this.routePath);
+    }
   }
 }
 
@@ -59,6 +61,10 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background-color: #F8F8FF;
+}
+
+body {
   background-color: #F8F8FF;
 }
 

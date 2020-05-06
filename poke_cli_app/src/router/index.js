@@ -2,12 +2,13 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Global from '../views/Global.vue'
 import PCA from '../views/PCA.vue'
+import Organism from '../views/Organism.vue'
 
 Vue.use(VueRouter)
 
   const routes = [
   {
-    path: '/',
+    path: '/global',
     name: 'Global',
     component: Global
   },
@@ -15,6 +16,11 @@ Vue.use(VueRouter)
     path: '/pca',
     name: 'PCA',
     component: PCA
+  },
+  {
+    path: '/',
+    name: 'Organism',
+    component: Organism
   },
   {
     path: '/local',

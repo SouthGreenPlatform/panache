@@ -177,6 +177,7 @@ export default {
       d3.select(this.$refs.yAxis).call(yAxisTicks)
     },
     renderLegend(legendList) {
+      let legendColor = this.colForCropGroups;
       let legendGroup = d3.select('svg').append('g').attr('id', 'legends');
       let leftSpace = 25;
       let rightSpace = 5;
@@ -195,7 +196,7 @@ export default {
           .attr('cy', yPos)
           .attr('r', legendRadius)
           //.attr('fill', 'cyan');
-          .attr('fill', this.colorScale(legendList[i]));
+          .attr('fill', legendColor[i]);
           console.log(legendList[i])
           console.log(this.cropGroups)
           console.log(this.colorScale)
@@ -204,7 +205,11 @@ export default {
           .text(legendList[i])
           .attr('x', newX + rightSpace + legendRadius)
           .attr('y', yPos)
-          .style('dominant-baseline', 'central');
+          .style('dominant-baseline', 'central')
+          .on('click', function (d, i) {
+            console.log(legendList[i]);
+            console.log(d);
+          });
 
         let currentBBox = currentGroup.node().getBBox();
 
@@ -247,6 +252,9 @@ export default {
         this.hideName(key)
       }
     },
+    highlightLgend() {
+       
+    }
   }
 }
 </script>

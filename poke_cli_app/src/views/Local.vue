@@ -1,6 +1,6 @@
 <template>
   <div class="local">
-    <local-graph class="graph" :user=user :tweetData="loadData" />
+    <local-graph :user=user :tweetData="loadData" />
   </div>
 </template>
 
