@@ -1,6 +1,6 @@
 <template>
   <div>
-    <GenomesPCA :pcaCoordinates="pcaData"/>
+    <GenomesPCA :pcaCoordinates="pcaData" :crop="crop" @clicked="onClickChild"/>
     <!-- <main-tab-bar class="mainTabBar"/> -->
   </div>
 </template>
@@ -20,7 +20,8 @@ export default {
   },
   data: function() {
     return {
-      pcaData: []
+      pcaData: [],
+      crop: ""
     };
   },
   beforeMount() {
@@ -32,6 +33,9 @@ export default {
 
       let pca = await pcaPromise;
       this.pcaData = pca;
+    },
+    onClickChild(data) {
+      this.crop = data;
     }
   }
 }

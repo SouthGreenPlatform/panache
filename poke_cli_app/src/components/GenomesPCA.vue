@@ -11,10 +11,11 @@
                     :r="radius(genome.key)"
                     :cx="newCoordX(genome.V1)"
                     :cy="newCoordY(genome.V2)"
-                    :fill="circleColor(genome.key)"
+                    :fill="circleColor(genome.key, crop)"
                     :stroke="stroke(genome.key)"
                     @mouseover="condShowName(genome.key)"
                     @mouseout="condHideName(genome.key)"
+                    class="circle"
                 >
                 </circle>
                 <text
@@ -54,7 +55,8 @@ export default {
     pcaCoordinates: {
       type: Array,
       default: () => []
-    }
+    },
+    crop: String,
   },
   data() {
       return {
@@ -70,8 +72,23 @@ export default {
               .range(this.colForCropGroups)
               .unknown('grey')
             },
-          circleColor: function(key) {
-            return (this.refGenomes.includes(key) ? "red" : "grey")
+          circleColor: function(key, crop) {
+            if(crop === ""){
+              return (this.refGenomes.includes(key) ? "red" : "grey");
+            } else {
+              for(let i=0; i<this.cropGroups.length; i++){
+                if (this.cropGroups[i] === crop){
+                  for(let j=0; j < this.pcaCoordinates.length; j++){
+                    if(this.pcaCoordinates[j].key === key){
+                      if(this.pcaCoordinates[j].HeteroticGroups.includes(crop)){
+                        return this.colForCropGroups[i];
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            return (this.refGenomes.includes(key) ? "red" : "grey");
           },
           stroke: function(key) {
             return (this.refGenomes.includes(key) ? "black" : "none")
@@ -197,18 +214,20 @@ export default {
           .attr('r', legendRadius)
           //.attr('fill', 'cyan');
           .attr('fill', legendColor[i]);
-          console.log(legendList[i])
-          console.log(this.cropGroups)
-          console.log(this.colorScale)
 
         let newText = currentGroup.append('text')
           .text(legendList[i])
           .attr('x', newX + rightSpace + legendRadius)
           .attr('y', yPos)
           .style('dominant-baseline', 'central')
-          .on('click', function (d, i) {
-            console.log(legendList[i]);
-            console.log(d);
+          .style('cursor', 'pointer')
+          .on('click', function () {
+            /*let list = d3.selectAll(".circle");
+            this.listCircles = list._groups[0];
+            console.log(this.listCircles);*/
+            
+            this.parentElement.parentElement.parentElement.parentElement.__vue__.$emit('clicked', legendList[i]);
+
           });
 
         let currentBBox = currentGroup.node().getBBox();
@@ -252,9 +271,12 @@ export default {
         this.hideName(key)
       }
     },
-    highlightLgend() {
+    highlightLegend() {
        
-    }
+    },
+    onLegendClick: function(data) {
+        this.$emit('clicked', data);
+    },
   }
 }
 </script>
