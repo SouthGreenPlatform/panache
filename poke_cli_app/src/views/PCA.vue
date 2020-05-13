@@ -43,10 +43,5 @@ export default {
 
 <style>
 
-.graph {
-  margin-top: 40px;
-  background-color: #F8F8FF;
-}
-
 </style>
 

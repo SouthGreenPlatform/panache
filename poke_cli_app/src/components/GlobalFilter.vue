@@ -1,7 +1,7 @@
 <template>
   <div>
     <img class="logo" alt="Vue logo" src="../assets/logo.png">
-    <hr class="greyBar"/>
+    <hr class="blueBar"/>
     <strong>Active Filter</strong>
     <b-form-input v-model="text" placeholder="Filter"/>
     <strong>Region of interest</strong>
@@ -39,7 +39,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .greyBar {
+  .blueBar {
     color: grey;
   }
 

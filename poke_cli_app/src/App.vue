@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <global-filter v-if="this.$route.name === 'Global'" class="filterTab"/>
+    <global-filter v-if="this.$route.name === 'Circos'" class="filterTab"/>
     <local-filter v-if="this.$route.name === 'Local'" class="filterTab"/>
     <sample-filter v-if="this.$route.name === 'PCA'" class="filterTab"/>
     <b-navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark" v-if="this.$route.name !== 'Organism'">

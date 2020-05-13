@@ -12,6 +12,7 @@
   "main": "babel.config.js",
   "dependencies": {
     "bootstrap-vue": "^2.1.0",
+    "circos": "^2.1.0",
     "core-js": "^3.6.4",
     "d3": "^5.15.1",
     "jquery": "^3.5.1",
