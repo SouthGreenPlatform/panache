@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 //import Global from '../views/Global.vue'
 import PCA from '../views/PCA.vue'
 import Organism from '../views/Organism.vue'
+import Panache from '../views/Panache.vue'
 import Circos from '../views/Circos.vue'
 
 Vue.use(VueRouter)
@@ -12,6 +13,11 @@ Vue.use(VueRouter)
     path: '/global',
     name: 'Circos',
     component: Circos
+  },
+  {
+    path: '/panache',
+    name: 'Panache',
+    component: Panache
   },
   {
     path: '/pca',
@@ -30,10 +36,10 @@ Vue.use(VueRouter)
   },
   {
     path: '/local',
-    name: 'Local',
+    name: 'Panache',
     props: true,
 
-    component: () => import('../views/Local.vue')
+    component: () => import('../views/Panache.vue')
   }
 ]
 

@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <global-filter v-if="this.$route.name === 'Circos'" class="filterTab"/>
-    <local-filter v-if="this.$route.name === 'Local'" class="filterTab"/>
+    <local-filter v-if="this.$route.name === 'Panache'" class="localFilterTab"/>
     <sample-filter v-if="this.$route.name === 'PCA'" class="filterTab"/>
     <b-navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark" v-if="this.$route.name !== 'Organism'">
         <b-navbar-nav class="ml">
@@ -16,7 +16,7 @@
       <router-link to="/">Organism</router-link> |
       <router-link to="/pca">Sample diversity</router-link> |
       <router-link to="/global">Global diversity</router-link> |
-      <router-link :to="{ name: 'Local', params: { user: user } }">Local diversity</router-link>
+      <router-link :to="{ name: 'Panache', params: { user: user } }">Local diversity</router-link>
     </div>
     <router-view/>
   </div>
@@ -89,6 +89,15 @@ body {
   width: 20rem;
   background-color: white;
   height: 49rem;
+  padding: 20px;
+  text-align: left;
+}
+
+.localFilterTab {
+  float: left;
+  width: 20rem;
+  background-color: white;
+  height: 55rem;
   padding: 20px;
   text-align: left;
 }

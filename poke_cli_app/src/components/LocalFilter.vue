@@ -4,13 +4,20 @@
     <hr class="blueBar"/>
     <strong>Local Filters</strong>
     
+    <core-threshold class="coreThreshold" />
     
   </div>
 </template>
 
 <script>
+
+import CoreThreshold from '@/components/CoreThreshold.vue';
+
 export default {
   name: 'LocalFilter',
+  components: {
+    CoreThreshold
+  },
   data() {
     return {
     }
@@ -29,8 +36,12 @@ export default {
 
   .logo {
     height: 3rem;
-    display:block;
+    display: block;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .coreThreshold {
+    margin-top: 2rem;
   }
 </style>

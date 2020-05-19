@@ -291,7 +291,7 @@ function renderD3Visualisation(file_URL) {
     var browsingBlocksDimensions = {width:(svgContainer_browsingSlider.attr("width")/dataGroupedPerChromosome[`${currentChromInView}`].length)+1, height:10, borderSpace:1}
  
     
-// creation du slider en haut a gauche
+    // creation du slider en haut a gauche
     var coreSliderScale = d3.scaleLinear()
         .domain([0, 1])
         .range([0, 100])
@@ -426,9 +426,10 @@ function renderD3Visualisation(file_URL) {
       pseudoRainbowColorScale,
       greenColorScale);
 
-
+    // Partie interractive de minature bg
     var chromSlider = svgContainer_browsingSlider.append("g");
 
+    // rectangle transparent pour la souris
     chromSlider.append("rect")
       .attr("class", "track-overlay")
       .attr("width", svgContainer_browsingSlider.attr("width"))
@@ -523,11 +524,14 @@ function renderD3Visualisation(file_URL) {
         }; 
     };
     
+    // echelle graduée sous miniature bg
     var miniatureTicksScale = d3.scaleLinear() 
                   .domain([0, maxPositionInNucleotide])
-                  .range([0, svgContainer_browsingSlider.attr("width")]) 
+                  .range([0, svgContainer_browsingSlider.attr("width")]) // taille du canvas width
                   .clamp(true); 
 
+    // canvas + svg pour miniature
+    // ajout g pour le svg
     svgContainer_browsingSlider.append("g") 
                   .attr("id","miniatureTicks")
                   .style("font", "10px sans-serif")
@@ -535,7 +539,6 @@ function renderD3Visualisation(file_URL) {
                   .call(d3.axisBottom(miniatureTicksScale)
                     .ticks(20)
                     .tickFormat(d3.format("~s")));
-
 
 
     svgContainer_legends.append("g").attr("id","legend_matrixPA_title")
