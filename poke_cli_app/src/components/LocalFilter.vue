@@ -6,20 +6,26 @@
     
     <core-threshold class="coreThreshold" />
     
+    <MatrixPavZoom class="zoomSlider" :lastNt="lastNt" :displayWindowWidth="displayWindowWidth" />
+    
   </div>
 </template>
 
 <script>
 
 import CoreThreshold from '@/components/CoreThreshold.vue';
+import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 
 export default {
   name: 'LocalFilter',
   components: {
-    CoreThreshold
+    CoreThreshold,
+    MatrixPavZoom
   },
   data() {
     return {
+      lastNt: 41332,
+      displayWindowWidth: 1100
     }
   },
   props: {

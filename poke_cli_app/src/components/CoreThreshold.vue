@@ -56,7 +56,7 @@ export default {
     return {
       threshold: 0.85,
       width: 300,
-      height: 300,
+      height: 100,
       leftPosPixel: leftPx,
       rightPosPixel: rightPx,
       pxToThresholdScale: d3.scaleLinear() //Attaches to each threshold value a position on the slider
@@ -160,6 +160,10 @@ export default {
     },
     updateThreshold(mousePos) {
       this.threshold = this.pxToThresholdScale(mousePos);
+      if(mousePos >= 0 && mousePos <= 100){
+        this.$store.state.coreThresholdSlide = mousePos; // on enregistre en variable globale la valeur du slider pour modifier le canvas
+       // console.log(this.$store.state.coreThresholdSlide);
+      }
     },
     translateContent() {
       console.log(this.width);

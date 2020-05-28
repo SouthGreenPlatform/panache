@@ -1,7 +1,14 @@
 <template>
-  <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
+  <div>
 
     <canvas ref="CanvasMiniature" :width="width" :height="height"></canvas>
+
+    <svg ref="svgOnCanvas" class="svgAbsolute" :width="width" :height="height">
+      <g>
+        <rect class="handle" :width="sliderWidth" height="46" :x="0" :y="2*blockHeight-13" style="stroke: rgb(59, 59, 59); position: absolute; fill-opacity: 0;" />
+        <rect class="track-overlay" ref="tracker" :y="2*blockHeight-12" :width="width" :height="sliderHeight" style="fill-opacity: 0;" cursor="ew-resize" />
+      </g>
+    </svg>
 
   </div>
 </template>
@@ -12,6 +19,7 @@ import * as d3 from 'd3';
 export default {
   name: 'Canvas',
   props: {
+    // Props qu'on récupère de Panache.vue
     chromosomeData: {
       type: Array,
       default: () => []
@@ -22,45 +30,36 @@ export default {
     },
     height: {
       type: Number,
-      default: 600
+      default: 110
     },
     nbOfGenomes: {
       type: Number,
       default: 6
-      },
+    },
     nbOfFunctions: {
       type: Number,
       default: 14
-      },
-    colorScaleFunction : {
-      type: Function,
-      default: () => 'purple'
     },
     coreThreshold: {
-      type: Function,
-      default: () => 'red'
+      type: Number,
+      default: () => 5.1
     },
-    colorScaleCore: {
-      type: Function,
-      default: () => 'blue'
+    maxPositionInNucleotide: {
+      type: Number,
+      default: 41332
     },
-    colorScaleDisp: {
-      type: Function,
-      default: () => 'black'
-    },
-    colorScaleRainbow: {
-      type: Function,
-      default: () => 'yellow'
-    },
-    colorScaleSimilarities: {
-      type: Function,
-      default: () => 'green'
+    sliderWidth: {
+      type: Number,
+      default: 55
     }
   },
   data() {
     return {
       blockHeight: 14,
       blockWidth: 12,
+      alreadyAppend: false,
+      sliderHeight: 50,
+      miniWindowHandle: Function,
       correspondancePosColor: function() {
         let map = new Map();
         this.chromosomeData.forEach( function(d,i) {
@@ -68,15 +67,47 @@ export default {
         });
 
         return map;
-      }
+      },
+      miniatureSliderScale: Function
     }
   },
   mounted() {
     this.drawCanvas();
+    this.drawSvg();
   },
   watch: {
+    // Si les données du chromosome sont update on redessine la miniature
     chromosomeData: function() {
       this.drawCanvas();
+      this.drawSvg();
+    },
+
+    // Si on change le core dans le filtre, on update seulement la partie de la miniature qui est update pour réduire le poids de l'opération
+    coreThreshold: function() {
+      let canvas = d3.select(this.$refs.CanvasMiniature);
+      let context = canvas.node().getContext("2d");
+
+      this.chromosomeData.forEach((d) => {
+
+        let rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
+
+        let xPos = this.width * Number(d.index)/rightmostNt;
+        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/rightmostNt+1;
+        let trackHeight = this.blockHeight;
+
+        if (Number(d.presenceCounter) === 0) {
+          context.fillStyle = "#fff";
+        } else if (Number(d.presenceCounter) >= this.coreThreshold) {
+          context.fillStyle = this.$store.state.orangeColorScale.range()[1];
+        } else {
+          context.fillStyle = this.$store.state.blueColorScale.range()[1];
+        }
+
+        context.fillRect(xPos,
+            2*trackHeight+6,
+            blockWidth,
+            trackHeight); //fillRect(x, y, width, height)
+      })
     }
   },
   methods: {
@@ -107,7 +138,7 @@ export default {
         if (this.nbOfFunctions === 1) {
             context.fillStyle = d3.interpolateRainbow( ( this.correspondancePosColor().get(d["FeatureStart"])%14 )/14 )
         } else {
-            context.fillStyle = this.colorScaleFunction(d["Function"]);
+            context.fillStyle = this.$store.state.functionColorScale(d["Function"]);
         }
 
         context.fillRect(xPos,
@@ -121,9 +152,9 @@ export default {
         if (Number(d.presenceCounter) === 0) {
           context.fillStyle = "#fff";
         } else if (Number(d.presenceCounter) >= this.coreThreshold) {
-          context.fillStyle = this.colorScaleCore.range()[1];
+          context.fillStyle = this.$store.state.orangeColorScale.range()[1];
         } else {
-          context.fillStyle = this.colorScaleDisp.range()[1];
+          context.fillStyle = this.$store.state.blueColorScale.range()[1];
         }
 
         context.fillRect(xPos,
@@ -133,7 +164,7 @@ export default {
 
 
         //Drawing the rainbow miniature
-        context.fillStyle = this.colorScaleRainbow(Number(d.FeatureStart));
+        context.fillStyle = this.$store.state.pseudoRainbowColorScale(Number(d.FeatureStart));
 
         context.fillRect(xPos,
             2*trackHeight+6 + trackHeight+1,
@@ -142,13 +173,47 @@ export default {
 
 
         //Drawing the similarity miniature
-        context.fillStyle = this.colorScaleSimilarities(Number(d.SimilarBlocks.split(";").length));
+        context.fillStyle = this.$store.state.greenColorScale(Number(d.SimilarBlocks.split(";").length));
 
         context.fillRect(xPos,
             2*trackHeight+6 + (trackHeight+1)*2,
             blockWidth,
             trackHeight);
       });
+    },
+
+    drawSvg() {
+      let miniatureTicksScale = d3.scaleLinear() 
+                  .domain([0, this.maxPositionInNucleotide])
+                  .range([0, this.width]) // taille du canvas width
+                  .clamp(true); 
+
+      // canvas + svg pour miniature
+      // ajout g pour le svg
+      d3.select(this.$refs.svgOnCanvas)
+        .append("g") 
+        .attr("id","miniatureTicks")
+        .style("font", "10px sans-serif")
+        .attr("transform", "translate(" + 0 + "," + 65 + ")")
+        .call(d3.axisBottom(miniatureTicksScale)
+          .ticks(20)
+          .tickFormat(d3.format("~s")));
+
+      let self = this;
+
+      d3.select(self.$refs.tracker)
+        .call(d3.drag()
+          .on("start drag", function() { self.slidingAlongBlocks(d3.mouse(this)[0]);
+      }));
+    },
+
+    // fonction qui actualise la position du rectangle de slide en fonction de la position cliqué sur la miniature
+    slidingAlongBlocks(mouse_xPosition) {
+      let slider = d3.select(this.$refs.svgOnCanvas).select("rect").attr("class", "handle");
+      if (mouse_xPosition >= (0 + this.sliderWidth/2 -2) && mouse_xPosition <= (this.width - this.sliderWidth/2 +2)) {
+        slider.attr("x", mouse_xPosition - this.sliderWidth/2);
+      }
+      
     }
   }
 }
@@ -156,11 +221,15 @@ export default {
 
 <style >
 
-.whiteBlockCanvas {
-  background-color: white;
-  width: 73rem;
-  height: 45rem;
-  border-radius: 50px;
-  margin-left: 21rem;
+.svgAbsolute {
+  position: absolute;
+  margin-top: 1.2rem;
+  right: 3rem;
+}
+
+.invisibleRect {
+  margin-top: 2rem;
+  background-color: black;
+  opacity: 0.5;
 }
 </style>

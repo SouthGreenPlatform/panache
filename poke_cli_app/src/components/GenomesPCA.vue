@@ -72,6 +72,8 @@ export default {
               .range(this.colForCropGroups)
               .unknown('grey')
             },
+          // fonction qui récupère la couleur à mettre en avant définie en cliquant dans la légende, 
+          // par défaut il n'y a pas de couleur cliqué et on colorie les points en noir
           circleColor: function(key, crop) {
             if(crop === ""){
               return (this.refGenomes.includes(key) ? "red" : "grey");
@@ -207,6 +209,7 @@ export default {
       for (let i=0; i<legendList.length; ++i) {
         let currentGroup = legendGroup.append('g');
         let newX = lastRight + leftSpace;
+        let self = this;
 
         let newCircle = currentGroup.append('circle')
           .attr('cx', newX)
@@ -226,7 +229,7 @@ export default {
             this.listCircles = list._groups[0];
             console.log(this.listCircles);*/
             
-            this.parentElement.parentElement.parentElement.parentElement.__vue__.$emit('clicked', legendList[i]);
+            self.$emit('clicked', legendList[i]);
 
           });
 
@@ -274,6 +277,8 @@ export default {
     highlightLegend() {
        
     },
+    // emit l'information au parent component pour pouvoir actualiser les couleurs. On procède comme ça, car on attend un click sur la légende
+    // qui est un svg différent de celui sur lequel on veut un impact, on doit donc asser par la parent pour envoyer l'information à l'autre svg
     onLegendClick: function(data) {
         this.$emit('clicked', data);
     },

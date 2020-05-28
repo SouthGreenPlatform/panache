@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <!-- On affiche le filtre qui correspond au nom du component qui est affiché via le routing vie le v-if -->
     <global-filter v-if="this.$route.name === 'Circos'" class="filterTab"/>
     <local-filter v-if="this.$route.name === 'Panache'" class="localFilterTab"/>
     <sample-filter v-if="this.$route.name === 'PCA'" class="filterTab"/>
@@ -12,11 +13,12 @@
         </b-navbar-nav>
         <b-navbar-brand class="text-dark mx-auto">Title</b-navbar-brand>
     </b-navbar>
+    <!-- Système de routing mis en place dans router/index.js -->
     <div id="nav" v-if="this.$route.name !== 'Organism'">
       <router-link to="/">Organism</router-link> |
       <router-link to="/pca">Sample diversity</router-link> |
       <router-link to="/global">Global diversity</router-link> |
-      <router-link :to="{ name: 'Panache', params: { user: user } }">Local diversity</router-link>
+      <router-link to="/panache">Local diversity</router-link>
     </div>
     <router-view/>
   </div>
@@ -34,20 +36,6 @@ export default {
     GlobalFilter,
     LocalFilter,
     SampleFilter
-  },
-  data () {
-    return {
-      user: 'Sam',
-      route: 'global',
-      routePath: this.$route.name
-    }
-  },
-  methods: {
-  },
-  computed: {
-    getRoute: function(){
-      return console.log(this.routePath);
-    }
   }
 }
 
@@ -97,7 +85,7 @@ body {
   float: left;
   width: 20rem;
   background-color: white;
-  height: 55rem;
+  height: 50rem;
   padding: 20px;
   text-align: left;
 }

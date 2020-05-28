@@ -389,15 +389,16 @@ function renderD3Visualisation(file_URL) {
         .style("position", "absolute")
         .style("z-index", -1);
 
-        // position du slider rectangle
+    // position du slider rectangle
     var browsingHandleDimensions = {strokeWidth:3};
     browsingHandleDimensions.height = browsingBlocksDimensions.height*3 + browsingBlocksDimensions.borderSpace*(3-1) + Number(browsingHandleDimensions.strokeWidth)*2;
 
     browsingHandleDimensions.width = svgContainer_browsingSlider.attr("width") * (svgContainer_rawBlocks.attr("width")/(maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective));
 
+    // gere les max et min pour deplacer le rectangle sur le slider il faut calculer a gauche et a droite etant donnée qu'on prend le centre du rectangle comme point 0
     var miniatureSliderScale = d3.scaleLinear() 
-                  .domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective - svgContainer_rawBlocks.attr("width")]) 
-                  .range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) 
+                  .domain([0, maxPositionInNucleotide*currentNucleotidesWidthInPixel.effective - svgContainer_rawBlocks.attr("width")]) // valeur de départ 
+                  .range([0+browsingHandleDimensions.width/2, svgContainer_browsingSlider.attr("width")-browsingHandleDimensions.width/2]) // valeur d'arrivée
                   .clamp(true); 
 
     var bgBrowser_miniCanvas = foreignObject_Browser.append("xhtml:canvas")
@@ -451,10 +452,12 @@ function renderD3Visualisation(file_URL) {
         .style("position", "absolute")
         .style("fill-opacity", 0);
 
-
-        // fenetre principale, matrice colorée
+        // fenetre principale, matrice colorée 
+        // jeu de données / largeur de la plus grosse feature du jeu de donnée / élément svg du slider miniWindowHandle (pour x et width de la manette)
+        // pas be soin de genomesList et de chromList / ratio d'un nucleotide
     function drawingDisplay_Window(fullChrData, maxWidth, handle, genomesList, chromList, nucleotideWidth){
       
+      //filtre les éléments a afficher
       let underThresholdArray = fullChrData.filter( d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-maxWidth) ));
 
       let elementsWithIndexesWithinWindow = fullChrData.filter( d => ( (Number(d.index) >= miniatureTicksScale.invert(Number(handle.attr("x"))) ) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(handle.attr("width"))) ) ));
@@ -512,7 +515,7 @@ function renderD3Visualisation(file_URL) {
     function slidingAlongBlocks(xPosition_displayedPixel) {
       let mouse_xPosition = Number(miniatureSliderScale(xPosition_displayedPixel));
 
-      miniWindowHandle.attr("x", mouse_xPosition - browsingHandleDimensions.width/2);
+      miniWindowHandle.attr("x", mouse_xPosition - browsingHandleDimensions.width/2); // j'ai besoin que de ca
 
       drawingDisplay_Window(dataGroupedPerChromosome[`${currentChromInView}`], currentWidestFeatureLength, miniWindowHandle, INITIAL_GENOMES_NAMES, CHROMOSOME_NAMES, currentNucleotidesWidthInPixel.effective);
 

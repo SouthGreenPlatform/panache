@@ -11,6 +11,7 @@
             </div>
         </div>
         <h3 class="policeTitre mt-5">Bookmarks</h3>
+        <!-- Menu des organism de la première page, on définit image, titre et lien -->
         <div class="mt-5">
             <figure class="item">
                 <img class="organismImage" src="../assets/helianthusAnnuus.jpg" alt="">
@@ -46,11 +47,12 @@ export default {
     
   },
   methods: {
-     onImageClick() {
-        this.$router.push({
-            name: 'PCA'
-        });
-     }
+    // Exemple de onClick fonction à définir pour la future version du menu
+    onImageClick() {
+    this.$router.push({
+        name: 'PCA'
+    });
+    }
   },  
 
   computed: {

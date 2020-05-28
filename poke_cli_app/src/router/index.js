@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-//import Global from '../views/Global.vue'
 import PCA from '../views/PCA.vue'
 import Organism from '../views/Organism.vue'
 import Panache from '../views/Panache.vue'
 import Circos from '../views/Circos.vue'
 
+// Système de routing, on défini les chemins, leur nom et le component associé qui a été import au dessus 
 Vue.use(VueRouter)
 
   const routes = [
