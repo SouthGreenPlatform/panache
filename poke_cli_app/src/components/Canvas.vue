@@ -51,6 +51,10 @@ export default {
     sliderWidth: {
       type: Number,
       default: 55
+    },
+    chromList: {
+      type: Array,
+      default: () => ['chrom0', 'chrom1', 'chrom2', 'chrom3']
     }
   },
   data() {
@@ -68,14 +72,22 @@ export default {
 
         return map;
       },
-      miniatureSliderScale: Function
+      miniatureSliderScale: Function,
+      rightmostNt: Number
     }
   },
   mounted() {
     this.drawCanvas();
     this.drawSvg();
   },
+  computed: {
+  },
   watch: {
+    sliderWidth() {
+      let slider = d3.select(this.$refs.svgOnCanvas).select("rect").attr("class", "handle");
+      this.$store.state.localHandle = slider;
+    },
+
     // Si les données du chromosome sont update on redessine la miniature
     chromosomeData: function() {
       this.drawCanvas();
@@ -89,10 +101,8 @@ export default {
 
       this.chromosomeData.forEach((d) => {
 
-        let rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
-
-        let xPos = this.width * Number(d.index)/rightmostNt;
-        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/rightmostNt+1;
+        let xPos = this.width * Number(d.index)/this.rightmostNt;
+        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/this.rightmostNt+1;
         let trackHeight = this.blockHeight;
 
         if (Number(d.presenceCounter) === 0) {
@@ -119,11 +129,11 @@ export default {
 
       this.chromosomeData.forEach((d) => {
 
-        let rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
+        this.rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
 
         let presenceRatio = (this.nbOfGenomes-d.presenceCounter)/this.nbOfGenomes;
-        let xPos = this.width * Number(d.index)/rightmostNt;
-        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/rightmostNt+1;
+        let xPos = this.width * Number(d.index)/this.rightmostNt;
+        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/this.rightmostNt+1;
         let trackHeight = this.blockHeight;
 
 
@@ -210,10 +220,13 @@ export default {
     // fonction qui actualise la position du rectangle de slide en fonction de la position cliqué sur la miniature
     slidingAlongBlocks(mouse_xPosition) {
       let slider = d3.select(this.$refs.svgOnCanvas).select("rect").attr("class", "handle");
+      
       if (mouse_xPosition >= (0 + this.sliderWidth/2 -2) && mouse_xPosition <= (this.width - this.sliderWidth/2 +2)) {
         slider.attr("x", mouse_xPosition - this.sliderWidth/2);
+        this.$store.state.firstNtDisplay = (mouse_xPosition - this.sliderWidth/2) / this.width * this.rightmostNt;
       }
-      
+
+      this.$store.state.localHandle = slider;
     }
   }
 }

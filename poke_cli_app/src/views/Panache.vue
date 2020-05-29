@@ -7,15 +7,17 @@
       :coreThreshold="coreThreshold" 
       :maxPositionInNucleotide="maxPositionInNucleotide" 
       :sliderWidth="sliderWidth" 
-      :width="width" 
+      :width="width"
+      :chromList="chromList"
       />
     <PavMatrixAndTracks
       :filteredData="filteredData"
       :genomeList="genomeList"
       :chromList="chromList"
       :coreThreshold="coreThreshold"
-      :displaySizeOfNt="1"
+      :displaySizeOfNt="displaySizeOfNt"
       :displayHeight="175"
+      :offSetX="offSetX"
     />
   </div>
 </template>
@@ -40,6 +42,7 @@ export default {
       coreThreshold: Number,
       sliderWidth: 55,
       width: 1100,
+      displaySizeOfNt: 1,
 
       pseudoRainbowList: [d3.rgb(0, 90, 200), d3.rgb(0, 200, 250),
         d3.rgb(120, 50, 40), d3.rgb(190, 140, 60), d3.rgb(240, 240, 50),
@@ -51,12 +54,17 @@ export default {
       colorsForFunctions: Function,
       functionDiversity: Function,
       maxPositionInNucleotide: Number,
+      currentWidestFeatureLength: Number,
 
       // datas for PavMatrixAndTracks component
       filteredData: [],
       genomeList: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'],
       chromList: ['0', '1', '2', '3',],
       displayWindowWidth: 600,
+      offSetX: {
+        type: Number,
+        default: 0
+      }
     }
   },
   beforeMount() {
@@ -71,6 +79,14 @@ export default {
     //Va s'executer chaque fois que la variable global zoomLevel, qu'on récupère du filtre, est mise à jour
     zoomUpdate() {
       return this.$store.state.zoomLevel.current;
+    },
+
+    drawDisplay_windows() {
+      return this.$store.state.localHandle;
+    },
+
+    getOffSetX() {
+      return this.$store.state.firstNtDisplay;
     }
   },
   watch: {
@@ -79,6 +95,9 @@ export default {
 
       this.functionDiversity = [...new Set(this.chromosomeData.map( d => d.Function))];
       this.coreThreshold = this.coreValue /100 * this.nbOfGenomes;
+
+      //Calcul de la nt la plus large du jeu de donnée
+      this.currentWidestFeatureLength = Math.max(...this.chromosomeData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) ));
 
       this.lastBlockStart = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStart)));
       this.pivotsForRainbow = this.domainPivotsMaker(this.pseudoRainbowList.length, this.lastBlockStart);
@@ -110,6 +129,41 @@ export default {
 
       let rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
       this.sliderWidth = this.width * (ntNumber / rightmostNt);
+    },
+
+    drawDisplay_windows: function(){
+
+      this.displaySizeOfNt = this.$store.state.zoomLevel.current;
+
+      let handle = this.$store.state.localHandle;
+
+      let miniatureTicksScale = d3.scaleLinear() 
+                  .domain([0, this.maxPositionInNucleotide])
+                  .range([0, this.width]) // taille du canvas width
+                  .clamp(true);
+      
+      let underThresholdArray = this.chromosomeData.filter( 
+        d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-this.currentWidestFeatureLength))
+      );
+
+      let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
+        d => ( (Number(d.index) >= miniatureTicksScale.invert(Number(handle.attr("x"))) ) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(handle.attr("width")))))
+      );
+
+      this.filteredData = [this.chromosomeData[0]];
+
+      if (underThresholdArray.length != 0) {
+        this.filteredData = [underThresholdArray[underThresholdArray.length-1]]; 
+      }
+      elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) ); 
+    },
+
+    getOffSetX: function() {
+      if(this.$store.state.zoomLevel.current === undefined){
+        this.offSetX = 0;
+      } else {
+        this.offSetX = this.$store.state.firstNtDisplay * this.$store.state.zoomLevel.current;
+      }
     }
   },
   mounted() {
@@ -120,7 +174,6 @@ export default {
     async fetchData(){
       this.chromosomeData = await d3.json("./mediumFakeDataWithAllBlocks_chrom0.json");
       this.filteredData = await d3.json("./mediumFakeDataWithAllBlocks_chrom0_smallPart.json");
-
     },
 
     colorScaleMaker(domain, range, scaleLinear = true) {

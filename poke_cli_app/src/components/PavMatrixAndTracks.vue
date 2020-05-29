@@ -7,6 +7,7 @@
           class='movableBlock'
           :x="ntToPx(block.index)"
           :y="applyOffset(index * blocksDimensions.height)"
+          :transform="writeTranslateWithOffSet(0,0)"
           :height="blocksDimensions.height"
           :width="ntToPx(block.FeatureStop - block.FeatureStart)"
           :fill="colorScaleFunction(block)"
@@ -39,6 +40,7 @@
             class='movableBlock'
             :x="ntToPx(block.index)"
             y='0'
+            :transform="writeTranslateWithOffSet(0,0)"
             :height="blocksDimensions.height"
             :width="ntToPx(block.FeatureStop - block.FeatureStart)"
             :fill="track.colorScale(block)"
@@ -61,7 +63,7 @@
               class='movableBoxes'
               :x="ntToPx(block.index)"
               y='0'
-              :transform="writeTranslate( 0.5* ((block.FeatureStop - block.FeatureStart) - pptionBasedWidth(block, chromName) ), 0)"
+              :transform="writeTranslateWithOffSet( 0.5* ((block.FeatureStop - block.FeatureStart) - pptionBasedWidth(block, chromName) ), 0)"
               :width="pptionBasedWidth(block, chromName)"
               :height="blocksDimensions.height"
               :fill="similarityFill(block, chromName)"
@@ -156,6 +158,10 @@ export default {
         return {width: 20, height: 10}
       }
     },
+    offSetX: {
+      type: Number,
+      default: 0
+    }
   },
   data() {
     let self = this;
@@ -267,6 +273,9 @@ export default {
   computed: {
   },
   watch: {
+    filteredData: function() {
+      
+    }
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
@@ -309,6 +318,9 @@ export default {
     },
     writeTranslate(x=0,y=0) {
       return `translate(${x},${y})`
+    },
+    writeTranslateWithOffSet(x=0,y=0) {
+      return `translate(${x - this.offSetX},${y})`
     },
     hclToRgb(h,c,l) {
       let color = d3.hcl(h,c,l);

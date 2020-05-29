@@ -69,6 +69,9 @@ export default {
     },
     posBasedOnRatio() {
       return this.ratioToSliderPosScale(this.getCurrentRatio)
+    },
+    drawDisplay_windows() {
+      return this.$store.state.localHandle;
     }
   },
   mounted() {
@@ -85,6 +88,10 @@ export default {
   watch: {
     getCurrentRatio() {
       console.log(`New size of nt in px is: ${this.getCurrentRatio}`);
+      this.$store.state.zoomLevel = this.ntWidthInPixel;
+    },
+
+    drawDisplay_windows: function(){
       this.$store.state.zoomLevel = this.ntWidthInPixel;
     }
   },

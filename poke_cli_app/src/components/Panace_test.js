@@ -454,7 +454,7 @@ function renderD3Visualisation(file_URL) {
 
         // fenetre principale, matrice colorée 
         // jeu de données / largeur de la plus grosse feature du jeu de donnée / élément svg du slider miniWindowHandle (pour x et width de la manette)
-        // pas be soin de genomesList et de chromList / ratio d'un nucleotide
+        // pas be soin de genomesList et de chromList / ratio d'un nucleotide zoomLevel.current
     function drawingDisplay_Window(fullChrData, maxWidth, handle, genomesList, chromList, nucleotideWidth){
       
       //filtre les éléments a afficher

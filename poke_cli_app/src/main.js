@@ -14,7 +14,14 @@ Vue.config.productionTip = false
 const store = new Vuex.Store({
   state: {
     coreThresholdSlide: 85, // Valeur du filtre local -> Minimal presence ratio to be part of core
-    zoomLevel: "",  // Valeur du filtre local -> Zoom level
+    zoomLevel: {
+      current: 1,
+      minEfficiency: 1,
+      minGlobal: 0.01,
+      max: 2
+    },  // Valeur du filtre local -> Zoom level
+    localHandle: "",
+    firstNtDisplay: 0, // enregistre le premier nt à afficher
 
     //définition des couleurs en varaibles globale, car elles sont utilisées dans divers components
     pseudoRainbowColorScale: "",
@@ -22,6 +29,7 @@ const store = new Vuex.Store({
     blueColorScale: "",
     orangeColorScale: "",
     functionColorScale: "",
+
   }
 })
 
