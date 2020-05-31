@@ -3,10 +3,13 @@
 
     <canvas ref="CanvasMiniature" :width="width" :height="height"></canvas>
 
-    <svg ref="svgOnCanvas" class="svgAbsolute" :width="width" :height="height">
+    <svg class="svgAbsolute" :width="width" :height="height">
+      <!-- Following translation should be dynamic instead -->
+      <g ref='ticksForMiniature' id='miniatureTicks' style='10px sans-serif' transform='translate(0,65)'>
+      </g>
       <g>
-        <rect class="handle" :width="sliderWidth" height="46" :x="0" :y="2*blockHeight-13" style="stroke: rgb(59, 59, 59); position: absolute; fill-opacity: 0;" />
-        <rect class="track-overlay" ref="tracker" :y="2*blockHeight-12" :width="width" :height="sliderHeight" style="fill-opacity: 0;" cursor="ew-resize" />
+        <rect class="handle" :x="ntToCanvasPxPos(firstNtToDisplay)" :y="2*blockHeight-13" :width="widthOfHandle" height="46" style="stroke: rgb(59, 59, 59); position: absolute; fill-opacity: 0;" />
+        <rect class="track-overlay" ref="overlayOfCanvas" :y="2*blockHeight-12" :width="width" :height="sliderHeight" style="fill-opacity: 0;" cursor="ew-resize" />
       </g>
     </svg>
 
@@ -24,6 +27,10 @@ export default {
       type: Array,
       default: () => []
     },
+    firstNtToDisplay: {
+      type: Number,
+      default: 0
+    },
     width: {
       type: Number,
       default: 1100
@@ -31,6 +38,10 @@ export default {
     height: {
       type: Number,
       default: 110
+    },
+    mainWindowWidth: {
+      type: Number,
+      default: 600
     },
     nbOfGenomes: {
       type: Number,
@@ -44,18 +55,10 @@ export default {
       type: Number,
       default: () => 5.1
     },
-    maxPositionInNucleotide: {
+    rightmostNt: {
       type: Number,
       default: 41332
     },
-    sliderWidth: {
-      type: Number,
-      default: 55
-    },
-    chromList: {
-      type: Array,
-      default: () => ['chrom0', 'chrom1', 'chrom2', 'chrom3']
-    }
   },
   data() {
     return {
@@ -73,7 +76,6 @@ export default {
         return map;
       },
       miniatureSliderScale: Function,
-      rightmostNt: Number
     }
   },
   mounted() {
@@ -81,11 +83,32 @@ export default {
     this.drawSvg();
   },
   computed: {
+    ntWidthInPxInDisplayWindow() {
+      return this.$store.state.zoomLevel.current
+    },
+    amountOfNtToDisplay() {
+      return this.mainWindowWidth / this.ntWidthInPxInDisplayWindow
+    },
+    lastNtToDisplay() {
+      return Math.min(this.firstNtToDisplay + this.amountOfNtToDisplay, this.rightmostNt)
+    },
+    widthOfHandle() {
+      return this.ntToCanvasPxPos(this.lastNtToDisplay) - this.ntToCanvasPxPos(this.firstNtToDisplay)
+    }
   },
   watch: {
-    sliderWidth() {
-      let slider = d3.select(this.$refs.svgOnCanvas).select("rect").attr("class", "handle");
-      this.$store.state.localHandle = slider;
+
+    lastNtToDisplay() {
+      console.log(`lastNtToDisplay has changed and is now ${this.lastNtToDisplay}`);
+      this.$store.dispatch('updateLastNtToDisplay', this.lastNtToDisplay)
+    },
+    amountOfNtToDisplay() {
+      if (this.lastNtToDisplay === this.rightmostNt) {
+        this.$store.dispatch('updateFirstNtToDisplay', Math.max([0, this.rightmostNt - this.amountOfNtToDisplay]))
+      }
+    },
+    firstNtToDisplay() {
+      console.log(this.firstNtToDisplay)
     },
 
     // Si les données du chromosome sont update on redessine la miniature
@@ -102,7 +125,7 @@ export default {
       this.chromosomeData.forEach((d) => {
 
         let xPos = this.width * Number(d.index)/this.rightmostNt;
-        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/this.rightmostNt+1;
+        let blockWidth = this.width * (Number(d.FeatureStop) - Number(d.FeatureStart))/this.rightmostNt+1;
         let trackHeight = this.blockHeight;
 
         if (Number(d.presenceCounter) === 0) {
@@ -129,11 +152,10 @@ export default {
 
       this.chromosomeData.forEach((d) => {
 
-        this.rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
-
         let presenceRatio = (this.nbOfGenomes-d.presenceCounter)/this.nbOfGenomes;
-        let xPos = this.width * Number(d.index)/this.rightmostNt;
-        let blockWidth = this.width * (Number(d.FeatureStop)-Number(d.FeatureStart))/this.rightmostNt+1;
+        let xPos = this.ntToCanvasPxPos(d.index);
+        //+1 so that it is better drawn on the canvas (it is at least a full px)
+        let blockWidth = this.ntToCanvasPxPos(Number(d.FeatureStop)-Number(d.FeatureStart)) +1;
         let trackHeight = this.blockHeight;
 
 
@@ -193,40 +215,72 @@ export default {
     },
 
     drawSvg() {
-      let miniatureTicksScale = d3.scaleLinear() 
-                  .domain([0, this.maxPositionInNucleotide])
+      let miniatureTicksScale = d3.scaleLinear()
+                  .domain([0, this.rightmostNt])
                   .range([0, this.width]) // taille du canvas width
-                  .clamp(true); 
+                  .clamp(true);
 
       // canvas + svg pour miniature
       // ajout g pour le svg
-      d3.select(this.$refs.svgOnCanvas)
-        .append("g") 
-        .attr("id","miniatureTicks")
-        .style("font", "10px sans-serif")
-        .attr("transform", "translate(" + 0 + "," + 65 + ")")
+      d3.select(this.$refs.ticksForMiniature)
         .call(d3.axisBottom(miniatureTicksScale)
           .ticks(20)
           .tickFormat(d3.format("~s")));
 
       let self = this;
 
-      d3.select(self.$refs.tracker)
+      d3.select(self.$refs.overlayOfCanvas)
         .call(d3.drag()
-          .on("start drag", function() { self.slidingAlongBlocks(d3.mouse(this)[0]);
-      }));
+          .on("start drag", function() {
+            console.log(`mouse is at ${d3.mouse(this)[0]}`)
+            self.slidingAlongBlocks(d3.mouse(this)[0]);
+          })
+        );
     },
 
-    // fonction qui actualise la position du rectangle de slide en fonction de la position cliqué sur la miniature
-    slidingAlongBlocks(mouse_xPosition) {
-      let slider = d3.select(this.$refs.svgOnCanvas).select("rect").attr("class", "handle");
-      
-      if (mouse_xPosition >= (0 + this.sliderWidth/2 -2) && mouse_xPosition <= (this.width - this.sliderWidth/2 +2)) {
-        slider.attr("x", mouse_xPosition - this.sliderWidth/2);
-        this.$store.state.firstNtDisplay = (mouse_xPosition - this.sliderWidth/2) / this.width * this.rightmostNt;
+    // fonction qui actualise firstNtToDisplay, et donc la position X du rectangle selon l'endroit cliqué sur la miniature
+    slidingAlongBlocks(mouse_xPos) {
+
+      //Borders for the accepted/available values of mouse_xPos
+      //I cannot remember why there are the -2 and +2 there... so I try without
+      /*
+      let leftPxBorder = 0 + this.widthOfHandle/2 -2;
+      let rightPxBorder = this.width - this.widthOfHandle/2 +2;
+      */
+      let leftPxBorder = 0 + this.widthOfHandle/2;
+      let rightPxBorder = this.width - this.widthOfHandle/2;
+
+      //we change the value of the first nt to dsplay only if it is a valid one
+      if ((mouse_xPos >= leftPxBorder) && (mouse_xPos <= rightPxBorder)) {
+        let desiredPxLeftPos = mouse_xPos - this.widthOfHandle / 2;
+        console.log(`The first nt to display should be ${this.canvasPxPosToNt(desiredPxLeftPos)}`)
+        this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
+        console.log(`And it is set at ${this.$store.state.firstNtToDisplay}`);
+        console.log(`Still, my props is ${this.firstNtToDisplay}`);
+      }
+    },
+
+    //function that returns where a nt should be placed on the canvas
+    ntToCanvasPxPos(ntIndex) {
+      //Checking if we can do the division
+      if (this.rightmostNt === 0) {
+        console.log('ERROR: rightmostNt should not be 0');
+        return;
       }
 
-      this.$store.state.localHandle = slider;
+      let xPosPx = Number(ntIndex) / this.rightmostNt * this.width;
+      return xPosPx;
+    },
+    //reverse function of ntToCanvasPxPos
+    canvasPxPosToNt(pxPos) {
+      //Checking if we can do the division
+      if (this.width === 0) {
+        console.log('ERROR: canvas width should not be 0');
+        return;
+      }
+
+      let ntIndex = pxPos * this.rightmostNt / this.width;
+      return ntIndex;
     }
   }
 }

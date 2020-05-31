@@ -1,14 +1,14 @@
 <template>
   <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
     <!-- Props envoyés à Canvas.vue -->
-    <Canvas 
-      :chromosomeData="chromosomeData"  
-      :nbOfGenomes="nbOfGenomes" 
-      :coreThreshold="coreThreshold" 
-      :maxPositionInNucleotide="maxPositionInNucleotide" 
-      :sliderWidth="sliderWidth" 
+    <Canvas
+      :chromosomeData="chromosomeData"
+      :nbOfGenomes="nbOfGenomes"
+      :coreThreshold="coreThreshold"
+      :rightmostNt="maxPositionInNucleotide"
       :width="width"
-      :chromList="chromList"
+      :mainWindowWidth="displayWindowWidth"
+      :firstNtToDisplay="getFirstNtToDisplay"
       />
     <PavMatrixAndTracks
       :filteredData="filteredData"
@@ -17,7 +17,11 @@
       :coreThreshold="coreThreshold"
       :displaySizeOfNt="displaySizeOfNt"
       :displayHeight="175"
-      :offSetX="offSetX"
+      :displayWidth="displayWindowWidth"
+      :firstNtToDisplay="this.$store.state.firstNtToDisplay"
+      :colorScaleFunction="this.$store.state.functionColorScale"
+      :colorScaleRainbow="this.$store.state.pseudoRainbowColorScale"
+      :colorScaleSimilarities="this.$store.state.greenColorScale"
     />
   </div>
 </template>
@@ -40,7 +44,6 @@ export default {
       chromosomeData: [],
       nbOfGenomes: 6,
       coreThreshold: Number,
-      sliderWidth: 55,
       width: 1100,
       displaySizeOfNt: 1,
 
@@ -48,23 +51,19 @@ export default {
         d3.rgb(120, 50, 40), d3.rgb(190, 140, 60), d3.rgb(240, 240, 50),
         d3.rgb(160, 250,130)],
 
-      lastBlockStart: Function,
-      pivotsForRainbow: Function,
-      highestRepNumber: Function,
-      colorsForFunctions: Function,
-      functionDiversity: Function,
-      maxPositionInNucleotide: Number,
+      lastBlockStart: Number,
+      pivotsForRainbow: Array,
+      highestRepNumber: Number,
+      colorsForFunctions: Array,
+      functionDiversity: Array,
+      maxPositionInNucleotide: 41332,
       currentWidestFeatureLength: Number,
 
       // datas for PavMatrixAndTracks component
       filteredData: [],
       genomeList: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'],
       chromList: ['0', '1', '2', '3',],
-      displayWindowWidth: 600,
-      offSetX: {
-        type: Number,
-        default: 0
-      }
+      displayWindowWidth: 1100,
     }
   },
   beforeMount() {
@@ -81,13 +80,13 @@ export default {
       return this.$store.state.zoomLevel.current;
     },
 
-    drawDisplay_windows() {
-      return this.$store.state.localHandle;
+    getFirstNtToDisplay() {
+      return this.$store.state.firstNtToDisplay;
     },
 
-    getOffSetX() {
-      return this.$store.state.firstNtDisplay;
-    }
+    getLastNtToDisplay() {
+      return this.$store.state.firstNtToDisplay;
+    },
   },
   watch: {
     // on s'assures de créer les diverses variables à envoyer en props a Canvas.vue après avoir bien charger le jeu de donnée chromosomeData
@@ -105,18 +104,14 @@ export default {
       this.colorsForFunctions = this.domainPivotsMaker(this.functionDiversity.length, this.functionDiversity.length)
                                 .map(intNum => d3.interpolateRainbow(intNum / (this.functionDiversity.length + 1)));
 
-      // définition des couleurs          
-      this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList);                
-      this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
-      this.$store.state.blueColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(246, 0, 95), d3.hcl(246, 65, 70)]);
-      this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
-      this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
-
       this.maxPositionInNucleotide = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
-    },
+      console.log(`maxPosInNt is ${this.maxPositionInNucleotide}`)
 
-    filteredData: function(){
-      this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList); 
+      // définition des couleurs
+      this.updateDataDependantColorScales();
+
+      // updating the zoom borders
+      this.$store.state.zoomLevel.minGlobal = this.displayWindowWidth / this.maxPositionInNucleotide;
     },
 
     // va s'éxecuter après avoir intercepté l'update dans le computed plus haut
@@ -131,40 +126,39 @@ export default {
       this.sliderWidth = this.width * (ntNumber / rightmostNt);
     },
 
-    drawDisplay_windows: function(){
+    getFirstNtToDisplay: function() {
 
-      this.displaySizeOfNt = this.$store.state.zoomLevel.current;
-
-      let handle = this.$store.state.localHandle;
-
-      let miniatureTicksScale = d3.scaleLinear() 
-                  .domain([0, this.maxPositionInNucleotide])
-                  .range([0, this.width]) // taille du canvas width
-                  .clamp(true);
-      
-      let underThresholdArray = this.chromosomeData.filter( 
-        d => (Number(d.index) <= miniatureTicksScale.invert(handle.attr("x")) && (Number(d.index) >= miniatureTicksScale.invert(handle.attr("x"))-this.currentWidestFeatureLength))
+      //looking for data that are before the first nt to show but might have to be displayed (if FeatureStop is in the window)
+      let underThresholdArray = this.chromosomeData.filter(
+        d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
       );
 
+      //getting all elements with indices within the desired range
       let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-        d => ( (Number(d.index) >= miniatureTicksScale.invert(Number(handle.attr("x"))) ) && (Number(d.index) <= miniatureTicksScale.invert(Number(handle.attr("x"))+Number(handle.attr("width")))))
+        d => ( d.index >= this.getFirstNtToDisplay ) && ( d.index <= this.getLastNtToDisplay )
       );
 
-      this.filteredData = [this.chromosomeData[0]];
-
+      //Setting and filling the filteredData array with at least one element
       if (underThresholdArray.length != 0) {
-        this.filteredData = [underThresholdArray[underThresholdArray.length-1]]; 
+        //If there is at least one data with index < firstNtToDisplay <= index+width
+        //then the rightmostone is added to the filtered data
+        let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
+        let arrayOfNearestUnselectedData = underThresholdArray.filter(
+          d => (d.index === maxSubIndex)
+        );
+        this.filteredData = arrayOfNearestUnselectedData;
+      } else {
+        //Else filteredData have at least the first data, so that it is never empty
+        this.filteredData = [this.chromosomeData[0]]
       }
-      elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) ); 
+
+      //Adding selected elements to the filteredData array
+      elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
+      console.log(this.filteredData);
+
     },
 
-    getOffSetX: function() {
-      if(this.$store.state.zoomLevel.current === undefined){
-        this.offSetX = 0;
-      } else {
-        this.offSetX = this.$store.state.firstNtDisplay * this.$store.state.zoomLevel.current;
-      }
-    }
+
   },
   mounted() {
   },
@@ -173,7 +167,6 @@ export default {
     // on récupère le jeu de donnée utilisé pour notre poke
     async fetchData(){
       this.chromosomeData = await d3.json("./mediumFakeDataWithAllBlocks_chrom0.json");
-      this.filteredData = await d3.json("./mediumFakeDataWithAllBlocks_chrom0_smallPart.json");
     },
 
     colorScaleMaker(domain, range, scaleLinear = true) {
@@ -196,6 +189,16 @@ export default {
           breakpoints.push(Math.round( (i / (breakpointsNb - 1) ) * maxValue));
       }
       return(breakpoints);
+    },
+
+    updateDataDependantColorScales() {
+
+      this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList);
+      this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
+      this.$store.state.blueColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(246, 0, 95), d3.hcl(246, 65, 70)]);
+      this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
+      this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
+
     }
   }
 }

@@ -7,6 +7,8 @@ import './plugins/bootstrap-vue'
 import App from './App.vue'
 import router from './router'
 
+import * as d3 from 'd3'
+
 Vue.use(Vuex)
 Vue.config.productionTip = false
 
@@ -20,17 +22,33 @@ const store = new Vuex.Store({
       minGlobal: 0.01,
       max: 2
     },  // Valeur du filtre local -> Zoom level
-    localHandle: "",
-    firstNtDisplay: 0, // enregistre le premier nt à afficher
+    firstNtToDisplay: 0, // enregistre le premier nt à afficher
+    lastNtToDisplay: 1000,
 
     //définition des couleurs en varaibles globale, car elles sont utilisées dans divers components
-    pseudoRainbowColorScale: "",
-    greenColorScale: "",
-    blueColorScale: "",
-    orangeColorScale: "",
-    functionColorScale: "",
+    pseudoRainbowColorScale: d3.scaleLinear().range([d3.hcl('yellow'), d3.hcl('yellow')]),
+    greenColorScale: d3.scaleLinear().range([d3.hcl('green'), d3.hcl('green')]),
+    blueColorScale: d3.scaleLinear().range([d3.hcl('blue'), d3.hcl('blue')]),
+    orangeColorScale: d3.scaleLinear().range([d3.hcl('orange'), d3.hcl('orange')]),
+    functionColorScale: d3.scaleLinear().range([d3.hcl('purple'), d3.hcl('purple')]),
 
-  }
+  },
+  mutations: {
+    SET_NEW_FIRST_NT(state, payload) {
+      state.firstNtToDisplay = payload
+    },
+    SET_NEW_LAST_NT(state, payload) {
+      state.lastNtToDisplay = payload
+    }
+  },
+  actions: {
+    updateFirstNtToDisplay({commit}, ntIndex) {
+      commit('SET_NEW_FIRST_NT', ntIndex)
+    },
+    updateLastNtToDisplay({commit}, ntIndex) {
+      commit('SET_NEW_LAST_NT', ntIndex)
+    }
+  },
 })
 
 new Vue({

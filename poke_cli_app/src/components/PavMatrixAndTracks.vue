@@ -10,7 +10,7 @@
           :transform="writeTranslateWithOffSet(0,0)"
           :height="blocksDimensions.height"
           :width="ntToPx(block.FeatureStop - block.FeatureStart)"
-          :fill="colorScaleFunction(block)"
+          :fill="colorScaleFunction(block.Function)"
           :opacity="calcPavBlockOpacity(block[`${genome}`])"
           @mouseover="XXXsomeConditionalEventXXX"
           @mouseout="XXXsomeConditionalEventXXX"
@@ -20,10 +20,10 @@
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
       <g v-show="heightOfTotBlocks > pavMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
-        <line y1='0' :y2="blockOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
-        <line y1='0' :y2="blockOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
-        <circle :cy="blockOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
-        <line y1='-10' :y2="`${blockOffsetToSliderScale.range()[1]+10}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
+        <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
+        <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
+        <circle :cy="blockVerticalOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
+        <line y1='-10' :y2="`${blockVerticalOffsetToSliderScale.range()[1]+10}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
       </g>
     </svg>
     <g>
@@ -158,7 +158,7 @@ export default {
         return {width: 20, height: 10}
       }
     },
-    offSetX: {
+    firstNtToDisplay: {
       type: Number,
       default: 0
     }
@@ -202,7 +202,7 @@ export default {
     return {
       heightOfTotBlocks:heightOfTotBlocks,
       pavMatrixHeight: pavMatrixHeight,
-      blockOffsetToSliderScale: d3.scaleLinear() //Attaches to each threshold value a position on the slider
+      blockVerticalOffsetToSliderScale: d3.scaleLinear() //Attaches to each threshold value a position on the slider
         .domain([0, heightOfTotBlocks - pavMatrixHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- pavMatrixHeight'
         .range([0, pavMatrixHeight - 20]) //The scrolling bar will have the same height than the PA matrix svg, minus 20px
         .clamp(true),
@@ -243,11 +243,15 @@ export default {
         },
         {
           name: 'rainbowed',
-          colorScale: this.colorScaleRainbow
+          colorScale: function(d) {
+            return this.colorScaleRainbow(d.FeatureStart)
+          }
         },
         {
           name: 'similarCount',
-          colorScale: this.colorScaleSimilarities
+          colorScale: function(d) {
+            return this.colorScaleSimilarities(d.SimilarBlocks.split(";").length)
+          }
         }
       ],
       structLegendPanels: [
@@ -274,7 +278,7 @@ export default {
   },
   watch: {
     filteredData: function() {
-      
+      console.log('FilteredData has changed !')
     }
   },
   mounted() {
@@ -291,7 +295,7 @@ export default {
   },
   methods: {
     updateBlockOffset(mousePos) {
-      this.blockOffset = this.blockOffsetToSliderScale.invert(mousePos)
+      this.blockOffset = this.blockVerticalOffsetToSliderScale.invert(mousePos)
     },
     applyOffset(initialPos) {
       return initialPos - this.blockOffset
@@ -319,10 +323,11 @@ export default {
     writeTranslate(x=0,y=0) {
       return `translate(${x},${y})`
     },
-    writeTranslateWithOffSet(x=0,y=0) {
-      return `translate(${x - this.offSetX},${y})`
+    writeTranslateWithOffSet(x=0, y=0) {
+      let offsetX = this.ntToPx(this.firstNtToDisplay);
+      return this.writeTranslate(x - offsetX, y)
     },
-    hclToRgb(h,c,l) {
+    hclToRgb(h, c, l) {
       let color = d3.hcl(h,c,l);
       return `${d3.rgb(color)}`
     },

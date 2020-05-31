@@ -52,6 +52,7 @@ export default {
   data() {
     let defaultAmount = (this.acceptableAmountOfNt === undefined ? this.lastNt/20 : this.acceptableAmountOfNt);
     let defaultRatio = this.convertToRatio(defaultAmount);
+    console.log(`minGlobalRatio will be ${this.convertToRatio(this.lastNt)}`);
 
     return {
       acceptableNtToPxRatio: defaultRatio,
@@ -67,11 +68,11 @@ export default {
     getCurrentRatio() {
       return this.ntWidthInPixel.current
     },
+    getMinRatio() {
+      return this.ntWidthInPixel.minGlobal
+    },
     posBasedOnRatio() {
       return this.ratioToSliderPosScale(this.getCurrentRatio)
-    },
-    drawDisplay_windows() {
-      return this.$store.state.localHandle;
     }
   },
   mounted() {
@@ -90,9 +91,8 @@ export default {
       console.log(`New size of nt in px is: ${this.getCurrentRatio}`);
       this.$store.state.zoomLevel = this.ntWidthInPixel;
     },
-
-    drawDisplay_windows: function(){
-      this.$store.state.zoomLevel = this.ntWidthInPixel;
+    getMinRatio() {
+      console.log(`minGlobal ratio has been set to ${this.getMinRatio}`)
     }
   },
   methods: {
