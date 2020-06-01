@@ -244,13 +244,13 @@ export default {
         {
           name: 'rainbowed',
           colorScale: function(d) {
-            return this.colorScaleRainbow(d.FeatureStart)
+            return self.colorScaleRainbow(d.FeatureStart)
           }
         },
         {
           name: 'similarCount',
           colorScale: function(d) {
-            return this.colorScaleSimilarities(d.SimilarBlocks.split(";").length)
+            return self.colorScaleSimilarities(d.SimilarBlocks.split(";").length)
           }
         }
       ],
@@ -279,7 +279,7 @@ export default {
   watch: {
     filteredData: function() {
       console.log('FilteredData has changed !')
-    }
+    },
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
@@ -291,7 +291,6 @@ export default {
       .on("mouseover", function() {self.eventShowRef('pavConditionalSlider')})
       .on("mouseout", function() {self.eventHideRef('pavConditionalSlider')});
 
-    //this.translateContent();
   },
   methods: {
     updateBlockOffset(mousePos) {
