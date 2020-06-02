@@ -20,7 +20,7 @@
       :displayWidth="displayWindowWidth"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
       :colorScaleFunction="$store.state.functionColorScale"
-      :colorScaleRainbow="getRainbowColorScale"
+      :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
       :colorScaleSimilarities="$store.state.greenColorScale"
     />
   </div>
@@ -88,9 +88,6 @@ export default {
       return this.$store.state.lastNtToDisplay;
     },
 
-    getRainbowColorScale() {
-      return this.$store.state.pseudoRainbowColorScale;
-    },
   },
   watch: {
     // on s'assures de créer les diverses variables à envoyer en props a Canvas.vue après avoir bien charger le jeu de donnée chromosomeData
