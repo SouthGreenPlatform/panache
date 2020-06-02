@@ -15,7 +15,7 @@
       :genomeList="genomeList"
       :chromList="chromList"
       :coreThreshold="coreThreshold"
-      :displaySizeOfNt="displaySizeOfNt"
+      :displaySizeOfNt="$store.state.zoomLevel.current"
       :displayHeight="175"
       :displayWidth="displayWindowWidth"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
