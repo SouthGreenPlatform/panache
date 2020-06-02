@@ -158,15 +158,29 @@ export default {
         if (underThresholdArray.length != 0) {
           //If there is at least one data with index < firstNtToDisplay <= index+width
           //then the rightmostone is added to the filtered data
+
+
+          //Uncomment to make the selection of only one element of underThresholdArray
+          /*
           let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
+          console.log(`maxSubIndex is ${maxSubIndex}`);
+          console.log(`underThresholdArray is ...`);
+          console.log(underThresholdArray);
+          console.log(underThresholdArray[underThresholdArray.length-1]);
           let arrayOfNearestUnselectedData = underThresholdArray.filter(
             d => (d.index === maxSubIndex)
           );
+          console.log(`arrayOfNearestUnselectedData is ...`);
+          console.log(arrayOfNearestUnselectedData);
           this.filteredData = arrayOfNearestUnselectedData;
+          */
+          this.filteredData = underThresholdArray;
         } else {
           //Else filteredData have at least the first data, so that it is never empty
           this.filteredData = [this.chromosomeData[0]]
         }
+        console.log('filteredData is...');
+        console.log(this.filteredData);
 
         //Adding selected elements to the filteredData array
         elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
