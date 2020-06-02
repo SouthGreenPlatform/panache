@@ -278,7 +278,7 @@ export default {
   },
   watch: {
     filteredData: function() {
-      console.log('FilteredData has changed !')
+      //console.log('FilteredData has changed !')
     },
   },
   mounted() {

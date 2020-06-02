@@ -104,11 +104,9 @@ export default {
     },
     amountOfNtToDisplay() {
       if (this.lastNtToDisplay === this.rightmostNt) {
-        this.$store.dispatch('updateFirstNtToDisplay', Math.max([0, this.rightmostNt - this.amountOfNtToDisplay]))
+        this.$store.dispatch('updateFirstNtToDisplay', Math.max([0, this.rightmostNt - this.amountOfNtToDisplay]));
+        console.log('First nt to display has been updated through a watch on amountOfNtToDisplay');
       }
-    },
-    firstNtToDisplay() {
-      console.log(this.firstNtToDisplay)
     },
 
     // Si les données du chromosome sont update on redessine la miniature
@@ -232,7 +230,6 @@ export default {
       d3.select(self.$refs.overlayOfCanvas)
         .call(d3.drag()
           .on("start drag", function() {
-            console.log(`mouse is at ${d3.mouse(this)[0]}`)
             self.slidingAlongBlocks(d3.mouse(this)[0]);
           })
         );
@@ -242,21 +239,30 @@ export default {
     slidingAlongBlocks(mouse_xPos) {
 
       //Borders for the accepted/available values of mouse_xPos
-      //I cannot remember why there are the -2 and +2 there... so I try without
-      /*
-      let leftPxBorder = 0 + this.widthOfHandle/2 -2;
-      let rightPxBorder = this.width - this.widthOfHandle/2 +2;
-      */
+      //calculated for a centered handle
       let leftPxBorder = 0 + this.widthOfHandle/2;
       let rightPxBorder = this.width - this.widthOfHandle/2;
 
       //we change the value of the first nt to dsplay only if it is a valid one
       if ((mouse_xPos >= leftPxBorder) && (mouse_xPos <= rightPxBorder)) {
         let desiredPxLeftPos = mouse_xPos - this.widthOfHandle / 2;
-        console.log(`The first nt to display should be ${this.canvasPxPosToNt(desiredPxLeftPos)}`)
+        //console.log(`The first nt to display should be ${this.canvasPxPosToNt(desiredPxLeftPos)}`)
         this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
-        console.log(`And it is set at ${this.$store.state.firstNtToDisplay}`);
-        console.log(`Still, my props is ${this.firstNtToDisplay}`);
+        console.log(`firstNtToDisplay has changed in slidingAlongBlocks and is now ${this.firstNtToDisplay}`);
+        console.log(`AND if I check in the store it's value is ${this.$store.state.firstNtToDisplay}`);
+        //this.lastNtToDisplay will only be updated outside of this function
+        //so we cannot change the store state in here, else the value would be wrong!!!
+        //cf watch on lastNtToDisplay based on firstNtToDisplay instead
+
+
+      } else if (mouse_xPos < leftPxBorder) {
+        let desiredPxLeftPos = 0;
+        this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
+
+      } else if (mouse_xPos > rightPxBorder) {
+        let desiredPxLeftPos = this.width - this.widthOfHandle;
+        this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
+
       }
     },
 

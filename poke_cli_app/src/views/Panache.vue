@@ -18,10 +18,10 @@
       :displaySizeOfNt="displaySizeOfNt"
       :displayHeight="175"
       :displayWidth="displayWindowWidth"
-      :firstNtToDisplay="this.$store.state.firstNtToDisplay"
-      :colorScaleFunction="this.$store.state.functionColorScale"
-      :colorScaleRainbow="this.$store.state.pseudoRainbowColorScale"
-      :colorScaleSimilarities="this.$store.state.greenColorScale"
+      :firstNtToDisplay="$store.state.firstNtToDisplay"
+      :colorScaleFunction="$store.state.functionColorScale"
+      :colorScaleRainbow="getRainbowColorScale"
+      :colorScaleSimilarities="$store.state.greenColorScale"
     />
   </div>
 </template>
@@ -85,7 +85,11 @@ export default {
     },
 
     getLastNtToDisplay() {
-      return this.$store.state.firstNtToDisplay;
+      return this.$store.state.lastNtToDisplay;
+    },
+
+    getRainbowColorScale() {
+      return this.$store.state.pseudoRainbowColorScale;
     },
   },
   watch: {
@@ -126,7 +130,8 @@ export default {
       this.sliderWidth = this.width * (ntNumber / rightmostNt);
     },
 
-    getFirstNtToDisplay: function() {
+    getLastNtToDisplay: function() {
+      console.log('Panache detected a change of last nt to display');
 
       //looking for data that are before the first nt to show but might have to be displayed (if FeatureStop is in the window)
       let underThresholdArray = this.chromosomeData.filter(
@@ -134,9 +139,13 @@ export default {
       );
 
       //getting all elements with indices within the desired range
+      console.log('Panache identifies the elements within the window of interest');
+      console.log(`Panache thinks that first nt to display is ${this.getFirstNtToDisplay} and that last nt to display is ${this.getLastNtToDisplay}`);
+
       let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-        d => ( d.index >= this.getFirstNtToDisplay ) && ( d.index <= this.getLastNtToDisplay )
+        d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
       );
+      //console.log(elementsWithIndexesWithinWindow);
 
       //Setting and filling the filteredData array with at least one element
       if (underThresholdArray.length != 0) {
@@ -154,7 +163,8 @@ export default {
 
       //Adding selected elements to the filteredData array
       elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
-      console.log(this.filteredData);
+      //console.log('filteredData is');
+      //console.log(this.filteredData);
 
     },
 
