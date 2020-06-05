@@ -37,7 +37,7 @@ export default {
     },
     height: {
       type: Number,
-      default: 110
+      default: 82
     },
     mainWindowWidth: {
       type: Number,
@@ -294,22 +294,9 @@ export default {
 
 <style >
 
-.svgAbsolute {
-  position: absolute;
-  margin-top: 1.2rem;
-  right: 3rem;
-}
-
-.invisibleRect {
-  margin-top: 2rem;
-  background-color: black;
-  opacity: 0.5;
-}
-
 .canvasSvg {
   position: relative;
   display: block;
-  height: 100%;
   margin-top: 1.2rem;
 }
 
@@ -322,7 +309,7 @@ export default {
 .svg {
   position: relative;
   display: inline-block;
-  margin-top: -7rem;
+  margin-top: -5.3rem;
   z-index: 5;
 }
 </style>

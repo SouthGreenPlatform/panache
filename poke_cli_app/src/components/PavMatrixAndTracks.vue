@@ -1,6 +1,6 @@
 <template>
 <div>
-  <svg class="pavMatrixSvg" ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
+  <svg ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
     <svg ref='pavMatrix' :height="pavMatrixHeight" :width="displayWidth">
       <g v-for="(genome, index) in genomeList" :key="genome" :id="`presence_${genome}`">
         <rect v-for="block in filteredData"
@@ -553,7 +553,4 @@ export default {
 </script>
 
 <style>
-.pavMatrixSvg {
-  margin-top: -24rem;
-}
 </style>
