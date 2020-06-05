@@ -467,7 +467,7 @@ function renderD3Visualisation(file_URL) {
       if (underThresholdArray.length != 0) {
         dataFiltered2View = [underThresholdArray[underThresholdArray.length-1]]; 
       };
-      elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) ); 
+      elementsWithIndexesWithinWindow.forEach( d => dataFiltered2View.push(d) );
 
       genomesList.forEach((geno, genomeNumber) => drawBlock.pavBlocks(geno,
         genomeNumber,
@@ -523,8 +523,7 @@ function renderD3Visualisation(file_URL) {
       for (let chr = 0; chr < CHROMOSOME_NAMES.length; ++chr) {
         d3.select(`#duplicationBoxes_Chr${chr}`).selectAll("rect")
           .attr("x", d => Number(d.index)*currentNucleotidesWidthInPixel.effective - xPosition_displayedPixel  + (Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective/2 - 0.5*(d[`copyPptionIn_Chr${chr}`]*((Number(d.FeatureStop)-Number(d.FeatureStart))*currentNucleotidesWidthInPixel.effective-2)));
-
-        }; 
+      };
     };
     
     // echelle graduée sous miniature bg

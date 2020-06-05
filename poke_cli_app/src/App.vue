@@ -3,7 +3,7 @@
     <!-- On affiche le filtre qui correspond au nom du component qui est affiché via le routing vie le v-if -->
     <global-filter v-if="this.$route.name === 'Circos'" class="filterTab"/>
     <local-filter v-if="this.$route.name === 'Panache'" class="localFilterTab"/>
-    <sample-filter v-if="this.$route.name === 'PCA'" class="filterTab"/>
+    <sample-filter v-if="this.$route.name === 'PCA'" class="sampleTab"/>
     <b-navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark" v-if="this.$route.name !== 'Organism'">
         <b-navbar-nav class="ml">
             <b-nav-form>
@@ -74,7 +74,7 @@ body {
 
 .filterTab {
   float: left;
-  width: 20rem;
+  width: 21%;
   background-color: white;
   height: 49rem;
   padding: 20px;
@@ -83,9 +83,18 @@ body {
 
 .localFilterTab {
   float: left;
-  width: 20rem;
+  width: 21%;
   background-color: white;
-  height: 50rem;
+  height: 49rem;
+  padding: 20px;
+  text-align: left;
+}
+
+.sampleTab {
+  float: left;
+  width: 21%;
+  background-color: white;
+  height: 55rem;
   padding: 20px;
   text-align: left;
 }

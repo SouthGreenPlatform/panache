@@ -62,9 +62,9 @@ export default {
 
 .whiteBlock {
   background-color: white;
-  width: 60rem;
+  width: 77%;
   height: 39rem;
   border-radius: 50px;
-  margin-left: 28rem;
+  margin-left: 22%;
 }
 </style>

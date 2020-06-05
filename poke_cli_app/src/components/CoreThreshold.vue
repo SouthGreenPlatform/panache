@@ -56,7 +56,7 @@ export default {
     return {
       threshold: 0.85,
       width: 300,
-      height: 100,
+      height: 70,
       leftPosPixel: leftPx,
       rightPosPixel: rightPx,
       pxToThresholdScale: d3.scaleLinear() //Attaches to each threshold value a position on the slider

@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div class="canvasSvg">
 
-    <canvas ref="CanvasMiniature" :width="width" :height="height"></canvas>
+    <canvas class="canvas" ref="CanvasMiniature" :width="width" :height="height"></canvas>
 
-    <svg class="svgAbsolute" :width="width" :height="height">
+    <svg class="svg" :width="width" :height="height">
       <!-- Following translation should be dynamic instead -->
       <g ref='ticksForMiniature' id='miniatureTicks' style='10px sans-serif' transform='translate(0,65)'>
       </g>
@@ -104,7 +104,7 @@ export default {
     },
     amountOfNtToDisplay() {
       if (this.lastNtToDisplay === this.rightmostNt) {
-        this.$store.dispatch('updateFirstNtToDisplay', Math.max([0, this.rightmostNt - this.amountOfNtToDisplay]));
+        this.$store.dispatch('updateFirstNtToDisplay', Math.max(0, this.rightmostNt - this.amountOfNtToDisplay));
         console.log('First nt to display has been updated through a watch on amountOfNtToDisplay');
       }
     },
@@ -304,5 +304,25 @@ export default {
   margin-top: 2rem;
   background-color: black;
   opacity: 0.5;
+}
+
+.canvasSvg {
+  position: relative;
+  display: block;
+  height: 100%;
+  margin-top: 1.2rem;
+}
+
+.canvas {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+
+.svg {
+  position: relative;
+  display: inline-block;
+  margin-top: -7rem;
+  z-index: 5;
 }
 </style>

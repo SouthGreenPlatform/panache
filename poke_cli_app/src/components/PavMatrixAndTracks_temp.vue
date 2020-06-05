@@ -1,6 +1,5 @@
 <template>
-<div>
-  <svg class="pavMatrixSvg" ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
+  <svg class="pavMatrixSvg" :height="displayHeight" :width="displayWidth">
     <svg ref='pavMatrix' :height="pavMatrixHeight" :width="displayWidth">
       <g v-for="(genome, index) in genomeList" :key="genome" :id="`presence_${genome}`">
         <rect v-for="block in filteredData"
@@ -45,6 +44,8 @@
             :height="blocksDimensions.height"
             :width="ntToPx(block.FeatureStop - block.FeatureStart)"
             :fill="track.colorScale(block)"
+            @mouseover="function() {eventHighlightColor(`block${block.index}_${track.name}`)}"
+            @mouseout="function() {eventRestoreColor(`block${block.index}_${track.name}`)}"
           />
         </g>
       </g>
@@ -95,28 +96,8 @@
         </g>
       </g>
     </g>
-    <g :visibility="tooltipVisibility" id="hoverTooltip">
-      <rect :x="tooltipData.x - tooltipData.margin"
-      :y="tooltipData.y - tooltipData.margin"
-      :height="tooltipData.height + 2 * tooltipData.margin"
-      :width="tooltipData.width + 2 * tooltipData.margin"
-      :fill="hclToRgb(83, 4, 96)"
-      fill-opacity='0.9'
-      :stroke="hclToRgb(86, 5, 80)"
-      stroke-opacity='0.9'/>
-      <text ref='tooltipForTracksAndPavMatrix'
-        :x="tooltipData.x"
-        :y="tooltipData.y"
-        dominant-baseline='hanging'
-        font-family='sans-serif'
-        text-anchor='start'>
-        {{tooltipTxtContent}}
-      </text>
-    </g>
 
   </svg>
-  <canvas v-show='false' id='tooltipPreRenderingCanvas' ref='pavTooltipCanvas' height='50' :width="displayWidth"/>
-</div>
 </template>
 
 <script>
@@ -257,17 +238,17 @@ export default {
       ],
       tracks: [
         {
-          name: 'panChrom_coreVSdispensable',
+          name: 'coreVSdispensable',
           colorScale: colorScaleThresholdBased
         },
         {
-          name: 'panChrom_rainbowed',
+          name: 'rainbowed',
           colorScale: function(d) {
             return self.colorScaleRainbow(d.FeatureStart)
           }
         },
         {
-          name: 'panChrom_similarCount',
+          name: 'similarCount',
           colorScale: function(d) {
             return self.colorScaleSimilarities(d.SimilarBlocks.split(";").length)
           }
@@ -291,32 +272,13 @@ export default {
       similarityStroke: simStroke,
       blockOriginColor: d3.hcl(10,50,80),
       legendPanelWidth: legendPanelWidth,
-      tooltipTxtContent: '',
-      tooltipVisibility: 'hidden',
-      tooltipMargin: 2,
-      tooltipXPos: 0,
-      tooltipXOffset: 20,
-      tooltipYPos: 0,
-      tooltipHeight: 10,
-      tooltipWidth: 0,
-      tooltipEventIsApplied: true,
     }
   },
   computed: {
-    tooltipData() {
-      return {
-        x: this.tooltipXPos,
-        y: this.tooltipYPos,
-        height: this.tooltipHeight,
-        width: this.tooltipWidth,
-        margin: this.tooltipMargin,
-        offset: this.tooltipXOffset
-      }
-    },
   },
   watch: {
-    filteredData() {
-      this.tooltipEventIsApplied = false
+    filteredData: function() {
+      //console.log('FilteredData has changed !')
     },
   },
   mounted() {
@@ -329,35 +291,6 @@ export default {
       .on("mouseover", function() {self.eventShowRef('pavConditionalSlider')})
       .on("mouseout", function() {self.eventHideRef('pavConditionalSlider')});
 
-  },
-  updated() {
-    if (this.tooltipEventIsApplied === true) {
-      return
-    }
-
-    this.$nextTick(function() {
-      console.log('Update is completely finished');
-
-      let self = this;
-
-      //Add the mouseoer events
-      self.tracks.forEach( function(track) {
-        self.filteredData.forEach( function(block) {
-          //console.log(self.$refs[`block${block.index}_${track.name}`]);
-          //display tooltip on hovering, based on data
-          d3.select(self.$refs[`block${block.index}_${track.name}`][0]).on('mouseover', function() {
-            self.eventShowTooltip(`block${block.index}_${track.name}`, block)
-          });
-
-          //reset tooltip and block color
-          d3.select(self.$refs[`block${block.index}_${track.name}`][0]).on('mouseout', function() {
-            self.eventHideTooltip(`block${block.index}_${track.name}`)
-          });
-        });
-      });
-    });
-
-    this.tooltipEventIsApplied = true;
   },
   methods: {
     updateBlockOffset(mousePos) {
@@ -430,129 +363,15 @@ export default {
 
       svgToChange.attr('fill', this.blockOriginColor);
     },
-    computeTooltipText(refName, data) {
-      let svgSelected = this.$refs[refName][0];
-      let parentNodeId = d3.select(svgSelected.parentNode).attr("id");
-      let textToDisplay;
-
-      switch(true) { //Function that will display information depending on the selected row
-
-        case ("panChrom_coreVSdispensable" === parentNodeId):
-          textToDisplay = "This block appears in " + data.presenceCounter + " selected genome(s)" //Text content
-          break;
-
-        case ("panChrom_rainbowed" === parentNodeId):
-          textToDisplay = "This block starts on position " + data.FeatureStart + " and is " + d3.format("~s")(Number(data.FeatureStop) - Number(data.FeatureStart)) + "b long" //d3.format is used to have the International System writing, with rounded values
-          //ATTENTION for float values such as 1.586 for instance eval() considered the "." to be the announcement of a property (586, property of the object 1), therefore an ID error occured
-          break;
-
-        case ("panChrom_similarCount" === parentNodeId):
-          textToDisplay = "This block is repeated " + eval((data.SimilarBlocks.split(";").length >= 2) ? data.SimilarBlocks.split(";").length : 0) + " time(s) within the pangenome"
-          break;
-
-        case (/^presence_/.test(parentNodeId) ): {
-          //Gets the genome name, to retrieve the correct PAV info from *data*
-          let genomeName = `${parentNodeId}`.split('presence_')[1];
-          textToDisplay = data[genomeName]; //Displays what's in the PAV matrix for the corresponding genome
-          break;
-        }
-
-        default:
-          textToDisplay = 'ERROR Switch case has not been identified';
-      }
-
-      this.tooltipTxtContent = textToDisplay;
-    },
-    computeTooltipDims(textToDisplay, fontFamily='sans-serif', fontSizePx=10) {
-      //Function that guesses the width of the tooltip based on how it
-      //would look like on the prerendering canvas, and the font size
-
-      let ctx = this.$refs.pavTooltipCanvas.getContext("2d");
-      ctx.font = `${fontSizePx}px ${fontFamily}`;
-
-      this.tooltipHeight = fontSizePx+2;
-      this.tooltipWidth = ctx.measureText(textToDisplay).width;
-      console.log('TooltipData after recalculation of dims is:');
-      console.log(this.tooltipData);
-    },
-    calculateTooltipPos(axis) {
-      let mouseCoord, offsetFromMouse, minBorder, maxBorder, belowBorderPos, beyondBorderPos;
-      let mousePosRefSystem = this.$refs.PanacheSvgContainer;
-
-      console.log(`tooltipData is:`);
-      console.log(this.tooltipData);
-
-      switch (axis) {
-
-        //Working on width
-        case 'x':
-          mouseCoord = d3.mouse(mousePosRefSystem)[0]; //d3.event.x works only for drag events, not for cursor coordinates*
-          console.log(`coord x is ${mouseCoord}`);
-          offsetFromMouse = 20;
-          minBorder = this.tooltipData.margin + offsetFromMouse; //Leaving space for the background rectangle
-          maxBorder = this.displayWidth - (this.tooltipData.width + this.tooltipData.margin);
-          console.log(`max border x is ${maxBorder}`);
-          belowBorderPos = minBorder;
-          //Text is now displayed on the left
-          //beyondBorderPos IS NOT the maxBorder
-          beyondBorderPos = mouseCoord - this.tooltipData.width - offsetFromMouse;
-          break;
-
-        //Working on height
-        case 'y':
-          mouseCoord = d3.mouse(mousePosRefSystem)[1];
-          console.log(`coord y is ${mouseCoord}`);
-          offsetFromMouse = this.tooltipData.height / 2; //For a y-centered text
-          //Borders are not the same since pos of a text elt is at its bottom-left
-          //y-axis has not the same origin than the svgContainer !
-          minBorder = this.tooltipData.margin + this.tooltipData.height;
-          maxBorder = this.displayHeight - this.tooltipData.margin;
-          console.log(`max border y is ${maxBorder}`);
-          belowBorderPos = minBorder;
-          beyondBorderPos = maxBorder;
-          break;
-      }
-
-      //Repositions text element to its right place depending on its size
-      let potentialPos = mouseCoord + offsetFromMouse;
-
-      let chosenPos;
-
-      //If mouse too close to min border...
-      if (potentialPos < minBorder) {
-        chosenPos = belowBorderPos;
-      //If mouse too close to max border...
-      } else if (potentialPos > maxBorder) {
-        chosenPos = beyondBorderPos;
-      //If mouse within acceptable range...
-      } else { chosenPos = potentialPos }
-
-      return chosenPos;
-    },
-    eventShowTooltip(refName, data) {
-      console.log('event is launched');
-      this.computeTooltipText(refName, data);
-      this.tooltipVisibility = 'visible';
-      this.computeTooltipDims(this.tooltipTxtContent);
-      console.log('ref of the text Bbox is');
-      console.log(this.$refs.tooltipForTracksAndPavMatrix);
-      console.log(this.$refs.tooltipForTracksAndPavMatrix.getBBox());
-      this.tooltipXPos = this.calculateTooltipPos('x');
-      this.tooltipYPos = this.calculateTooltipPos('y');
-
-      this.eventHighlightColor(refName);
-      this.tooltipVisibility = 'visible';
-    },
-    eventHideTooltip(refName) {
-      this.tooltipVisibility = 'hidden';
-      this.tooltipTxtContent = '';
-      this.eventRestoreColor(refName);
-    },
+    XXXTooltipXXX() {
+      //Do something
+    }
   }
 }
 </script>
 
 <style>
+
 .pavMatrixSvg {
   margin-top: -24rem;
 }

@@ -90,6 +90,10 @@ export default {
 
     getDisplayBorders() {
       return { first:this.getFirstNtToDisplay, last:this.getLastNtToDisplay }
+    },
+
+    getChromSelected() {
+      return this.$store.state.chromSelected;
     }
 
   },
@@ -110,13 +114,16 @@ export default {
                                 .map(intNum => d3.interpolateRainbow(intNum / (this.functionDiversity.length + 1)));
 
       this.maxPositionInNucleotide = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
-      console.log(`maxPosInNt is ${this.maxPositionInNucleotide}`)
 
       // définition des couleurs
       this.updateDataDependantColorScales();
 
       // updating the zoom borders
       this.$store.state.zoomLevel.minGlobal = this.displayWindowWidth / this.maxPositionInNucleotide;
+      this.$store.state.zoomLevel.minEfficiency = this.width / (0.05 * this.maxPositionInNucleotide);
+      this.$store.state.zoomLevel.current = this.$store.state.zoomLevel.minEfficiency;
+
+      this.handler();
     },
 
     // va s'éxecuter après avoir intercepté l'update dans le computed plus haut
@@ -131,66 +138,13 @@ export default {
       this.sliderWidth = this.width * (ntNumber / rightmostNt);
     },
 
-    getDisplayBorders: {
-      //checking if the inside values has changed
-      deep: true,
-      //firing the watch handler on creation even if no change has been detected
-      //immediate: true,
-      //handler function, ie what has to happen
-      handler() {
-        console.log('Panache detected a change of nt to display');
-
-        //looking for data that are before the first nt to show but might have to be displayed (if FeatureStop is in the window)
-        let underThresholdArray = this.chromosomeData.filter(
-          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
-        );
-
-        //getting all elements with indices within the desired range
-        console.log('Panache identifies the elements within the window of interest');
-        console.log(`Panache thinks that first nt to display is ${this.getFirstNtToDisplay} and that last nt to display is ${this.getLastNtToDisplay}`);
-
-        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
-        );
-        //console.log(elementsWithIndexesWithinWindow);
-
-        //Setting and filling the filteredData array with at least one element
-        if (underThresholdArray.length != 0) {
-          //If there is at least one data with index < firstNtToDisplay <= index+width
-          //then the rightmostone is added to the filtered data
-
-
-          //Uncomment to make the selection of only one element of underThresholdArray
-          /*
-          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
-          console.log(`maxSubIndex is ${maxSubIndex}`);
-          console.log(`underThresholdArray is ...`);
-          console.log(underThresholdArray);
-          console.log(underThresholdArray[underThresholdArray.length-1]);
-          let arrayOfNearestUnselectedData = underThresholdArray.filter(
-            d => (d.index === maxSubIndex)
-          );
-          console.log(`arrayOfNearestUnselectedData is ...`);
-          console.log(arrayOfNearestUnselectedData);
-          this.filteredData = arrayOfNearestUnselectedData;
-          */
-          this.filteredData = underThresholdArray;
-        } else {
-          //Else filteredData have at least the first data, so that it is never empty
-          this.filteredData = [this.chromosomeData[0]]
-        }
-        console.log('filteredData is...');
-        console.log(this.filteredData);
-
-        //Adding selected elements to the filteredData array
-        elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
-        //console.log('filteredData is');
-        //console.log(this.filteredData);
-      }
-
+    getDisplayBorders: function(){
+      this.handler();
     },
 
-
+    getChromSelected: function() {
+      this.fetchData();
+    },
   },
   mounted() {
   },
@@ -198,7 +152,10 @@ export default {
 
     // on récupère le jeu de donnée utilisé pour notre poke
     async fetchData(){
-      this.chromosomeData = await d3.json("./mediumFakeDataWithAllBlocks_chrom0.json");
+      this.chromosomeData = await d3.json("./mediumFakeDataWithAllBlocks.json");
+      console.log(this.chromosomeData);
+      this.chromosomeData = this.chromosomeData[0][this.$store.state.chromSelected];
+      console.log(this.chromosomeData);
     },
 
     colorScaleMaker(domain, range, scaleLinear = true) {
@@ -231,7 +188,58 @@ export default {
       this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
       this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
 
-    }
+    },
+
+    handler() {
+        //console.log('Panache detected a change of nt to display');
+
+        //looking for data that are before the first nt to show but might have to be displayed (if FeatureStop is in the window)
+        let underThresholdArray = this.chromosomeData.filter(
+          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
+        );
+
+        //getting all elements with indices within the desired range
+        //console.log('Panache identifies the elements within the window of interest');
+        //console.log(`Panache thinks that first nt to display is ${this.getFirstNtToDisplay} and that last nt to display is ${this.getLastNtToDisplay}`);
+
+        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
+          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
+        );
+        console.log(elementsWithIndexesWithinWindow);
+
+        //Setting and filling the filteredData array with at least one element
+        if (underThresholdArray.length != 0) {
+          //If there is at least one data with index < firstNtToDisplay <= index+width
+          //then the rightmostone is added to the filtered data
+
+
+          //Uncomment to make the selection of only one element of underThresholdArray
+          
+          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
+          // console.log(`maxSubIndex is ${maxSubIndex}`);
+          // console.log(`underThresholdArray is ...`);
+          // console.log(underThresholdArray);
+          // console.log(underThresholdArray[underThresholdArray.length-1]);
+          let arrayOfNearestUnselectedData = underThresholdArray.filter(
+            d => (Number(d.index) === maxSubIndex)
+          );
+          // console.log(`arrayOfNearestUnselectedData is ...`);
+          // console.log(arrayOfNearestUnselectedData);
+          this.filteredData = arrayOfNearestUnselectedData;
+          
+          //this.filteredData = underThresholdArray;
+        } else {
+          //Else filteredData have at least the first data, so that it is never empty
+          this.filteredData = [this.chromosomeData[0]]
+        }
+        console.log('filteredData is...');
+        console.log(this.filteredData);
+
+        //Adding selected elements to the filteredData array
+        elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
+        //console.log('filteredData is');
+        //console.log(this.filteredData);
+      }
   }
 }
 </script>
@@ -240,10 +248,10 @@ export default {
 
 .whiteBlockCanvas {
   background-color: white;
-  width: 73rem;
-  height: 40rem;
+  width: 77%;
+  height: 25rem;
   border-radius: 50px;
-  margin-left: 21rem;
+  margin-left: 22%;
 }
 
 </style>
