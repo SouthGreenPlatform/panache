@@ -102,7 +102,11 @@ export default {
         });
 
         return map;
-      }
+      },
+      miniatureTicksScale: d3.scaleLinear()
+                  .domain([0, this.rightmostNt]) //from nt space
+                  .range([0, this.width]) //to px space of canvas
+                  .clamp(true); //borders cannot be exceeded
     }
   },
   mounted() {
@@ -136,7 +140,6 @@ export default {
       this.drawCanvas();
       this.drawSvg();
     },
-
     //Whenever the core threshold changes, the corresponding track should be re-drawn on canvas
     coreThreshold() {
       let canvas = d3.select(this.$refs.CanvasMiniature);
@@ -157,6 +160,17 @@ export default {
       })
     }
   },
+  mounted() {
+    //adds d3 event superimposed on canvas for interactivity
+    let self = this;
+
+    d3.select(self.$refs.overlayOfCanvas)
+      .call(d3.drag()
+        .on("start drag", function() {
+          self.slidingAlongBlocks(d3.mouse(this)[0]);
+        })
+      );
+  }
   methods: {
     drawCanvasRect(ctx, x, y, width, height) {
       //fillRect(x, y, width, height)
@@ -252,28 +266,14 @@ export default {
 
       });
     },
-
+    /**
+     * Draws the SVG ticks for the miniature in the dedicated g element
+    */
     drawSvg() {
-      let miniatureTicksScale = d3.scaleLinear()
-                  .domain([0, this.rightmostNt]) //from nt space
-                  .range([0, this.width]) //to px space of canvas
-                  .clamp(true); //borders cannot be exceeded
-
-      //adds graduated scale as new SVGs
       d3.select(this.$refs.ticksForMiniature)
-        .call(d3.axisBottom(miniatureTicksScale)
+        .call(d3.axisBottom(this.miniatureTicksScale)
           .ticks(20)
           .tickFormat(d3.format("~s")));
-
-      //adds d3 event on canvas for interactivity
-      let self = this;
-
-      d3.select(self.$refs.overlayOfCanvas)
-        .call(d3.drag()
-          .on("start drag", function() {
-            self.slidingAlongBlocks(d3.mouse(this)[0]);
-          })
-        );
     },
 
     //Updates firstNt when a user clicks on the browser bar
@@ -329,6 +329,7 @@ export default {
 }
 </script>
 
+<!--Here again are too many hardcoded values!!!/-->
 <style >
 
 .canvasSvg {
