@@ -31,6 +31,10 @@ export default {
       type: Number,
       default: 0
     },
+    ntWidthInPxInDisplayWindow: {
+      type: Number,
+      required: true
+    },
     width: {
       type: Number,
       default: 1100
@@ -83,9 +87,6 @@ export default {
     this.drawSvg();
   },
   computed: {
-    ntWidthInPxInDisplayWindow() {
-      return this.$store.state.ntWidthInPx.current
-    },
     amountOfNtToDisplay() {
       return this.mainWindowWidth / this.ntWidthInPxInDisplayWindow
     },

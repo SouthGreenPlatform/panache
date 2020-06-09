@@ -9,6 +9,7 @@
       :width="width"
       :mainWindowWidth="displayWindowWidth"
       :firstNtToDisplay="getFirstNtToDisplay"
+      :ntWidthInPxInDisplayWindow="$store.state.ntWidthInPx.current"
       />
     <PavMatrixAndTracks
       :filteredData="filteredData"
