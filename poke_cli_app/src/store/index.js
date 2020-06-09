@@ -9,7 +9,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
-    zoomLevel: {
+    ntWidthInPx: {
       current: 0.5, // Updates --> minEfficiency per default, or user input
       minEfficiency: 1, // Updates --> max size under which too many elements are displayed, causing lag
       minGlobal: 0.01, // Updates --> min size to see all nt at once

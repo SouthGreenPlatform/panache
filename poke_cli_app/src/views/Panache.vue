@@ -15,7 +15,7 @@
       :genomeList="genomeList"
       :chromList="chromList"
       :coreThreshold="coreThreshold"
-      :displaySizeOfNt="$store.state.zoomLevel.current"
+      :displaySizeOfNt="$store.state.ntWidthInPx.current"
       :displayHeight="175"
       :displayWidth="displayWindowWidth"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
@@ -75,9 +75,9 @@ export default {
       return this.$store.state.coreThresholdSlide;
     },
 
-    //Va s'executer chaque fois que la variable global zoomLevel, qu'on récupère du filtre, est mise à jour
+    //Va s'executer chaque fois que la variable global ntWidthInPx, qu'on récupère du filtre, est mise à jour
     zoomUpdate() {
-      return this.$store.state.zoomLevel.current;
+      return this.$store.state.ntWidthInPx.current;
     },
 
     getFirstNtToDisplay() {
@@ -119,9 +119,9 @@ export default {
       this.updateDataDependantColorScales();
 
       // updating the zoom borders
-      this.$store.state.zoomLevel.minGlobal = this.displayWindowWidth / this.maxPositionInNucleotide;
-      this.$store.state.zoomLevel.minEfficiency = this.width / (0.05 * this.maxPositionInNucleotide);
-      this.$store.state.zoomLevel.current = this.$store.state.zoomLevel.minEfficiency;
+      this.$store.state.ntWidthInPx.minGlobal = this.displayWindowWidth / this.maxPositionInNucleotide;
+      this.$store.state.ntWidthInPx.minEfficiency = this.width / (0.05 * this.maxPositionInNucleotide);
+      this.$store.state.ntWidthInPx.current = this.$store.state.ntWidthInPx.minEfficiency;
 
       this.handler();
     },
@@ -132,7 +132,7 @@ export default {
     },
 
     zoomUpdate: function() {
-      let ntNumber = this.width / this.$store.state.zoomLevel.current;
+      let ntNumber = this.width / this.$store.state.ntWidthInPx.current;
 
       let rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
       this.sliderWidth = this.width * (ntNumber / rightmostNt);

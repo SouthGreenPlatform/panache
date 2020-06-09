@@ -89,7 +89,7 @@ export default {
   watch: {
     getCurrentRatio() {
       console.log(`New size of nt in px is: ${this.getCurrentRatio}`);
-      this.$store.state.zoomLevel = this.ntWidthInPixel;
+      this.$store.state.ntWidthInPx = this.ntWidthInPixel;
     },
     getMinRatio() {
       console.log(`minGlobal ratio has been set to ${this.getMinRatio}`)

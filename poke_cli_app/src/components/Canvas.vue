@@ -84,7 +84,7 @@ export default {
   },
   computed: {
     ntWidthInPxInDisplayWindow() {
-      return this.$store.state.zoomLevel.current
+      return this.$store.state.ntWidthInPx.current
     },
     amountOfNtToDisplay() {
       return this.mainWindowWidth / this.ntWidthInPxInDisplayWindow
