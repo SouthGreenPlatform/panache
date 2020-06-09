@@ -9,7 +9,7 @@
       </g>
       <g>
         <rect class="handle" :x="ntToCanvasPxPos(firstNtToDisplay)" :y="2*blockHeight-13" :width="widthOfHandle" height="46" style="stroke: rgb(59, 59, 59); position: absolute; fill-opacity: 0;" />
-        <rect class="track-overlay" ref="overlayOfCanvas" :y="2*blockHeight-12" :width="width" :height="sliderHeight" style="fill-opacity: 0;" cursor="ew-resize" />
+        <rect class="track-overlay" ref="overlayOfCanvas" :y="2*blockHeight-12" :width="width" :height="handleHeight" style="fill-opacity: 0;" cursor="ew-resize" />
       </g>
     </svg>
 
@@ -24,11 +24,19 @@ export default {
   props: {
     chromosomeData: {
       type: Array,
-      default: () => []
+      default: () => [] //Default in case data are not there at creation
     },
     firstNtToDisplay: {
       type: Number,
       default: 0
+    },
+    updateFirstNt: {
+      type: Function,
+      required: true
+    },
+    updateLastNt: {
+      type: Function,
+      required: true
     },
     ntWidthInPxInDisplayWindow: {
       type: Number,
@@ -56,11 +64,11 @@ export default {
     },
     coreThreshold: {
       type: Number,
-      default: () => 5.1
+      default: () => 5.1 //Why TF is hardcoded, again?
     },
     rightmostNt: {
       type: Number,
-      default: 41332
+      default: 41332 //Hard coded, again, come on.
     },
     colorScaleFunction :{
       type: Function,
@@ -86,7 +94,7 @@ export default {
   data() {
     return {
       blockHeight: 14, //This should be based on outside properties
-      sliderHeight: 50, //This should not be hard coded
+      handleHeight: 50, //This should not be hard coded
       correspondancePosColor() {
         let map = new Map();
         this.chromosomeData.forEach( function(d, i) {
@@ -115,12 +123,12 @@ export default {
   watch: {
     //if inner lastNtToDisplay changes, this should be cascaded to the global variable
     lastNtToDisplay() {
-      this.$store.dispatch('updateLastNtToDisplay', this.lastNtToDisplay)
+      this.updateLastNt(this.lastNtToDisplay)
     },
     //amount changes => either lastNt changes, then see prevous watch, or firstNt has to change instead
     amountOfNtToDisplay() {
       if (this.lastNtToDisplay === this.rightmostNt) {
-        this.$store.dispatch('updateFirstNtToDisplay', Math.max(0, this.rightmostNt - this.amountOfNtToDisplay));
+        this.updateFirstNt(Math.max(0, this.rightmostNt - this.amountOfNtToDisplay));
       }
     },
     //Whenever chromData change, both canvas and ticks should be redrawn
@@ -279,7 +287,6 @@ export default {
       //we change the value of the first nt to dsplay only if it is a valid one
       if ((mouse_xPos >= leftPxBorder) && (mouse_xPos <= rightPxBorder)) {
         let desiredPxLeftPos = mouse_xPos - this.widthOfHandle / 2;
-        this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
         //this.lastNtToDisplay will only be updated outside of this function
         //so we cannot change its store state in here, else the value would be wrong!!!
         //cf watch on lastNtToDisplay based on firstNtToDisplay instead
@@ -287,14 +294,13 @@ export default {
       //When mouse is on the far left, stores min value instead
       } else if (mouse_xPos < leftPxBorder) {
         let desiredPxLeftPos = 0;
-        this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
 
       //When mouse is on the far right, stores max value instead
       } else if (mouse_xPos > rightPxBorder) {
         let desiredPxLeftPos = this.width - this.widthOfHandle;
-        this.$store.dispatch('updateFirstNtToDisplay', this.canvasPxPosToNt(desiredPxLeftPos));
-
       }
+
+      this.updateFirstNt(this.canvasPxPosToNt(desiredPxLeftPos));
     },
 
     //Function that returns where a nt should be placed on the canvas

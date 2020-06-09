@@ -16,6 +16,7 @@
       :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
       :colorScaleSimilarities="$store.state.greenColorScale"
       />
+    <!-- displayHeight should not be hardcoded, not there/-->
     <PavMatrixAndTracks
       :filteredData="filteredData"
       :genomeList="genomeList"
@@ -25,6 +26,8 @@
       :displayHeight="175"
       :displayWidth="displayWindowWidth"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
+      :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
+      :updateLastNt="function(payload) {$store.dispatch('updateLastNtToDisplay', payload)}"
       :colorScaleFunction="$store.state.functionColorScale"
       :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
       :colorScaleSimilarities="$store.state.greenColorScale"
