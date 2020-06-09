@@ -10,6 +10,11 @@
       :mainWindowWidth="displayWindowWidth"
       :firstNtToDisplay="getFirstNtToDisplay"
       :ntWidthInPxInDisplayWindow="$store.state.ntWidthInPx.current"
+      :colorScaleFunction="$store.state.functionColorScale"
+      :colorScaleCore="$store.state.orangeColorScale"
+      :colorScaleDisp="$store.state.blueColorScale"
+      :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
+      :colorScaleSimilarities="$store.state.greenColorScale"
       />
     <PavMatrixAndTracks
       :filteredData="filteredData"
