@@ -106,12 +106,22 @@ export default {
       miniatureTicksScale: d3.scaleLinear()
                   .domain([0, this.rightmostNt]) //from nt space
                   .range([0, this.width]) //to px space of canvas
-                  .clamp(true); //borders cannot be exceeded
+                  .clamp(true), //borders cannot be exceeded
     }
   },
   mounted() {
     this.drawCanvas();
     this.drawSvg();
+
+    //adds d3 event superimposed on canvas for interactivity
+    let self = this;
+
+    d3.select(self.$refs.overlayOfCanvas)
+      .call(d3.drag()
+        .on("start drag", function() {
+          self.slidingAlongBlocks(d3.mouse(this)[0]);
+        })
+      );
   },
   computed: {
     amountOfNtToDisplay() {
@@ -160,17 +170,6 @@ export default {
       })
     }
   },
-  mounted() {
-    //adds d3 event superimposed on canvas for interactivity
-    let self = this;
-
-    d3.select(self.$refs.overlayOfCanvas)
-      .call(d3.drag()
-        .on("start drag", function() {
-          self.slidingAlongBlocks(d3.mouse(this)[0]);
-        })
-      );
-  }
   methods: {
     drawCanvasRect(ctx, x, y, width, height) {
       //fillRect(x, y, width, height)
@@ -181,7 +180,7 @@ export default {
       //Colouring white blocks (those are used to overlay the coloured blocks
       //that have a width slightly larger than what they should have, in order
       //to show no gap within the miniature)
-      context.fillStyle = "#FFF";
+      ctx.fillStyle = "#FFF";
       this.drawCanvasRect(ctx, x, offset, width, globalHeight);
 
       //Colouring the function blocks, rainbow style if there is no functionnal info
@@ -283,21 +282,22 @@ export default {
       //calculated for a centered handle
       let leftPxBorder = 0 + this.widthOfHandle/2;
       let rightPxBorder = this.width - this.widthOfHandle/2;
+      let desiredPxLeftPos;
 
       //we change the value of the first nt to dsplay only if it is a valid one
       if ((mouse_xPos >= leftPxBorder) && (mouse_xPos <= rightPxBorder)) {
-        let desiredPxLeftPos = mouse_xPos - this.widthOfHandle / 2;
+        desiredPxLeftPos = mouse_xPos - this.widthOfHandle / 2;
         //this.lastNtToDisplay will only be updated outside of this function
         //so we cannot change its store state in here, else the value would be wrong!!!
         //cf watch on lastNtToDisplay based on firstNtToDisplay instead
 
       //When mouse is on the far left, stores min value instead
       } else if (mouse_xPos < leftPxBorder) {
-        let desiredPxLeftPos = 0;
+        desiredPxLeftPos = 0;
 
       //When mouse is on the far right, stores max value instead
       } else if (mouse_xPos > rightPxBorder) {
-        let desiredPxLeftPos = this.width - this.widthOfHandle;
+        desiredPxLeftPos = this.width - this.widthOfHandle;
       }
 
       this.updateFirstNt(this.canvasPxPosToNt(desiredPxLeftPos));
