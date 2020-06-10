@@ -140,7 +140,7 @@ export default {
       this.$store.state.ntWidthInPx.minEfficiency = this.width / (0.05 * this.maxPositionInNucleotide);
       this.$store.state.ntWidthInPx.current = this.$store.state.ntWidthInPx.minEfficiency;
 
-      this.handler(); //WHY THE F*CK IS THERE A METHOD CALLED 'HANDLER'
+      this.filterDataForDisplay();
     },
 
     //... wtf with coreValue & coreThreshold?
@@ -150,7 +150,7 @@ export default {
 
     //Whenever firstNt or lastNt changes, do...
     getDisplayBorders() {
-      this.handler();
+      this.filterDataForDisplay();
     },
 
     getSelectedChrom() {
@@ -206,55 +206,38 @@ export default {
 
     },
 
-    handler() {
-        //console.log('Panache detected a change of nt to display');
+    filterDataForDisplay() {
 
-        //looking for data that are before the first nt to show but might have to be displayed (if FeatureStop is in the window)
+        //Looking for data that are before the first nt to show but might be
+        //wide enough to appear, and therefore should be included
         let underThresholdArray = this.chromosomeData.filter(
           d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
         );
 
-        //getting all elements with indices within the desired range
-        //console.log('Panache identifies the elements within the window of interest');
-        //console.log(`Panache thinks that first nt to display is ${this.getFirstNtToDisplay} and that last nt to display is ${this.getLastNtToDisplay}`);
-
-        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
-        );
-        console.log(elementsWithIndexesWithinWindow);
-
         //Setting and filling the filteredData array with at least one element
         if (underThresholdArray.length != 0) {
           //If there is at least one data with index < firstNtToDisplay <= index+width
-          //then the rightmostone is added to the filtered data
+          //then the rightmost one is added to filteredData
 
-
-          //Uncomment to make the selection of only one element of underThresholdArray
-          
           let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
-          // console.log(`maxSubIndex is ${maxSubIndex}`);
-          // console.log(`underThresholdArray is ...`);
-          // console.log(underThresholdArray);
-          // console.log(underThresholdArray[underThresholdArray.length-1]);
           let arrayOfNearestUnselectedData = underThresholdArray.filter(
-            d => (Number(d.index) === maxSubIndex)
+            d => (Number(d.index) === maxSubIndex) //Number() is important here!
           );
-          // console.log(`arrayOfNearestUnselectedData is ...`);
-          // console.log(arrayOfNearestUnselectedData);
+
           this.filteredData = arrayOfNearestUnselectedData;
-          
-          //this.filteredData = underThresholdArray;
+
         } else {
           //Else filteredData have at least the first data, so that it is never empty
           this.filteredData = [this.chromosomeData[0]]
         }
-        console.log('filteredData is...');
-        console.log(this.filteredData);
+
+        //Getting all elements with indices within the desired range
+        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
+          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
+        );
 
         //Adding selected elements to the filteredData array
         elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
-        //console.log('filteredData is');
-        //console.log(this.filteredData);
       }
   }
 }
