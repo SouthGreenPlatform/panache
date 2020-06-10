@@ -24,11 +24,11 @@ export default {
   props: {
     chromosomeData: {
       type: Array,
-      default: () => [] //Default in case data are not there at creation
+      default: () => [] //Default in case data are not there on creation
     },
     firstNtToDisplay: {
       type: Number,
-      default: 0
+      default: 0 //Default position
     },
     updateFirstNt: {
       type: Function,
@@ -44,57 +44,57 @@ export default {
     },
     width: {
       type: Number,
-      default: 1100
+      default: 40 //will be replaced when data are loaded
     },
     height: {
       type: Number,
-      default: 82
+      default: 80 //Must be enough to show 5*blockHeight + interspace + ticks
     },
     mainWindowWidth: {
       type: Number,
-      default: 600
+      default: 600 //Should depend on available window space
     },
     nbOfGenomes: {
       type: Number,
-      default: 6
+      default: 6 //Replaced when real data are loaded
     },
     nbOfFunctions: {
       type: Number,
-      default: 14
+      default: 14 //Replaced when real data are loaded
     },
     coreThreshold: {
       type: Number,
-      default: () => 5.1 //Why TF is hardcoded, again?
+      default: 3 //Replaced when real data are loaded + should be turned into a %
     },
     rightmostNt: {
       type: Number,
-      default: 41332 //Hard coded, again, come on.
+      default: 10000 //Replaced when real data are loaded
     },
-    colorScaleFunction :{
+    colorScaleFunction: {
       type: Function,
       required: true
     },
-    colorScaleCore :{
+    colorScaleCore: {
       type: Function,
       required: true
     },
-    colorScaleDisp :{
+    colorScaleDisp: {
       type: Function,
       required: true
     },
-    colorScaleRainbow :{
+    colorScaleRainbow: {
       type: Function,
       required: true
     },
-    colorScaleSimilarities :{
+    colorScaleSimilarities: {
       type: Function,
       required: true
     }
   },
   data() {
     return {
-      blockHeight: 14, //This should be based on outside properties
-      handleHeight: 50, //This should not be hard coded
+      blockHeight: 10, //This should be based on outside properties?
+      handleHeight: 50, //This should not be hard coded but based on track sizes
       correspondancePosColor() {
         let map = new Map();
         this.chromosomeData.forEach( function(d, i) {

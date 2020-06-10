@@ -1,12 +1,11 @@
 <template>
   <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
-    <!-- Props envoyés à Canvas.vue -->
     <Canvas
       :chromosomeData="chromosomeData"
       :nbOfGenomes="nbOfGenomes"
       :coreThreshold="coreThreshold"
       :rightmostNt="maxPositionInNucleotide"
-      :width="width"
+      :width="canvasWidth"
       :mainWindowWidth="displayWindowWidth"
       :firstNtToDisplay="getFirstNtToDisplay"
       :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
@@ -18,14 +17,13 @@
       :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
       :colorScaleSimilarities="$store.state.greenColorScale"
       />
-    <!-- displayHeight should not be hardcoded, not there/-->
     <PavMatrixAndTracks
       :filteredData="filteredData"
       :genomeList="genomeList"
       :chromList="chromList"
       :coreThreshold="coreThreshold"
       :displaySizeOfNt="$store.state.ntWidthInPx.current"
-      :displayHeight="175"
+      :displayHeight="displayWindowHeight"
       :displayWidth="displayWindowWidth"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
       :colorScaleFunction="$store.state.functionColorScale"
@@ -47,73 +45,83 @@ export default {
     Canvas,
     PavMatrixAndTracks
   },
-  data: function() {
+  data() {
     return {
-      // datas for Canvas component
-      chromosomeData: [],
-      nbOfGenomes: 6,
-      coreThreshold: Number,
-      width: 1100,
-      displaySizeOfNt: 1,
+      //Values based on full dataset
+      genomeList: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
+      chromList: ['0', '1', '2', '3' ],
 
+      //Variables directly linked to chromosomal data - changed on (re-)load
+      chromosomeData: [],
+      lastBlockStart: Number,
+      highestRepNumber: Number,
+      functionDiversity: Array,
+      currentWidestFeatureLength: Number,
+      maxPositionInNucleotide: 10000,
+
+      //Used to define the rainbow color Scale
       pseudoRainbowList: [d3.rgb(0, 90, 200), d3.rgb(0, 200, 250),
         d3.rgb(120, 50, 40), d3.rgb(190, 140, 60), d3.rgb(240, 240, 50),
         d3.rgb(160, 250,130)],
 
-      lastBlockStart: Number,
+      //Data to change into computed
+      coreThreshold: Number,
       pivotsForRainbow: Array,
-      highestRepNumber: Number,
       colorsForFunctions: Array,
-      functionDiversity: Array,
-      maxPositionInNucleotide: 41332,
-      currentWidestFeatureLength: Number,
 
-      // datas for PavMatrixAndTracks component
+      //Variables specific to PavMatrixAndTracks
+      canvasWidth: 600,
+
+
+      //Variables specific to PavMatrixAndTracks
+      //Dims should be responsive, depending on the available space!
       filteredData: [],
-      genomeList: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'],
-      chromList: ['0', '1', '2', '3',],
-      displayWindowWidth: 1100,
+      displayWindowWidth: 600,
+      displayWindowHeight: 175,
     }
   },
-  beforeMount() {
-    this.fetchData();
-  },
   computed: {
-    // Va s'executer chaque fois que la variable global coreThresholdSlide, qu'on récupère du filtre, est mise à jour
-    coreValue() {
-      return this.$store.state.coreThresholdSlide;
+    //data based computeds
+    nbOfGenomes() {
+      return this.genomeList.length
     },
 
-    //Va s'executer chaque fois que la variable global ntWidthInPx, qu'on récupère du filtre, est mise à jour
-    zoomUpdate() {
+    //Get values out of Vuex store
+    coreValue() {
+      return this.$store.state.coreThresholdSlide; //Name should be changed, again
+    },
+    displaySizeOfNt() {
       return this.$store.state.ntWidthInPx.current;
     },
-
     getFirstNtToDisplay() {
       return this.$store.state.firstNtToDisplay;
     },
-
     getLastNtToDisplay() {
       return this.$store.state.lastNtToDisplay;
     },
-
-    getDisplayBorders() {
-      return { first:this.getFirstNtToDisplay, last:this.getLastNtToDisplay }
-    },
-
-    getChromSelected() {
+    getSelectedChrom() {
       return this.$store.state.chromSelected;
     }
 
+    //Computed of multiple objects to watch
+    getDisplayBorders() {
+      return { first:this.getFirstNtToDisplay, last:this.getLastNtToDisplay }
+    },
+  },
+
+  beforeMount() {
+    this.fetchData();
+  },
+    mounted() {
   },
   watch: {
-    // on s'assures de créer les diverses variables à envoyer en props a Canvas.vue après avoir bien charger le jeu de donnée chromosomeData
-    chromosomeData: function() {
+    //Whenever the chosen chromosome changes, this.data should be updated
+    chromosomeData() {
 
       this.functionDiversity = [...new Set(this.chromosomeData.map( d => d.Function))];
-      this.coreThreshold = this.coreValue /100 * this.nbOfGenomes;
+      this.coreThreshold = this.coreValue /100 * this.nbOfGenomes; //Should not be data dependant...
 
-      //Calcul de la nt la plus large du jeu de donnée
+      //Update of the chrom-specific data
       this.currentWidestFeatureLength = Math.max(...this.chromosomeData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) ));
 
       this.lastBlockStart = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStart)));
@@ -124,42 +132,39 @@ export default {
 
       this.maxPositionInNucleotide = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
 
-      // définition des couleurs
+      //Re-creation of the colorScales
       this.updateDataDependantColorScales();
 
-      // updating the zoom borders
+      //Updating the zoom values
       this.$store.state.ntWidthInPx.minGlobal = this.displayWindowWidth / this.maxPositionInNucleotide;
       this.$store.state.ntWidthInPx.minEfficiency = this.width / (0.05 * this.maxPositionInNucleotide);
       this.$store.state.ntWidthInPx.current = this.$store.state.ntWidthInPx.minEfficiency;
 
-      this.handler();
+      this.handler(); //WHY THE F*CK IS THERE A METHOD CALLED 'HANDLER'
     },
 
-    // va s'éxecuter après avoir intercepté l'update dans le computed plus haut
-    coreValue: function() {
+    //... wtf with coreValue & coreThreshold?
+    coreValue() {
       this.coreThreshold = this.coreValue /100 * this.nbOfGenomes;
     },
 
-    zoomUpdate: function() {
-      let ntNumber = this.width / this.$store.state.ntWidthInPx.current;
-
-      let rightmostNt = Number(this.chromosomeData[this.chromosomeData.length-1].index);
-      this.sliderWidth = this.width * (ntNumber / rightmostNt);
-    },
-
-    getDisplayBorders: function(){
+    //Whenever firstNt or lastNt changes, do...
+    getDisplayBorders() {
       this.handler();
     },
 
-    getChromSelected: function() {
+    getSelectedChrom() {
       this.fetchData();
     },
   },
-  mounted() {
-  },
   methods: {
 
-    // on récupère le jeu de donnée utilisé pour notre poke
+    //WTF, why is this.chromosomeData given a value twice?
+    //Ok so the full dataset is fetched whenever he wants to change only a single Chrom?
+    //This makes no sense
+    //There should be:
+    //A the full data set, stored somewhere
+    //B chromosomeData, corresponding only to the selected part
     async fetchData(){
       this.chromosomeData = await d3.json("./mediumFakeDataWithAllBlocks.json");
       console.log(this.chromosomeData);
@@ -167,6 +172,7 @@ export default {
       console.log(this.chromosomeData);
     },
 
+    //This should be a stored function instead, or from a module at least
     colorScaleMaker(domain, range, scaleLinear = true) {
       if (scaleLinear) {
         return d3.scaleLinear()
@@ -180,6 +186,7 @@ export default {
       }
     },
 
+    //Again this could be from a module instead
     domainPivotsMaker(breakpointsNb, maxValue) {
       let breakpoints = [];
 
