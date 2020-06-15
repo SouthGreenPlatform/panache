@@ -63,6 +63,7 @@ export default {
       //Dims should be responsive, depending on the available space!
       displayWindowWidth: 600,
       displayWindowHeight: 175,
+      filteredData: []
     }
   },
   computed: {
@@ -111,46 +112,6 @@ export default {
       return Math.max(...this.chromosomeData.map(d => d.SimilarBlocks.split(";").length))
     },
 
-    //Trying to set filtered data as a computed, I do hope it is fast
-    filteredData() {
-      let newFilteredData =[]; //serves as default value
-
-      if (this.chromosomeData != undefined) {
-        //Looking for data that are before the first nt to show but might be
-        //wide enough to appear, and therefore should be included
-        let underThresholdArray = this.chromosomeData.filter(
-          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
-        );
-
-        //Setting and filling the newFilteredData array with at least one element
-        if (underThresholdArray.length != 0) {
-
-          //If there is at least one data with index < firstNtToDisplay <= index+width
-          //then the rightmost one is added to newFilteredData
-          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
-          let arrayOfNearestUnselectedData = underThresholdArray.filter(
-            d => (Number(d.index) === maxSubIndex) //Number() is important here!
-          );
-
-          newFilteredData = arrayOfNearestUnselectedData;
-
-        } else {
-          //Else newFilteredData have at least the first data, so that it is never empty
-          newFilteredData = [this.chromosomeData[0]]
-        }
-
-        //Getting all elements with indices within the desired range
-        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
-        );
-
-        //Adding selected elements to the newFilteredData array
-        elementsWithIndexesWithinWindow.forEach( d => newFilteredData.push(d) );
-      }
-
-      return newFilteredData;
-    },
-
     //Get values out of Vuex store
     coreValue() {
       return this.$store.state.coreThresholdSlide //Name should be changed, again
@@ -168,12 +129,11 @@ export default {
       return this.$store.state.chromSelected
     },
 
-    /*
     //Computed of multiple objects to watch
     getDisplayBorders() {
       return { first: this.getFirstNtToDisplay, last: this.getLastNtToDisplay }
     },
-    */
+
 
   },
 
@@ -201,6 +161,15 @@ export default {
     colorsForFunctions: function() {
       this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
     },
+
+    chromosomeData: function() {
+      this.filterData();
+    },
+
+    //Everytime a border changes, filterData is updated
+    getDisplayBorders: function() {
+      this.filterData();
+    },
   },
 
   methods: {
@@ -214,6 +183,41 @@ export default {
 
       console.log('Full data fetched');
       this.fullData = data;
+    },
+
+    filterData() {
+      if (this.chromosomeData != undefined) {
+        //Looking for data that are before the first nt to show but might be
+        //wide enough to appear, and therefore should be included
+        let underThresholdArray = this.chromosomeData.filter(
+          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
+        );
+
+        //Setting and filling the filteredData array with at least one element
+        if (underThresholdArray.length != 0) {
+
+          //If there is at least one data with index < firstNtToDisplay <= index+width
+          //then the rightmost one is added to filteredData
+          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
+          let arrayOfNearestUnselectedData = underThresholdArray.filter(
+            d => (Number(d.index) === maxSubIndex) //Number() is important here!
+          );
+
+          this.filteredData = arrayOfNearestUnselectedData;
+
+        } else {
+          //Else filteredData have at least the first data, so that it is never empty
+          this.filteredData = [this.chromosomeData[0]]
+        }
+
+        //Getting all elements with indices within the desired range
+        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
+          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
+        );
+
+        //Adding selected elements to the filteredData array
+        elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
+      }
     },
 
     //This should be a stored function instead, or from a module at least
