@@ -3,15 +3,20 @@
     <img class="logo" alt="Vue logo" src="../assets/logo.png">
     <hr class="blueBar"/>
     <strong>Local Filters</strong>
-    
+
     <core-threshold class="coreThreshold" />
 
-    <DropDownChoice :msg="'Chromosome on display'" :choices="chromList" :id="'Yuca'"/>
+    <DropDownChoice :msg="'Chromosome on display'" :choices="$store.state.chromNames" :id="'Yuca'"/>
 
     <PavMatrixLegend class="pavLegend" />
-    
-    <MatrixPavZoom class="zoomSlider" :lastNt="lastNt" :displayWindowWidth="displayWindowWidth" />
-    
+
+    <MatrixPavZoom
+      class='zoomSlider'
+      :lastNt="$store.state.lastNtOfChrom"
+      :displayWindowWidth="$store.state.displayWindowWidth"
+      :updateGlobalZoom="function(ntWidthInPx) {$store.dispatch('updateCurrentZoomLvl', ntWidthInPx)}"
+    />
+
   </div>
 </template>
 
@@ -30,15 +35,11 @@ export default {
     DropDownChoice,
     PavMatrixLegend
   },
+  props: {
+  },
   data() {
     return {
-      lastNt: 41332,
-      displayWindowWidth: 1100,
-      chromList: ['0', '1', '2', '3',],
     }
-  },
-  props: {
-    msg: String
   }
 }
 </script>

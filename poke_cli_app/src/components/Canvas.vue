@@ -109,6 +109,10 @@ export default {
                   .clamp(true), //borders cannot be exceeded
     }
   },
+  beforeMount() {
+    console.log('firstNt is');
+    console.log(this.firstNtToDisplay);
+  },
   mounted() {
     this.drawCanvas();
     this.drawSvg();
@@ -135,6 +139,10 @@ export default {
     }
   },
   watch: {
+    ntWidthInPxInDisplayWindow() {
+      console.log('zoom has changed');
+      console.log(this.ntWidthInPxInDisplayWindow);
+    },
     //if inner lastNtToDisplay changes, this should be cascaded to the global variable
     lastNtToDisplay() {
       this.updateLastNt(this.lastNtToDisplay)

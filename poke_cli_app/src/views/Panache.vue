@@ -10,7 +10,7 @@
       :firstNtToDisplay="getFirstNtToDisplay"
       :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
       :updateLastNt="function(payload) {$store.dispatch('updateLastNtToDisplay', payload)}"
-      :ntWidthInPxInDisplayWindow="$store.state.ntWidthInPx.current"
+      :ntWidthInPxInDisplayWindow="$store.state.currentDisplayNtWidthInPx"
       :colorScaleFunction="$store.state.functionColorScale"
       :colorScaleCore="$store.state.orangeColorScale"
       :colorScaleDisp="$store.state.blueColorScale"
@@ -20,9 +20,9 @@
     <PavMatrixAndTracks
       :filteredData="filteredData"
       :genomeList="genomeList"
-      :chromList="chromList"
+      :chromList="$store.state.chromNames"
       :coreThreshold="coreThreshold"
-      :displaySizeOfNt="$store.state.ntWidthInPx.current"
+      :displaySizeOfNt="$store.state.currentDisplayNtWidthInPx"
       :displayHeight="displayWindowHeight"
       :displayWidth="displayWindowWidth"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
@@ -48,34 +48,19 @@ export default {
   data() {
     return {
       //Values based on full dataset
+      fullData: [],
       genomeList: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
-      chromList: ['0', '1', '2', '3' ],
-
-      //Variables directly linked to chromosomal data - changed on (re-)load
-      chromosomeData: [],
-      lastBlockStart: Number,
-      highestRepNumber: Number,
-      functionDiversity: Array,
-      currentWidestFeatureLength: Number,
-      maxPositionInNucleotide: 10000,
 
       //Used to define the rainbow color Scale
       pseudoRainbowList: [d3.rgb(0, 90, 200), d3.rgb(0, 200, 250),
         d3.rgb(120, 50, 40), d3.rgb(190, 140, 60), d3.rgb(240, 240, 50),
         d3.rgb(160, 250,130)],
 
-      //Data to change into computed
-      coreThreshold: Number,
-      pivotsForRainbow: Array,
-      colorsForFunctions: Array,
-
       //Variables specific to PavMatrixAndTracks
       canvasWidth: 600,
 
-
       //Variables specific to PavMatrixAndTracks
       //Dims should be responsive, depending on the available space!
-      filteredData: [],
       displayWindowWidth: 600,
       displayWindowHeight: 175,
     }
@@ -86,90 +71,149 @@ export default {
       return this.genomeList.length
     },
 
+    //chromosomeData and associated properties
+    chromosomeData() {
+      //in case full data is not loaded yet...
+      if (this.fullData[0] === undefined || this.fullData[0][this.getSelectedChrom] === undefined) {
+        return []
+      }
+
+      // else return the correct dataset
+      let selectedSubData = this.fullData[0][this.getSelectedChrom];
+      return selectedSubData;
+    },
+    // I SHOULD MANAGE DEFAULT VALUES HERE TOO
+    lastBlockStart() {
+      return Math.max(...this.chromosomeData.map(d => Number(d.FeatureStart)))
+    },
+    maxPositionInNucleotide() {
+      return Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
+    },
+    currentWidestFeatureLength() {
+      let arrayOfLength = this.chromosomeData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) );
+      return Math.max(...arrayOfLength);
+    },
+    coreThreshold() {
+      return this.coreValue /100 * this.nbOfGenomes //Should not be data dependant...
+    },
+    functionDiversity() {
+      return [...new Set(this.chromosomeData.map( d => d.Function))];
+    },
+    colorsForFunctions() {
+      let arrayOfInt = this.domainPivotsMaker(this.functionDiversity.length, this.functionDiversity.length);
+      //+1 so that there is no full circle in the rainbow
+      return arrayOfInt.map(intNum => d3.interpolateRainbow(intNum / (this.functionDiversity.length + 1)));
+    },
+    pivotsForRainbow() {
+      return this.domainPivotsMaker(this.pseudoRainbowList.length, this.lastBlockStart);
+    },
+    highestRepNumber() {
+      return Math.max(...this.chromosomeData.map(d => d.SimilarBlocks.split(";").length))
+    },
+
+    //Trying to set filtered data as a computed, I do hope it is fast
+    filteredData() {
+      let newFilteredData =[]; //serves as default value
+
+      if (this.chromosomeData != undefined) {
+        //Looking for data that are before the first nt to show but might be
+        //wide enough to appear, and therefore should be included
+        let underThresholdArray = this.chromosomeData.filter(
+          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
+        );
+
+        //Setting and filling the newFilteredData array with at least one element
+        if (underThresholdArray.length != 0) {
+
+          //If there is at least one data with index < firstNtToDisplay <= index+width
+          //then the rightmost one is added to newFilteredData
+          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
+          let arrayOfNearestUnselectedData = underThresholdArray.filter(
+            d => (Number(d.index) === maxSubIndex) //Number() is important here!
+          );
+
+          newFilteredData = arrayOfNearestUnselectedData;
+
+        } else {
+          //Else newFilteredData have at least the first data, so that it is never empty
+          newFilteredData = [this.chromosomeData[0]]
+        }
+
+        //Getting all elements with indices within the desired range
+        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
+          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
+        );
+
+        //Adding selected elements to the newFilteredData array
+        elementsWithIndexesWithinWindow.forEach( d => newFilteredData.push(d) );
+      }
+
+      return newFilteredData;
+    },
+
     //Get values out of Vuex store
     coreValue() {
-      return this.$store.state.coreThresholdSlide; //Name should be changed, again
+      return this.$store.state.coreThresholdSlide //Name should be changed, again
     },
     displaySizeOfNt() {
-      return this.$store.state.ntWidthInPx.current;
+      return this.$store.state.currentDisplayNtWidthInPx
     },
     getFirstNtToDisplay() {
-      return this.$store.state.firstNtToDisplay;
+      return this.$store.state.firstNtToDisplay
     },
     getLastNtToDisplay() {
-      return this.$store.state.lastNtToDisplay;
+      return this.$store.state.lastNtToDisplay
     },
     getSelectedChrom() {
-      return this.$store.state.chromSelected;
-    }
+      return this.$store.state.chromSelected
+    },
 
+    /*
     //Computed of multiple objects to watch
     getDisplayBorders() {
-      return { first:this.getFirstNtToDisplay, last:this.getLastNtToDisplay }
+      return { first: this.getFirstNtToDisplay, last: this.getLastNtToDisplay }
     },
+    */
+
   },
 
   beforeMount() {
-    this.fetchData();
+    this.fetchFullData();
   },
-    mounted() {
-  },
+
   watch: {
-    //Whenever the chosen chromosome changes, this.data should be updated
-    chromosomeData() {
-
-      this.functionDiversity = [...new Set(this.chromosomeData.map( d => d.Function))];
-      this.coreThreshold = this.coreValue /100 * this.nbOfGenomes; //Should not be data dependant...
-
-      //Update of the chrom-specific data
-      this.currentWidestFeatureLength = Math.max(...this.chromosomeData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) ));
-
-      this.lastBlockStart = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStart)));
-      this.pivotsForRainbow = this.domainPivotsMaker(this.pseudoRainbowList.length, this.lastBlockStart);
-      this.highestRepNumber = Math.max(...this.chromosomeData.map(d => d.SimilarBlocks.split(";").length));
-      this.colorsForFunctions = this.domainPivotsMaker(this.functionDiversity.length, this.functionDiversity.length)
-                                .map(intNum => d3.interpolateRainbow(intNum / (this.functionDiversity.length + 1)));
-
-      this.maxPositionInNucleotide = Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
-
-      //Re-creation of the colorScales
-      this.updateDataDependantColorScales();
-
-      //Updating the zoom values
-      this.$store.state.ntWidthInPx.minGlobal = this.displayWindowWidth / this.maxPositionInNucleotide;
-      this.$store.state.ntWidthInPx.minEfficiency = this.width / (0.05 * this.maxPositionInNucleotide);
-      this.$store.state.ntWidthInPx.current = this.$store.state.ntWidthInPx.minEfficiency;
-
-      this.filterDataForDisplay();
+    //update global value of the last position of the current chrom
+    maxPositionInNucleotide: function() {
+      this.$store.dispatch('updateLastNtOfChrom', this.maxPositionInNucleotide);
     },
 
-    //... wtf with coreValue & coreThreshold?
-    coreValue() {
-      this.coreThreshold = this.coreValue /100 * this.nbOfGenomes;
+    //Data that will change the Color Scales
+    pivotsForRainbow: function() {
+      this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList);
     },
-
-    //Whenever firstNt or lastNt changes, do...
-    getDisplayBorders() {
-      this.filterDataForDisplay();
+    highestRepNumber: function() {
+      this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
     },
-
-    getSelectedChrom() {
-      this.fetchData();
+    nbOfGenomes: function() {
+      this.$store.state.blueColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(246, 0, 95), d3.hcl(246, 65, 70)]);
+      this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
+    },
+    colorsForFunctions: function() {
+      this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
     },
   },
+
   methods: {
 
-    //WTF, why is this.chromosomeData given a value twice?
-    //Ok so the full dataset is fetched whenever he wants to change only a single Chrom?
-    //This makes no sense
-    //There should be:
-    //A the full data set, stored somewhere
-    //B chromosomeData, corresponding only to the selected part
-    async fetchData(){
-      this.chromosomeData = await d3.json("./mediumFakeDataWithAllBlocks.json");
-      console.log(this.chromosomeData);
-      this.chromosomeData = this.chromosomeData[0][this.$store.state.chromSelected];
-      console.log(this.chromosomeData);
+    //Fetches the full dataset, from which chromosomal data can be used
+    async fetchFullData() {
+      console.log('Fetching full dataset');
+
+      let dataPromise = d3.json("./mediumFakeDataWithAllBlocks.json");
+      let data = await dataPromise;
+
+      console.log('Full data fetched');
+      this.fullData = data;
     },
 
     //This should be a stored function instead, or from a module at least
@@ -196,49 +240,6 @@ export default {
       return(breakpoints);
     },
 
-    updateDataDependantColorScales() {
-
-      this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList);
-      this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
-      this.$store.state.blueColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(246, 0, 95), d3.hcl(246, 65, 70)]);
-      this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
-      this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
-
-    },
-
-    filterDataForDisplay() {
-
-        //Looking for data that are before the first nt to show but might be
-        //wide enough to appear, and therefore should be included
-        let underThresholdArray = this.chromosomeData.filter(
-          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
-        );
-
-        //Setting and filling the filteredData array with at least one element
-        if (underThresholdArray.length != 0) {
-          //If there is at least one data with index < firstNtToDisplay <= index+width
-          //then the rightmost one is added to filteredData
-
-          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
-          let arrayOfNearestUnselectedData = underThresholdArray.filter(
-            d => (Number(d.index) === maxSubIndex) //Number() is important here!
-          );
-
-          this.filteredData = arrayOfNearestUnselectedData;
-
-        } else {
-          //Else filteredData have at least the first data, so that it is never empty
-          this.filteredData = [this.chromosomeData[0]]
-        }
-
-        //Getting all elements with indices within the desired range
-        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
-        );
-
-        //Adding selected elements to the filteredData array
-        elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
-      }
   }
 }
 </script>

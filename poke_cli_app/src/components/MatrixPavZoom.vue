@@ -34,7 +34,7 @@ export default {
     },
     acceptableAmountOfNt: {
       type: Number,
-      default: undefined
+      default: undefined //default value in case data are not loaded
     },
     svgWidth: {
       type: Number,
@@ -47,29 +47,35 @@ export default {
     displayWindowWidth: {
       type: Number,
       required: true
+    },
+    updateGlobalZoom: {
+      type: Function,
+      required: true
     }
   },
   data() {
     let defaultAmount = (this.acceptableAmountOfNt === undefined ? this.lastNt/20 : this.acceptableAmountOfNt);
     let defaultRatio = this.convertToRatio(defaultAmount);
-    console.log(`minGlobalRatio will be ${this.convertToRatio(this.lastNt)}`);
+    //Does this change everytime this.lastNt changes?
 
     return {
       acceptableNtToPxRatio: defaultRatio,
-      ntWidthInPixel: {
-        current: defaultRatio,
-        minEfficiency: defaultRatio,
-        minGlobal: this.convertToRatio(this.lastNt),
-        max: 2
-      }
+      ntWidthInPixel: defaultRatio, // Updates --> minEfficiency per default, or user input
     }
   },
   computed: {
+    zoomThresholds() {
+      return {
+        minEfficiency: this.acceptableNtToPxRatio, // Updates --> max size under which too many elements are displayed, causing lag
+        minGlobal: this.convertToRatio(this.lastNt), // Updates --> min size to see all nt at once
+        max: 2 // Arbitrary value, it would not make much sense to see them bigger right now
+      }
+    },
     getCurrentRatio() {
-      return this.ntWidthInPixel.current
+      return this.ntWidthInPixel
     },
     getMinRatio() {
-      return this.ntWidthInPixel.minGlobal
+      return this.zoomThresholds.minGlobal
     },
     posBasedOnRatio() {
       return this.ratioToSliderPosScale(this.getCurrentRatio)
@@ -84,39 +90,38 @@ export default {
         self.updateNtToPxRatio(d3.event.x)
       }));
 
-    this.translateContent();
+    //Apply translation based on size so that the svg is centered
+    this.centerContent();
   },
   watch: {
     getCurrentRatio() {
-      console.log(`New size of nt in px is: ${this.getCurrentRatio}`);
-      this.$store.state.ntWidthInPx = this.ntWidthInPixel;
+      this.updateGlobalZoom(this.getCurrentRatio);
     },
-    getMinRatio() {
-      console.log(`minGlobal ratio has been set to ${this.getMinRatio}`)
+    acceptableNtToPxRatio() {
+      console.log('minEfficiency has changed')
     }
   },
   methods: {
     ratioToSliderPosScale(value) {
       let self = this;
       let scale = d3.scaleLinear() //Linear Scale in two parts as low values are more important than "high" values that would not be displayed properly anyway, it has the number of features to display as an input
-      .domain([self.ntWidthInPixel.minGlobal, self.ntWidthInPixel.minEfficiency, self.ntWidthInPixel.max]) //Last pivot is the "number" of features displayed when nt width == 10px
+      .domain([self.zoomThresholds.minGlobal, self.zoomThresholds.minEfficiency, self.zoomThresholds.max]) //Last pivot is the "number" of features displayed when nt width == 10px
       .range([-90, -30, 90])
       .clamp(true);
 
-      if (value===undefined) {
+      if (value === undefined) {
         return scale
       } else {
         return scale(value)
       }
     },
     updateNtToPxRatio(mousePos) {
-      this.ntWidthInPixel.current = this.ratioToSliderPosScale().invert(mousePos);
+      this.ntWidthInPixel = this.ratioToSliderPosScale().invert(mousePos);
     },
     convertToRatio(nbOfNtToSee) {
       return this.displayWindowWidth / nbOfNtToSee
     },
-    translateContent() {
-      console.log(this.svgWidth);
+    centerContent() {
       let svgToMove = d3.select(this.$refs.zoomLegend);
       let bboxSvg = svgToMove.node().getBBox();
       let xMove = ((this.svgWidth - bboxSvg.width) / 2) + -bboxSvg.x;

@@ -9,17 +9,16 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
-    ntWidthInPx: {
-      current: 0.5, // Updates --> minEfficiency per default, or user input
-      minEfficiency: 1, // Updates --> max size under which too many elements are displayed, causing lag
-      minGlobal: 0.01, // Updates --> min size to see all nt at once
-      max: 2 // Arbitrary value, it would not make much sense to see them bigger right now
-    },
+
+    displayWindowWidth: 600, //Should be responsively set
+
+    currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
     // Coords of the first and last nt to display on the block level vis
     firstNtToDisplay: 0,
     lastNtToDisplay: 1200,
-    chromSelected: 0, // Stores the id of the chrom to display at the block level vis
-    // It should be a String...
+    lastNtOfChrom: 1200, //'Rightmost' nt of the dataset
+    chromNames: ['0', '1', '2', '3'],
+    chromSelected: '0', // Stores the id of the chrom to display at the block level vis
 
     // Color scales used throughout the app
     pseudoRainbowColorScale: d3.scaleLinear().range([d3.hcl('yellow'), d3.hcl('yellow')]),
@@ -30,20 +29,32 @@ export default new Vuex.Store({
 
   },
   mutations: {
-    SET_NEW_FIRST_NT(state, payload) {
+    SET_NEW_FIRST_NT_OF_DISPLAY(state, payload) {
       state.firstNtToDisplay = payload
     },
-    SET_NEW_LAST_NT(state, payload) {
+    SET_NEW_LAST_NT_OF_DISPLAY(state, payload) {
       state.lastNtToDisplay = payload
+    },
+    SET_GLOBAL_LAST_NT(state, payload) {
+      state.lastNtOfChrom = payload
+    },
+    SET_NEW_CURRENT_ZOOM(state, payload) {
+      state.currentDisplayNtWidthInPx = payload
     }
   },
-  // functions to call within the app to apply mutations to the store, asynch
+  // Functions to call within the app to apply mutations to the store, asynch
   actions: {
     updateFirstNtToDisplay({commit}, ntIndex) {
-      commit('SET_NEW_FIRST_NT', ntIndex)
+      commit('SET_NEW_FIRST_NT_OF_DISPLAY', ntIndex)
     },
     updateLastNtToDisplay({commit}, ntIndex) {
-      commit('SET_NEW_LAST_NT', ntIndex)
+      commit('SET_NEW_LAST_NT_OF_DISPLAY', ntIndex)
+    },
+    updateLastNtOfChrom({commit}, ntIndex) {
+      commit('SET_GLOBAL_LAST_NT', ntIndex)
+    },
+    updateCurrentZoomLvl({commit}, ntWidthInPx) {
+      commit('SET_NEW_CURRENT_ZOOM', ntWidthInPx)
     }
   },
 })
