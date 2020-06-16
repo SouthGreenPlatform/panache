@@ -156,7 +156,6 @@ export default {
     //Whenever chromData change, both canvas and ticks should be redrawn
     chromosomeData: function() {
       this.drawCanvas();
-      this.drawSvg();
     },
     //Whenever the core threshold changes, the corresponding track should be re-drawn on canvas
     coreThreshold: function() {
@@ -177,8 +176,10 @@ export default {
         this.drawCanvasRectForCoreTrack(d, context, xPos, offset, blockWidth, trackHeight);
       })
     },
+    //Ticks scale should be redrawn only when maxPosInNt changes
     rightmostNt: function() {
-      this.rightmostNt.domain([0, this.rightmostNt]) //from nt space
+      this.miniatureTicksScale.domain([0, this.rightmostNt]);
+      this.drawSvg();
     }
   },
   methods: {
