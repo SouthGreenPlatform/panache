@@ -344,11 +344,6 @@ export default {
 <!--Here again are too many hardcoded values!!!/-->
 <style scoped>
 
-.canvasSvg {
-  position: relative;
-  display: inline-block;
-  margin-top: 1.2rem;
-}
 .canvas {
   position: absolute;
   display: block;
@@ -359,4 +354,5 @@ export default {
   display: block;
   z-index: 1;
 }
+
 </style>

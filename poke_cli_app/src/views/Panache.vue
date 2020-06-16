@@ -1,7 +1,8 @@
 <template>
   <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
-  <div class='upperPart'>
+  <div >
     <OverlayedCanvas
+      class='upperPart'
       :chromosomeData="chromosomeData"
       :nbOfGenomes="nbOfGenomes"
       :coreThreshold="coreThreshold"
@@ -269,10 +270,12 @@ export default {
   margin-left: 22%;
 }
 .upperPart {
-  z-index: 5;
+  display: inline-block;
+  margin-top: 1.2rem;
+  width: 600px;
+  height: 80px;
 }
 .underPart {
-  z-index: 5;
 }
 
 </style>
