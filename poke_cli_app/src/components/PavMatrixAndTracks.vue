@@ -84,8 +84,8 @@
         :ref="`panChromLegend_${panel.side}`"
         :id="`panChromLegend_${panel.side}`"
         :transform="panel.translation"
-        @mouseover="function() {eventHideRef(`panChromLegend_${panel.side}`)}"
-        @mouseout="function() {eventShowRef(`panChromLegend_${panel.side}`)}">
+        @mouseover="function() {eventFadeOutRef(`panChromLegend_${panel.side}`)}"
+        @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
           <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="legendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
           <text v-for="(chromName, index) in chromList"
             :key="chromName"
@@ -332,8 +332,8 @@ export default {
       .call(d3.drag().on("start drag", function() {
         self.updateBlockOffset(d3.event.y)
       }))
-      .on("mouseover", function() {self.eventShowRef('pavConditionalSlider')})
-      .on("mouseout", function() {self.eventHideRef('pavConditionalSlider')});
+      .on("mouseover", function() {self.eventFadeInRef('pavConditionalSlider')})
+      .on("mouseout", function() {self.eventFadeOutRef('pavConditionalSlider')});
 
   },
   updated() {
@@ -406,15 +406,31 @@ export default {
     XXXsomeConditionalEventXXX() {
       //Do something
     },
-    eventHideRef(refName) {
-      d3.select(this.$refs[refName])
-        .transition()
-        .attr('opacity', 0)
+    selectSvgFromRefs(refName) {
+      let ref = this.$refs[refName];
+      let svgToSelect;
+
+      if (Array.isArray(ref)) {
+        svgToSelect = ref[0]
+      } else {
+        svgToSelect = ref
+      }
+
+      return svgToSelect;
     },
-    eventShowRef(refName) {
-      d3.select(this.$refs[refName])
+    eventFadeOutRef(refName) {
+      let svgToSelect = this.selectSvgFromRefs(refName);
+
+      d3.select(svgToSelect)
         .transition()
-        .attr('opacity', 1)
+        .attr('opacity', 0);
+    },
+    eventFadeInRef(refName) {
+      let svgToSelect = this.selectSvgFromRefs(refName);
+
+      d3.select(svgToSelect)
+        .transition()
+        .attr('opacity', 1);
     },
     eventHighlightColor(refName) {
       //We have to select the first element of the ref, else it is not the svg...
