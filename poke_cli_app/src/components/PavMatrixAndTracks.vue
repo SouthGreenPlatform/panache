@@ -1,6 +1,7 @@
 <template>
 <div>
   <svg ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
+    <!-- SVG CONTAINER FOR THE PAV MATRIX -->
     <svg ref='pavMatrix' :height="pavMatrixHeight" :width="displayWidth">
       <g v-for="(genome, index) in genomeList" :key="genome" :id="`presence_${genome}`">
         <rect v-for="block in filteredData"
@@ -20,6 +21,7 @@
       <!-- related event are applied on 'mounted', could we find another way through Vue?-->
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
+      <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
       <g v-show="heightOfTotBlocks > pavMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
         <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
         <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
@@ -28,11 +30,13 @@
       </g>
     </svg>
     <g>
+    <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
       <defs>
         <linearGradient v-for="gradient in bgGradients" :key="gradient.side" :id="`repeatsBgLabelGradient_${gradient.side}`" :x1="gradient.x1" :x2="gradient.x2" y1="0" y2="0">
           <stop v-for="stop in stops" :key="`offset_${stop.offset}`" :offset="stop.offset" :stop-color="stop.color" :stop-opacity="stop.opacity"/>
         </linearGradient>
       </defs>
+      <!-- TRACKS OF INFORMATION -->
       <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, pavMatrixHeight+5)">
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
           <rect v-for="block in filteredData"
@@ -48,6 +52,7 @@
           />
         </g>
       </g>
+      <!-- SIMILARITY BOXES -->
       <!-- Hard written traslation could surely be improved-->
       <g id='structureInfo' :transform="writeTranslate(0, pavMatrixHeight+5 + 50)">
         <g id='blocksStructuralVariation'>
@@ -72,6 +77,7 @@
             />
           </g>
         </g>
+        <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
         <!-- Following labels could be more automatized through a data containing ids and positions depending on right/left legends /-->
         <g v-for="panel in structLegendPanels"
         :key="panel.side"
