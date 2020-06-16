@@ -8,7 +8,7 @@
       <g ref='ticksForMiniature' id='miniatureTicks' style='10px sans-serif' transform='translate(0,65)'>
       </g>
       <g>
-        <rect class="handle" :x="ntToCanvasPxPos(firstNtToDisplay)" :y="2*blockHeight-13" :width="widthOfHandle" height="46" style="stroke: rgb(59, 59, 59); fill-opacity: 0;" />
+        <rect class="handle" :x="ntToCanvasPxPos(firstNtToDisplay)" y=1 :width="widthOfHandle" :height="5*blockHeight +9" style="stroke: rgb(59, 59, 59); fill-opacity: 0;" />
         <rect class="track-overlay" ref="overlayOfCanvas" :y="2*blockHeight-12" :width="canvasWidth" :height="handleHeight" style="fill-opacity: 0;" cursor="ew-resize" />
       </g>
     </svg>
@@ -48,7 +48,7 @@ export default {
     },
     canvasHeight: {
       type: Number,
-      default: 80 //Must be enough to show 5*blockHeight + interspace + ticks
+      default: 100 //Must be enough to show 5*blockHeight + interspace + ticks
     },
     mainWindowWidth: {
       type: Number,
@@ -342,14 +342,17 @@ export default {
 
 .canvasSvg {
   position: relative;
+  display: block;
   margin-top: 1.2rem;
 }
 .canvas {
   position: absolute;
-  z-index: -1;
+  display: inline-block;
+  z-index: 0;
 }
-.superimposedSVG {
+.superimposedSvg {
   position: absolute;
-  z-index: 1;
+  display: inline-block;
+  z-index: 5;
 }
 </style>
