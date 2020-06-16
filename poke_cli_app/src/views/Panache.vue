@@ -5,7 +5,7 @@
       :nbOfGenomes="nbOfGenomes"
       :coreThreshold="coreThreshold"
       :rightmostNt="maxPositionInNucleotide"
-      :width="canvasWidth"
+      :canvasWidth="canvasWidth"
       :mainWindowWidth="displayWindowWidth"
       :firstNtToDisplay="getFirstNtToDisplay"
       :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
@@ -88,6 +88,9 @@ export default {
       return Math.max(...this.chromosomeData.map(d => Number(d.FeatureStart)))
     },
     maxPositionInNucleotide() {
+      if (this.chromosomeData[0] === undefined) {
+        return 10000 //default value
+      }
       return Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
     },
     currentWidestFeatureLength() {
@@ -154,7 +157,7 @@ export default {
     highestRepNumber: function() {
       this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
     },
-    nbOfGenomes: function() {
+    nbOfGenomes: function() { //not supposed to change with the data, unless some genomes are hidden
       this.$store.state.blueColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(246, 0, 95), d3.hcl(246, 65, 70)]);
       this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
     },

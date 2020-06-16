@@ -1,15 +1,15 @@
 <template>
   <div class="canvasSvg">
 
-    <canvas class="canvas" ref="CanvasMiniature" :width="width" :height="height"></canvas>
+    <canvas class="canvas" ref="CanvasMiniature" :width="canvasWidth" :height="canvasHeight"></canvas>
 
-    <svg class="svg" :width="width" :height="height">
+    <svg class="superimposedSvg" :width="canvasWidth" :height="canvasHeight">
       <!-- Following translation should be dynamic instead -->
       <g ref='ticksForMiniature' id='miniatureTicks' style='10px sans-serif' transform='translate(0,65)'>
       </g>
       <g>
-        <rect class="handle" :x="ntToCanvasPxPos(firstNtToDisplay)" :y="2*blockHeight-13" :width="widthOfHandle" height="46" style="stroke: rgb(59, 59, 59); position: absolute; fill-opacity: 0;" />
-        <rect class="track-overlay" ref="overlayOfCanvas" :y="2*blockHeight-12" :width="width" :height="handleHeight" style="fill-opacity: 0;" cursor="ew-resize" />
+        <rect class="handle" :x="ntToCanvasPxPos(firstNtToDisplay)" :y="2*blockHeight-13" :width="widthOfHandle" height="46" style="stroke: rgb(59, 59, 59); fill-opacity: 0;" />
+        <rect class="track-overlay" ref="overlayOfCanvas" :y="2*blockHeight-12" :width="canvasWidth" :height="handleHeight" style="fill-opacity: 0;" cursor="ew-resize" />
       </g>
     </svg>
 
@@ -42,11 +42,11 @@ export default {
       type: Number,
       required: true
     },
-    width: {
+    canvasWidth: {
       type: Number,
       default: 40 //will be replaced when data are loaded
     },
-    height: {
+    canvasHeight: {
       type: Number,
       default: 80 //Must be enough to show 5*blockHeight + interspace + ticks
     },
@@ -105,7 +105,7 @@ export default {
       },
       miniatureTicksScale: d3.scaleLinear()
                   .domain([0, this.rightmostNt]) //from nt space
-                  .range([0, this.width]) //to px space of canvas
+                  .range([0, this.canvasWidth]) //to px space of canvas
                   .clamp(true), //borders cannot be exceeded
     }
   },
@@ -240,7 +240,7 @@ export default {
       let context = canvas.node().getContext("2d");
 
       //Clear all previous drawing in case there was already one
-      context.clearRect(0, 0, canvas.attr("width"), canvas.attr("height"));
+      context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
       this.chromosomeData.forEach((d) => {
 
@@ -289,7 +289,7 @@ export default {
       //Borders for the accepted/available values of mouse_xPos
       //calculated for a centered handle
       let leftPxBorder = 0 + this.widthOfHandle/2;
-      let rightPxBorder = this.width - this.widthOfHandle/2;
+      let rightPxBorder = this.canvasWidth - this.widthOfHandle/2;
       let desiredPxLeftPos;
 
       //we change the value of the first nt to dsplay only if it is a valid one
@@ -305,7 +305,7 @@ export default {
 
       //When mouse is on the far right, stores max value instead
       } else if (mouse_xPos > rightPxBorder) {
-        desiredPxLeftPos = this.width - this.widthOfHandle;
+        desiredPxLeftPos = this.canvasWidth - this.widthOfHandle;
       }
 
       this.updateFirstNt(this.canvasPxPosToNt(desiredPxLeftPos));
@@ -319,18 +319,18 @@ export default {
         return;
       }
 
-      let xPosPx = Number(ntIndex) / this.rightmostNt * this.width;
+      let xPosPx = Number(ntIndex) / this.rightmostNt * this.canvasWidth;
       return xPosPx;
     },
     //reverse function of ntToCanvasPxPos
     canvasPxPosToNt(pxPos) {
       //Checking if we can do the division
-      if (this.width === 0) {
-        console.log('ERROR: canvas width should not be 0');
+      if (this.canvasWidth === 0) {
+        console.log('ERROR: canvasWidth should not be 0');
         return;
       }
 
-      let ntIndex = pxPos * this.rightmostNt / this.width;
+      let ntIndex = pxPos * this.rightmostNt / this.canvasWidth;
       return ntIndex;
     }
   }
@@ -338,24 +338,18 @@ export default {
 </script>
 
 <!--Here again are too many hardcoded values!!!/-->
-<style >
+<style scoped>
 
 .canvasSvg {
   position: relative;
-  display: block;
   margin-top: 1.2rem;
 }
-
 .canvas {
-  position: relative;
-  display: inline-block;
-  z-index: 1;
+  position: absolute;
+  z-index: -1;
 }
-
-.svg {
-  position: relative;
-  display: inline-block;
-  margin-top: -5.3rem;
-  z-index: 5;
+.superimposedSVG {
+  position: absolute;
+  z-index: 1;
 }
 </style>
