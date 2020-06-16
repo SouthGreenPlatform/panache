@@ -1,6 +1,7 @@
 <template>
   <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
-    <Canvas
+  <div class='upperPart'>
+    <OverlayedCanvas
       :chromosomeData="chromosomeData"
       :nbOfGenomes="nbOfGenomes"
       :coreThreshold="coreThreshold"
@@ -16,7 +17,9 @@
       :colorScaleDisp="$store.state.blueColorScale"
       :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
       :colorScaleSimilarities="$store.state.greenColorScale"
-      />
+    />
+  </div>
+  <div class='underPart'>
     <PavMatrixAndTracks
       :filteredData="filteredData"
       :genomeList="genomeList"
@@ -31,18 +34,19 @@
       :colorScaleSimilarities="$store.state.greenColorScale"
     />
   </div>
+  </div>
 </template>
 
 <script>
 import * as d3 from 'd3';
 
-import Canvas from '@/components/Canvas.vue';
+import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
 
 export default {
   name: 'Panache',
   components: {
-    Canvas,
+    OverlayedCanvas,
     PavMatrixAndTracks
   },
   data() {
@@ -251,7 +255,8 @@ export default {
 }
 </script>
 
-<style>
+<!--Here again are too many hardcoded values!!!/-->
+<style scoped>
 
 .whiteBlockCanvas {
   background-color: white;
@@ -259,6 +264,12 @@ export default {
   height: 25rem;
   border-radius: 50px;
   margin-left: 22%;
+}
+.upperPart {
+  z-index: 5;
+}
+.underPart {
+  z-index: 5;
 }
 
 </style>

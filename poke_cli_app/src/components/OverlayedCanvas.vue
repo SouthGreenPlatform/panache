@@ -48,7 +48,7 @@ export default {
     },
     canvasHeight: {
       type: Number,
-      default: 100 //Must be enough to show 5*blockHeight + interspace + ticks
+      default: 90 //Must be enough to show 5*blockHeight + interspace + ticks
     },
     mainWindowWidth: {
       type: Number,
@@ -139,27 +139,27 @@ export default {
     }
   },
   watch: {
-    ntWidthInPxInDisplayWindow() {
+    ntWidthInPxInDisplayWindow: function() {
       console.log('zoom has changed');
       console.log(this.ntWidthInPxInDisplayWindow);
     },
     //if inner lastNtToDisplay changes, this should be cascaded to the global variable
-    lastNtToDisplay() {
+    lastNtToDisplay: function() {
       this.updateLastNt(this.lastNtToDisplay)
     },
     //amount changes => either lastNt changes, then see prevous watch, or firstNt has to change instead
-    amountOfNtToDisplay() {
+    amountOfNtToDisplay: function() {
       if (this.lastNtToDisplay === this.rightmostNt) {
         this.updateFirstNt(Math.max(0, this.rightmostNt - this.amountOfNtToDisplay));
       }
     },
     //Whenever chromData change, both canvas and ticks should be redrawn
-    chromosomeData() {
+    chromosomeData: function() {
       this.drawCanvas();
       this.drawSvg();
     },
     //Whenever the core threshold changes, the corresponding track should be re-drawn on canvas
-    coreThreshold() {
+    coreThreshold: function() {
       let canvas = d3.select(this.$refs.CanvasMiniature);
       let context = canvas.node().getContext("2d");
 
@@ -176,6 +176,9 @@ export default {
 
         this.drawCanvasRectForCoreTrack(d, context, xPos, offset, blockWidth, trackHeight);
       })
+    },
+    rightmostNt: function() {
+      this.rightmostNt.domain([0, this.rightmostNt]) //from nt space
     }
   },
   methods: {
@@ -342,17 +345,17 @@ export default {
 
 .canvasSvg {
   position: relative;
-  display: block;
+  display: inline-block;
   margin-top: 1.2rem;
 }
 .canvas {
   position: absolute;
-  display: inline-block;
+  display: block;
   z-index: 0;
 }
 .superimposedSvg {
   position: absolute;
-  display: inline-block;
-  z-index: 5;
+  display: block;
+  z-index: 1;
 }
 </style>
