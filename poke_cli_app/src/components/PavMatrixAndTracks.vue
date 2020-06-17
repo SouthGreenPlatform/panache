@@ -47,7 +47,7 @@
             y='0'
             :transform="writeTranslateWithOffSet(0,0)"
             :height="blocksDimensions.height"
-            :width="ntToPx(block.FeatureStop - block.FeatureStart)"
+            :width="ntToPx(FeatureWidth(block))"
             :fill="track.colorScale(block)"
           />
         </g>
@@ -67,7 +67,7 @@
               class='movableBoxes'
               :x="ntToPx(block.index)"
               y='0'
-              :transform="writeTranslateWithOffSet( 0.5* ((block.FeatureStop - block.FeatureStart) - pptionBasedWidth(block, chromName) ), 0)"
+              :transform="writeTranslateWithOffSet( 0.5* (ntToPx(FeatureWidth(block)) - pptionBasedWidth(block, chromName) ), 0)"
               :width="pptionBasedWidth(block, chromName)"
               :height="blocksDimensions.height"
               :fill="similarityFill(block, chromName)"
@@ -101,6 +101,7 @@
         </g>
       </g>
     </g>
+    <!-- TOOLTIP -->
     <g :visibility="tooltipVisibility" id="hoverTooltip">
       <rect :x="tooltipData.x - tooltipData.margin"
       :y="tooltipData.y - tooltipData.margin"
@@ -386,8 +387,11 @@ export default {
         return pavEntry;
       }
     },
+    FeatureWidth(data) {
+      return Number(data.FeatureStop) - Number(data.FeatureStart)
+    },
     pptionBasedWidth(data, chromName) {
-      let originalSize = this.ntToPx(data.FeatureStop - data.FeatureStart);
+      let originalSize = this.ntToPx(this.FeatureWidth(data));
       let pptionalSize = (originalSize -2) * data[`copyPptionIn_Chr${chromName}`];
 
       return pptionalSize;
@@ -464,7 +468,7 @@ export default {
           break;
 
         case ("panChrom_rainbowed" === parentNodeId):
-          textToDisplay = "This block starts on position " + data.FeatureStart + " and is " + d3.format("~s")(Number(data.FeatureStop) - Number(data.FeatureStart)) + "b long" //d3.format is used to have the International System writing, with rounded values
+          textToDisplay = "This block starts on position " + data.FeatureStart + " and is " + d3.format("~s")(this.FeatureWidth(data)) + "b long" //d3.format is used to have the International System writing, with rounded values
           //ATTENTION for float values such as 1.586 for instance eval() considered the "." to be the announcement of a property (586, property of the object 1), therefore an ID error occured
           break;
 
