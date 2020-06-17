@@ -54,7 +54,7 @@
       </g>
       <!-- SIMILARITY BOXES -->
       <!-- Hard written traslation could surely be improved-->
-      <g id='structureInfo' :transform="writeTranslate(0, pavMatrixHeight+5 + 50)">
+      <g id='structureInfo' :transform="writeTranslate(0, pavMatrixHeight+5 + 55)">
         <g id='blocksStructuralVariation'>
           <g v-for="(chromName, index) in chromList"
             :key="chromName"
@@ -181,7 +181,7 @@ export default {
     blocksDimensions: {
       type: Object,
       default: function() {
-        return {width: 20, height: 10}
+        return {width: 20, height: 14}
       }
     },
     firstNtToDisplay: {
@@ -342,8 +342,8 @@ export default {
       return
     }
 
+    //Wait until update is fully finished
     this.$nextTick(function() {
-      console.log('Update is completely finished');
 
       let self = this;
 
@@ -498,26 +498,21 @@ export default {
 
       this.tooltipHeight = fontSizePx+2;
       this.tooltipWidth = ctx.measureText(textToDisplay).width;
-      console.log('TooltipData after recalculation of dims is:');
-      console.log(this.tooltipData);
     },
     calculateTooltipPos(axis) {
       let mouseCoord, offsetFromMouse, minBorder, maxBorder, belowBorderPos, beyondBorderPos;
       let mousePosRefSystem = this.$refs.PanacheSvgContainer;
-
-      console.log(`tooltipData is:`);
-      console.log(this.tooltipData);
 
       switch (axis) {
 
         //Working on width
         case 'x':
           mouseCoord = d3.mouse(mousePosRefSystem)[0]; //d3.event.x works only for drag events, not for cursor coordinates*
-          console.log(`coord x is ${mouseCoord}`);
+
           offsetFromMouse = 20;
           minBorder = this.tooltipData.margin + offsetFromMouse; //Leaving space for the background rectangle
           maxBorder = this.displayWidth - (this.tooltipData.width + this.tooltipData.margin);
-          console.log(`max border x is ${maxBorder}`);
+
           belowBorderPos = minBorder;
           //Text is now displayed on the left
           //beyondBorderPos IS NOT the maxBorder
@@ -527,13 +522,13 @@ export default {
         //Working on height
         case 'y':
           mouseCoord = d3.mouse(mousePosRefSystem)[1];
-          console.log(`coord y is ${mouseCoord}`);
+
           offsetFromMouse = this.tooltipData.height / 2; //For a y-centered text
           //Borders are not the same since pos of a text elt is at its bottom-left
           //y-axis has not the same origin than the svgContainer !
           minBorder = this.tooltipData.margin + this.tooltipData.height;
           maxBorder = this.displayHeight - this.tooltipData.margin;
-          console.log(`max border y is ${maxBorder}`);
+
           belowBorderPos = minBorder;
           beyondBorderPos = maxBorder;
           break;
@@ -556,17 +551,14 @@ export default {
       return chosenPos;
     },
     eventShowTooltip(refName, data) {
-      console.log('event is launched');
       this.computeTooltipText(refName, data);
-      this.tooltipVisibility = 'visible';
       this.computeTooltipDims(this.tooltipTxtContent);
-      console.log('ref of the text Bbox is');
-      console.log(this.$refs.tooltipForTracksAndPavMatrix);
-      console.log(this.$refs.tooltipForTracksAndPavMatrix.getBBox());
+
       this.tooltipXPos = this.calculateTooltipPos('x');
       this.tooltipYPos = this.calculateTooltipPos('y');
 
       this.eventHighlightColor(refName);
+
       this.tooltipVisibility = 'visible';
     },
     eventHideTooltip(refName) {

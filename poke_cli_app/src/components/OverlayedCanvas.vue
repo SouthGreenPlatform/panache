@@ -139,10 +139,6 @@ export default {
     }
   },
   watch: {
-    ntWidthInPxInDisplayWindow: function() {
-      console.log('zoom has changed');
-      console.log(this.ntWidthInPxInDisplayWindow);
-    },
     //if inner lastNtToDisplay changes, this should be cascaded to the global variable
     lastNtToDisplay: {
       immediate: true,
