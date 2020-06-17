@@ -144,8 +144,11 @@ export default {
       console.log(this.ntWidthInPxInDisplayWindow);
     },
     //if inner lastNtToDisplay changes, this should be cascaded to the global variable
-    lastNtToDisplay: function() {
-      this.updateLastNt(this.lastNtToDisplay)
+    lastNtToDisplay: {
+      immediate: true,
+      handler: function() {
+        this.updateLastNt(this.lastNtToDisplay)
+      }
     },
     //amount changes => either lastNt changes, then see prevous watch, or firstNt has to change instead
     amountOfNtToDisplay: function() {

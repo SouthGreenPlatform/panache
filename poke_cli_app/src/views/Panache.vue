@@ -62,11 +62,11 @@ export default {
         d3.rgb(160, 250,130)],
 
       //Variables specific to PavMatrixAndTracks
-      canvasWidth: 600,
+      canvasWidth: 1200,
 
       //Variables specific to PavMatrixAndTracks
       //Dims should be responsive, depending on the available space!
-      displayWindowWidth: 600,
+      displayWindowWidth: 1200,
       displayWindowHeight: 175,
       filteredData: []
     }
@@ -272,7 +272,7 @@ export default {
 .upperPart {
   display: inline-block;
   margin-top: 1.2rem;
-  width: 600px;
+  width: 1200px;
   height: 80px;
 }
 .underPart {
