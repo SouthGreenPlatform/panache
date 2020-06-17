@@ -206,7 +206,7 @@ export default {
     };
 
     let simFill = function(d, chromName) {
-      let color = self.colorScaleSimilarities.range()[1];
+      let color = d3.hcl(self.colorScaleSimilarities.range()[1]);
       color.h = 180;
       //Only the lightness changes between similarity boxes
       color.l = 100-(d[`copyPptionIn_Chr${chromName}`]*100*0.75);
