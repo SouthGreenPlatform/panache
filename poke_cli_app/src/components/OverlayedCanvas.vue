@@ -1,5 +1,5 @@
 <template>
-  <div class="canvasSvg">
+  <div class="canvasSvg" :style="containerDiv">
 
     <canvas class="canvas" ref="CanvasMiniature" :width="canvasWidth" :height="canvasHeight"></canvas>
 
@@ -136,6 +136,15 @@ export default {
     },
     widthOfHandle() {
       return this.ntToCanvasPxPos(this.lastNtToDisplay) - this.ntToCanvasPxPos(this.firstNtToDisplay)
+    },
+
+    //Style object to apply on upper div for a correct display
+    containerDiv() {
+      return {
+        display: 'inline-block',
+        width: `${this.canvasWidth}px`,
+        height: `${this.canvasHeight}px`,
+      }
     }
   },
   watch: {

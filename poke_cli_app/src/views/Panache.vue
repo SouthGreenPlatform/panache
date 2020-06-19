@@ -7,8 +7,8 @@
       :nbOfGenomes="nbOfGenomes"
       :coreThreshold="coreThreshold"
       :rightmostNt="maxPositionInNucleotide"
-      :canvasWidth="canvasWidth"
-      :mainWindowWidth="displayWindowWidth"
+      :canvasWidth="getWidthOfDisplay"
+      :mainWindowWidth="getWidthOfDisplay"
       :firstNtToDisplay="getFirstNtToDisplay"
       :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
       :updateLastNt="function(payload) {$store.dispatch('updateLastNtToDisplay', payload)}"
@@ -28,7 +28,7 @@
       :coreThreshold="coreThreshold"
       :displaySizeOfNt="$store.state.currentDisplayNtWidthInPx"
       :displayHeight="displayWindowHeight"
-      :displayWidth="displayWindowWidth"
+      :displayWidth="getWidthOfDisplay"
       :firstNtToDisplay="$store.state.firstNtToDisplay"
       :colorScaleFunction="$store.state.functionColorScale"
       :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
@@ -62,13 +62,10 @@ export default {
         d3.rgb(160, 250,130)],
 
       //Variables specific to PavMatrixAndTracks
-      canvasWidth: 1200,
-
-      //Variables specific to PavMatrixAndTracks
       //Dims should be responsive, depending on the available space!
-      displayWindowWidth: 1200,
       displayWindowHeight: 175,
-      filteredData: []
+      filteredData: [],
+
     }
   },
   computed: {
@@ -136,13 +133,14 @@ export default {
     getSelectedChrom() {
       return this.$store.state.chromSelected
     },
+    getWidthOfDisplay() {
+      return this.$store.state.displayWindowWidth
+    },
 
     //Computed of multiple objects to watch
     getDisplayBorders() {
       return { first: this.getFirstNtToDisplay, last: this.getLastNtToDisplay }
     },
-
-
   },
 
   beforeMount() {
@@ -270,10 +268,7 @@ export default {
   margin-left: 22%;
 }
 .upperPart {
-  display: inline-block;
   margin-top: 1.2rem;
-  width: 1200px;
-  height: 80px;
 }
 .underPart {
 }

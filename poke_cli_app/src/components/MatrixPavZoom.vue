@@ -56,6 +56,8 @@ export default {
   data() {
     let defaultAmount = (this.acceptableAmountOfNt === undefined ? this.lastNt/20 : this.acceptableAmountOfNt);
     let defaultRatio = this.convertToRatio(defaultAmount);
+    console.log('Default ratio for zoom is:');
+    console.log(defaultRatio);
     //Does this change everytime this.lastNt changes?
 
     return {
@@ -94,11 +96,32 @@ export default {
     this.centerContent();
   },
   watch: {
-    getCurrentRatio() {
+    getCurrentRatio: function() {
+      console.log('Ratio has changed to ...');
+      console.log(this.getCurrentRatio);
       this.updateGlobalZoom(this.getCurrentRatio);
+      console.log('Corresponding pos in px is supposed to be...');
+      console.log(this.ratioToSliderPosScale(this.getCurrentRatio));
+      console.log('since the max value associated with the righmost px is...');
+      console.log(this.zoomThresholds.max);
+      console.log('Indeed the max pos of domain is...');
+      console.log(this.ratioToSliderPosScale().domain());
+      console.log('Which is linked to this max pos of range...');
+      console.log(this.ratioToSliderPosScale().range());
     },
-    acceptableNtToPxRatio() {
+    acceptableNtToPxRatio: function() {
       console.log('minEfficiency has changed')
+    },
+    lastNt: function() {
+      console.log('lastNt has changed in zoom component:');
+      console.log(this.lastNt)
+    },
+    displayWindowWidth: {
+      immediate: true,
+      handler: function() {
+        console.log('Value of display window in Zoom component');
+        console.log(this.displayWindowWidth);
+      }
     }
   },
   methods: {
