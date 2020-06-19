@@ -54,34 +54,40 @@ export default {
     }
   },
   data() {
-    let defaultAmount = (this.acceptableAmountOfNt === undefined ? this.lastNt/20 : this.acceptableAmountOfNt);
-    let defaultRatio = this.convertToRatio(defaultAmount);
-    console.log('Default ratio for zoom is:');
-    console.log(defaultRatio);
-    //Does this change everytime this.lastNt changes?
-
     return {
-      acceptableNtToPxRatio: defaultRatio,
-      ntWidthInPixel: defaultRatio, // Updates --> minEfficiency per default, or user input
+      ntWidthInPixel: 0.5, // Updates --> minEfficiency per default, or user input
+      zoomHasBeenSelected: false
     }
   },
   computed: {
+    defaultAmountOfNtToShow() {
+      return (this.acceptableAmountOfNt === undefined ? this.lastNt/20 : this.acceptableAmountOfNt)
+    },
+    acceptableNtToPxRatio() {
+      return this.convertToRatio(this.defaultAmountOfNtToShow);
+    },
     zoomThresholds() {
+      //minEfficiency should not be too big, in order to stay smaller than the max threshold
+      let acceptableMinEfficiency = Math.min(1.2, this.acceptableNtToPxRatio);
+
       return {
-        minEfficiency: this.acceptableNtToPxRatio, // Updates --> max size under which too many elements are displayed, causing lag
+        minEfficiency: acceptableMinEfficiency, // Updates --> max size under which too many elements are displayed, causing lag
         minGlobal: this.convertToRatio(this.lastNt), // Updates --> min size to see all nt at once
         max: 2 // Arbitrary value, it would not make much sense to see them bigger right now
       }
     },
-    getCurrentRatio() {
-      return this.ntWidthInPixel
-    },
-    getMinRatio() {
-      return this.zoomThresholds.minGlobal
+    getMinEfficiencyRatio() {
+      return this.zoomThresholds.minEfficiency
     },
     posBasedOnRatio() {
-      return this.ratioToSliderPosScale(this.getCurrentRatio)
+      return this.ratioToSliderPosScale(this.ntWidthInPixel)
     }
+  },
+  created() {
+    //Set default zoom value depending on computed
+    console.log('ntWidthInPixel is set');
+    console.log(this.acceptableNtToPxRatio);
+    this.ntWidthInPixel = this.acceptableNtToPxRatio;
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
@@ -96,33 +102,22 @@ export default {
     this.centerContent();
   },
   watch: {
-    getCurrentRatio: function() {
-      console.log('Ratio has changed to ...');
-      console.log(this.getCurrentRatio);
-      this.updateGlobalZoom(this.getCurrentRatio);
-      console.log('Corresponding pos in px is supposed to be...');
-      console.log(this.ratioToSliderPosScale(this.getCurrentRatio));
-      console.log('since the max value associated with the righmost px is...');
-      console.log(this.zoomThresholds.max);
-      console.log('Indeed the max pos of domain is...');
-      console.log(this.ratioToSliderPosScale().domain());
-      console.log('Which is linked to this max pos of range...');
-      console.log(this.ratioToSliderPosScale().range());
+    getMinEfficiencyRatio: function() {
+      //If zoom has been manually selected, auto-update do not apply
+      if (!this.zoomHasBeenSelected) {
+        this.ntWidthInPixel = this.getMinEfficiencyRatio
+      }
     },
-    acceptableNtToPxRatio: function() {
-      console.log('minEfficiency has changed')
-    },
-    lastNt: function() {
-      console.log('lastNt has changed in zoom component:');
-      console.log(this.lastNt)
-    },
-    displayWindowWidth: {
+    ntWidthInPixel: {
       immediate: true,
       handler: function() {
-        console.log('Value of display window in Zoom component');
-        console.log(this.displayWindowWidth);
+        this.updateGlobalZoom(this.ntWidthInPixel);
       }
-    }
+    },
+    acceptableNtToPxRatio: function() {
+    },
+    lastNt: function() {
+    },
   },
   methods: {
     ratioToSliderPosScale(value) {
@@ -139,6 +134,7 @@ export default {
       }
     },
     updateNtToPxRatio(mousePos) {
+      this.zoomHasBeenSelected = true;
       this.ntWidthInPixel = this.ratioToSliderPosScale().invert(mousePos);
     },
     convertToRatio(nbOfNtToSee) {

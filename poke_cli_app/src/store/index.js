@@ -10,7 +10,7 @@ export default new Vuex.Store({
   state: {
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
 
-    displayWindowWidth: 600, //Should be responsively set
+    displayWindowWidth: 1200, //Should be responsively set
 
     currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
     // Coords of the first and last nt to display on the block level vis
