@@ -3,9 +3,9 @@
   <svg ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
     <!-- SVG CONTAINER FOR THE PAV MATRIX -->
     <svg ref='pavMatrix' :height="pavMatrixHeight" :width="displayWidth">
-      <g v-for="(genome, index) in genomeList" :key="genome" :id="`presence_${genome}`">
+      <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
         <rect v-for="block in filteredData"
-          :key="block.index"
+          :key="`idxForMatrix_${block.index}`"
           class='movableBlock'
           :x="ntToPx(block.index)"
           :y="applyOffset(index * blocksDimensions.height)"
@@ -40,7 +40,7 @@
       <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, pavMatrixHeight+5)">
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
           <rect v-for="block in filteredData"
-            :key="block.index"
+            :key="`idxForTracks_${block.index}`"
             :ref="`block${block.index}_${track.name}`"
             class='movableBlock'
             :x="ntToPx(block.index)"
@@ -57,13 +57,13 @@
       <g id='structureInfo' :transform="writeTranslate(0, pavMatrixHeight+5 + 55)">
         <g id='blocksStructuralVariation'>
           <g v-for="(chromName, index) in chromList"
-            :key="chromName"
+            :key="`chrom_${chromName}`"
             :id="`duplicationBoxes_${chromName}`"
             :transform="writeTranslate(0, index * blocksDimensions.height)">
             <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
             <!-- similarity boxes are translated in order to be centered-->
             <rect v-for="block in filteredData"
-              :key="block.index"
+              :key="`idxForStruct_${block.index}`"
               class='movableBoxes'
               :x="ntToPx(block.index)"
               y='0'
@@ -88,7 +88,7 @@
         @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
           <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="legendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
           <text v-for="(chromName, index) in chromList"
-            :key="chromName"
+            :key="`duplicationBoxes_${chromName}`"
             :x="panel.xPos"
             :y="index * (blocksDimensions.height)"
             dominant-baseline='hanging'
