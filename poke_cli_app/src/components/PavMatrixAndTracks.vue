@@ -1,7 +1,14 @@
 <template>
 <div>
   <svg ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
+    <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
+      <defs>
+        <linearGradient v-for="gradient in bgGradients" :key="gradient.side" :id="`repeatsBgLabelGradient_${gradient.side}`" :x1="gradient.x1" :x2="gradient.x2" y1="0" y2="0">
+          <stop v-for="stop in stops" :key="`offset_${stop.offset}`" :offset="stop.offset" :stop-color="stop.color" :stop-opacity="stop.opacity"/>
+        </linearGradient>
+      </defs>
     <!-- SVG CONTAINER FOR THE PAV MATRIX -->
+    <!-- That way the bottom of the blocks is automatically cropped -->
     <svg ref='pavMatrix' :height="pavMatrixHeight" :width="displayWidth">
       <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
         <rect v-for="block in filteredData"
@@ -18,7 +25,24 @@
           @mouseout="XXXsomeConditionalEventXXX"
         />
       </g>
-      <!-- related event are applied on 'mounted', could we find another way through Vue?-->
+      <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
+      <g ref='genomeLegend'
+        id='genomeLegend'
+        @mouseover="function() {eventFadeOutRef('genomeLegend')}"
+        @mouseout="function() {eventFadeInRef('genomeLegend')}">
+            <rect x='0' y='0' :height="pavMatrixHeight+1" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
+            <text v-for="(genome, index) in genomeList"
+              :key="`genomeLabel_${genome}`"
+              x='2'
+              :y="applyOffset(index * blocksDimensions.height)"
+              dominant-baseline='hanging'
+              font-family='sans-serif'
+              font-size='10px'
+              text-anchor='start'
+              >
+              {{genome}}
+            </text>
+          </g>
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
       <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
@@ -30,12 +54,6 @@
       </g>
     </svg>
     <g>
-    <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
-      <defs>
-        <linearGradient v-for="gradient in bgGradients" :key="gradient.side" :id="`repeatsBgLabelGradient_${gradient.side}`" :x1="gradient.x1" :x2="gradient.x2" y1="0" y2="0">
-          <stop v-for="stop in stops" :key="`offset_${stop.offset}`" :offset="stop.offset" :stop-color="stop.color" :stop-opacity="stop.opacity"/>
-        </linearGradient>
-      </defs>
       <!-- TRACKS OF INFORMATION -->
       <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, pavMatrixHeight+5)">
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
@@ -86,7 +104,7 @@
         :transform="panel.translation"
         @mouseover="function() {eventFadeOutRef(`panChromLegend_${panel.side}`)}"
         @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
-          <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="legendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
+          <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="chromLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
           <text v-for="(chromName, index) in chromList"
             :key="`duplicationBoxes_${chromName}`"
             :x="panel.xPos"
@@ -223,7 +241,11 @@ export default {
     }
 
     let longestSizeOfChromName = Math.max(...this.chromList.map( d => d.length));
-    let legendPanelWidth = longestSizeOfChromName * 10;
+    let chromLegendPanelWidth = longestSizeOfChromName * 10;
+
+    let longestSizeOfGenoName = Math.max(...this.genomeList.map( d => d.length));
+    let genoLegendPanelWidth = longestSizeOfGenoName * 10;
+
 
     return {
       heightOfTotBlocks:heightOfTotBlocks,
@@ -290,14 +312,15 @@ export default {
         {
           side: 'right',
           anchor: 'end',
-          xPos: legendPanelWidth,
-          translation: this.writeTranslate(this.displayWidth-legendPanelWidth,0)
+          xPos: chromLegendPanelWidth,
+          translation: this.writeTranslate(this.displayWidth-chromLegendPanelWidth,0)
         }
       ],
       similarityFill: simFill,
       similarityStroke: simStroke,
       blockOriginColor: d3.hcl(10,50,80),
-      legendPanelWidth: legendPanelWidth,
+      chromLegendPanelWidth: chromLegendPanelWidth,
+      genoLegendPanelWidth: genoLegendPanelWidth,
       tooltipTxtContent: '',
       tooltipVisibility: 'hidden',
       tooltipMargin: 2,
