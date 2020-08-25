@@ -17,15 +17,26 @@
       :updateGlobalZoom="function(ntWidthInPx) {$store.dispatch('updateCurrentZoomLvl', ntWidthInPx)}"
     />
 
+    <HollowAreaFinder
+      :arrayOfPanFeatures="chromData"
+      :lastNt="$store.state.lastNtOfChrom"
+      :nbOfGenomes="6"
+      :currentFirstNt="$store.state.firstNtToDisplay"
+      :displayWindowWidth="$store.state.displayWindowWidth"
+      :ntWidthInPixel="$store.state.currentDisplayNtWidthInPx"
+      :updateGlobalFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
+    />
+
   </div>
 </template>
 
 <script>
 
 import CoreThreshold from '@/components/CoreThreshold.vue';
-import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
+import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
+import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
 export default {
   name: 'LocalFilter',
