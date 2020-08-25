@@ -10,8 +10,8 @@
       :canvasWidth="displayWindowWidth"
       :mainWindowWidth="displayWindowWidth"
       :firstNtToDisplay="firstNt"
-      :updateFirstNt="function(payload) {updateFirstNtToDisplay(payload)}"
-      :updateLastNt="function(payload) {updateLastNtToDisplay(payload)}"
+      :updateFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+      :updateLastNt="function(payload) { updateLastNtToDisplay(payload) }"
       :ntWidthInPxInDisplayWindow="ntWidthInPx"
       :colorScaleFunction="colorScaleFunction"
       :colorScaleCore="colorScaleCore"
@@ -165,35 +165,14 @@ export default {
       this.updateChromDataInDisplay(this.tempChromData)
     },
 
-/*    //Update data in Display whenever the chromosome data change
+    //Update data in Display whenever the chromosome data change
     chromData: function() {
       this.filterData();
     },
-*/
+
     //Everytime a border changes, filterData is updated
     getDisplayBorders: function() {
       this.filterData();
-    },
-
-
-    fullData: {
-      handler: function() { //not supposed to change with the data, unless some genomes are hidden
-        console.log({fullData: this.fullData})
-      },
-      immediate: true
-    },
-    chromData: {
-      handler: function() { //not supposed to change with the data, unless some genomes are hidden
-        console.log({chromData: this.chromData})
-        this.filterData();
-      },
-      immediate: true
-    },
-    filteredData: {
-      handler: function() { //not supposed to change with the data, unless some genomes are hidden
-        console.log({filteredData: this.filteredData})
-      },
-      immediate: true
     },
 
   },
@@ -244,10 +223,6 @@ export default {
         //Adding selected elements to the filteredData array
         elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
 
-        console.log({underThresholdArray: underThresholdArray,
-        indexLeft:this.firstNt,
-        indexRight:this.lastNt,
-        })
       }
     },
 

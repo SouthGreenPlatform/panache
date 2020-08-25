@@ -14,7 +14,7 @@
       class='zoomSlider'
       :lastNt="globalLastNt"
       :displayWindowWidth="displayWindowWidth"
-      :updateGlobalZoom="function(ntWidthInPx) {$store.dispatch('updateCurrentZoomLvl', ntWidthInPx)}"
+      :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
 
   </div>
@@ -26,7 +26,8 @@ import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
-import { mapState, mapGetters } from 'vuex';
+
+import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'LocalFilter',
@@ -55,8 +56,11 @@ export default {
       nbOfGenomes: 'nbOfGenomesInDisplay'
     })
   },
-  beforeMount() {
-    console.log(this.$store.getters)
+  methods: {
+    //Get Actions from the store
+    ...mapActions([
+      'updateCurrentZoomLvl'
+    ]),
   }
 }
 </script>
