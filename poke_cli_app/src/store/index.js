@@ -12,6 +12,8 @@ export default new Vuex.Store({
 
     displayWindowWidth: 1200, //Should be responsively set
 
+    chromDataInDisplay: [], //Chromosomal dataset
+
     currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
     // Coords of the first and last nt to display on the block level vis
     firstNtToDisplay: 0,
@@ -29,6 +31,9 @@ export default new Vuex.Store({
 
   },
   mutations: {
+    SET_CURRENT_CHROM_DATA_IN_DISPLAY(state, payload) {
+      state.chromDataInDisplay = payload
+    },
     SET_NEW_FIRST_NT_OF_DISPLAY(state, payload) {
       state.firstNtToDisplay = payload
     },
@@ -44,6 +49,9 @@ export default new Vuex.Store({
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
+    updateChromDataInDisplay({commit}, ntIndex) {
+      commit('SET_CURRENT_CHROM_DATA_IN_DISPLAY', ntIndex)
+    },
     updateFirstNtToDisplay({commit}, ntIndex) {
       commit('SET_NEW_FIRST_NT_OF_DISPLAY', ntIndex)
     },
