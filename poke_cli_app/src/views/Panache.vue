@@ -10,8 +10,8 @@
       :canvasWidth="displayWindowWidth"
       :mainWindowWidth="displayWindowWidth"
       :firstNtToDisplay="firstNt"
-      :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
-      :updateLastNt="function(payload) {$store.dispatch('updateLastNtToDisplay', payload)}"
+      :updateFirstNt="function(payload) {updateFirstNtToDisplay(payload)}"
+      :updateLastNt="function(payload) {updateLastNtToDisplay(payload)}"
       :ntWidthInPxInDisplayWindow="ntWidthInPx"
       :colorScaleFunction="colorScaleFunction"
       :colorScaleCore="colorScaleCore"
@@ -44,7 +44,7 @@ import * as d3 from 'd3';
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
 
-import { mapState, mapGetters } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Panache',
@@ -162,7 +162,7 @@ export default {
 
     //Update stored chromosome data when changes apply
     tempChromData: function() {
-      this.$store.dispatch('updateChromDataInDisplay', this.tempChromData)
+      this.updateChromDataInDisplay(this.tempChromData)
     },
 
 /*    //Update data in Display whenever the chromosome data change
@@ -274,6 +274,13 @@ export default {
       }
       return(breakpoints);
     },
+
+    //Get Actions from the store
+    ...mapActions([
+      'updateChromDataInDisplay',
+      'updateFirstNtToDisplay',
+      'updateLastNtToDisplay'
+    ]),
 
   }
 }
