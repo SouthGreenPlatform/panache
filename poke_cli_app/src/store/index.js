@@ -12,13 +12,14 @@ export default new Vuex.Store({
 
     displayWindowWidth: 1200, //Should be responsively set
 
+    genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
+
     chromDataInDisplay: [], //Chromosomal dataset
 
     currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
     // Coords of the first and last nt to display on the block level vis
     firstNtToDisplay: 0,
     lastNtToDisplay: 1200,
-    lastNtOfChrom: 1200, //'Rightmost' nt of the dataset
     chromNames: ['0', '1', '2', '3'],
     chromSelected: '0', // Stores the id of the chrom to display at the block level vis
 
@@ -29,6 +30,17 @@ export default new Vuex.Store({
     orangeColorScale: d3.scaleLinear().range([d3.hcl('orange'), d3.hcl('orange')]),
     functionColorScale: d3.scaleLinear().range([d3.hcl('purple'), d3.hcl('purple')]),
 
+  },
+  getters: {
+    nbOfGenomesInDisplay: state => {
+      return state.genomeListInDisplay.length
+    },
+    lastNtOfChrom: state => {
+      if (state.chromDataInDisplay[0] === undefined) {
+        return 10000 //default value
+      }
+      return Math.max(...state.chromDataInDisplay.map(d => Number(d.FeatureStop)));
+    },
   },
   mutations: {
     SET_CURRENT_CHROM_DATA_IN_DISPLAY(state, payload) {

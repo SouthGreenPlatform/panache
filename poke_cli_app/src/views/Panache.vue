@@ -3,36 +3,36 @@
   <div >
     <OverlayedCanvas
       class='upperPart'
-      :chromosomeData="chromosomeData"
+      :chromosomeData="chromData"
       :nbOfGenomes="nbOfGenomes"
       :coreThreshold="coreThreshold"
-      :rightmostNt="maxPositionInNucleotide"
-      :canvasWidth="getWidthOfDisplay"
-      :mainWindowWidth="getWidthOfDisplay"
-      :firstNtToDisplay="getFirstNtToDisplay"
+      :rightmostNt="globalLastNt"
+      :canvasWidth="displayWindowWidth"
+      :mainWindowWidth="displayWindowWidth"
+      :firstNtToDisplay="firstNt"
       :updateFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
       :updateLastNt="function(payload) {$store.dispatch('updateLastNtToDisplay', payload)}"
-      :ntWidthInPxInDisplayWindow="$store.state.currentDisplayNtWidthInPx"
-      :colorScaleFunction="$store.state.functionColorScale"
-      :colorScaleCore="$store.state.orangeColorScale"
-      :colorScaleDisp="$store.state.blueColorScale"
-      :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
-      :colorScaleSimilarities="$store.state.greenColorScale"
+      :ntWidthInPxInDisplayWindow="ntWidthInPx"
+      :colorScaleFunction="colorScaleFunction"
+      :colorScaleCore="colorScaleCore"
+      :colorScaleDisp="colorScaleDisp"
+      :colorScaleRainbow="colorScaleRainbow"
+      :colorScaleSimilarities="colorScaleSimilarities"
     />
   </div>
   <div class='underPart'>
     <PavMatrixAndTracks
       :filteredData="filteredData"
       :genomeList="genomeList"
-      :chromList="$store.state.chromNames"
+      :chromList="chromNames"
       :coreThreshold="coreThreshold"
-      :displaySizeOfNt="$store.state.currentDisplayNtWidthInPx"
+      :displaySizeOfNt="ntWidthInPx"
       :displayHeight="displayWindowHeight"
-      :displayWidth="getWidthOfDisplay"
-      :firstNtToDisplay="$store.state.firstNtToDisplay"
-      :colorScaleFunction="$store.state.functionColorScale"
-      :colorScaleRainbow="$store.state.pseudoRainbowColorScale"
-      :colorScaleSimilarities="$store.state.greenColorScale"
+      :displayWidth="displayWindowWidth"
+      :firstNtToDisplay="firstNt"
+      :colorScaleFunction="colorScaleFunction"
+      :colorScaleRainbow="colorScaleRainbow"
+      :colorScaleSimilarities="colorScaleSimilarities"
     />
   </div>
   </div>
@@ -44,6 +44,8 @@ import * as d3 from 'd3';
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
 
+import { mapState, mapGetters } from 'vuex';
+
 export default {
   name: 'Panache',
   components: {
@@ -54,7 +56,6 @@ export default {
     return {
       //Values based on full dataset
       fullData: [],
-      genomeList: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
 
       //Used to define the rainbow color Scale
       pseudoRainbowList: [d3.rgb(0, 90, 200), d3.rgb(0, 200, 250),
@@ -69,41 +70,30 @@ export default {
     }
   },
   computed: {
-    //data based computeds
-    nbOfGenomes() {
-      return this.genomeList.length
-    },
-
-    //chromosomeData and associated properties
-    chromosomeData() {
+    //chromosome data and associated properties
+    tempChromData() {
       //in case full data is not loaded yet...
-      if (this.fullData[0] === undefined || this.fullData[0][this.getSelectedChrom] === undefined) {
+      if (this.fullData[0] === undefined || this.fullData[0][this.selectedChrom] === undefined) {
         return []
       }
 
       // else return the correct dataset
-      let selectedSubData = this.fullData[0][this.getSelectedChrom];
+      let selectedSubData = this.fullData[0][this.selectedChrom];
       return selectedSubData;
     },
     // I SHOULD MANAGE DEFAULT VALUES HERE TOO
     lastBlockStart() {
-      return Math.max(...this.chromosomeData.map(d => Number(d.FeatureStart)))
-    },
-    maxPositionInNucleotide() {
-      if (this.chromosomeData[0] === undefined) {
-        return 10000 //default value
-      }
-      return Math.max(...this.chromosomeData.map(d => Number(d.FeatureStop)));
+      return Math.max(...this.chromData.map(d => Number(d.FeatureStart)))
     },
     currentWidestFeatureLength() {
-      let arrayOfLength = this.chromosomeData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) );
+      let arrayOfLength = this.chromData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) );
       return Math.max(...arrayOfLength);
     },
     coreThreshold() {
       return this.coreValue /100 * this.nbOfGenomes //Should not be data dependant...
     },
     functionDiversity() {
-      return [...new Set(this.chromosomeData.map( d => d.Function))];
+      return [...new Set(this.chromData.map( d => d.Function))];
     },
     colorsForFunctions() {
       let arrayOfInt = this.domainPivotsMaker(this.functionDiversity.length, this.functionDiversity.length);
@@ -114,33 +104,36 @@ export default {
       return this.domainPivotsMaker(this.pseudoRainbowList.length, this.lastBlockStart);
     },
     highestRepNumber() {
-      return Math.max(...this.chromosomeData.map(d => d.SimilarBlocks.split(";").length))
+      return Math.max(...this.chromData.map(d => d.SimilarBlocks.split(";").length))
     },
 
-    //Get values out of Vuex store
-    coreValue() {
-      return this.$store.state.coreThresholdSlide //Name should be changed, again
-    },
-    displaySizeOfNt() {
-      return this.$store.state.currentDisplayNtWidthInPx
-    },
-    getFirstNtToDisplay() {
-      return this.$store.state.firstNtToDisplay
-    },
-    getLastNtToDisplay() {
-      return this.$store.state.lastNtToDisplay
-    },
-    getSelectedChrom() {
-      return this.$store.state.chromSelected
-    },
-    getWidthOfDisplay() {
-      return this.$store.state.displayWindowWidth
-    },
 
     //Computed of multiple objects to watch
     getDisplayBorders() {
-      return { first: this.getFirstNtToDisplay, last: this.getLastNtToDisplay }
+      return { first: this.firstNt, last: this.lastNt }
     },
+
+    //Get values out of Vuex store
+    ...mapState({
+      coreValue: 'coreThresholdSlide',
+      genomeList: 'genomeListInDisplay',
+      chromNames: 'chromNames',
+      selectedChrom: 'chromSelected',
+      chromData: 'chromDataInDisplay',
+      firstNt: 'firstNtToDisplay',
+      lastNt: 'lastNtToDisplay',
+      displayWindowWidth: 'displayWindowWidth',
+      ntWidthInPx: 'currentDisplayNtWidthInPx',
+      colorScaleRainbow: 'pseudoRainbowColorScale',
+      colorScaleSimilarities: 'greenColorScale',
+      colorScaleDisp: 'blueColorScale',
+      colorScaleCore: 'orangeColorScale',
+      colorScaleFunction: 'functionColorScale'
+    }),
+    ...mapGetters({
+      nbOfGenomes: 'nbOfGenomesInDisplay',
+      globalLastNt: 'lastNtOfChrom',
+    })
   },
 
   beforeMount() {
@@ -148,10 +141,6 @@ export default {
   },
 
   watch: {
-    //update global value of the last position of the current chrom
-    maxPositionInNucleotide: function() {
-      this.$store.dispatch('updateLastNtOfChrom', this.maxPositionInNucleotide);
-    },
 
     //Data that will change the Color Scales
     pivotsForRainbow: function() {
@@ -171,14 +160,42 @@ export default {
       this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
     },
 
-    chromosomeData: function() {
-      this.filterData();
+    //Update stored chromosome data when changes apply
+    tempChromData: function() {
+      this.$store.dispatch('updateChromDataInDisplay', this.tempChromData)
     },
 
+/*    //Update data in Display whenever the chromosome data change
+    chromData: function() {
+      this.filterData();
+    },
+*/
     //Everytime a border changes, filterData is updated
     getDisplayBorders: function() {
       this.filterData();
     },
+
+
+    fullData: {
+      handler: function() { //not supposed to change with the data, unless some genomes are hidden
+        console.log({fullData: this.fullData})
+      },
+      immediate: true
+    },
+    chromData: {
+      handler: function() { //not supposed to change with the data, unless some genomes are hidden
+        console.log({chromData: this.chromData})
+        this.filterData();
+      },
+      immediate: true
+    },
+    filteredData: {
+      handler: function() { //not supposed to change with the data, unless some genomes are hidden
+        console.log({filteredData: this.filteredData})
+      },
+      immediate: true
+    },
+
   },
 
   methods: {
@@ -195,11 +212,11 @@ export default {
     },
 
     filterData() {
-      if (this.chromosomeData != undefined) {
+      if (this.chromData[0] != undefined) {
         //Looking for data that are before the first nt to show but might be
         //wide enough to appear, and therefore should be included
-        let underThresholdArray = this.chromosomeData.filter(
-          d => ( d.index <= this.getFirstNtToDisplay ) && ( d.index >= this.getFirstNtToDisplay - this.currentWidestFeatureLength )
+        let underThresholdArray = this.chromData.filter(
+          d => ( d.index <= this.firstNt ) && ( d.index >= this.firstNt - this.currentWidestFeatureLength )
         );
 
         //Setting and filling the filteredData array with at least one element
@@ -216,16 +233,21 @@ export default {
 
         } else {
           //Else filteredData have at least the first data, so that it is never empty
-          this.filteredData = [this.chromosomeData[0]]
+          this.filteredData = [this.chromData[0]]
         }
 
         //Getting all elements with indices within the desired range
-        let elementsWithIndexesWithinWindow = this.chromosomeData.filter(
-          d => ( Number(d.index) >= this.getFirstNtToDisplay ) && ( Number(d.index) <= this.getLastNtToDisplay )
+        let elementsWithIndexesWithinWindow = this.chromData.filter(
+          d => ( Number(d.index) >= this.firstNt ) && ( Number(d.index) <= this.lastNt )
         );
 
         //Adding selected elements to the filteredData array
         elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
+
+        console.log({underThresholdArray: underThresholdArray,
+        indexLeft:this.firstNt,
+        indexRight:this.lastNt,
+        })
       }
     },
 

@@ -6,25 +6,15 @@
 
     <core-threshold class="coreThreshold" />
 
-    <DropDownChoice :msg="'Chromosome on display'" :choices="$store.state.chromNames" :id="'Yuca'"/>
+    <DropDownChoice :msg="'Chromosome on display'" :choices="chromNames" :id="'Yuca'"/>
 
     <PavMatrixLegend class="pavLegend" />
 
     <MatrixPavZoom
       class='zoomSlider'
-      :lastNt="$store.state.lastNtOfChrom"
-      :displayWindowWidth="$store.state.displayWindowWidth"
+      :lastNt="globalLastNt"
+      :displayWindowWidth="displayWindowWidth"
       :updateGlobalZoom="function(ntWidthInPx) {$store.dispatch('updateCurrentZoomLvl', ntWidthInPx)}"
-    />
-
-    <HollowAreaFinder
-      :arrayOfPanFeatures="chromData"
-      :lastNt="$store.state.lastNtOfChrom"
-      :nbOfGenomes="6"
-      :currentFirstNt="$store.state.firstNtToDisplay"
-      :displayWindowWidth="$store.state.displayWindowWidth"
-      :ntWidthInPixel="$store.state.currentDisplayNtWidthInPx"
-      :updateGlobalFirstNt="function(payload) {$store.dispatch('updateFirstNtToDisplay', payload)}"
     />
 
   </div>
@@ -36,7 +26,7 @@ import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
-import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'LocalFilter',
@@ -44,13 +34,29 @@ export default {
     CoreThreshold,
     MatrixPavZoom,
     DropDownChoice,
-    PavMatrixLegend
+    PavMatrixLegend,
   },
   props: {
   },
   data() {
     return {
     }
+  },
+  computed: {
+    ...mapState({
+      chromNames: 'chromNames',
+      chromData: 'chromDataInDisplay',
+      firstNt: 'firstNtToDisplay',
+      displayWindowWidth: 'displayWindowWidth',
+      ntWidthInPx: 'currentDisplayNtWidthInPx',
+    }),
+    ...mapGetters({
+      globalLastNt: 'lastNtOfChrom',
+      nbOfGenomes: 'nbOfGenomesInDisplay'
+    })
+  },
+  beforeMount() {
+    console.log(this.$store.getters)
   }
 }
 </script>
