@@ -1,20 +1,24 @@
 <template>
 
 <div>
-  <label for='HA_pavRate'>Absence rate (0-1):</label>
-  <input v-model.number="paramAbsenceRate" type='number' id='HA_pavRate' min='0' max='1' step=0.01>
-  <label for='HA_consBlocks'>Number of consecutive blocks:</label>
-  <input v-model.number="paramConsecutiveBlock" type='number' id='HA_consBlocks' min='1' step=1>
-  <p>There are {{nbOfRegionsFound}} regions matching these criteria</p>
-  <p>{{nbOfRegionsBefore}} before</p>
-  <p>{{nbOfRegionsAfter}} after</p>
-  <p>Targeted position: {{targetedPosNt}}</p>
-  <button v-on:click="skipBackward" :disabled="leftmostAreaIsReached">&laquo;</button>
-  <p>{{distanceToPreviousAreaMsg}} :</p>
-  <button v-on:click="goBackward" :disabled="leftmostAreaIsReached">&lsaquo;</button>
-  <button v-on:click="goForward" :disabled="rightmostAreaIsReached">&rsaquo;</button>
-  <p>: {{distanceToNextAreaMsg}}</p>
-  <button v-on:click="skipForward" :disabled="rightmostAreaIsReached">&raquo;</button>
+  <div class='inputWrapper'>
+    <label class='textLabel labelAbs' for='HA_pavRate'>Absence rate (0-1):</label>
+    <input class='textLabel inputNumber inputAbs' v-model.number="paramAbsenceRate" type='number' id='HA_pavRate' min='0' max='1' step=0.01>
+    <label class='textLabel labelBlocks' for='HA_consBlocks'>Number of consecutive blocks:</label>
+    <input class='textLabel inputNumber inputBlocks' v-model.number="paramConsecutiveBlock" type='number' id='HA_consBlocks' min='1' step=1>
+  </div>
+  <div class='areasFoundWrapper'>
+    <p class='textLabel nbTotal' >There are {{nbOfRegionsFound}} regions matching these criteria</p>
+    <p class='textLabel nbBefore' >{{nbOfRegionsBefore}} before</p>
+    <p class='textLabel nbAfter' >{{nbOfRegionsAfter}} after</p>
+    <p class='textLabel targetedPos' >Targeted position: {{targetedPosNt}}</p>
+    <button class='jumpButton skipLeft' v-on:click="skipBackward" :disabled="leftmostAreaIsReached">&laquo;</button>
+    <div class='textLabel distanceLeft' >{{distanceToPreviousAreaMsg}} :</div>
+    <button class='jumpButton goLeft' v-on:click="goBackward" :disabled="leftmostAreaIsReached">&lsaquo;</button>
+    <button class='jumpButton goRight' v-on:click="goForward" :disabled="rightmostAreaIsReached">&rsaquo;</button>
+    <div class='textLabel distanceRight' >: {{distanceToNextAreaMsg}}</div>
+    <button class='jumpButton skipRight' v-on:click="skipForward" :disabled="rightmostAreaIsReached">&raquo;</button>
+  </div>
 </div>
 
 </template>
@@ -302,5 +306,122 @@ export default {
 
 
 <style>
+
+.textLabel {
+  font: 10px sans-serif;
+}
+
+.inputNumber {
+  width: 5em;
+}
+
+.inputWrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 10px;
+}
+.areasFoundWrapper {
+  display: grid;
+  grid-template-columns: 50px 1fr 30px 30px 1fr 50px;
+  grid-template-rows: repeat(4, 1fr);
+}
+
+
+.labelAbs {
+  grid-column: 1 / 3;
+  grid-row: 1;
+  text-align: right;
+  align-self: center;
+}
+.inputAbs {
+  grid-column: 3;
+  grid-row: 1;
+  text-align: left;
+  align-self: center;
+}
+.labelBlocks {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  text-align: right;
+  align-self: center;
+}
+.inputBlocks {
+  grid-column: 3;
+  grid-row: 2;
+  text-align: left;
+  align-self: center;
+}
+.nbTotal {
+  grid-column: 1 / 7;
+  grid-row: 1;
+  text-align: center;
+  align-self: center;
+}
+.nbBefore {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  text-align: right;
+  align-self: center;
+}
+.nbAfter {
+  grid-column: 5 / 7;
+  grid-row: 2;
+  text-align: left;
+  align-self: center;
+}
+.targetedPos {
+  grid-column: 1 / 7;
+  grid-row: 3;
+  text-align: center;
+  align-self: center;
+}
+.skipLeft {
+  grid-column: 1;
+  grid-row: 4;
+  text-align: left;
+  align-self: center;
+}
+.distanceLeft {
+  grid-column: 2;
+  grid-row: 4;
+  text-align: right;
+  justify-self: end;
+  align-self: center;
+}
+.goLeft {
+  grid-column: 3;
+  grid-row: 4;
+  text-align: center;
+  justify-self: end;
+  align-self: center;
+}
+.goRight {
+  grid-column: 4;
+  grid-row: 4;
+  text-align: center;
+  justify-self: start;
+  align-self: center;
+}
+.distanceRight {
+  grid-column: 5;
+  grid-row: 4;
+  text-align: left;
+  justify-self: left;
+  align-self: center;
+}
+.skipRight {
+  grid-column: 6;
+  grid-row: 4;
+  text-align: right;
+  align-self: center;
+}
+
+.jumpButton {
+  font: 1em sans-serif;
+  width: 1.5em;
+  height: 1.5em;
+  padding: 0 0;
+  text-align: center;
+}
 
 </style>

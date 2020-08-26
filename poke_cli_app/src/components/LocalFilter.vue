@@ -17,6 +17,16 @@
       :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
 
+    <HollowAreaFinder
+      :arrayOfPanFeatures="chromData"
+      :lastNt="globalLastNt"
+      :nbOfGenomes="nbOfGenomes"
+      :currentFirstNt="firstNt"
+      :displayWindowWidth="displayWindowWidth"
+      :ntWidthInPixel="ntWidthInPx"
+      :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+    />
+
   </div>
 </template>
 
@@ -26,6 +36,7 @@ import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
+import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
 import { mapState, mapGetters, mapActions } from 'vuex';
 
@@ -36,6 +47,7 @@ export default {
     MatrixPavZoom,
     DropDownChoice,
     PavMatrixLegend,
+    HollowAreaFinder,
   },
   props: {
   },
@@ -59,7 +71,8 @@ export default {
   methods: {
     //Get Actions from the store
     ...mapActions([
-      'updateCurrentZoomLvl'
+      'updateCurrentZoomLvl',
+      'updateFirstNtToDisplay',
     ]),
   }
 }
