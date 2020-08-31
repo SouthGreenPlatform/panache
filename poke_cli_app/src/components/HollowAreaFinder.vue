@@ -246,39 +246,9 @@ export default {
       //Reset Array as empty for every position
       let sparseArray = this.emptySparseArrayOfPos.slice();
 
-      let nbOfConsecutiveMatchingBlock = 0;
-      let isWithinBlock = false;
-      let blockIsAlreadyStored = false;
-      let startingIdx;
-
-      this.arrayOfPanFeatures.forEach( function(d) {
-
-        //If a block has the right amount of absence...
-        if (d.presenceCounter <= self.maxDesiredNbOfPresentBlock) {
-          nbOfConsecutiveMatchingBlock += 1;
-
-          //...its index is saved if it is the first one of its area
-          if (!isWithinBlock) {
-            isWithinBlock = true;
-            startingIdx = Number(d.index); //Converted into number for further calculation, just in case
-          }
-
-          //...the first index of the serie is stored when nb of consecutive blocks is reached
-          if ((nbOfConsecutiveMatchingBlock >= self.paramConsecutiveBlock ) && (!blockIsAlreadyStored)) {
-            sparseArray[startingIdx] = startingIdx;
-            blockIsAlreadyStored = true;
-          }
-
-        //Else the serie of matching blocks is reset
-        } else {
-
-          if (isWithinBlock) {
-            isWithinBlock = false;
-            blockIsAlreadyStored = false;
-            nbOfConsecutiveMatchingBlock = 0;
-          }
-
-        }
+      //Assign starting index of hollow areas in the sparse array
+      this.hollowAreasCoordinates.keys().forEach( function (startingIdx) {
+        sparseArray[startingIdx] = startingIdx;
       })
 
       return sparseArray;
