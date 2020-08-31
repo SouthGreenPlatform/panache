@@ -31,6 +31,10 @@ export default {
       type: Array,
       default: () => []
     },
+    genoNames: {
+      type: Array,
+      default: () => []
+    },
     lastNt: {
       type: Number,
       required: true
@@ -63,12 +67,176 @@ export default {
   data() {
     return {
       paramAbsenceRate: 0.80, //Default value of v-model MUST NOT BE declared in the template
-      paramConsecutiveBlock: 1,
+      paramConsecutiveBlock: 2,
       targetedPosNt: Number(), //Linked to center of screen if possible,
       targetIsChangedInternally: false,
     }
   },
   computed: {
+    //Array with same indices as original dataset, for count of consecutive absent blocks
+    arrayOfConsecutivenessOfAbs() {
+      let self = this;
+
+      let arrayOfConsecutivenessPerGeno = new Array(this.arrayOfPanFeatures.length);
+
+      //Explore dataset to find matching hollow areas
+      this.arrayOfPanFeatures.forEach( function(d,i) {
+
+        let mapFromGenoToConsec = new Map();
+
+        //Map a consecTracer to every genome for every block
+        self.genoNames.forEach( function(name) {
+
+          let previousCount;
+          let oldStartPos;
+
+          //Different behaviour depending on previous data
+          if ( i > 0 ) {
+            previousCount = arrayOfConsecutivenessPerGeno[i-1].get(name).nbOfConsecutiveAbsentBlocks;
+            oldStartPos = arrayOfConsecutivenessPerGeno[i-1].get(name).startPosOfConsecutiveness;
+          } else {
+            previousCount = 0;
+            oldStartPos = 0;
+          };
+
+          let newCount;
+          let newStartPos;
+
+          //When a genome has an absent block, register its consecutiveness
+          if (d.name == 0) {
+            newCount = previousCount + 1;
+          } else {
+            newCount = 0;
+          }
+
+          //Store new startPos only when no consecutiveness is detected
+          if (newCount <= 1) {
+            newStartPos = Number(d.index) //Should be FeatureStart?
+          } else {
+            newStartPos = oldStartPos
+          };
+
+          let consecTracer = {
+            nbOfConsecutiveAbsentBlocks: newCount,
+            startPosOfConsecutiveness: newStartPos,
+          };
+
+          mapFromGenoToConsec.set(name, consecTracer)
+
+        });
+
+        arrayOfConsecutivenessPerGeno[i] = mapFromGenoToConsec;
+      })
+
+      return arrayOfConsecutivenessPerGeno;
+    },
+    hollowAreasCoordinates() {
+      let self = this;
+      //Store for continuity profiles here
+      let continuityStore = new Map();
+      let lastCheckedPosition = 0;
+      let lastFeatureWidth;
+      let continuityProfilesThatEnd = [];
+      let mapOfHollowCoordinates = new Map();
+
+      this.arrayOfPanFeatures.forEach( function(d,i) {
+
+        //Build the consecutiveness profile for each block
+        let consecProfile = new Map();
+
+        self.genoNames.forEach( function(name, genoIndex) {
+          let genoToConsider = self.arrayOfConsecutivenessOfAbs[i].get(name)
+
+          //Tag genomes which validate the min consecutive number of absent blocks
+          if (genoToConsider.nbOfConsecutiveAbsentBlocks >= self.paramConsecutiveBlock) {
+            let startPos = genoToConsider.startPosOfConsecutiveness;
+            consecProfile.set(name, startPos);
+          }
+        });
+
+        //If the consecProfile does not match the absence rate, all continuity
+        //profiles must be registered as 'ending'
+        if (consecProfile.size/self.nbOfGenomes < self.paramAbsenceRate) {
+          continuityStore.forEach( function(value, key) {
+            continuityProfilesThatEnd.push([key, value]);
+          })
+        //Else the valid consecutiveness profile mark the beginning of a
+        //potential hollow area. It can also mark the end of previous areas.
+        } else {
+
+          //Update continuities when possible...
+          continuityStore.forEach( function(value, key) {
+            let continuityProfile = value;
+            let removedContinuities = [];
+            continuityProfile.forEach( function(startPos, genoName) {
+              if (!consecProfile.has(genoName)) {
+                removedContinuities.push(genoName);
+              }
+            });
+
+            //Check if continuities still check absence parameter.
+            //If not, register continuityProfile for storage and deletion, without modification...
+            let nbOfValidConsecutivGeno = continuityProfile.size - removedContinuities.length;
+            if (nbOfValidConsecutivGeno/self.nbOfGenomes < self.paramAbsenceRate) {
+              continuityProfilesThatEnd.push([key, value]);
+            //...Else update continuity profiles without the useless entries
+            } else {
+              removedContinuities.forEach( function(genoName) {
+                continuityProfile.delete(genoName);
+              })
+            }
+          });
+
+          //...then register the consecutiveness profile as a new continuity profile
+          let newContinuityProfile = consecProfile;
+          continuityStore.set(Number(d.index), newContinuityProfile); //Profile is associated to where it has been found
+        };
+
+        //Check the ending continuity profiles, as they mark end of hollow areas
+        //First find which profile mark the beginning (if 2+ end)...
+        let profileToStore = undefined;
+        if (continuityProfilesThatEnd.length >= 2) {
+          let posOfFirstEncounter = continuityProfilesThatEnd.reduce( (acc, continuityPair) => Math.min(acc, continuityPair[0]) );
+          profileToStore = continuityStore.get(posOfFirstEncounter);
+        } else {
+          continuityProfilesThatEnd.forEach( function(value, key) {
+            profileToStore = value;
+            continuityStore.delete(key);
+          });
+        };
+
+        //...Then store start and end pos of hollow area...
+        if (profileToStore != undefined) {
+          let endOfHollowArea = lastCheckedPosition + lastFeatureWidth;
+          let maxStartPos = Math.max(...profileToStore.values());
+          mapOfHollowCoordinates.set(maxStartPos, endOfHollowArea);
+        };
+
+        //...Finally remove continuity profiles that won't be used anymore
+        continuityProfilesThatEnd.forEach(pair) {
+          let keyOfProfileToDelete = pair[0];
+          continuityStore.delete(keyOfProfileToDelete);
+        };
+
+        //Update the lastCheckedPosition and lastFeatureWidth
+        lastCheckedPosition = Number(d.index);
+        lastFeatureWidth = Number(d.FeatureStop - d.FeatureStart);
+      });
+
+      //Store profiles that might not have been ended by the last data
+      if (continuityStore.size > 0) {
+        let posOfFirstEncounter = Math.min(...continuityStore.keys());
+        let profileToStore = continuityStore.get(posOfFirstEncounter);
+        let maxStartPos = Math.max(...profileToStore.values());
+        //Stop is supposed to be lastNt in that case, since area reached the end
+        let endOfHollowArea = lastCheckedPosition + lastFeatureWidth;
+        mapOfHollowCoordinates.set(maxStartPos, endOfHollowArea);
+      };
+
+      //Eventually...
+      return mapOfHollowCoordinates;
+
+    },
     emptySparseArrayOfPos() {
       return new Array(this.lastNt + 1)
     },
@@ -81,7 +249,7 @@ export default {
       let nbOfConsecutiveMatchingBlock = 0;
       let isWithinBlock = false;
       let blockIsAlreadyStored = false;
-      let startingIdx = Number;
+      let startingIdx;
 
       this.arrayOfPanFeatures.forEach( function(d) {
 
