@@ -77,6 +77,9 @@ export default {
     arrayOfConsecutivenessOfAbs() {
       let self = this;
 
+      //arrayOfConsecutivenessPerGeno is an array as long as the original dataset
+      //Each index (ie block) is associated with a map that links every genome to
+      //its corresponding consecTracer object
       let arrayOfConsecutivenessPerGeno = new Array(this.arrayOfPanFeatures.length);
 
       //Explore dataset to find matching hollow areas
@@ -84,20 +87,23 @@ export default {
 
         let mapFromGenoToConsec = new Map();
 
-        //Map a consecTracer to every genome for every block
+        //Map a consecTracer to every genome
         self.genoNames.forEach( function(name) {
 
           let previousCount;
           let oldStartPos;
 
-          //Different behaviour depending on previous data
+          //Different behaviours if its the middle of the algorithm...
           if ( i > 0 ) {
-            previousCount = arrayOfConsecutivenessPerGeno[i-1].get(name).nbOfConsecutiveAbsentBlocks;
-            oldStartPos = arrayOfConsecutivenessPerGeno[i-1].get(name).startPosOfConsecutiveness;
+            let previousConsecInfo = arrayOfConsecutivenessPerGeno[i-1].get(name);
+            previousCount = previousConsecInfo.nbOfConsecutiveAbsentBlocks;
+            oldStartPos = previousConsecInfo.startPosOfConsecutiveness;
+          //... or if there is no previous data, at the very beginning
           } else {
             previousCount = 0;
+            //TODO: replace oldSartPos with global first nt in case it is not 0
             oldStartPos = 0;
-          };
+          }
 
           let newCount;
           let newStartPos;
@@ -114,7 +120,7 @@ export default {
             newStartPos = Number(d.index) //Should be FeatureStart?
           } else {
             newStartPos = oldStartPos
-          };
+          }
 
           let consecTracer = {
             nbOfConsecutiveAbsentBlocks: newCount,
@@ -122,7 +128,6 @@ export default {
           };
 
           mapFromGenoToConsec.set(name, consecTracer)
-
         });
 
         arrayOfConsecutivenessPerGeno[i] = mapFromGenoToConsec;
@@ -144,7 +149,7 @@ export default {
         //Build the consecutiveness profile for each block
         let consecProfile = new Map();
 
-        self.genoNames.forEach( function(name, genoIndex) {
+        self.genoNames.forEach( function(name) {
           let genoToConsider = self.arrayOfConsecutivenessOfAbs[i].get(name)
 
           //Tag genomes which validate the min consecutive number of absent blocks
@@ -190,7 +195,7 @@ export default {
           //...then register the consecutiveness profile as a new continuity profile
           let newContinuityProfile = consecProfile;
           continuityStore.set(Number(d.index), newContinuityProfile); //Profile is associated to where it has been found
-        };
+        }
 
         //Check the ending continuity profiles, as they mark end of hollow areas
         //First find which profile mark the beginning (if 2+ end)...
@@ -203,20 +208,20 @@ export default {
             profileToStore = value;
             continuityStore.delete(key);
           });
-        };
+        }
 
         //...Then store start and end pos of hollow area...
         if (profileToStore != undefined) {
           let endOfHollowArea = lastCheckedPosition + lastFeatureWidth;
           let maxStartPos = Math.max(...profileToStore.values());
           mapOfHollowCoordinates.set(maxStartPos, endOfHollowArea);
-        };
+        }
 
         //...Finally remove continuity profiles that won't be used anymore
-        continuityProfilesThatEnd.forEach(pair) {
+        continuityProfilesThatEnd.forEach( function(pair) {
           let keyOfProfileToDelete = pair[0];
           continuityStore.delete(keyOfProfileToDelete);
-        };
+        });
 
         //Update the lastCheckedPosition and lastFeatureWidth
         lastCheckedPosition = Number(d.index);
@@ -231,7 +236,7 @@ export default {
         //Stop is supposed to be lastNt in that case, since area reached the end
         let endOfHollowArea = lastCheckedPosition + lastFeatureWidth;
         mapOfHollowCoordinates.set(maxStartPos, endOfHollowArea);
-      };
+      }
 
       //Eventually...
       return mapOfHollowCoordinates;
@@ -241,7 +246,6 @@ export default {
       return new Array(this.lastNt + 1)
     },
     sparseArrayOfMatChingIndices() {
-      let self = this;
 
       //Reset Array as empty for every position
       let sparseArray = this.emptySparseArrayOfPos.slice();
