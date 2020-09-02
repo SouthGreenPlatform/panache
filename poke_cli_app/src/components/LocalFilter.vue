@@ -26,7 +26,7 @@
       :displayWindowWidth="displayWindowWidth"
       :ntWidthInPixel="ntWidthInPx"
       :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
-      :updateGlobalCoordOfHollowAreas="function() {return}"
+      :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
     />
 
   </div>
@@ -76,6 +76,7 @@ export default {
     ...mapActions([
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
+      'updateCoordsOfHollowAreas'
     ]),
   }
 }

@@ -33,6 +33,7 @@
       :colorScaleFunction="colorScaleFunction"
       :colorScaleRainbow="colorScaleRainbow"
       :colorScaleSimilarities="colorScaleSimilarities"
+      :coordsOfHollowAreas="coordsOfHollowAreas"
     />
   </div>
   </div>
@@ -128,7 +129,8 @@ export default {
       colorScaleSimilarities: 'greenColorScale',
       colorScaleDisp: 'blueColorScale',
       colorScaleCore: 'orangeColorScale',
-      colorScaleFunction: 'functionColorScale'
+      colorScaleFunction: 'functionColorScale',
+      coordsOfHollowAreas: 'coordsOfHollowAreas',
     }),
     ...mapGetters({
       nbOfGenomes: 'nbOfGenomesInDisplay',

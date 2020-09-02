@@ -368,7 +368,7 @@ export default {
       }
     },
     hollowAreasCoordinates: function() {
-      updateGlobalCoordOfHollowAreas(this.hollowAreasCoordinates);
+      this.updateGlobalCoordOfHollowAreas(this.hollowAreasCoordinates);
     }
   },
   methods: {

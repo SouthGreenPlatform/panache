@@ -22,6 +22,7 @@ export default new Vuex.Store({
     lastNtToDisplay: 1200,
     chromNames: ['0', '1', '2', '3'],
     chromSelected: '0', // Stores the id of the chrom to display at the block level vis
+    coordsOfHollowAreas: new Map(),
 
     // Color scales used throughout the app
     pseudoRainbowColorScale: d3.scaleLinear().range([d3.hcl('yellow'), d3.hcl('yellow')]),
@@ -57,6 +58,9 @@ export default new Vuex.Store({
     },
     SET_NEW_CURRENT_ZOOM(state, payload) {
       state.currentDisplayNtWidthInPx = payload
+    },
+    SET_NEW_COORDS_OF_HOLLOW_AREAS(state, payload) {
+      state.coordsOfHollowAreas = payload
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -75,6 +79,9 @@ export default new Vuex.Store({
     },
     updateCurrentZoomLvl({commit}, ntWidthInPx) {
       commit('SET_NEW_CURRENT_ZOOM', ntWidthInPx)
+    },
+    updateCoordsOfHollowAreas({commit}, mapOfCoords) {
+      commit('SET_NEW_COORDS_OF_HOLLOW_AREAS', mapOfCoords)
     }
   },
 })
