@@ -75,7 +75,9 @@ export default {
   computed: {
     //Array with same indices as original dataset, for count of consecutive absent blocks
     arrayOfConsecutivenessOfAbs() {
-      let self = this;
+      console.log('Working on building the consecutiveness array');
+      let genoNames = this.genoNames
+
 
       //arrayOfConsecutivenessPerGeno is an array as long as the original dataset
       //Each index (ie block) is associated with a map that links every genome to
@@ -88,7 +90,7 @@ export default {
         let mapFromGenoToConsec = new Map();
 
         //Map a consecTracer to every genome
-        self.genoNames.forEach( function(name) {
+        genoNames.forEach( function(name) {
 
           let previousCount;
           let oldStartPos;
@@ -109,7 +111,7 @@ export default {
           let newStartPos;
 
           //When a genome has an absent block, register its consecutiveness
-          if (d.name == 0) {
+          if (d[name] == 0) {
             newCount = previousCount + 1;
           } else {
             newCount = 0;
@@ -127,21 +129,25 @@ export default {
             startPosOfConsecutiveness: newStartPos,
           };
 
-          mapFromGenoToConsec.set(name, consecTracer)
+          mapFromGenoToConsec.set(name, consecTracer);
         });
 
         arrayOfConsecutivenessPerGeno[i] = mapFromGenoToConsec;
       })
 
+      console.log({consecutivenessArray: arrayOfConsecutivenessPerGeno});
       return arrayOfConsecutivenessPerGeno;
     },
     hollowAreasCoordinates() {
       let self = this;
+      let paramAbsenceRate = this.paramAbsenceRate;
+      let paramConsecutiveBlock = this.paramConsecutiveBlock;
+      let arrayOfConsecutivenessOfAbs = this.arrayOfConsecutivenessOfAbs;
       //Store for continuity profiles here
       let continuityStore = new Map();
       let lastCheckedPosition = 0;
       let lastFeatureWidth;
-      let continuityProfilesThatEnd = [];
+      let continuityProfilesThatEnd = new Map();
       let mapOfHollowCoordinates = new Map();
 
       this.arrayOfPanFeatures.forEach( function(d,i) {
@@ -150,10 +156,10 @@ export default {
         let consecProfile = new Map();
 
         self.genoNames.forEach( function(name) {
-          let genoToConsider = self.arrayOfConsecutivenessOfAbs[i].get(name)
+          let genoToConsider = arrayOfConsecutivenessOfAbs[i].get(name)
 
           //Tag genomes which validate the min consecutive number of absent blocks
-          if (genoToConsider.nbOfConsecutiveAbsentBlocks >= self.paramConsecutiveBlock) {
+          if (genoToConsider.nbOfConsecutiveAbsentBlocks >= paramConsecutiveBlock) {
             let startPos = genoToConsider.startPosOfConsecutiveness;
             consecProfile.set(name, startPos);
           }
@@ -161,13 +167,14 @@ export default {
 
         //If the consecProfile does not match the absence rate, all continuity
         //profiles must be registered as 'ending'
-        if (consecProfile.size/self.nbOfGenomes < self.paramAbsenceRate) {
+        if (consecProfile.size/self.nbOfGenomes < paramAbsenceRate) {
           continuityStore.forEach( function(value, key) {
-            continuityProfilesThatEnd.push([key, value]);
+            continuityProfilesThatEnd.set(key, value);
           })
         //Else the valid consecutiveness profile mark the beginning of a
         //potential hollow area. It can also mark the end of previous areas.
         } else {
+          console.log({validity:'paramAbsenceRate is VALID and might be saved!', index:d.index});
 
           //Update continuities when possible...
           continuityStore.forEach( function(value, key) {
@@ -182,8 +189,8 @@ export default {
             //Check if continuities still check absence parameter.
             //If not, register continuityProfile for storage and deletion, without modification...
             let nbOfValidConsecutivGeno = continuityProfile.size - removedContinuities.length;
-            if (nbOfValidConsecutivGeno/self.nbOfGenomes < self.paramAbsenceRate) {
-              continuityProfilesThatEnd.push([key, value]);
+            if (nbOfValidConsecutivGeno/self.nbOfGenomes < paramAbsenceRate) {
+              continuityProfilesThatEnd.set(key, value);
             //...Else update continuity profiles without the useless entries
             } else {
               removedContinuities.forEach( function(genoName) {
@@ -195,33 +202,32 @@ export default {
           //...then register the consecutiveness profile as a new continuity profile
           let newContinuityProfile = consecProfile;
           continuityStore.set(Number(d.index), newContinuityProfile); //Profile is associated to where it has been found
+
+          console.log({consecProfile, index:Number(d.index), continuityStoreContent:[...continuityStore.values()]});
         }
 
         //Check the ending continuity profiles, as they mark end of hollow areas
-        //First find which profile mark the beginning (if 2+ end)...
-        let profileToStore = undefined;
-        if (continuityProfilesThatEnd.length >= 2) {
-          let posOfFirstEncounter = continuityProfilesThatEnd.reduce( (acc, continuityPair) => Math.min(acc, continuityPair[0]) );
-          profileToStore = continuityStore.get(posOfFirstEncounter);
-        } else {
-          continuityProfilesThatEnd.forEach( function(value, key) {
-            profileToStore = value;
-            continuityStore.delete(key);
-          });
+        //First find which profile mark the beginning...
+        let profileToStoreAsArea = undefined;
+        if (continuityProfilesThatEnd.size >= 1) {
+          let posOfFirstEncounter = [...continuityProfilesThatEnd.keys()].reduce( (acc, posOfEncounter) => Math.min(acc, posOfEncounter) );
+          profileToStoreAsArea = continuityStore.get(posOfFirstEncounter);
+          console.log({continuityProfilesThatEnd, posOfFirstEncounter, profileToStoreAsArea})
         }
 
         //...Then store start and end pos of hollow area...
-        if (profileToStore != undefined) {
+        if (profileToStoreAsArea != undefined) {
           let endOfHollowArea = lastCheckedPosition + lastFeatureWidth;
-          let maxStartPos = Math.max(...profileToStore.values());
+          let maxStartPos = Math.max(...profileToStoreAsArea.values());
           mapOfHollowCoordinates.set(maxStartPos, endOfHollowArea);
         }
 
         //...Finally remove continuity profiles that won't be used anymore
-        continuityProfilesThatEnd.forEach( function(pair) {
-          let keyOfProfileToDelete = pair[0];
+        continuityProfilesThatEnd.forEach( function(value, key) {
+          let keyOfProfileToDelete = key;
           continuityStore.delete(keyOfProfileToDelete);
         });
+        continuityProfilesThatEnd.clear();
 
         //Update the lastCheckedPosition and lastFeatureWidth
         lastCheckedPosition = Number(d.index);
@@ -231,14 +237,15 @@ export default {
       //Store profiles that might not have been ended by the last data
       if (continuityStore.size > 0) {
         let posOfFirstEncounter = Math.min(...continuityStore.keys());
-        let profileToStore = continuityStore.get(posOfFirstEncounter);
-        let maxStartPos = Math.max(...profileToStore.values());
+        let profileToStoreAsArea = continuityStore.get(posOfFirstEncounter);
+        let maxStartPos = Math.max(...profileToStoreAsArea.values());
         //Stop is supposed to be lastNt in that case, since area reached the end
         let endOfHollowArea = lastCheckedPosition + lastFeatureWidth;
         mapOfHollowCoordinates.set(maxStartPos, endOfHollowArea);
       }
 
       //Eventually...
+      console.log({mapOfCoords: mapOfHollowCoordinates});
       return mapOfHollowCoordinates;
 
     },
@@ -251,7 +258,7 @@ export default {
       let sparseArray = this.emptySparseArrayOfPos.slice();
 
       //Assign starting index of hollow areas in the sparse array
-      this.hollowAreasCoordinates.keys().forEach( function (startingIdx) {
+      [...this.hollowAreasCoordinates.keys()].forEach( function (startingIdx) {
         sparseArray[startingIdx] = startingIdx;
       })
 

@@ -20,6 +20,7 @@
     <HollowAreaFinder
       :arrayOfPanFeatures="chromData"
       :lastNt="globalLastNt"
+      :genoNames="genoNames"
       :nbOfGenomes="nbOfGenomes"
       :currentFirstNt="firstNt"
       :displayWindowWidth="displayWindowWidth"
@@ -57,6 +58,7 @@ export default {
   },
   computed: {
     ...mapState({
+      genoNames: 'genomeListInDisplay',
       chromNames: 'chromNames',
       chromData: 'chromDataInDisplay',
       firstNt: 'firstNtToDisplay',
