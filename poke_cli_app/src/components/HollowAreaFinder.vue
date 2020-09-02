@@ -59,6 +59,10 @@ export default {
       type: Function,
       required: true
     },
+    updateGlobalCoordOfHollowAreas: {
+      type: Function,
+      required: true
+    },
     nbOfAreasToSkip: { //Nb of Area to skip when using the >> or << buttons
       type: Number,
       default: 5
@@ -75,7 +79,6 @@ export default {
   computed: {
     //Array with same indices as original dataset, for count of consecutive absent blocks
     arrayOfConsecutivenessOfAbs() {
-      console.log('Working on building the consecutiveness array');
       let genoNames = this.genoNames
 
 
@@ -174,7 +177,6 @@ export default {
         //Else the valid consecutiveness profile mark the beginning of a
         //potential hollow area. It can also mark the end of previous areas.
         } else {
-          console.log({validity:'paramAbsenceRate is VALID and might be saved!', index:d.index});
 
           //Update continuities when possible...
           continuityStore.forEach( function(value, key) {
@@ -202,8 +204,6 @@ export default {
           //...then register the consecutiveness profile as a new continuity profile
           let newContinuityProfile = consecProfile;
           continuityStore.set(Number(d.index), newContinuityProfile); //Profile is associated to where it has been found
-
-          console.log({consecProfile, index:Number(d.index), continuityStoreContent:[...continuityStore.values()]});
         }
 
         //Check the ending continuity profiles, as they mark end of hollow areas
@@ -212,7 +212,6 @@ export default {
         if (continuityProfilesThatEnd.size >= 1) {
           let posOfFirstEncounter = [...continuityProfilesThatEnd.keys()].reduce( (acc, posOfEncounter) => Math.min(acc, posOfEncounter) );
           profileToStoreAsArea = continuityStore.get(posOfFirstEncounter);
-          console.log({continuityProfilesThatEnd, posOfFirstEncounter, profileToStoreAsArea})
         }
 
         //...Then store start and end pos of hollow area...
@@ -368,6 +367,9 @@ export default {
         this.targetedPosNt = Math.round(this.currentFirstNt + this.amountOfNtInHalfScreen)
       }
     },
+    hollowAreasCoordinates: function() {
+      updateGlobalCoordOfHollowAreas(this.hollowAreasCoordinates);
+    }
   },
   methods: {
     ntToPx(ntAmount) {

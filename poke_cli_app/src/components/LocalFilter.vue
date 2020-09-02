@@ -26,6 +26,7 @@
       :displayWindowWidth="displayWindowWidth"
       :ntWidthInPixel="ntWidthInPx"
       :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+      :updateGlobalCoordOfHollowAreas="function() {return}"
     />
 
   </div>
