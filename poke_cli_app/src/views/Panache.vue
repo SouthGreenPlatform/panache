@@ -1,41 +1,47 @@
 <template>
   <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
-  <div >
-    <OverlayedCanvas
-      class='upperPart'
-      :chromosomeData="chromData"
-      :nbOfGenomes="nbOfGenomes"
-      :coreThreshold="coreThreshold"
-      :rightmostNt="globalLastNt"
-      :canvasWidth="displayWindowWidth"
-      :mainWindowWidth="displayWindowWidth"
-      :firstNtToDisplay="firstNt"
-      :updateFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
-      :updateLastNt="function(payload) { updateLastNtToDisplay(payload) }"
-      :ntWidthInPxInDisplayWindow="ntWidthInPx"
-      :colorScaleFunction="colorScaleFunction"
-      :colorScaleCore="colorScaleCore"
-      :colorScaleDisp="colorScaleDisp"
-      :colorScaleRainbow="colorScaleRainbow"
-      :colorScaleSimilarities="colorScaleSimilarities"
-    />
-  </div>
-  <div class='underPart'>
-    <PavMatrixAndTracks
-      :filteredData="filteredData"
-      :genomeList="genomeList"
-      :chromList="chromNames"
-      :coreThreshold="coreThreshold"
-      :displaySizeOfNt="ntWidthInPx"
-      :displayHeight="displayWindowHeight"
-      :displayWidth="displayWindowWidth"
-      :firstNtToDisplay="firstNt"
-      :colorScaleFunction="colorScaleFunction"
-      :colorScaleRainbow="colorScaleRainbow"
-      :colorScaleSimilarities="colorScaleSimilarities"
-      :coordsOfHollowAreas="coordsOfHollowAreas"
-    />
-  </div>
+    <div >
+      <OverlayedCanvas
+        class='upperPart'
+        :chromosomeData="chromData"
+        :nbOfGenomes="nbOfGenomes"
+        :coreThreshold="coreThreshold"
+        :rightmostNt="globalLastNt"
+        :canvasWidth="displayWindowWidth"
+        :mainWindowWidth="displayWindowWidth"
+        :firstNtToDisplay="firstNt"
+        :updateFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+        :updateLastNt="function(payload) { updateLastNtToDisplay(payload) }"
+        :ntWidthInPxInDisplayWindow="ntWidthInPx"
+        :colorScaleFunction="colorScaleFunction"
+        :colorScaleCore="colorScaleCore"
+        :colorScaleDisp="colorScaleDisp"
+        :colorScaleRainbow="colorScaleRainbow"
+        :colorScaleSimilarities="colorScaleSimilarities"
+      />
+    </div>
+    <div class='underPart'>
+      <HollowAreaTrack
+        :coordsStartStop="filteredHollowAreas"
+        :firstNtToDisplay="firstNt"
+        :displaySizeOfNt="ntWidthInPx"
+        :svgWidth="displayWindowWidth"
+        />
+      <PavMatrixAndTracks
+        :filteredData="filteredData"
+        :genomeList="genomeList"
+        :chromList="chromNames"
+        :coreThreshold="coreThreshold"
+        :displaySizeOfNt="ntWidthInPx"
+        :displayHeight="displayWindowHeight"
+        :displayWidth="displayWindowWidth"
+        :firstNtToDisplay="firstNt"
+        :colorScaleFunction="colorScaleFunction"
+        :colorScaleRainbow="colorScaleRainbow"
+        :colorScaleSimilarities="colorScaleSimilarities"
+        :coordsOfHollowAreas="coordsOfHollowAreas"
+      />
+    </div>
   </div>
 </template>
 
@@ -44,6 +50,7 @@ import * as d3 from 'd3';
 
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
+import HollowAreaTrack from '@/components/HollowAreaTrack.vue';
 
 import { mapState, mapGetters, mapActions } from 'vuex';
 
@@ -51,7 +58,8 @@ export default {
   name: 'Panache',
   components: {
     OverlayedCanvas,
-    PavMatrixAndTracks
+    PavMatrixAndTracks,
+    HollowAreaTrack,
   },
   data() {
     return {
@@ -106,6 +114,45 @@ export default {
     },
     highestRepNumber() {
       return Math.max(...this.chromData.map(d => d.SimilarBlocks.split(";").length))
+    },
+
+    //Hollow areas data
+    allColoredHollowAreas() {
+      let coloredArray = [];
+      let rainbowScale = d3.interpolateRainbow;
+      let n = 0;
+
+      this.coordsOfHollowAreas.forEach(function(value, key) {
+        let color = rainbowScale( (n % 4) / 4);
+        let coordTriple = [key, value, color];
+
+        coloredArray.push(coordTriple);
+        n += 1;
+      })
+
+      console.log({coloredArray});
+      return coloredArray;
+    },
+    filteredHollowAreas() {
+      let firstNtOfDisplay = this.firstNt;
+      let lastNtOfDisplay = this.lastNt;
+
+      let filteredArray = this.allColoredHollowAreas.filter( function(triple) {
+        let start = triple[0];
+        let stop = triple[1];
+        let isInDisplayWindow;
+
+        if (lastNtOfDisplay < start || stop < firstNtOfDisplay) {
+          isInDisplayWindow = false
+        } else {
+          isInDisplayWindow = true
+        }
+
+        return isInDisplayWindow;
+      });
+
+      console.log({filteredArray});
+      return filteredArray;
     },
 
 

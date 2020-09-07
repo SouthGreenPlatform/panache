@@ -3,7 +3,7 @@
   <svg class="" :width="svgWidth" :height="svgHeight">
     <g v-for="(coordsTriplet) in wideEnoughCoordsOnly"
       :key="coordsTriplet[0]"
-      :transform="writeTranslateWithOffSet(coordsTriplet[0], 0)"
+      :transform="writeTranslateWithOffSet(ntToPx(coordsTriplet[0]), 0)"
       :fill="coordsTriplet[2]"
       >
       <path :d="`M 0 4 L 2 0 L 2 ${svgHeight} L 0 ${svgHeight-4} Z`" />
@@ -164,7 +164,7 @@ export default {
   },
   watch: {
     coordsStartStop: function() {
-      console.log({coordStartStopChanged:this.coordsStartStop});
+      console.log({coordStartStopChanged: this.coordsStartStop});
     }
   },
   methods: {
