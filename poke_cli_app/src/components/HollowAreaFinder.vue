@@ -369,7 +369,13 @@ export default {
     },
     hollowAreasCoordinates: function() {
       this.updateGlobalCoordOfHollowAreas(this.hollowAreasCoordinates);
-    }
+    },
+    ntWidthInPixel: function() {
+      //The change is external so this.targetIsChangedInternally is false
+      //I can change targetedPos freely
+      let floatTarget = (2 * this.currentFirstNt + this.pxToNt(this.displayWindowWidth) ) / 2;
+      this.targetedPosNt = Math.floor(floatTarget);
+    },
   },
   methods: {
     ntToPx(ntAmount) {
