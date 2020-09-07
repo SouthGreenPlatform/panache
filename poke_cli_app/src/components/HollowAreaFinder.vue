@@ -347,7 +347,7 @@ export default {
   watch: {
     reachableFirstNt: function() {
       if (this.targetIsChangedInternally) {
-        this.updateGlobalFirstNt(this.reachableFirstNt)
+        this.updateGlobalFirstNt(this.reachableFirstNt);
       }
     },
     maxDesiredNbOfPresentBlock: function() {
