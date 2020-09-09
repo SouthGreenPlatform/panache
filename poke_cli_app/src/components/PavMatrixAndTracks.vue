@@ -9,7 +9,7 @@
       </defs>
     <!-- SVG CONTAINER FOR THE PAV MATRIX -->
     <!-- That way the bottom of the blocks is automatically cropped -->
-    <svg ref='pavMatrix' :height="pavMatrixHeight" :width="displayWidth">
+    <svg ref='pavMatrix' :height="autoComputeMatrixHeight" :width="displayWidth">
       <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
         <rect v-for="block in filteredData"
           :key="`idxForMatrix_${block.index}`"
@@ -30,7 +30,7 @@
         id='genomeLegend'
         @mouseover="function() {eventFadeOutRef('genomeLegend')}"
         @mouseout="function() {eventFadeInRef('genomeLegend')}">
-            <rect x='0' y='0' :height="pavMatrixHeight+1" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
+            <rect x='0' y='0' :height="autoComputeMatrixHeight+1" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
             <text v-for="(genome, index) in genomeList"
               :key="`genomeLabel_${genome}`"
               x='2'
@@ -46,7 +46,7 @@
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
       <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
-      <g v-show="heightOfTotBlocks > pavMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
+      <g v-show="heightOfTotBlocks > autoComputeMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
         <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
         <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
         <circle :cy="blockVerticalOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
@@ -55,7 +55,7 @@
     </svg>
     <g>
       <!-- TRACKS OF INFORMATION -->
-      <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, pavMatrixHeight+5)">
+      <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, autoComputeMatrixHeight+5)">
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
           <rect v-for="block in filteredData"
             :key="`idxForTracks_${block.index}`"
@@ -72,7 +72,7 @@
       </g>
       <!-- SIMILARITY BOXES -->
       <!-- Hard written traslation could surely be improved-->
-      <g id='structureInfo' :transform="writeTranslate(0, pavMatrixHeight+5 + 55)">
+      <g id='structureInfo' :transform="writeTranslate(0, autoComputeMatrixHeight+5 + 55)">
         <g id='blocksStructuralVariation'>
           <g v-for="(chromName, index) in chromList"
             :key="`chrom_${chromName}`"
@@ -162,6 +162,10 @@ export default {
       type: Number,
       default : 600
     },
+    pavMatrixHeight: {
+      type: Number,
+      default: undefined
+    },
     genomeList: {
       type: Array,
       //Defult must not be empty, so that length > 0 !
@@ -211,8 +215,6 @@ export default {
     let self = this;
 
     let heightOfTotBlocks = this.blocksDimensions.height * this.genomeList.length;
-    //let pavMatrixHeight = xxxxxxxxxxxxxxxxxxxxxxxxxxxx;
-    let pavMatrixHeight = this.displayHeight/3;
 
     let colorScaleThresholdBased = function(data) {
       let value = data.presenceCounter;
@@ -249,11 +251,6 @@ export default {
 
     return {
       heightOfTotBlocks:heightOfTotBlocks,
-      pavMatrixHeight: pavMatrixHeight,
-      blockVerticalOffsetToSliderScale: d3.scaleLinear() //Attaches to each threshold value a position on the slider
-        .domain([0, heightOfTotBlocks - pavMatrixHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- pavMatrixHeight'
-        .range([0, pavMatrixHeight - 20]) //The scrolling bar will have the same height than the PA matrix svg, minus 20px
-        .clamp(true),
       blockOffset: 0,
       stops: [
         {
@@ -342,6 +339,25 @@ export default {
         margin: this.tooltipMargin,
         offset: this.tooltipXOffset
       }
+    },
+    autoComputeMatrixHeight() {
+      let heightOfMatrix;
+      if (this.pavMatrixHeight != undefined) {
+        heightOfMatrix = this.pavMatrixHeight;
+      } else {
+        let thirdOfTotalHeight = Math.floor(this.displayHeight/3);
+        heightOfMatrix = Math.min(thirdOfTotalHeight, this.heightOfTotBlocks);
+      }
+      console.log({autoHeight: heightOfMatrix});
+      return heightOfMatrix;
+    },
+    blockVerticalOffsetToSliderScale() {
+      let scale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+        .domain([0, this.heightOfTotBlocks - this.autoComputeMatrixHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- autoComputeMatrixHeight'
+        .range([0, this.autoComputeMatrixHeight - 20]) //The scrolling bar will have the same height than the PA matrix svg, minus 20px
+        .clamp(true);
+
+      return scale;
     },
   },
   watch: {
