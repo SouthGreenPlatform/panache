@@ -6,15 +6,14 @@
       :transform="writeTranslateWithOffSet(ntToPx(coordsTriplet[0]), 0)"
       :fill="coordsTriplet[2]"
       >
-      <path :d="`M 0 4 L 2 0 L 2 ${svgHeight} L 0 ${svgHeight-4} Z`" />
+      <path :d="`M 0 0 L 2 0 L 2 ${trackHeight} L 0 ${trackHeight-4} Z`" />
       <rect
         x='0'
         y='0'
         :width="ntToPx(coordsTriplet[1]-coordsTriplet[0])"
         :height="rectHeightDependingOnOverlaps.get(coordsTriplet[0])"
-        :transform="writeTranslate(0, (svgHeight - rectHeightDependingOnOverlaps.get(coordsTriplet[0])) /2)"
       />
-      <path :d="`M 0 4 L -2 0 L -2 ${svgHeight} L 0 ${svgHeight-4} Z`" :transform="writeTranslate(ntToPx(coordsTriplet[1]-coordsTriplet[0]), 0)"/>
+      <path :d="`M 0 0 L -2 0 L -2 ${trackHeight} L 0 ${trackHeight-4} Z`" :transform="writeTranslate(ntToPx(coordsTriplet[1]-coordsTriplet[0]), 0)"/>
     </g>
   </svg>
 
@@ -43,9 +42,17 @@ export default {
       type: Number,
       default: 600
     },
-    svgHeight: {
+    trackHeight: {
       type: Number,
       default: 14 //should be an even number
+    },
+    gapHeight: {
+      type: Number,
+      default: 2
+    },
+    overlapingHeight: {
+      type: Number,
+      default: 50
     },
 
   },
@@ -59,6 +66,9 @@ export default {
   mounted() {
   },
   computed: {
+    svgHeight: function() {
+      return this.trackHeight + this.gapHeight + this.overlapingHeight
+    },
     //Attribute color to links if needed
     coordsTripleWithColor: function() {
       let coloredCoords = [];
@@ -87,7 +97,6 @@ export default {
       let self = this;
 
       this.coordsTripleWithColor.forEach( function(tuple) {
-        console.log({start:tuple[0], stop: tuple[1], diff: tuple[1]-tuple[0], pxWidth: self.ntToPx(tuple[1]-tuple[0])});
         let width = self.ntToPx(tuple[1] - tuple[0]);
         if ( width >= self.smallestWidthVisible) {
           validCoords.push(tuple);
@@ -158,7 +167,6 @@ export default {
         })
       }
 
-      console.log({mapOfDesiredHeights});
       return mapOfDesiredHeights;
     }
   },
