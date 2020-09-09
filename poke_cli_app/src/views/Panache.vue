@@ -20,26 +20,32 @@
         :colorScaleSimilarities="colorScaleSimilarities"
       />
     </div>
-    <div class='underPart'>
+    <div :style="displayWrapper">
       <HollowAreaTrack
+        class='zoneHighlight'
         :coordsStartStop="filteredHollowAreas"
         :firstNtToDisplay="firstNt"
         :displaySizeOfNt="ntWidthInPx"
         :svgWidth="displayWindowWidth"
+        :trackHeight="haTrackHeight"
+        :gapHeight="gridGapSize"
+        :overlapingHeight="autoComputeMatrixHeight"
         />
       <PavMatrixAndTracks
+        class='displayMatrix'
         :filteredData="filteredData"
         :genomeList="genomeList"
         :chromList="chromNames"
         :coreThreshold="coreThreshold"
+        :blocksDimensions="blocksDimensions"
         :displaySizeOfNt="ntWidthInPx"
         :displayHeight="displayWindowHeight"
         :displayWidth="displayWindowWidth"
+        :pavMatrixHeight="autoComputeMatrixHeight"
         :firstNtToDisplay="firstNt"
         :colorScaleFunction="colorScaleFunction"
         :colorScaleRainbow="colorScaleRainbow"
         :colorScaleSimilarities="colorScaleSimilarities"
-        :coordsOfHollowAreas="coordsOfHollowAreas"
       />
     </div>
   </div>
@@ -75,6 +81,10 @@ export default {
       //Dims should be responsive, depending on the available space!
       displayWindowHeight: 175,
       filteredData: [],
+
+      blocksDimensions: {width:20, height:14},
+      haTrackHeight: 14,
+      gridGapSize: 2,
 
     }
   },
@@ -155,6 +165,23 @@ export default {
       return filteredArray;
     },
 
+    //Set pavMatrixHeight for further use for the displayWrapper
+    autoComputeMatrixHeight() {
+      let thirdOfTotalHeight = Math.floor(this.displayWindowHeight/3);
+      let heightOfTotBlocks = this.nbOfGenomes * this.blocksDimensions.height;
+      let heightOfMatrix = Math.min(thirdOfTotalHeight, heightOfTotBlocks);
+
+      return heightOfMatrix;
+    },
+
+    //Style object to apply on css-grid wrapper
+    displayWrapper() {
+      return {
+        display: 'grid',
+        'grid-template-rows': `${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
+        'row-gap': `${this.gridGapSize}px`,
+      }
+    },
 
     //Computed of multiple objects to watch
     getDisplayBorders() {
@@ -323,7 +350,26 @@ export default {
 .upperPart {
   margin-top: 1.2rem;
 }
-.underPart {
+
+/*.displayWrapper {
+        display: grid;
+        grid-template-rows: 10px 10px 10px;
+        row-gap: 2px;
+}*/
+
+
+.zoneHighlight {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: start;
+  justify-self: center;
+}
+.displayMatrix {
+  grid-column: 1;
+  grid-row: 2 / 4;
+  align-self: start;
+  justify-self: center;
+  z-index: 2;
 }
 
 </style>

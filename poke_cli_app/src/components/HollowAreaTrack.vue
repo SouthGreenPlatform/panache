@@ -1,6 +1,16 @@
 <template>
 
   <svg class="" :width="svgWidth" :height="svgHeight">
+    <rect v-for="(coordsTriplet) in wideEnoughCoordsOnly"
+      :key="`highlight_${coordsTriplet[0]}`"
+      x=0
+      y=0
+      :width="ntToPx(coordsTriplet[1]-coordsTriplet[0])"
+      :height="svgHeight"
+      fill='yellow'
+      fill-opacity=0.75
+      :transform="writeTranslateWithOffSet(ntToPx(coordsTriplet[0]), 0)"
+    />
     <g v-for="(coordsTriplet) in wideEnoughCoordsOnly"
       :key="coordsTriplet[0]"
       :transform="writeTranslateWithOffSet(ntToPx(coordsTriplet[0]), 0)"
@@ -8,8 +18,8 @@
       >
       <path :d="`M 0 0 L 2 0 L 2 ${trackHeight} L 0 ${trackHeight-4} Z`" />
       <rect
-        x='0'
-        y='0'
+        x=0
+        y=0
         :width="ntToPx(coordsTriplet[1]-coordsTriplet[0])"
         :height="rectHeightDependingOnOverlaps.get(coordsTriplet[0])"
       />
@@ -58,7 +68,7 @@ export default {
   },
   data() {
     return {
-      smallestWidthVisible: 15,
+      smallestWidthVisible: 6,
     }
   },
   beforeMount() {
