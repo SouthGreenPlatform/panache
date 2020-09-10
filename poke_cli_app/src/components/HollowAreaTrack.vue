@@ -121,6 +121,7 @@ export default {
     rectHeightDependingOnOverlaps: function() {
       let overlapsToCompare = new Map();
       let previousStop = 0;
+      let previousWasOverlapped = false;
       let arrayOfOverlapCount = [];
       let mapOfDesiredHeights = new Map();
 
@@ -128,32 +129,45 @@ export default {
       this.coordsTripleWithColor.forEach( function(coords, index) {
         let currentStart = coords[0];
 
-        //First check if old coords are still overlaped
-        overlapsToCompare.forEach( function(overlaped, index) {
-          if (overlaped.stop > currentStart) {
-            overlaped.overlapCounter += 1;
-          } else {
-            arrayOfOverlapCount[index] = overlaped.overlapCounter;
-            overlapsToCompare.delete(index);
-          }
-        })
-
-        //Then check if previous coords are overlaped
-        //<= since stop is included in the holow region, not excluded
-        if (currentStart <= previousStop && index >= 1) {
+        //First check if previous coords are overlapped, and should be added to
+        //the overlaps store
+        if (currentStart < previousStop && index >= 1) {
           let overlapObject = {
             stop: previousStop,
-            overlapCounter: 1,
+            overlapCounter: 0,
           };
           overlapsToCompare.set(index - 1, overlapObject);
+          previousWasOverlapped = true;
         } else {
+          console.log({currentStart, previousStop});
           arrayOfOverlapCount[index - 1] = 0;
+          previousWasOverlapped = false;
         }
+
+
+        //Then if there are overlaps stored their overlapCounter might be
+        //increased or registered, depending on previousWasOverlapped
+        if (previousWasOverlapped) {
+
+          overlapsToCompare.forEach( function(overlapped) {
+            overlapped.overlapCounter += 1;
+          });
+
+        //If previous is not overlapping, all the overlapping chain ends and
+        //should be registered
+        } else {
+          overlapsToCompare.forEach( function(overlapped, index) {
+            arrayOfOverlapCount[index] = overlapped.overlapCounter;
+            overlapsToCompare.delete(index);
+          });
+        }
+
+        previousStop = coords[1];
       })
 
       //Eventually store unrecorded areas (last one + those it overlaps)
-      overlapsToCompare.forEach( function(overlaped, index) {
-        arrayOfOverlapCount[index] = overlaped.overlapCounter;
+      overlapsToCompare.forEach( function(overlapped, index) {
+        arrayOfOverlapCount[index] = overlapped.overlapCounter;
       });
       arrayOfOverlapCount.push(0); //for last area not consider within the loop
 
@@ -176,6 +190,8 @@ export default {
           mapOfDesiredHeights.set(coords[0], desiredHeight);
         })
       }
+
+      console.log({arrayOfOverlapCount, mapOfDesiredHeights});
 
       return mapOfDesiredHeights;
     }
