@@ -70,7 +70,7 @@ export default {
   },
   data() {
     return {
-      paramAbsenceRate: 0.28, //Default value of v-model MUST NOT BE declared in the template
+      paramAbsenceRate: 0.8, //Default value of v-model MUST NOT BE declared in the template
       paramConsecutiveBlock: 2,
       targetedPosNt: Number(), //Linked to center of screen if possible,
       targetIsChangedInternally: false,

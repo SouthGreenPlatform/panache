@@ -175,11 +175,11 @@ export default {
       if (arrayOfOverlapCount.length != this.coordsTripleWithColor.length) {
         console.log('ERROR: arrayOfOverlapCount does not have same length than original dataset')
       } else {
-        let maxHalfWidth = (this.svgHeight / 2) - 1;
+        let maxHalfHeight = this.trackHeight / 2;
         let maxNbOfOverlaps = Math.max(...[arrayOfOverlapCount]);
 
         //If there are too many overlaps, size must be adapted TODO
-        if (maxNbOfOverlaps > maxHalfWidth) {
+        if (maxNbOfOverlaps > maxHalfHeight) {
           console.log('A Hollow Area might have too many overlaps to be properly rendered')
         //Else we can use the overlap count directly
         }
