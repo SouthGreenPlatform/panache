@@ -373,6 +373,7 @@ export default {
     ntWidthInPixel: function() {
       //The change is external so this.targetIsChangedInternally is false
       //I can change targetedPos freely
+      console.log('TargetedPos changed as the size of nt to display changed');
       let floatTarget = (2 * this.currentFirstNt + this.pxToNt(this.displayWindowWidth) ) / 2;
       this.targetedPosNt = Math.floor(floatTarget);
     },

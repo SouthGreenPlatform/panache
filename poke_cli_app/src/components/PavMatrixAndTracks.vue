@@ -11,8 +11,8 @@
     <!-- That way the bottom of the blocks is automatically cropped -->
     <svg ref='pavMatrix' :height="autoComputeMatrixHeight" :width="displayWidth">
       <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
-        <rect v-for="block in filteredData"
-          :key="`idxForMatrix_${block.index}`"
+        <rect v-for="(block, idxInArray) in filteredData"
+          :key="`idxForMatrix_${idxInArray}`"
           class='movableBlock'
           :x="ntToPx(block.index)"
           :y="applyOffset(index * blocksDimensions.height)"
@@ -57,8 +57,8 @@
       <!-- TRACKS OF INFORMATION -->
       <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, autoComputeMatrixHeight+5)">
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
-          <rect v-for="block in filteredData"
-            :key="`idxForTracks_${block.index}`"
+          <rect v-for="(block, idxInArray) in filteredData"
+            :key="`idxForTracks_${idxInArray}`"
             :ref="`block${block.index}_${track.name}`"
             class='movableBlock'
             :x="ntToPx(block.index)"
@@ -80,8 +80,8 @@
             :transform="writeTranslate(0, index * blocksDimensions.height)">
             <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
             <!-- similarity boxes are translated in order to be centered-->
-            <rect v-for="block in filteredData"
-              :key="`idxForStruct_${block.index}`"
+            <rect v-for="(block, idxInArray) in filteredData"
+              :key="`idxForStruct_${idxInArray}`"
               class='movableBoxes'
               :x="ntToPx(block.index)"
               y='0'
