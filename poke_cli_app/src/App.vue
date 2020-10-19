@@ -33,7 +33,7 @@
     </div>
 
     <!-- Router view to display -->
-    <router-view :style="mainDisplayStyle" :class="`whiteBlock shadow-lg pt-4 mt-2 ${( this.$route.name !== 'Organism' ? 'mainDisplayStyle' : 'fullScreenStyle')}`" id='TheRouterView'/>
+    <router-view :style="mainDisplayStyle" :class="`whiteBlock shadow-lg mt-2 ${( this.$route.name !== 'Organism' ? 'mainDisplayStyle' : 'fullScreenStyle')}`" id='TheRouterView'/>
 
   </div>
 </template>
@@ -59,7 +59,7 @@ export default {
       return {
         display: 'grid',
         'grid-template-rows': 'auto auto 1fr',
-        'grid-template-columns': `${this.optionPanelWidth}px 1fr`
+        'grid-template-columns': `${this.optionPanelWidth}px 1fr`,
       }
     },
 
@@ -127,6 +127,7 @@ body {
   grid-column: 1;
   text-align: center;
   align-self: center;
+  padding: 1em;
 }
 
 .titleStyle {
@@ -147,7 +148,7 @@ body {
   grid-row: 3;
   grid-column: 2;
   text-align: center;
-  align-self: center;
+  align-self: start;
 }
 
 .fullScreenStyle {

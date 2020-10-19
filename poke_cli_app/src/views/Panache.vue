@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div >
+    <div :style="displayWrapper">
       <OverlayedCanvas
-        class='upperPart'
+        class='canvasMiniature'
         :chromosomeData="chromData"
         :nbOfGenomes="nbOfGenomes"
         :coreThreshold="coreThreshold"
@@ -19,8 +19,6 @@
         :colorScaleRainbow="colorScaleRainbow"
         :colorScaleSimilarities="colorScaleSimilarities"
       />
-    </div>
-    <div :style="displayWrapper">
       <HollowAreaTrack
         class='zoneHighlight'
         :coordsStartStop="filteredHollowAreas"
@@ -178,8 +176,10 @@ export default {
     displayWrapper() {
       return {
         display: 'grid',
-        'grid-template-rows': `${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
+//        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
+        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
         'row-gap': `${this.gridGapSize}px`,
+        'padding': '1em',
       }
     },
 
@@ -340,34 +340,22 @@ export default {
 <!--Here again are too many hardcoded values!!!/-->
 <style scoped>
 
-/*.whiteBlockCanvas {
-  background-color: white;
-  width: 77%;
-  height: 25rem;
-  border-radius: 50px;
-  margin-left: 22%;
-}*/
-
-.upperPart {
-  margin-top: 1.2rem;
+.canvasMiniature {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  justify-self: center;
 }
-
-/*.displayWrapper {
-        display: grid;
-        grid-template-rows: 10px 10px 10px;
-        row-gap: 2px;
-}*/
-
 
 .zoneHighlight {
   grid-column: 1;
-  grid-row: 1 / 3;
+  grid-row: 2 / 4;
   align-self: start;
   justify-self: center;
 }
 .displayMatrix {
   grid-column: 1;
-  grid-row: 2 / 4;
+  grid-row: 3 / 5;
   align-self: start;
   justify-self: center;
   z-index: 2;

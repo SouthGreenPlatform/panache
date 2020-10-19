@@ -10,7 +10,7 @@ export default new Vuex.Store({
   state: {
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
 
-    optionPanelWidth: 305,
+    optionPanelWidth: 300,
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
@@ -44,7 +44,7 @@ export default new Vuex.Store({
     },
     //Based on size of display
     displayWindowWidth: state => {
-      return window.innerWidth - state.optionPanelWidth
+      return window.innerWidth - state.optionPanelWidth - 40
     }
   },
   mutations: {
