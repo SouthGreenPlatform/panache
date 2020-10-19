@@ -1,8 +1,9 @@
 <template>
-  <div class="dropdown" style="text-align:center;">
-    <label for="`dropdown_${id}`">{{msg}}: </label>
+  <div class="wrapper">
 
-    <select :id="`dropdown_${id}`" :ref="`dropdown_${id}`" @change=setChosen>
+    <label class="dropDownLabel" for="`dropDownButton`">{{msg}}: </label>
+
+    <select :id="`dropDownButton`" :ref="`dropDownButton`" @change=setChosen>
       <option v-for="choice in choices" :key="choice" :value="choice">{{ choice }}</option>
     </select>
 
@@ -22,10 +23,6 @@ export default {
       type: Array,
       default: () => ['']
     },
-    id: {
-      type: String,
-      default: () => this.choices[0]
-    }
   },
   data() {
     return {
@@ -47,5 +44,21 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
+
+.wrapper {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.dropDownLabel {
+  grid-row: 1;
+  text-align: center;
+  align-self: center;
+}
+.dropDownButton {
+  grid-row: 2;
+  text-align: center;
+  align-self: center;
+}
 
 </style>
