@@ -1,6 +1,6 @@
 <template>
   <div>
-    <organism-menu class="whiteBlock mx-auto shadow-lg pt-5 mt-5" />
+    <organism-menu class="mx-auto" />
   </div>
 </template>
 
@@ -25,14 +25,10 @@ export default {
 
 <style lang="scss">
 
-.grey-back {
-  background-color: #F8F8FF;
-}
-
-.whiteBlock {
+/*.whiteBlock {
   background-color: white;
   width: 70rem;
   height: 40rem;
   border-radius: 50px;
-}
+}*/
 </style>

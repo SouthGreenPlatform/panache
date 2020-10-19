@@ -1,5 +1,5 @@
 <template>
-  <div class="whiteBlockCanvas shadow-lg pt-4 mt-2">
+  <div>
     <div >
       <OverlayedCanvas
         class='upperPart'
@@ -340,13 +340,14 @@ export default {
 <!--Here again are too many hardcoded values!!!/-->
 <style scoped>
 
-.whiteBlockCanvas {
+/*.whiteBlockCanvas {
   background-color: white;
   width: 77%;
   height: 25rem;
   border-radius: 50px;
   margin-left: 22%;
-}
+}*/
+
 .upperPart {
   margin-top: 1.2rem;
 }

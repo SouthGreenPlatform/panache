@@ -1,7 +1,5 @@
 <template>
   <div>
-    <img class="logo" alt="Vue logo" src="../assets/logo.png">
-    <hr class="blueBar"/>
     <strong>Active Filter</strong>
     <b-form-input v-model="text" placeholder="Filter"/>
     <strong>Region of interest</strong>
@@ -18,7 +16,7 @@
 
     <label>Some range:</label>
     <b-form-input type="range"></b-form-input>
-    
+
   </div>
 </template>
 
@@ -39,9 +37,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  .blueBar {
-    color: grey;
-  }
 
   .logo {
     height: 3rem;

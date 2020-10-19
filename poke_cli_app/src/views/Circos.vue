@@ -1,6 +1,6 @@
 <template>
   <div id="circos">
-    <PanCircos :layoutData="layoutData" :chordsData="chordsData" class="whiteBlock shadow-lg pt-4 mt-2"/>
+    <PanCircos :layoutData="layoutData" :chordsData="chordsData"/>
   </div>
 </template>
 
@@ -60,11 +60,11 @@ export default {
   color: #2c3e50;
 }
 
-.whiteBlock {
+/*.whiteBlock {
   background-color: white;
   width: 77%;
   height: 39rem;
   border-radius: 50px;
   margin-left: 22%;
-}
+}*/
 </style>

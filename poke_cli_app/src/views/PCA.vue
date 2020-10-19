@@ -1,5 +1,5 @@
 <template>
-  <div class="whiteBlockCanvasPCA shadow-lg pt-4 mt-2">
+  <div>
     <!-- On récupère l'event clicked envoyé par le child component avec les datas associées -->
     <GenomesPCA :pcaCoordinates="pcaData" :crop="crop" @clicked="onClickChild"/>
   </div>
@@ -33,7 +33,7 @@ export default {
       let pca = await pcaPromise;
       this.pcaData = pca;
     },
-    // 
+    //
     onClickChild(data) {
       this.crop = data;
     }
@@ -43,13 +43,13 @@ export default {
 
 <style>
 
-.whiteBlockCanvasPCA {
+/*.whiteBlockCanvasPCA {
   background-color: white;
   width: 77%;
   height: 45rem;
   border-radius: 50px;
   margin-left: 22%;
-}
+}*/
 
 </style>
 
