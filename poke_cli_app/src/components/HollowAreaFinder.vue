@@ -537,6 +537,7 @@ export default {
   grid-column: 1;
   grid-row: 4;
   text-align: left;
+  justify-self: center;
   align-self: center;
 }
 .distanceLeft {
@@ -571,6 +572,7 @@ export default {
   grid-column: 6;
   grid-row: 4;
   text-align: right;
+  justify-self: center;
   align-self: center;
 }
 
