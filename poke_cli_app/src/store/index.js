@@ -10,7 +10,7 @@ export default new Vuex.Store({
   state: {
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
 
-    displayWindowWidth: 1200, //Should be responsively set
+    optionPanelWidth: 210,
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
@@ -42,6 +42,10 @@ export default new Vuex.Store({
       }
       return Math.max(...state.chromDataInDisplay.map(d => Number(d.FeatureStop)));
     },
+    //Based on size of display
+    displayWindowWidth: state => {
+      return window.innerWidth - state.optionPanelWidth
+    }
   },
   mutations: {
     SET_CURRENT_CHROM_DATA_IN_DISPLAY(state, payload) {

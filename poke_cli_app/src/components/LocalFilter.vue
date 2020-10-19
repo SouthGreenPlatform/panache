@@ -63,12 +63,12 @@ export default {
       chromNames: 'chromNames',
       chromData: 'chromDataInDisplay',
       firstNt: 'firstNtToDisplay',
-      displayWindowWidth: 'displayWindowWidth',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
     }),
     ...mapGetters({
       globalLastNt: 'lastNtOfChrom',
-      nbOfGenomes: 'nbOfGenomesInDisplay'
+      nbOfGenomes: 'nbOfGenomesInDisplay',
+      displayWindowWidth: 'displayWindowWidth',
     })
   },
   methods: {

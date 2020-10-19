@@ -197,7 +197,6 @@ export default {
       chromData: 'chromDataInDisplay',
       firstNt: 'firstNtToDisplay',
       lastNt: 'lastNtToDisplay',
-      displayWindowWidth: 'displayWindowWidth',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
       colorScaleRainbow: 'pseudoRainbowColorScale',
       colorScaleSimilarities: 'greenColorScale',
@@ -207,6 +206,7 @@ export default {
       coordsOfHollowAreas: 'coordsOfHollowAreas',
     }),
     ...mapGetters({
+      displayWindowWidth: 'displayWindowWidth',
       nbOfGenomes: 'nbOfGenomesInDisplay',
       globalLastNt: 'lastNtOfChrom',
     })
