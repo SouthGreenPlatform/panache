@@ -1,9 +1,9 @@
 <template>
   <div id="app">
     <!-- On affiche le filtre qui correspond au nom du component qui est affiché via le routing vie le v-if -->
-    <global-filter v-if="this.$route.name === 'Circos'" class="filterTab"/>
-    <local-filter v-if="this.$route.name === 'Panache'" class="localFilterTab"/>
-    <sample-filter v-if="this.$route.name === 'PCA'" class="sampleTab"/>
+    <global-filter v-if="this.$route.name === 'Circos'" :style="filterTabStyle"/>
+    <local-filter v-if="this.$route.name === 'Panache'" :style="filterTabStyle"/>
+    <sample-filter v-if="this.$route.name === 'PCA'" :style="filterTabStyle"/>
     <b-navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark" v-if="this.$route.name !== 'Organism'">
         <b-navbar-nav class="ml">
             <b-nav-form>
@@ -30,7 +30,7 @@ import GlobalFilter from '@/components/GlobalFilter.vue';
 import LocalFilter from '@/components/LocalFilter.vue';
 import SampleFilter from '@/components/SampleFilter.vue';
 
-import { mapGetters } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'App',
@@ -44,13 +44,16 @@ export default {
     filterTabStyle() {
       return {
         'float': 'left',
-        'width': `${21}%`,
+        'width': this.optionPanelWidth,
         'background-color': 'white',
         'height': `${49}rem`,
         'padding': `${20}px`,
         'text-align': 'left',
       }
     },
+    ...mapState({
+      optionPanelWidth: 'optionPanelWidth',
+    }),
     ...mapGetters({
       displayWindowWidth: 'displayWindowWidth',
     })
@@ -90,34 +93,8 @@ body {
   }
 }
 
-.filterTab {
-  float: left;
-  width: 21%;
-  background-color: white;
-  height: 49rem;
-  padding: 20px;
-  text-align: left;
-}
-
-.localFilterTab {
-  float: left;
-  width: 21%;
-  background-color: white;
-  height: 49rem;
-  padding: 20px;
-  text-align: left;
-}
-
-.sampleTab {
-  float: left;
-  width: 21%;
-  background-color: white;
-  height: 55rem;
-  padding: 20px;
-  text-align: left;
-}
-
 .grey-back {
   background-color: #F8F8FF;
 }
+
 </style>
