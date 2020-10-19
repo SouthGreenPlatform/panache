@@ -30,13 +30,31 @@ import GlobalFilter from '@/components/GlobalFilter.vue';
 import LocalFilter from '@/components/LocalFilter.vue';
 import SampleFilter from '@/components/SampleFilter.vue';
 
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'App',
   components: {
     GlobalFilter,
     LocalFilter,
-    SampleFilter
-  }
+    SampleFilter,
+  },
+  computed: {
+    //Style object to apply on upper div for a correct display
+    filterTabStyle() {
+      return {
+        'float': 'left',
+        'width': `${21}%`,
+        'background-color': 'white',
+        'height': `${49}rem`,
+        'padding': `${20}px`,
+        'text-align': 'left',
+      }
+    },
+    ...mapGetters({
+      displayWindowWidth: 'displayWindowWidth',
+    })
+  },
 }
 
 </script>
