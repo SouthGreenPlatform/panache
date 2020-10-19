@@ -1,9 +1,9 @@
 <template>
   <div class="wrapper">
 
-    <label class="dropDownLabel" for="`dropDownButton`">{{msg}}: </label>
+    <label class="dropDownLabel" for='dropDownButton'>{{msg}}: </label>
 
-    <select :id="`dropDownButton`" :ref="`dropDownButton`" @change=setChosen>
+    <select id='dropDownButton' :ref="`dropDownButton`" @change=setChosen>
       <option v-for="choice in choices" :key="choice" :value="choice">{{ choice }}</option>
     </select>
 
@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     setChosen() {
-      let value = d3.select(this.$refs[`dropdown_${this.id}`]).node().value;
+      let value = d3.select(this.$refs['dropDownButton']).node().value;
       this.$store.state.chromSelected = value;
     }
   },
