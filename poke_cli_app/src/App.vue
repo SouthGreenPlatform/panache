@@ -1,5 +1,6 @@
 <template>
   <div id="app" :style="wrapperStyle">
+    <div v-if="this.$route.name !== 'Organism'" class='whiteBgLeft' />
     <div v-if="this.$route.name !== 'Organism'" class='logoStyle'>
       <img class="logo" alt="Vue logo" src="@/assets/logo.png">
     </div>
@@ -77,7 +78,6 @@ export default {
 
 <style lang="scss">
 #app {
-  height: 49rem;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -111,6 +111,12 @@ body {
   border-radius: 50px;
 }
 
+.whiteBgLeft {
+  background-color: white;
+  grid-row: 1 / 4;
+  grid-column: 1;
+}
+
 .delimiterBar {
   margin: 0.1em auto;
 }
@@ -120,14 +126,13 @@ body {
   grid-column: 1;
   text-align: center;
   align-self: center;
+  padding: 1em;
 }
 
 .optionPanelStyle {
   grid-row: 2 / 4;
   grid-column: 1;
   text-align: center;
-  align-self: center;
-  padding: 1em;
 }
 
 .titleStyle {

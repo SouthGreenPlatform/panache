@@ -1,21 +1,27 @@
 <template>
-  <div>
-    <strong>Local Filters</strong>
+  <div class='wrapper'>
+    <strong class='title' >Local Filters</strong>
 
-    <core-threshold class="coreThreshold" />
-
-    <DropDownChoice :msg="'Chromosome on display'" :choices="chromNames" :id="'Yuca'"/>
-
-    <PavMatrixLegend class="pavLegend" />
-
+    <CoreThreshold
+      class='coreThreshold'
+    />
+    <DropDownChoice
+      class='chromChoice'
+      msg='Chromosome on display'
+      :choices="chromNames"
+      idBonus='Chrom'
+    />
+    <PavMatrixLegend
+      class="pavLegend"
+    />
     <MatrixPavZoom
       class='zoomSlider'
       :lastNt="globalLastNt"
       :displayWindowWidth="displayWindowWidth"
       :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
-
     <HollowAreaFinder
+      class='haf'
       :arrayOfPanFeatures="chromData"
       :lastNt="globalLastNt"
       :genoNames="genoNames"
@@ -83,20 +89,42 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-  .coreThreshold {
-    margin-top: 2rem;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
+.wrapper {
+  display: grid;
+  grid-template-rows: repeat(6, auto);
+  row-gap: 5px;
+}
 
-  .pavLegend {
-    display: block;
-    margin-top: 1rem;
-  }
+.title {
+  grid-row: 1;
+  text-align: center;
+}
 
-  .zoomSlider {
-    display: block;
-    margin-top: 7rem;
-  }
+.coreThreshold {
+  grid-row: 2;
+  text-align: center;
+  align-self: center;
+}
+
+.chromChoice {
+  grid-row: 3;
+  text-align: center;
+  padding: 0.5em;
+}
+
+.pavLegend {
+  grid-row: 4;
+  text-align: center;
+}
+
+.zoomSlider {
+  grid-row: 5;
+  text-align: center;
+}
+
+.haf {
+  grid-row: 6;
+  text-align: center;
+}
+
 </style>

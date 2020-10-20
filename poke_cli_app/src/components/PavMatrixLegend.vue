@@ -1,5 +1,5 @@
 <template>
-  <svg id="svgContainer_pavLegends" class="svgContainer" :height="height" :width="width" style="position: absolute">
+  <svg id="svgContainer_pavLegends" class="svgContainer" :height="height" :width="width">
     <g id="legend_matrixPA_title">
       <text font-family="sans-serif" font-size="10px" y="1em" :x="width/2" text-anchor="middle">One column represents one panBlock</text>
     </g>
