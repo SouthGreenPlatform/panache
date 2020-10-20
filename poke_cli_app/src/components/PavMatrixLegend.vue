@@ -1,22 +1,35 @@
 <template>
-  <svg id="svgContainer_pavLegends" class="svgContainer" :height="height" :width="width">
-    <g id="legend_matrixPA_title">
-      <text font-family="sans-serif" font-size="10px" y="1em" :x="width/2" text-anchor="middle">One column represents one panBlock</text>
-    </g>
-    <g id="legend_matrixPA_blocks">
-      <g id="legend_matrixSchema">
-        <g>
-          <text v-for="gName in genomeLabels" :key="gName.text" x='45' :y="gName.yPos" font-family='sans-serif' font-size='10px' dominant-baseline='middle'>{{gName.text}}</text>
-        </g>
-        <g transform="translate(10,0)">
-          <path v-for="column in pavPaths" :key="column.index" :d="column.directions" :fill="column.colour" />
-        </g>
+  <div class='pavLegendWrapper'>
+    <div class='titleLegend'>One column represents one panBlock</div>
+    <svg id="svgContainer_pavLegends" class="pavSchema" height=42 width=80>
+      <g>
+        <text v-for="gName in genomeLabels"
+          :key="gName.text"
+          x='0'
+          :y="gName.yPos"
+          font-family='sans-serif'
+          font-size='10px'
+          dominant-baseline='middle'>
+            {{gName.text}}
+        </text>
       </g>
-      <g id="legend_matrixMeanings" transform="translate(130,0)">
-        <text v-for="label in meaningLabels" :key="label.text.split(' ')[0]" x=41 :y="label.yPos" font-family='sans-serif' font-size='10px' dominant-baseline='middle' text-anchor='middle'>{{label.text}}</text>
+      <g transform="translate(10,0)">
+        <path v-for="column in pavPaths"
+          :key="column.index"
+          :d="column.directions"
+          :fill="column.colour"
+          :transform="writeTranslate(column.index * 14, 0)"
+        />
       </g>
-    </g>
-  </svg>
+    </svg>
+    <div v-for="label in meaningLabels"
+      :key="label.text.split(' ')[0]"
+      :class="label.class"
+      font-family='sans-serif'
+      font-size='10px'>
+        {{label.text}}
+      </div>
+  </div>
 </template>
 
 <script>
@@ -52,42 +65,42 @@ export default {
       ],
       meaningLabels: [
         {
-          yPos: 7,
+          class: 'filledMeaning',
           text: 'Filled : Presence'
         },
         {
-          yPos: 22,
+          class: 'emptyMeaning',
           text: 'Empty : Absence'
         },
         {
-          yPos: 37,
-          text: 'Colour => Function'
+          class: 'colorMeaning',
+          text: 'Color => Function'
         }
       ],
       pavPaths: [
         {
           index:0,
-          directions: 'M 45 0 H 57 V 14 H 45 Z M 45 14 H 57 V 28 H 45 Z M 45 28 H 57 V 42 H 45 Z',
+          directions: 'M 0 0 H 14 V 14 H 0 Z M 0 14 H 14 V 28 H 0 Z M 0 28 H 14 V 42 H 0 Z',
           colour: 'rgb(131, 245, 87)'
         },
         {
           index:1,
-          directions: 'M 57 28 H 69 V 42 H 57 Z',
+          directions: 'M 0 28 H 14 V 42 H 0 Z',
           colour: 'rgb(80, 105, 217)'
         },
         {
           index:2,
-          directions: 'M 69 14 H 81 V 28 H 69 Z M 69 28 H 81 V 42 H 69 Z',
+          directions: 'M 0 14 H 14 V 28 H 0 Z M 0 28 H 14 V 42 H 0 Z',
           colour: 'rgb(184, 60, 176)'
         },
         {
           index:3,
-          directions: 'M 81 0 H 93 V 14 H 81 Z M 81 14 H 93 V 28 H 81 Z',
+          directions: 'M 0 0 H 14 V 14 H 0 Z M 0 14 H 14 V 28 H 0 Z',
           colour: 'rgb(56, 241, 122)'
         },
         {
           index:4,
-          directions: 'M 93 28 H 105 V 42 H 93 Z',
+          directions: 'M 0 28 H 14 V 42 H 0 Z',
           colour: 'rgb(110, 64, 170)'
         }
       ]
@@ -103,10 +116,61 @@ export default {
     let xBlocks = 0.5*(this.width - blocksBbox.width) - blocksBbox.x;
 
     d3.select("#legend_matrixPA_blocks").attr('transform', `translate(${xBlocks},30)`);
-
+  },
+  methods: {
+    writeTranslate(x=0,y=0) {
+      return `translate(${x},${y})`
+    },
   }
 }
 </script>
 
-<style >
+<style scoped>
+
+.pavLegendWrapper {
+  display: grid;
+  grid-template-rows: 2fr 1fr 1fr 1fr;
+  grid-template-columns: auto auto;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 10px;
+  padding: 0;
+}
+
+.titleLegend {
+  grid-row: 1;
+  grid-column: 1 / 3;
+  align-self: center;
+  text-align: center;
+}
+
+.pavSchema {
+  grid-row: 2 / 5;
+  grid-column: 1;
+  align-self: center;
+  text-align: center;
+  justify-self: center;
+}
+
+.filledMeaning {
+  grid-row: 2;
+  grid-column: 2;
+  align-self: center;
+  text-align: center;
+}
+
+.emptyMeaning {
+  grid-row: 3;
+  grid-column: 2;
+  align-self: center;
+  text-align: center;
+}
+
+.colorMeaning {
+  grid-row: 4;
+  grid-column: 2;
+  align-self: center;
+  text-align: center;
+}
+
 </style>
