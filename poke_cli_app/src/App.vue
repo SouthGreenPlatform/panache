@@ -59,7 +59,7 @@ export default {
     wrapperStyle() {
       return {
         display: 'grid',
-        'grid-template-rows': 'auto auto 1fr',
+        'grid-template-rows': 'auto auto 2fr',
         'grid-template-columns': `${this.optionPanelWidth}px 1fr`,
       }
     },
