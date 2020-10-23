@@ -34,7 +34,7 @@
     </div>
 
     <!-- Router view to display -->
-    <router-view :style="mainDisplayStyle" :class="`whiteBlock shadow-lg mt-2 ${( this.$route.name !== 'Organism' ? 'mainDisplayStyle' : 'fullScreenStyle')}`" id='TheRouterView'/>
+    <router-view :class="`whiteBlock shadow-lg mt-2 ${( this.$route.name !== 'Organism' ? 'mainDisplayStyle' : 'fullScreenStyle')}`" id='TheRouterView'/>
 
   </div>
 </template>

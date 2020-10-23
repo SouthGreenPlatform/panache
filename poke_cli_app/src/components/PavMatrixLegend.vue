@@ -33,7 +33,6 @@
 </template>
 
 <script>
-import * as d3 from 'd3';
 
 export default {
   name: 'PavMatrixLegend',
@@ -107,15 +106,6 @@ export default {
     }
   },
   mounted() {
-    let matrixMeanings = d3.select("#legend_matrixMeanings")
-    let meaningsBbox = matrixMeanings.node().getBBox();
-
-    matrixMeanings.selectAll('text').attr('x', meaningsBbox.width/2)
-
-    let blocksBbox = d3.select("#legend_matrixPA_blocks").node().getBBox();
-    let xBlocks = 0.5*(this.width - blocksBbox.width) - blocksBbox.x;
-
-    d3.select("#legend_matrixPA_blocks").attr('transform', `translate(${xBlocks},30)`);
   },
   methods: {
     writeTranslate(x=0,y=0) {
