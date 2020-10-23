@@ -90,7 +90,7 @@
               :height="blocksDimensions.height"
               :fill="similarityFill(block, chromName)"
               :stroke="similarityStroke(block)"
-              :stroke-opacity="`${(block[`copyPptionIn_Chr${chromName}`] > 0 ? 0.8 : 0)}`"
+              :stroke-opacity="`${(block[`copyPptionInChr_${chromName}`] > 0 ? 0.8 : 0)}`"
               stroke-width='0.5'
             />
           </g>
@@ -230,7 +230,7 @@ export default {
       let color = d3.hcl(self.colorScaleSimilarities.range()[1]);
       color.h = 180;
       //Only the lightness changes between similarity boxes
-      color.l = 100-(d[`copyPptionIn_Chr${chromName}`]*100*0.75);
+      color.l = 100-(d[`copyPptionInChr_${chromName}`]*100*0.75);
       return color;
     }
 
@@ -431,7 +431,7 @@ export default {
     },
     pptionBasedWidth(data, chromName) {
       let originalSize = this.ntToPx(this.FeatureWidth(data));
-      let pptionalSize = (originalSize -2) * data[`copyPptionIn_Chr${chromName}`];
+      let pptionalSize = (originalSize -2) * data[`copyPptionInChr_${chromName}`];
 
       return pptionalSize;
     },

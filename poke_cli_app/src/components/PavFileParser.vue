@@ -147,7 +147,7 @@ export default {
         }
 
         //lineAsObject[`copyPptionInChr_${chrom}`] = pption;
-        lineAsObject[`copyPptionIn_Chr${i}`] = pption;
+        lineAsObject[`copyPptionInChr_${i}`] = pption;
       }
 
       return lineAsObject;
