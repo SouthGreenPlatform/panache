@@ -136,19 +136,17 @@ export default {
         'Chromosome': chromOfLine
       }, dataLine);
 
-      //TODO: change name to copyPptionInChr_XXX in all components
       //Adds copy proportion as new property for every chromosome
-      for (let i = 0; i < chromNames.length; ++i) {
+      chromNames.forEach(function(chrom) {
         let pption = 0;
-        let chrom = chromNames[i];
 
         if (maxCount > 0) {
           pption = countOfRepeats[`${chrom}`] / maxCount;
         }
 
-        //lineAsObject[`copyPptionInChr_${chrom}`] = pption;
-        lineAsObject[`copyPptionInChr_${i}`] = pption;
-      }
+        lineAsObject[`copyPptionInChr_${chrom}`] = pption;
+        //lineAsObject[`copyPptionInChr_${i}`] = pption;
+      });
 
       return lineAsObject;
     },
