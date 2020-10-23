@@ -5,7 +5,9 @@
 </template>
 
 <script>
-import FileLoader from './components/FileLoader.vue';
+import FileLoader from '@/components/FileLoader.vue';
+
+import * as d3 from "d3";
 
 export default {
   name: 'PavFileParser',
@@ -18,10 +20,6 @@ export default {
       required: true
     },
     updateGenoNames: {
-      type: Function,
-      required: true
-    },
-    updateChromNames: {
       type: Function,
       required: true
     },
@@ -67,7 +65,7 @@ export default {
 
       //Defines the list of functions used
       // CAUTION IT WILL WORK DIFFERENTLY WITH TRUE GO TERMS!!!
-      let functionDiversity = [...new Set(realPanMatrix.map( d => d.Function))];
+      let functionDiversity = [...new Set(pavData.map( d => d.Function))];
       this.updateFunctionsDiversity(functionDiversity);
 
       //Rewrite data with correct column names and bonus columns
@@ -78,7 +76,7 @@ export default {
       let chromGroupedData = this.groupDataPerKey_inHouse(improvedData, 'Chromosome');
 
       //Send data to store
-      this.sendDataToStore(chromGroupedData);
+      this.updatePavData(chromGroupedData);
       console.log('Data sent to store');
     },
     async readDsv(dataURL) {
@@ -93,7 +91,7 @@ export default {
     },
     rewriteDsvColumns(dsvData, chromNames) {
 
-      console.log('Rewriting pav blocks as objects');
+      console.log('Rewriting pav blocks as objects', {chromNames});
       let newData = dsvData.map( d => this.turnLineIntoObject(d, chromNames));
       return newData;
 
@@ -102,17 +100,20 @@ export default {
 
       //defines and affects variables by deconstructing
       let {
-        '#Chromosome': chromName,
+        '#Chromosome': chromOfLine,
         'FeatureStart': ntStart,
-        'FeatureStop': ntStop,
-        'Sequence_IUPAC_Plus': sequence,
+        'FeatureStop': ntStop, // eslint-disable-line no-unused-vars
+        'Sequence_IUPAC_Plus': sequence, // eslint-disable-line no-unused-vars
         'SimilarBlocks': similarBlocks,
-        'Function': function,
-        ...rest
+        'Function': geneOnto, // eslint-disable-line no-unused-vars
+        ...rest //pav matrix, defined as opposed to previous variables
       } = dataLine;
 
+      //INFO: '// eslint-disable-line no-unused-vars' tells eslint to not
+      //consider any unused var on the matching line
+
       //removes ill-named chromosome column, it will be replaced later
-      delete d["#Chromosome"];
+      delete dataLine["#Chromosome"];
 
       //prepares blockCount variable
       let pavList = [0].concat(Object.values(rest));
@@ -125,14 +126,14 @@ export default {
       //prepares calculation of copy proportion in every chromosome
       let listOfRepeats = this. getListOfRepeats(similarBlocks);
       let chromsWithRepeat = this.getRepeatsOrigin(listOfRepeats);
-      let countOfRepeats = this.getRepeatCountPerChrom({chromsWithRepeat, chromNames});
+      let countOfRepeats = this.getRepeatCountPerChrom({ listOfChromWithRepeats: chromsWithRepeat, chromList: chromNames });
       let maxCount = Math.max(...Object.values(countOfRepeats));
 
       //writes line as a new object, with additional columns
       let lineAsObject = Object.assign({
         'index': ntStart,
         'presenceCounter': blockCount,
-        'Chromosome': chromName
+        'Chromosome': chromOfLine
       }, dataLine);
 
       //TODO: change name to copyPptionInChr_XXX in all components
@@ -143,7 +144,7 @@ export default {
 
         if (maxCount > 0) {
           pption = countOfRepeats[`${chrom}`] / maxCount;
-        };
+        }
 
         //lineAsObject[`copyPptionInChr_${chrom}`] = pption;
         lineAsObject[`copyPptionIn_Chr${i}`] = pption;
@@ -168,7 +169,7 @@ export default {
       //initiates counts at 0
       let dictOfCounts = {};
       chromList.forEach(function(chromName) {
-        dictOfCounts[chromName] = 0);
+        dictOfCounts[chromName] = 0;
       });
 
       //does +=1 when a chrom has a repeat
