@@ -1,9 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import PCA from '../views/PCA.vue'
-import Organism from '../views/Organism.vue'
 import Panache from '../views/Panache.vue'
-import Circos from '../views/Circos.vue'
 
 // Poke rounting system, in prevision of more views for the future
 Vue.use(VueRouter)
