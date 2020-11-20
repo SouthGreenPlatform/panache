@@ -5,36 +5,21 @@ import Organism from '../views/Organism.vue'
 import Panache from '../views/Panache.vue'
 import Circos from '../views/Circos.vue'
 
-// Système de routing, on défini les chemins, leur nom et le component associé qui a été import au dessus 
+// Poke rounting system, in prevision of more views for the future
 Vue.use(VueRouter)
 
   const routes = [
-  {
-    path: '/global',
-    name: 'Circos',
-    component: Circos
-  },
   {
     path: '/panache',
     name: 'Panache',
     component: Panache
   },
   {
-    path: '/pca',
-    name: 'PCA',
-    component: PCA
-  },
-  {
     path: '/',
-    name: 'Organism',
-    component: Organism
+    name: 'Panache',
+    component: Panache
   },
-  {
-    path: '/circos',
-    name: 'Circos',
-    component: Circos
-  },
-  {
+  {  //I have no idea what this ones does, I'll have to check
     path: '/local',
     name: 'Panache',
     props: true,
