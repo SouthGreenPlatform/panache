@@ -1,18 +1,16 @@
 <template>
   <div id="app" :style="wrapperStyle">
-    <div v-if="this.$route.name !== 'Organism'" class='whiteBgLeft' />
-    <div v-if="this.$route.name !== 'Organism'" class='logoStyle'>
+    <div class='whiteBgLeft'>
+    </div>
+    <div  class='logoStyle'>
       <img class="logo" alt="Vue logo" src="@/assets/logo.png">
     </div>
 
     <!-- The router will determine which kind of filtershould be displayed -->
-    <global-filter v-if="this.$route.name === 'Circos'" class='optionPanelStyle'/>
     <local-filter v-if="this.$route.name === 'Panache'" class='optionPanelStyle'/>
-    <sample-filter v-if="this.$route.name === 'PCA'" class='optionPanelStyle'/>
 
     <!-- Title and Search bar -->
-    <!-- -navbar class="grey-back border-bottom mx-2" toggleable="lg" type="dark" v-if="this.$route.name !== 'Organism'" -->
-    <div class='titleStyle' v-if="this.$route.name !== 'Organism'">
+    <div class='titleStyle'>
       <b-navbar toggleable="lg" type="dark">
           <b-navbar-nav class="ml">
               <b-nav-form>
@@ -26,7 +24,7 @@
     </div>
 
     <!-- Navigation bar that navigates through all routes -->
-    <div id="nav" v-if="this.$route.name !== 'Organism'" class='navigationBarStyle'>
+    <div id="nav" class='navigationBarStyle'>
       <router-link to="/">Organism</router-link> |
       <router-link to="/pca">Sample diversity</router-link> |
       <router-link to="/global">Global diversity</router-link> |
@@ -34,25 +32,24 @@
     </div>
 
     <!-- Router view to display -->
-    <router-view :class="`whiteBlock shadow-lg mt-2 ${( this.$route.name !== 'Organism' ? 'mainDisplayStyle' : 'fullScreenStyle')}`" id='TheRouterView'/>
+    <router-view
+      class='whiteBlock shadow-lg mt-2 mainDisplayStyle'
+      id='TheRouterView'
+    />
 
   </div>
 </template>
 
 <script>
 
-import GlobalFilter from '@/components/GlobalFilter.vue';
 import LocalFilter from '@/components/LocalFilter.vue';
-import SampleFilter from '@/components/SampleFilter.vue';
 
 import { mapState, mapGetters } from 'vuex';
 
 export default {
   name: 'App',
   components: {
-    GlobalFilter,
     LocalFilter,
-    SampleFilter,
   },
   computed: {
     //Style object to apply to wrapper to take variable values
@@ -155,16 +152,5 @@ body {
   text-align: center;
   align-self: start;
 }
-
-.fullScreenStyle {
-  grid-row: 1 / 4;
-  grid-column: 1 / 3;
-  text-align: center;
-  align-self: center;
-}
-
-
-
-
 
 </style>
