@@ -2,34 +2,9 @@
   <div id="app" :style="wrapperStyle">
     <div class='whiteBgLeft'>
     </div>
-    <div  class='logoStyle'>
-      <img class="logo" alt="Vue logo" src="@/assets/logo.png">
-    </div>
 
     <!-- The router will determine which kind of filtershould be displayed -->
     <local-filter v-if="this.$route.name === 'Panache'" class='optionPanelStyle'/>
-
-    <!-- Title and Search bar -->
-    <div class='titleStyle'>
-      <b-navbar toggleable="lg" type="dark">
-          <b-navbar-nav class="ml">
-              <b-nav-form>
-                  <b-form-input size="sm" class="ml-sm-2" placeholder="Search"></b-form-input>
-                  <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
-              </b-nav-form>
-          </b-navbar-nav>
-          <b-navbar-brand class="text-dark mx-auto">Title</b-navbar-brand>
-      </b-navbar>
-      <hr class='delimiterBar'/>
-    </div>
-
-    <!-- Navigation bar that navigates through all routes -->
-    <div id="nav" class='navigationBarStyle'>
-      <router-link to="/">Organism</router-link> |
-      <router-link to="/pca">Sample diversity</router-link> |
-      <router-link to="/global">Global diversity</router-link> |
-      <router-link to="/panache">Local diversity</router-link>
-    </div>
 
     <!-- Router view to display -->
     <router-view
@@ -56,7 +31,6 @@ export default {
     wrapperStyle() {
       return {
         display: 'grid',
-        'grid-template-rows': 'auto auto 2fr',
         'grid-template-columns': `${this.optionPanelWidth}px 1fr`,
       }
     },
@@ -87,22 +61,6 @@ body {
   background-color: #F8F8FF;
 }
 
-#nav {
-  padding: 10px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: white;
-      background-color: #007BFF;
-      padding: 10px;
-      border-radius: 5px;
-    }
-  }
-}
-
 .whiteBlock {
   background-color: white;
   border-radius: 50px;
@@ -110,44 +68,15 @@ body {
 
 .whiteBgLeft {
   background-color: white;
-  grid-row: 1 / 4;
   grid-column: 1;
-}
-
-.delimiterBar {
-  margin: 0.1em auto;
-}
-
-.logoStyle {
-  grid-row: 1;
-  grid-column: 1;
-  text-align: center;
-  align-self: center;
-  padding: 1em;
 }
 
 .optionPanelStyle {
-  grid-row: 2 / 4;
   grid-column: 1;
   text-align: center;
 }
 
-.titleStyle {
-  grid-row: 1;
-  grid-column: 2;
-  text-align: center;
-  align-self: center;
-}
-
-.navigationBarStyle {
-  grid-row: 2;
-  grid-column: 2;
-  text-align: center;
-  align-self: center;
-}
-
 .mainDisplayStyle {
-  grid-row: 3;
   grid-column: 2;
   text-align: center;
   align-self: start;
