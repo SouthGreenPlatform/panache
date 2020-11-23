@@ -109,10 +109,6 @@ export default {
                   .clamp(true), //borders cannot be exceeded
     }
   },
-  beforeMount() {
-    console.log('firstNt is');
-    console.log(this.firstNtToDisplay);
-  },
   mounted() {
     this.drawCanvas();
     this.drawSvg();
@@ -214,7 +210,7 @@ export default {
         //Apply associated color
         ctx.fillStyle = d3.interpolateRainbow( colorRatio );
       } else {
-        ctx.fillStyle = this.colorScaleFunction(d["Function"]);
+        ctx.fillStyle = this.colorScaleFunction(d);
       }
 
       //height of histogram depends on the number of present blocks

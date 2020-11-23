@@ -98,7 +98,7 @@ export default {
         }
       })
 
-      console.log({coloredCoords});
+      //console.log({coloredCoords});
       return coloredCoords;
     },
     //Filter out coords too small to be correctly seen on screen
@@ -113,7 +113,7 @@ export default {
         }
       })
 
-      console.log({validCoords});
+      //console.log({validCoords});
 
       return validCoords;
     },
@@ -139,7 +139,7 @@ export default {
           overlapsToCompare.set(index - 1, overlapObject);
           previousWasOverlapped = true;
         } else {
-          console.log({currentStart, previousStop});
+          //console.log({currentStart, previousStop});
           arrayOfOverlapCount[index - 1] = 0;
           previousWasOverlapped = false;
         }
@@ -191,14 +191,14 @@ export default {
         })
       }
 
-      console.log({arrayOfOverlapCount, mapOfDesiredHeights});
+      //console.log({arrayOfOverlapCount, mapOfDesiredHeights});
 
       return mapOfDesiredHeights;
     }
   },
   watch: {
     coordsStartStop: function() {
-      console.log({coordStartStopChanged: this.coordsStartStop});
+      //console.log({coordStartStopChanged: this.coordsStartStop});
     }
   },
   methods: {

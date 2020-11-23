@@ -19,7 +19,7 @@
           :transform="writeTranslateWithOffSet(0,0)"
           :height="blocksDimensions.height"
           :width="ntToPx(block.FeatureStop - block.FeatureStart)"
-          :fill="colorScaleFunction(block.Function)"
+          :fill="colorScaleFunction(block)"
           :opacity="calcPavBlockOpacity(block[`${genome}`])"
           @mouseover="XXXsomeConditionalEventXXX"
           @mouseout="XXXsomeConditionalEventXXX"
@@ -348,7 +348,7 @@ export default {
         let thirdOfTotalHeight = Math.floor(this.displayHeight/3);
         heightOfMatrix = Math.min(thirdOfTotalHeight, this.heightOfTotBlocks);
       }
-      console.log({autoHeight: heightOfMatrix});
+      //console.log({autoHeight: heightOfMatrix});
       return heightOfMatrix;
     },
     blockVerticalOffsetToSliderScale() {

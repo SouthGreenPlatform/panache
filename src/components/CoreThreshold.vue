@@ -98,8 +98,7 @@ export default {
           break;
 
         default:
-          console.log('Position of circle is neither "left" nor "right"');
-          console.log(position);
+          console.log('Position of circle is neither "left" nor "right":', position);
         break;
       }
 
@@ -117,8 +116,8 @@ export default {
           break;
 
         default:
-        console.log('Position of circle is neither "left" nor "right"');
-        break;
+          console.log('Position of circle is neither "left" nor "right"');
+          break;
       }
 
       return `fill:${fill}`;
@@ -148,8 +147,8 @@ export default {
           break;
 
         default:
-        console.log('stopKey of gradient has not been found');
-        break;
+          console.log('stopKey of gradient has not been found');
+          break;
       }
 
       let properties = {offset: offset, color: color};
@@ -162,11 +161,10 @@ export default {
       this.threshold = this.pxToThresholdScale(mousePos);
       if(mousePos >= 0 && mousePos <= 100){
         this.$store.state.coreThresholdSlide = mousePos; // on enregistre en variable globale la valeur du slider pour modifier le canvas
-       // console.log(this.$store.state.coreThresholdSlide);
+       //console.log(this.$store.state.coreThresholdSlide);
       }
     },
     translateContent() {
-      console.log(this.width);
       let svgToMove = d3.select(this.$refs.coreSliderSVGs);
       let bboxSvg = svgToMove.node().getBBox();
       let xMove = ((this.width - bboxSvg.width) / 2) + - bboxSvg.x;

@@ -23,6 +23,10 @@ export default {
       type: Array,
       default: () => ['']
     },
+    updateCurrentChrom: {
+      type: Function,
+      required: true,
+    },
     idBonus: {
       type: String,
       default: ''
@@ -35,7 +39,8 @@ export default {
   methods: {
     setChosen() {
       let value = d3.select(this.$refs['dropDownButton']).node().value;
-      this.$store.state.chromSelected = value;
+      this.updateCurrentChrom(value);
+      //this.$store.state.chromSelected = value;
     }
   },
   watch: {

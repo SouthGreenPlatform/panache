@@ -1,6 +1,23 @@
 <template>
   <div class='wrapper'>
-    <strong class='title' >Local Filters</strong>
+    <strong class='title' >Filters</strong>
+
+
+    <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
+    <PavFileParser
+      class='pavLoader'
+      :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
+      :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
+      :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
+      :updateFunctionsDiversity="function() { return }"
+      :updatePavData="function(pavData) { updateFullChromData(pavData) }"
+    />
+    <!-- updateFunctionDiversity is not used yet?-->
+    <GffFileParser
+      class='gffLoader'
+      :chromList="chromNames"
+      :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+    />
 
     <CoreThreshold
       class='coreThreshold'
@@ -9,6 +26,7 @@
       class='chromChoice'
       msg='Chromosome on display'
       :choices="chromNames"
+      :updateCurrentChrom="function(chrom) { updateSelectedChrom(chrom) }"
       idBonus='Chrom'
     />
     <PavMatrixLegend
@@ -22,7 +40,7 @@
     />
     <HollowAreaFinder
       class='haf'
-      :arrayOfPanFeatures="chromData"
+      :arrayOfPanFeatures="currentChromData"
       :lastNt="globalLastNt"
       :genoNames="genoNames"
       :nbOfGenomes="nbOfGenomes"
@@ -38,6 +56,8 @@
 
 <script>
 
+import PavFileParser from '@/components/PavFileParser.vue';
+import GffFileParser from '@/components/GffFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
@@ -49,6 +69,8 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 export default {
   name: 'LocalFilter',
   components: {
+    PavFileParser,
+    GffFileParser,
     CoreThreshold,
     MatrixPavZoom,
     DropDownChoice,
@@ -65,11 +87,12 @@ export default {
     ...mapState({
       genoNames: 'genomeListInDisplay',
       chromNames: 'chromNames',
-      chromData: 'chromDataInDisplay',
       firstNt: 'firstNtToDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
     }),
     ...mapGetters({
+      currentChromData: 'chromDataInDisplay',
+      currentGffData: 'gffDataInDisplay',
       globalLastNt: 'lastNtOfChrom',
       nbOfGenomes: 'nbOfGenomesInDisplay',
       displayWindowWidth: 'displayWindowWidth',
@@ -78,6 +101,11 @@ export default {
   methods: {
     //Get Actions from the store
     ...mapActions([
+      'updateChromNames',
+      'updateGenomesInDisplay',
+      'updateFullChromData',
+      'updateFullGffData',
+      'updateSelectedChrom',
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
       'updateCoordsOfHollowAreas'
@@ -91,7 +119,7 @@ export default {
 
 .wrapper {
   display: grid;
-  grid-template-rows: repeat(6, auto);
+  grid-template-rows: repeat(8, auto);
   row-gap: 5px;
 }
 
@@ -100,30 +128,40 @@ export default {
   text-align: center;
 }
 
-.coreThreshold {
+.pavLoader {
   grid-row: 2;
   text-align: center;
   align-self: center;
 }
 
-.chromChoice {
+.gffLoader {
   grid-row: 3;
+  text-align: center;
+}
+
+.coreThreshold {
+  grid-row: 4;
+  text-align: center;
+}
+
+.chromChoice {
+  grid-row: 5;
   text-align: center;
   padding: 0.5em;
 }
 
 .pavLegend {
-  grid-row: 4;
+  grid-row: 6;
   text-align: center;
 }
 
 .zoomSlider {
-  grid-row: 5;
+  grid-row: 7;
   text-align: center;
 }
 
 .haf {
-  grid-row: 6;
+  grid-row: 8;
   text-align: center;
 }
 

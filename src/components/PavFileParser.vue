@@ -19,6 +19,10 @@ export default {
       type: Function,
       required: true
     },
+    updateDefaultChrom: {
+      type: Function,
+      required: true
+    },
     updateGenoNames: {
       type: Function,
       required: true
@@ -54,6 +58,7 @@ export default {
       //Defines the list/set of chromosome names
       let CHROMOSOME_NAMES = [...new Set(pavData.map( d => d["#Chromosome"]))];
       this.updateChromNames(CHROMOSOME_NAMES);
+      this.updateDefaultChrom(CHROMOSOME_NAMES[0]);
 
       ///Defines the list/set of genome names
       //CAUTION This definition assumes that the PAV part is at the end of the

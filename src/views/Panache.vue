@@ -67,8 +67,6 @@ export default {
   },
   data() {
     return {
-      //Values based on full dataset
-      fullData: [],
 
       //Used to define the rainbow color Scale
       pseudoRainbowList: [d3.rgb(0, 90, 200), d3.rgb(0, 200, 250),
@@ -87,17 +85,6 @@ export default {
     }
   },
   computed: {
-    //chromosome data and associated properties
-    tempChromData() {
-      //in case full data is not loaded yet...
-      if (this.fullData[0] === undefined || this.fullData[0][this.selectedChrom] === undefined) {
-        return []
-      }
-
-      // else return the correct dataset
-      let selectedSubData = this.fullData[0][this.selectedChrom];
-      return selectedSubData;
-    },
     // I SHOULD MANAGE DEFAULT VALUES HERE TOO
     lastBlockStart() {
       return Math.max(...this.chromData.map(d => Number(d.FeatureStart)))
@@ -108,14 +95,6 @@ export default {
     },
     coreThreshold() {
       return this.coreValue /100 * this.nbOfGenomes //Should not be data dependant...
-    },
-    functionDiversity() {
-      return [...new Set(this.chromData.map( d => d.Function))];
-    },
-    colorsForFunctions() {
-      let arrayOfInt = this.domainPivotsMaker(this.functionDiversity.length, this.functionDiversity.length);
-      //+1 so that there is no full circle in the rainbow
-      return arrayOfInt.map(intNum => d3.interpolateRainbow(intNum / (this.functionDiversity.length + 1)));
     },
     pivotsForRainbow() {
       return this.domainPivotsMaker(this.pseudoRainbowList.length, this.lastBlockStart);
@@ -138,7 +117,7 @@ export default {
         n += 1;
       })
 
-      console.log({coloredArray});
+      //console.log({coloredArray});
       return coloredArray;
     },
     filteredHollowAreas() {
@@ -159,7 +138,7 @@ export default {
         return isInDisplayWindow;
       });
 
-      console.log({filteredArray});
+      //console.log({filteredArray});
       return filteredArray;
     },
 
@@ -194,7 +173,6 @@ export default {
       genomeList: 'genomeListInDisplay',
       chromNames: 'chromNames',
       selectedChrom: 'chromSelected',
-      chromData: 'chromDataInDisplay',
       firstNt: 'firstNtToDisplay',
       lastNt: 'lastNtToDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
@@ -202,10 +180,12 @@ export default {
       colorScaleSimilarities: 'greenColorScale',
       colorScaleDisp: 'blueColorScale',
       colorScaleCore: 'orangeColorScale',
-      colorScaleFunction: 'functionColorScale',
       coordsOfHollowAreas: 'coordsOfHollowAreas',
     }),
     ...mapGetters({
+      chromData: 'chromDataInDisplay',
+      gffData: 'gffDataInDisplay',
+      colorScaleFunction: 'colorForFunctionElement',
       displayWindowWidth: 'displayWindowWidth',
       nbOfGenomes: 'nbOfGenomesInDisplay',
       globalLastNt: 'lastNtOfChrom',
@@ -213,7 +193,6 @@ export default {
   },
 
   beforeMount() {
-    this.fetchFullData();
   },
 
   watch: {
@@ -231,9 +210,6 @@ export default {
         this.$store.state.orangeColorScale = this.colorScaleMaker([0, this.nbOfGenomes],[d3.hcl(60, 0, 95), d3.hcl(60, 65, 70)]);
       },
       immediate: true
-    },
-    colorsForFunctions: function() {
-      this.$store.state.functionColorScale = this.colorScaleMaker(this.functionDiversity, this.colorsForFunctions, false);
     },
 
     //Update stored chromosome data when changes apply
@@ -254,17 +230,6 @@ export default {
   },
 
   methods: {
-
-    //Fetches the full dataset, from which chromosomal data can be used
-    async fetchFullData() {
-      console.log('Fetching full dataset');
-
-      let dataPromise = d3.json("./mediumFakeDataWithAllBlocks.json");
-      let data = await dataPromise;
-
-      console.log('Full data fetched');
-      this.fullData = data;
-    },
 
     filterData() {
       if (this.chromData[0] != undefined) {

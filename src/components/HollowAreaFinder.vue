@@ -138,7 +138,7 @@ export default {
         arrayOfConsecutivenessPerGeno[i] = mapFromGenoToConsec;
       })
 
-      console.log({consecutivenessArray: arrayOfConsecutivenessPerGeno});
+      //console.log({consecutivenessArray: arrayOfConsecutivenessPerGeno});
       return arrayOfConsecutivenessPerGeno;
     },
     hollowAreasCoordinates() {
@@ -244,7 +244,7 @@ export default {
       }
 
       //Eventually...
-      console.log({mapOfCoords: mapOfHollowCoordinates});
+      //console.log({mapOfCoords: mapOfHollowCoordinates});
       return mapOfHollowCoordinates;
 
     },
@@ -350,12 +350,6 @@ export default {
         this.updateGlobalFirstNt(this.reachableFirstNt);
       }
     },
-    maxDesiredNbOfPresentBlock: function() {
-      console.log({minNb:this.minDesiredNbOfAbsentBlock, maxNb:this.maxDesiredNbOfPresentBlock})
-    },
-    sparseArrayOfPrevious_reversed: function() {
-      console.log({allArray:this.sparseArrayOfMatChingIndices, next:this.sparseArrayOfNext, prev:this.sparseArrayOfPrevious, prevRev: this.sparseArrayOfPrevious_reversed});
-    },
     currentFirstNt: function() {
 
       //If window is moved through jump buttons
@@ -439,7 +433,7 @@ export default {
         this.targetedPosNt = destinationToReach
         this.targetIsChangedInternally = true
       }
-      console.log({destinationToReach: destinationToReach});
+      //console.log({destinationToReach: destinationToReach});
     },
     goForward() {
       let destinationToReach = this.targetAPosition({});
