@@ -59,7 +59,7 @@
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
           <rect v-for="(block, idxInArray) in filteredData"
             :key="`idxForTracks_${idxInArray}`"
-            :ref="`block${block.index}_${track.name}`"
+            :ref="`block${idxInArray}_${track.name}`"
             class='movableBlock'
             :x="ntToPx(block.index)"
             y='0'
@@ -388,16 +388,16 @@ export default {
 
       //Add the mouseoer events
       self.tracks.forEach( function(track) {
-        self.filteredData.forEach( function(block) {
-          //console.log(self.$refs[`block${block.index}_${track.name}`]);
+        self.filteredData.forEach( function(block, idxInArray) {
+          //console.log(self.$refs[`block${idxInArray}_${track.name}`]);
           //display tooltip on hovering, based on data
-          d3.select(self.$refs[`block${block.index}_${track.name}`][0]).on('mouseover', function() {
-            self.eventShowTooltip(`block${block.index}_${track.name}`, block)
+          d3.select(self.$refs[`block${idxInArray}_${track.name}`][0]).on('mouseover', function() {
+            self.eventShowTooltip(`block${idxInArray}_${track.name}`, block)
           });
 
           //reset tooltip and block color
-          d3.select(self.$refs[`block${block.index}_${track.name}`][0]).on('mouseout', function() {
-            self.eventHideTooltip(`block${block.index}_${track.name}`)
+          d3.select(self.$refs[`block${idxInArray}_${track.name}`][0]).on('mouseout', function() {
+            self.eventHideTooltip(`block${idxInArray}_${track.name}`)
           });
         });
       });
