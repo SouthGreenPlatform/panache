@@ -1,5 +1,5 @@
 FROM debian
-EXPOSE 80 8080
+EXPOSE 1337 8080
 
 RUN apt update && apt upgrade -y
 RUN apt install -y curl nginx sudo
@@ -7,9 +7,9 @@ RUN apt install -y curl nginx sudo
 RUN curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
 RUN apt install -y nodejs
 
-ADD . /app
+ADD nginx.conf /etc/nginx/sites-available/panache
+RUN ln -s /etc/nginx/sites-available/panache /etc/nginx/sites-enabled/panache
+
 WORKDIR /app
 
-RUN npm install -g @vue/cli && npm install
-
-CMD npm run serve
+CMD service nginx start && npm run serve
