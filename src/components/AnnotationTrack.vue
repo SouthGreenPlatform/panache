@@ -102,6 +102,7 @@ export default {
         position: 'absolute',
         opacity: 0,
         transition: 'opacity 0.1s',
+        'z-index': 333,
         //'pointer-events': 'none'; //let mouse events pass through
       },
       annotCardWidth: 0,

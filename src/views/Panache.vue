@@ -19,6 +19,13 @@
         :colorScaleRainbow="colorScaleRainbow"
         :colorScaleSimilarities="colorScaleSimilarities"
       />
+      <AnnotationTrack
+        class='annotationTrack'
+        :annotToDisplay="gffData"
+        :firstNtToDisplay="firstNt"
+        :lastNtToDisplay="lastNt"
+        :trackWidth="displayWindowWidth"
+      />
       <HollowAreaTrack
         class='zoneHighlight'
         :coordsStartStop="filteredHollowAreas"
@@ -55,6 +62,7 @@ import * as d3 from 'd3';
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
 import HollowAreaTrack from '@/components/HollowAreaTrack.vue';
+import AnnotationTrack from '@/components/AnnotationTrack.vue';
 
 import { mapState, mapGetters, mapActions } from 'vuex';
 
@@ -64,6 +72,7 @@ export default {
     OverlayedCanvas,
     PavMatrixAndTracks,
     HollowAreaTrack,
+    AnnotationTrack,
   },
   data() {
     return {
@@ -156,7 +165,7 @@ export default {
       return {
         display: 'grid',
 //        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
-        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
+        'grid-template-rows': `auto auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
         'row-gap': `${this.gridGapSize}px`,
         'padding': '1em',
       }
@@ -312,15 +321,21 @@ export default {
   justify-self: center;
 }
 
+.AnnotationTrack {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+}
 .zoneHighlight {
   grid-column: 1;
-  grid-row: 2 / 4;
+  grid-row: 3 / 5;
   align-self: start;
   justify-self: center;
 }
 .displayMatrix {
   grid-column: 1;
-  grid-row: 3 / 5;
+  grid-row: 4 / 6;
   align-self: start;
   justify-self: center;
   z-index: 2;
