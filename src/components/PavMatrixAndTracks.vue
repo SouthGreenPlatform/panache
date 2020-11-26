@@ -43,6 +43,7 @@
               {{genome}}
             </text>
           </g>
+
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
       <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->

@@ -1,15 +1,27 @@
 <template>
-  <div class="wrapperFileLoader">
-
-    <label class="loaderLabel" :for="`fileSelector_${idBonus}`">{{LabelToDisplay}}: </label>
+  <div class="custom-file">
     <input
-      class='loaderInput'
-      :id="`fileSelector_${idBonus}`"
-      type='file'
-      @change="emitDataURL"
+        class='loaderInput custom-file-input'
+        :id="`fileSelector_${idBonus}`"
+        type='file'
+        @change="emitDataURL"
     />
 
+    <label class="custom-file-label" :for="`fileSelector_${idBonus}`">{{LabelToDisplay}}:</label>
   </div>
+
+<!--  <div class="wrapperFileLoader">-->
+
+<!--    <label class="loaderLabel" :for="`fileSelector_${idBonus}`">{{LabelToDisplay}}: </label>-->
+
+<!--    <input-->
+<!--      class='loaderInput'-->
+<!--      :id="`fileSelector_${idBonus}`"-->
+<!--      type='file'-->
+<!--      @change="emitDataURL"-->
+<!--    />-->
+
+<!--  </div>-->
 </template>
 
 <script>

@@ -1,36 +1,46 @@
 <template>
-  <svg :width="svgWidth" :height="svgHeight">
-    <g ref='zoomLegend'>
-      <text font-family='sans-serif' font-size='10px' text-anchor='middle'>Zoom level</text>
-      <g transform='translate(0,8)'>
-        <path d='M -90 11 L 90 4 V 18 Z' fill='rgb(119, 119, 119)' />
-        <rect
-          x=-90
-          y=0
-          height=22
-          :width="ratioToSliderPosScale().range()[1]-ratioToSliderPosScale().range()[0]"
-          fill='rgb(255, 233, 103)'
-          fill-opacity=0.5
-          stroke='rgb(255, 158, 0)'
-        />
-        <text y=-3 x=-90 dominant-baseline='hanging' font-family='sans-serif' font-size='18px' fill='rgb(255, 158, 0)'>*</text>
-        <line
-          y1=0
-          y2=22
-          :x1="posBasedOnRatio"
-          :x2="posBasedOnRatio"
-          stroke-width=2
-          stroke='black'
-        />
-        <line class='overlay' :ref="`${id}_overlay`" y1=11 y2=11 x1=-110 x2=110 stroke-width=24 stroke='transparent' cursor='ew-resize' />
-      </g>
-      <text transform='translate(0,50)' font-family='sans-serif' font-size='10px' text-anchor="middle" dominant-baseline="hanging" fill='rgb(255, 158, 0)'>
-        <tspan>* At these zoom levels </tspan>
-        <tspan x=0 dy='1em'>lag might occur </tspan>
-      </text>
-    </g>
-  </svg>
-
+  <div>
+    <div class="row">
+      <div class="col-12">
+        <svg :width="svgWidth" :height="svgHeight">
+          <g ref='zoomLegend'>
+            <text font-family='sans-serif' font-size='10px' text-anchor='middle'>Zoom level</text>
+            <g transform='translate(0,8)'>
+              <path d='M -90 11 L 90 4 V 18 Z' fill='rgb(119, 119, 119)' />
+              <rect
+                  x=-90
+                  y=0
+                  height=22
+                  :width="ratioToSliderPosScale().range()[1]-ratioToSliderPosScale().range()[0]"
+                  fill='rgb(255, 233, 103)'
+                  fill-opacity=0.5
+                  stroke='rgb(255, 158, 0)'
+              />
+              <text y=-3 x=-90 dominant-baseline='hanging' font-family='sans-serif' font-size='18px' fill='rgb(255, 158, 0)'>*</text>
+              <line
+                  y1=0
+                  y2=22
+                  :x1="posBasedOnRatio"
+                  :x2="posBasedOnRatio"
+                  stroke-width=2
+                  stroke='black'
+              />
+              <line class='overlay' :ref="`${id}_overlay`" y1=11 y2=11 x1=-110 x2=110 stroke-width=24 stroke='transparent' cursor='ew-resize' />
+            </g>
+<!--            <text transform='translate(0,50)' font-family='sans-serif' font-size='10px' text-anchor="middle" dominant-baseline="hanging" fill='rgb(255, 158, 0)'>-->
+<!--              <tspan>* At these zoom levels </tspan>-->
+<!--              <tspan x=0 dy='1em'>lag might occur </tspan>-->
+<!--            </text>-->
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 text-center" style="color: rgb(255, 158, 0)">
+        <small><em>* At these zoom levels lag might occur </em></small>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -57,7 +67,7 @@ export default {
       },
     svgHeight: {
       type: Number,
-      default: 100
+      default: 60
       },
     displayWindowWidth: {
       type: Number,

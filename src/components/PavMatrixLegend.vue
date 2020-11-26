@@ -1,34 +1,34 @@
 <template>
-  <div class='pavLegendWrapper'>
-    <div class='titleLegend'>One column represents one panBlock</div>
-    <svg id="svgContainer_pavLegends" class="pavSchema" height=42 width=80>
-      <g>
-        <text v-for="gName in genomeLabels"
-          :key="gName.text"
-          x='0'
-          :y="gName.yPos"
-          font-family='sans-serif'
-          font-size='10px'
-          dominant-baseline='middle'>
+  <div>
+    <small>One column represents one panBlock</small>
+    <div class="pavLegendWrapper">
+      <svg id="svgContainer_pavLegends" class="pavSchema" height=42 width=80>
+        <g>
+          <text v-for="gName in genomeLabels"
+                :key="gName.text"
+                x='0'
+                :y="gName.yPos"
+                font-family='sans-serif'
+                font-size='10px'
+                dominant-baseline='middle'>
             {{gName.text}}
-        </text>
-      </g>
-      <g transform="translate(10,0)">
-        <path v-for="column in pavPaths"
-          :key="column.index"
-          :d="column.directions"
-          :fill="column.colour"
-          :transform="writeTranslate(column.index * 14, 0)"
-        />
-      </g>
-    </svg>
-    <div v-for="label in meaningLabels"
-      :key="label.text.split(' ')[0]"
-      :class="label.class"
-      font-family='sans-serif'
-      font-size='10px'>
-        {{label.text}}
+          </text>
+        </g>
+        <g transform="translate(10,0)">
+          <path v-for="column in pavPaths"
+                :key="column.index"
+                :d="column.directions"
+                :fill="column.colour"
+                :transform="writeTranslate(column.index * 14, 0)"
+          />
+        </g>
+      </svg>
+      <div v-for="label in meaningLabels"
+           :key="label.text.split(' ')[0]"
+           :class="label.class">
+        <small>{{label.text}}</small>
       </div>
+    </div>
   </div>
 </template>
 
@@ -119,11 +119,9 @@ export default {
 
 .pavLegendWrapper {
   display: grid;
-  grid-template-rows: 2fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
   grid-template-columns: auto auto;
   text-align: center;
-  font-family: sans-serif;
-  font-size: 10px;
   padding: 0;
 }
 
@@ -147,6 +145,7 @@ export default {
   grid-column: 2;
   align-self: center;
   text-align: center;
+  line-height: 16px;
 }
 
 .emptyMeaning {
@@ -154,6 +153,7 @@ export default {
   grid-column: 2;
   align-self: center;
   text-align: center;
+  line-height: 16px;
 }
 
 .colorMeaning {
@@ -161,6 +161,7 @@ export default {
   grid-column: 2;
   align-self: center;
   text-align: center;
+  line-height: 16px;
 }
 
 </style>

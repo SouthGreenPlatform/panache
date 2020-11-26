@@ -1,17 +1,20 @@
 <template>
-  <div id="app" :style="wrapperStyle">
-    <div class='whiteBgLeft'>
+  <div id="app" class="h-100">
+    <div class="container-fluid h-100">
+      <div class="row h-100">
+        <div class="col-2 bg-white h-100 sidepanel">
+          <local-filter v-if="this.$route.name === 'Panache'"/>
+        </div>
+        <div class="col-10">
+          <!-- Router view to display -->
+          <!-- The router will determine which kind of filtershould be displayed -->
+          <router-view
+              class='whiteBlock shadow-lg mt-2 mainDisplayStyle'
+              id='TheRouterView'
+          />
+        </div>
+      </div>
     </div>
-
-    <!-- The router will determine which kind of filtershould be displayed -->
-    <local-filter v-if="this.$route.name === 'Panache'" class='optionPanelStyle'/>
-
-    <!-- Router view to display -->
-    <router-view
-      class='whiteBlock shadow-lg mt-2 mainDisplayStyle'
-      id='TheRouterView'
-    />
-
   </div>
 </template>
 
@@ -52,13 +55,14 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  //text-align: center;
   color: #2c3e50;
   background-color: #F8F8FF;
 }
 
-body {
+body, html {
   background-color: #F8F8FF;
+  height: 100%!important;
 }
 
 .whiteBlock {
@@ -80,6 +84,12 @@ body {
   grid-column: 2;
   text-align: center;
   align-self: start;
+}
+
+.sidepanel {
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 </style>
