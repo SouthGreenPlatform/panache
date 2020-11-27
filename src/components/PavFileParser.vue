@@ -1,7 +1,5 @@
 <template>
-
     <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataURLToJson"/>
-
 </template>
 
 <script>

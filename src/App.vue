@@ -2,16 +2,13 @@
   <div id="app" class="h-100">
     <div class="container-fluid h-100">
       <div class="row h-100">
-        <div class="col-2 bg-white h-100 sidepanel">
+        <div class="col-2 bg-white h-100 side-panel">
           <local-filter v-if="this.$route.name === 'Panache'"/>
         </div>
         <div class="col-10">
           <!-- Router view to display -->
           <!-- The router will determine which kind of filtershould be displayed -->
-          <router-view
-              class='whiteBlock shadow-lg mt-2 mainDisplayStyle'
-              id='TheRouterView'
-          />
+          <router-view class='bg-white main-view' id='TheRouterView'/>
         </div>
       </div>
     </div>
@@ -21,8 +18,7 @@
 <script>
 
 import LocalFilter from '@/components/LocalFilter.vue';
-
-import { mapState, mapGetters } from 'vuex';
+import {mapState, mapGetters} from 'vuex';
 
 export default {
   name: 'App',
@@ -37,8 +33,6 @@ export default {
         'grid-template-columns': `${this.optionPanelWidth}px 1fr`,
       }
     },
-
-
     ...mapState({
       optionPanelWidth: 'optionPanelWidth',
     }),
@@ -49,10 +43,11 @@ export default {
 }
 
 </script>
-
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   //text-align: center;
@@ -62,7 +57,7 @@ export default {
 
 body, html {
   background-color: #F8F8FF;
-  height: 100%!important;
+  height: 100% !important;
 }
 
 .whiteBlock {
@@ -86,10 +81,14 @@ body, html {
   align-self: start;
 }
 
-.sidepanel {
+.side-panel {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
   overflow-y: auto;
   overflow-x: hidden;
 }
 
+.main-view {
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  margin-top: 15px;
+}
 </style>

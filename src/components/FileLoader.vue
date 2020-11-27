@@ -1,13 +1,12 @@
 <template>
   <div class="custom-file">
     <input
-        class='loaderInput custom-file-input'
+        class='custom-file-input form-control-sm'
         :id="`fileSelector_${idBonus}`"
         type='file'
         @change="emitDataURL"
     />
-
-    <label class="custom-file-label" :for="`fileSelector_${idBonus}`">{{LabelToDisplay}}:</label>
+    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">{{LabelToDisplay}}</label>
   </div>
 
 <!--  <div class="wrapperFileLoader">-->

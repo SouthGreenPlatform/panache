@@ -1,13 +1,13 @@
 <template>
   <div class="row">
     <div class="col-12">
-      <h6 class="mt-3 border-bottom">
-        <label :for="`dropDownButton_${idBonus}`">{{msg}}: </label>
+      <h6 class="mt-3">
+        <label :for="`dropDownButton_${idBonus}`" class="m-0">{{msg}}</label>
       </h6>
     </div>
 
     <div class="col-12">
-      <select :id="`dropDownButton_${idBonus}`" :ref="`dropDownButton`" @change="setChosen" class="form-control">
+      <select :id="`dropDownButton_${idBonus}`" :ref="`dropDownButton`" @change="setChosen" class="form-control form-control-sm">
         <option v-for="choice in choices" :key="choice" :value="choice">{{ choice }}</option>
       </select>
     </div>

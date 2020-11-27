@@ -4,17 +4,32 @@
       <div class="col-12">
         <form>
           <div class="form-group row mb-1">
-            <label class='col-8' for='HA_pavRate'><small>Absence rate (0-1)</small></label>
+            <label class="col-8 property-label" for="HA_pavRate">
+              <small>Absence rate (0-1)</small>
+            </label>
             <div class="col-4 input-group-sm">
-              <input class='form-control' v-model.number="paramAbsenceRate" type='number' id="HA_pavRate"
-                     min='0' max='1' step=0.01>
+              <input
+                  class="form-control"
+                  v-model.number="paramAbsenceRate"
+                  type="number"
+                  id="HA_pavRate"
+                  min="0"
+                  max="1"
+                  step="0.01">
             </div>
           </div>
           <div class="form-group row">
-            <label class='col-8' for='HA_consBlocks'><small>Number of consecutive blocks</small></label>
+            <label class="col-8 property-label" for="HA_consBlocks">
+              <small>Number of consecutive blocks</small>
+            </label>
             <div class="col-4 input-group-sm">
-              <input class='form-control' v-model.number="paramConsecutiveBlock" type='number'
-                     id='HA_consBlocks' min='1' step=1>
+              <input
+                  class="form-control"
+                  v-model.number="paramConsecutiveBlock"
+                  type="number"
+                  id="HA_consBlocks"
+                  min="1"
+                  step="1">
             </div>
           </div>
         </form>
@@ -51,7 +66,10 @@
       <div class="col-6 pr-0">
         <div class="input-group input-group-sm mb-3">
           <div class="input-group-prepend">
-            <button :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}" v-on:click="skipBackward" :disabled="leftmostAreaIsReached">
+            <button
+                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
+                @click="skipBackward"
+                :disabled="leftmostAreaIsReached">
               <b-icon icon="skip-backward-fill"></b-icon>
             </button>
           </div>
@@ -59,7 +77,10 @@
             <small>{{ distanceToPreviousAreaMsg }}</small>
           </div>
           <div class="input-group-prepend">
-            <button :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}" v-on:click="goBackward" :disabled="leftmostAreaIsReached">
+            <button
+                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
+                @click="goBackward"
+                :disabled="leftmostAreaIsReached">
               <b-icon icon="play-fill" rotate="180"></b-icon>
             </button>
           </div>
@@ -68,7 +89,10 @@
       <div class="col-6 pl-0">
         <div class="input-group input-group-sm mb-3">
           <div class="input-group-prepend">
-            <button :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}" v-on:click="goForward" :disabled="rightmostAreaIsReached">
+            <button
+                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                @click="goForward"
+                :disabled="rightmostAreaIsReached">
               <b-icon icon="play-fill"></b-icon>
             </button>
           </div>
@@ -76,7 +100,10 @@
             <small>{{ distanceToNextAreaMsg }}</small>
           </div>
           <div class="input-group-prepend">
-            <button :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"  v-on:click="skipForward" :disabled="rightmostAreaIsReached">
+            <button
+                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                @click="skipForward"
+                :disabled="rightmostAreaIsReached">
               <b-icon icon="skip-forward-fill"></b-icon>
             </button>
           </div>
@@ -92,18 +119,18 @@
     <!--      <input class='textLabel inputNumber inputBlocks' v-model.number="paramConsecutiveBlock" type='number'-->
     <!--             id='HA_consBlocks' min='1' step=1>-->
     <!--    </div>-->
-<!--    <div class='areasFoundWrapper'>-->
-<!--      &lt;!&ndash;      <p class='textLabel nbTotal'>There are {{ nbOfRegionsFound }} regions matching these criteria</p>&ndash;&gt;-->
-<!--      &lt;!&ndash;      <p class='textLabel nbBefore'>{{ nbOfRegionsBefore }} before</p>&ndash;&gt;-->
-<!--      &lt;!&ndash;      <p class='textLabel nbAfter'>{{ nbOfRegionsAfter }} after</p>&ndash;&gt;-->
-<!--      &lt;!&ndash;      <p class='textLabel targetedPos'>Targeted position: {{ targetedPosNt }}</p>&ndash;&gt;-->
-<!--      <button class='jumpButton skipLeft' v-on:click="skipBackward" :disabled="leftmostAreaIsReached">&laquo;</button>-->
-<!--      <div class='textLabel distanceLeft'>{{ distanceToPreviousAreaMsg }} :</div>-->
-<!--      <button class='jumpButton goLeft' v-on:click="goBackward" :disabled="leftmostAreaIsReached">&lsaquo;</button>-->
-<!--      <button class='jumpButton goRight' v-on:click="goForward" :disabled="rightmostAreaIsReached">&rsaquo;</button>-->
-<!--      <div class='textLabel distanceRight'>: {{ distanceToNextAreaMsg }}</div>-->
-<!--      <button class='jumpButton skipRight' v-on:click="skipForward" :disabled="rightmostAreaIsReached">&raquo;</button>-->
-<!--    </div>-->
+    <!--    <div class='areasFoundWrapper'>-->
+    <!--      &lt;!&ndash;      <p class='textLabel nbTotal'>There are {{ nbOfRegionsFound }} regions matching these criteria</p>&ndash;&gt;-->
+    <!--      &lt;!&ndash;      <p class='textLabel nbBefore'>{{ nbOfRegionsBefore }} before</p>&ndash;&gt;-->
+    <!--      &lt;!&ndash;      <p class='textLabel nbAfter'>{{ nbOfRegionsAfter }} after</p>&ndash;&gt;-->
+    <!--      &lt;!&ndash;      <p class='textLabel targetedPos'>Targeted position: {{ targetedPosNt }}</p>&ndash;&gt;-->
+    <!--      <button class='jumpButton skipLeft' v-on:click="skipBackward" :disabled="leftmostAreaIsReached">&laquo;</button>-->
+    <!--      <div class='textLabel distanceLeft'>{{ distanceToPreviousAreaMsg }} :</div>-->
+    <!--      <button class='jumpButton goLeft' v-on:click="goBackward" :disabled="leftmostAreaIsReached">&lsaquo;</button>-->
+    <!--      <button class='jumpButton goRight' v-on:click="goForward" :disabled="rightmostAreaIsReached">&rsaquo;</button>-->
+    <!--      <div class='textLabel distanceRight'>: {{ distanceToNextAreaMsg }}</div>-->
+    <!--      <button class='jumpButton skipRight' v-on:click="skipForward" :disabled="rightmostAreaIsReached">&raquo;</button>-->
+    <!--    </div>-->
   </div>
 </template>
 
@@ -554,7 +581,7 @@ export default {
 .distance-area-msg {
   flex-grow: 1;
   justify-content: center;
-  padding: 0!important;
+  padding: 0 !important;
 }
 
 .inputNumber {
@@ -687,6 +714,11 @@ export default {
   height: 1.5em;
   padding: 0 0;
   text-align: center;
+}
+
+.property-label {
+  margin-bottom: 0;
+  line-height: 31px;
 }
 
 </style>

@@ -1,14 +1,17 @@
 <template>
   <div>
-    <h5 class="mt-3">
-      <b-icon icon="filter"></b-icon> Filters
-    </h5>
+    <div class="row border-bottom bg-light">
+      <b-icon icon="filter" scale="1.5" class="filters-icon"></b-icon>
+      <h5 class="mt-2 text-center w-100">
+        Filters
+      </h5>
+    </div>
 
     <div class="row">
       <div class="col-12">
-        <h6 class="mt-3 border-bottom">File</h6>
+        <h6 class="mt-3">Files</h6>
       </div>
-      <div class="col-12 mb-2">
+      <div class="col-12 mb-1">
         <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
         <!-- updateFunctionDiversity is not used yet?-->
         <PavFileParser
@@ -36,11 +39,11 @@
 
     <div class="row">
       <div class="col-12">
-        <h6 class="mt-3 border-bottom">Display parameters</h6>
+        <h6 class="mt-3">Display parameters</h6>
       </div>
     </div>
 
-    <CoreThreshold />
+    <CoreThreshold/>
 
     <MatrixPavZoom
         class='zoomSlider'
@@ -51,33 +54,31 @@
 
     <div class="row">
       <div class="col-12">
-        <h6 class="mt-3 border-bottom">Hollow area finder</h6>
+        <h6 class="mt-3">Hollow area finder</h6>
       </div>
     </div>
 
     <HollowAreaFinder
-      :arrayOfPanFeatures="currentChromData"
-      :lastNt="globalLastNt"
-      :genoNames="genoNames"
-      :nbOfGenomes="nbOfGenomes"
-      :currentFirstNt="firstNt"
-      :displayWindowWidth="displayWindowWidth"
-      :ntWidthInPixel="ntWidthInPx"
-      :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
-      :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
+        :arrayOfPanFeatures="currentChromData"
+        :lastNt="globalLastNt"
+        :genoNames="genoNames"
+        :nbOfGenomes="nbOfGenomes"
+        :currentFirstNt="firstNt"
+        :displayWindowWidth="displayWindowWidth"
+        :ntWidthInPixel="ntWidthInPx"
+        :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+        :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
     />
 
     <div class="row">
       <div class="col-12">
-        <h6 class="mt-3 border-bottom">Legend</h6>
+        <h6 class="mt-3">Legend</h6>
       </div>
     </div>
 
     <PavMatrixLegend
         class="pavLegend"
     />
-
-
   </div>
 </template>
 
@@ -91,7 +92,7 @@ import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
-import { mapState, mapGetters, mapActions } from 'vuex';
+import {mapState, mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'LocalFilter',
@@ -104,11 +105,9 @@ export default {
     PavMatrixLegend,
     HollowAreaFinder,
   },
-  props: {
-  },
+  props: {},
   data() {
-    return {
-    }
+    return {}
   },
   computed: {
     ...mapState({
@@ -192,4 +191,9 @@ export default {
   text-align: center;
 }
 
+.filters-icon {
+  position: absolute;
+  top: 15px;
+  left: 20px
+}
 </style>
