@@ -90,7 +90,6 @@ export default {
       blocksDimensions: {width:20, height:14},
       haTrackHeight: 14,
       gridGapSize: 2,
-
     }
   },
   computed: {

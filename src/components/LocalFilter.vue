@@ -1,45 +1,61 @@
 <template>
-  <div class='wrapper'>
-    <strong class='title' >Filters</strong>
+  <div>
+    <h5 class="mt-3">
+      <b-icon icon="filter"></b-icon> Filters
+    </h5>
 
+    <div class="row">
+      <div class="col-12">
+        <h6 class="mt-3 border-bottom">File</h6>
+      </div>
+      <div class="col-12 mb-2">
+        <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
+        <!-- updateFunctionDiversity is not used yet?-->
+        <PavFileParser
+            :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
+            :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
+            :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
+            :updateFunctionsDiversity="function() { return }"
+            :updatePavData="function(pavData) { updateFullChromData(pavData) }"
+        />
+      </div>
+      <div class="col-12">
+        <GffFileParser
+            :chromList="chromNames"
+            :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+        />
+      </div>
+    </div>
 
-    <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
-    <PavFileParser
-      class='pavLoader'
-      :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
-      :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
-      :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
-      :updateFunctionsDiversity="function() { return }"
-      :updatePavData="function(pavData) { updateFullChromData(pavData) }"
-    />
-    <!-- updateFunctionDiversity is not used yet?-->
-    <GffFileParser
-      class='gffLoader'
-      :chromList="chromNames"
-      :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
-    />
-
-    <CoreThreshold
-      class='coreThreshold'
-    />
     <DropDownChoice
-      class='chromChoice'
-      msg='Chromosome on display'
-      :choices="chromNames"
-      :updateCurrentChrom="function(chrom) { updateSelectedChrom(chrom) }"
-      idBonus='Chrom'
+        msg='Chromosome on display'
+        :choices="chromNames"
+        :updateCurrentChrom="function(chrom) { updateSelectedChrom(chrom) }"
+        idBonus='Chrom'
     />
-    <PavMatrixLegend
-      class="pavLegend"
-    />
+
+    <div class="row">
+      <div class="col-12">
+        <h6 class="mt-3 border-bottom">Display parameters</h6>
+      </div>
+    </div>
+
+    <CoreThreshold />
+
     <MatrixPavZoom
-      class='zoomSlider'
-      :lastNt="globalLastNt"
-      :displayWindowWidth="displayWindowWidth"
-      :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
+        class='zoomSlider'
+        :lastNt="globalLastNt"
+        :displayWindowWidth="displayWindowWidth"
+        :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
+
+    <div class="row">
+      <div class="col-12">
+        <h6 class="mt-3 border-bottom">Hollow area finder</h6>
+      </div>
+    </div>
+
     <HollowAreaFinder
-      class='haf'
       :arrayOfPanFeatures="currentChromData"
       :lastNt="globalLastNt"
       :genoNames="genoNames"
@@ -50,6 +66,17 @@
       :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
       :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
     />
+
+    <div class="row">
+      <div class="col-12">
+        <h6 class="mt-3 border-bottom">Legend</h6>
+      </div>
+    </div>
+
+    <PavMatrixLegend
+        class="pavLegend"
+    />
+
 
   </div>
 </template>

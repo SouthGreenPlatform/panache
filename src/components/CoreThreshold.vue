@@ -1,28 +1,44 @@
 <template>
-  <svg :width="width" :height="height" :id="id">
-    <defs>
-      <linearGradient id='coreSliderGradient' x1="0" x2="1" y1="0" y2="0">
-        <stop v-for="stop in stops" :key="stop.key" :offset="stopDynamicPpties(stop.key).offset" :stop-color="stopDynamicPpties(stop.key).color" :class="stop.class"></stop>
-      </linearGradient>
-    </defs>
 
-    <text ref="coreSliderLegend" :transform="`translate(${width/2}, 0)`" font-family='sans-serif' font-size='10px' text-anchor="middle" dominant-baseline="hanging">
-      <tspan>Minimal Presence ratio </tspan>
-      <tspan x=0 dy='1.2em'>to be part of </tspan>
-      <tspan :fill="rightColorScale.range()[1]">Core</tspan>
-    </text>
+  <div>
 
-    <g ref="coreSliderSVGs">
-      <path :d="makeArea(pathData)" stroke='#000' stroke-opacity=0.3 :fill="'url(#coreSliderGradient)'"/>
-      <circle v-for="relPos in ['left', 'right']" :key="relPos" :cx="cxPos(relPos)" :r="4" :style="circleFill(relPos)"/>
-      <circle :cx="thresholdToPxScale(threshold)" r=7 fill='#fff' stroke='#000' stroke-opacity=0.3 stroke-width="1.25px" class='handle'/>
-      <g transform="translate(0,18)" class='ticks' font-family='sans-serif' font-size='10px'>
-        <text :x="thresholdToPxScale(threshold)" text-anchor="middle">{{thresholdAsPercent}}</text>
-      </g>
-      <line :x1="pxToThresholdScale.domain()[0]" :x2="pxToThresholdScale.domain()[1]" stroke-width="30px" stroke-linecap="round" stroke="transparent" cursor="crosshair" class='track-overlay' :ref="`${id}_track-overlay`"/>
-    </g>
 
-  </svg>
+    <div class="row">
+      <div class="col-12 text-center text-muted">
+        <small><em>Minimal Presence ratio to be part of <span :style="{color: rightColorScale.range()[1]}">Core</span></em></small>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <svg :width="width" :height="height" :id="id">
+          <defs>
+            <linearGradient id='coreSliderGradient' x1="0" x2="1" y1="0" y2="0">
+              <stop v-for="stop in stops" :key="stop.key" :offset="stopDynamicPpties(stop.key).offset" :stop-color="stopDynamicPpties(stop.key).color" :class="stop.class"></stop>
+            </linearGradient>
+          </defs>
+
+          <text ref="coreSliderLegend" :transform="`translate(${width/2}, 0)`" font-family='sans-serif' font-size='10px' text-anchor="middle" dominant-baseline="hanging">
+<!--            <tspan>Minimal Presence ratio </tspan>-->
+<!--            <tspan x=0 dy='1.2em'>to be part of </tspan>-->
+<!--            <tspan :fill="rightColorScale.range()[1]">Core</tspan>-->
+          </text>
+
+          <g ref="coreSliderSVGs">
+            <path :d="makeArea(pathData)" stroke='#000' stroke-opacity=0.3 :fill="'url(#coreSliderGradient)'"/>
+            <circle v-for="relPos in ['left', 'right']" :key="relPos" :cx="cxPos(relPos)" :r="4" :style="circleFill(relPos)"/>
+            <circle :cx="thresholdToPxScale(threshold)" r=7 fill='#fff' stroke='#000' stroke-opacity=0.3 stroke-width="1.25px" class='handle'/>
+            <g transform="translate(0,18)" class='ticks' font-family='sans-serif' font-size='10px'>
+              <text :x="thresholdToPxScale(threshold)" text-anchor="middle">{{thresholdAsPercent}}</text>
+            </g>
+            <line :x1="pxToThresholdScale.domain()[0]" :x2="pxToThresholdScale.domain()[1]" stroke-width="30px" stroke-linecap="round" stroke="transparent" cursor="crosshair" class='track-overlay' :ref="`${id}_track-overlay`"/>
+          </g>
+
+        </svg>
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script>
@@ -56,7 +72,7 @@ export default {
     return {
       threshold: 0.85,
       width: 300,
-      height: 70,
+      height: 40,
       leftPosPixel: leftPx,
       rightPosPixel: rightPx,
       pxToThresholdScale: d3.scaleLinear() //Attaches to each threshold value a position on the slider

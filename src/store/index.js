@@ -127,7 +127,7 @@ export default new Vuex.Store({
     },
     //Based on size of display
     displayWindowWidth: state => {
-      return window.innerWidth - state.optionPanelWidth - 40
+      return window.innerWidth - state.optionPanelWidth - 80
     },
   },
   mutations: {

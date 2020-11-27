@@ -1,12 +1,16 @@
 <template>
-  <div class="wrapperDropDown">
+  <div class="row">
+    <div class="col-12">
+      <h6 class="mt-3 border-bottom">
+        <label :for="`dropDownButton_${idBonus}`">{{msg}}: </label>
+      </h6>
+    </div>
 
-    <label class="dropDownLabel" :for="`dropDownButton_${idBonus}`">{{msg}}: </label>
-
-    <select :id="`dropDownButton_${idBonus}`" :ref="`dropDownButton`" @change=setChosen>
-      <option v-for="choice in choices" :key="choice" :value="choice">{{ choice }}</option>
-    </select>
-
+    <div class="col-12">
+      <select :id="`dropDownButton_${idBonus}`" :ref="`dropDownButton`" @change="setChosen" class="form-control">
+        <option v-for="choice in choices" :key="choice" :value="choice">{{ choice }}</option>
+      </select>
+    </div>
   </div>
 </template>
 
