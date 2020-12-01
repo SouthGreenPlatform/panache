@@ -165,7 +165,7 @@ export default {
 
       let idealLeftPos = window.pageXOffset + coordConvMatrix.e + 1.5 * this.squareSize;
       let idealTopPos = window.pageYOffset + coordConvMatrix.f + 1.5 * this.squareSize;
-      let maxLeftPos = window.innerWidth - this.annotCardWidth;
+      let maxLeftPos = window.innerWidth - this.annotCardWidth - 20;
 
       let leftPos = Math.min(idealLeftPos, maxLeftPos);
 
