@@ -135,6 +135,7 @@
         :y="tooltipData.y"
         dominant-baseline='hanging'
         font-family='sans-serif'
+        :font-size="tooltipFontSize"
         text-anchor='start'>
         {{tooltipTxtContent}}
       </text>
@@ -253,6 +254,7 @@ export default {
     return {
       heightOfTotBlocks:heightOfTotBlocks,
       blockOffset: 0,
+      tooltipFontSize: 14,
       stops: [
         {
           offset: 0,
@@ -321,7 +323,7 @@ export default {
       genoLegendPanelWidth: genoLegendPanelWidth,
       tooltipTxtContent: '',
       tooltipVisibility: 'hidden',
-      tooltipMargin: 2,
+      tooltipMargin: 10,
       tooltipXPos: 0,
       tooltipXOffset: 20,
       tooltipYPos: 0,
@@ -529,14 +531,14 @@ export default {
 
       this.tooltipTxtContent = textToDisplay;
     },
-    computeTooltipDims(textToDisplay, fontFamily='sans-serif', fontSizePx=10) {
+    computeTooltipDims(textToDisplay, fontFamily='sans-serif') {
       //Function that guesses the width of the tooltip based on how it
       //would look like on the prerendering canvas, and the font size
 
       let ctx = this.$refs.pavTooltipCanvas.getContext("2d");
-      ctx.font = `${fontSizePx}px ${fontFamily}`;
+      ctx.font = `${this.tooltipFontSize}px ${fontFamily}`;
 
-      this.tooltipHeight = fontSizePx+2;
+      this.tooltipHeight = this.tooltipFontSize;
       this.tooltipWidth = ctx.measureText(textToDisplay).width;
     },
     calculateTooltipPos(axis) {
