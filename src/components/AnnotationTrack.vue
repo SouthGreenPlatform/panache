@@ -5,7 +5,7 @@
         <rect v-for="(geneAnnot, rectIdx) in annotToDisplay"
           :key="geneAnnot.geneName"
           :ref="`annotRect_${rectIdx}`"
-          :x="ntToPx(middlePosAnnot(geneAnnot))"
+          :x="ntToPx(middlePosAnnot(geneAnnot)) - squareSize / 2"
           :y="yPosOf(geneAnnot)"
           :width="squareSize"
           :height="squareSize"
