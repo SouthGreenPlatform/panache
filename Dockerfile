@@ -10,6 +10,7 @@ RUN apt install -y nodejs
 ADD nginx.conf /etc/nginx/sites-available/panache
 RUN ln -s /etc/nginx/sites-available/panache /etc/nginx/sites-enabled/panache
 
+
 WORKDIR /app
 
-CMD service nginx start && npm run serve
+CMD service nginx start && npm install && npm install @vue/cli && npm run build && npm run serve
