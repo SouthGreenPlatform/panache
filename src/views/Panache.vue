@@ -7,7 +7,7 @@
         :nbOfGenomes="nbOfGenomes"
         :coreThreshold="coreThreshold"
         :rightmostNt="globalLastNt"
-        :canvasWidth="displayWindowWidth"
+        :miniatureWidth="displayWindowWidth"
         :mainWindowWidth="displayWindowWidth"
         :firstNtToDisplay="firstNt"
         :updateFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
