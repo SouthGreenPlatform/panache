@@ -186,7 +186,8 @@ export default {
         'grid-template-columns': `2em ${this.drawingWidth}px 2em`,
         padding: '1em',
         'background-color': 'beige',
-        width: `calc( 2em + ${this.drawingWidth}px + 2em)`, // The space around '+' MUST be kept!
+        // "+2em" after the calc function is a hack to force the element to take the full width.
+        width: `calc(2em + ${this.drawingWidth}px) + 2em`, // The space around '+' MUST be kept!
       }
     },
   },

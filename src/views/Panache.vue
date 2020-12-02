@@ -166,7 +166,7 @@ export default {
 //        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
         'grid-template-rows': `auto auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
         'row-gap': `${this.gridGapSize}px`,
-        'padding': '1em',
+        'padding': '0.6em',
       }
     },
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="row border-bottom bg-light">
+    <div class="row border-bottom bg-light" style="position: relative">
       <b-icon icon="filter" scale="1.5" class="filters-icon"></b-icon>
       <h5 class="mt-2 text-center w-100">
         Filters

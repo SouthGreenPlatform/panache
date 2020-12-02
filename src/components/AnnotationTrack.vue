@@ -5,7 +5,7 @@
         <rect v-for="(geneAnnot, rectIdx) in annotToDisplay"
           :key="geneAnnot.geneName"
           :ref="`annotRect_${rectIdx}`"
-          :x="ntToPx(middlePosAnnot(geneAnnot))"
+          :x="ntToPx(middlePosAnnot(geneAnnot)) - squareSize / 2"
           :y="yPosOf(geneAnnot)"
           :width="squareSize"
           :height="squareSize"
@@ -165,7 +165,7 @@ export default {
 
       let idealLeftPos = window.pageXOffset + coordConvMatrix.e + 1.5 * this.squareSize;
       let idealTopPos = window.pageYOffset + coordConvMatrix.f + 1.5 * this.squareSize;
-      let maxLeftPos = window.innerWidth - this.annotCardWidth;
+      let maxLeftPos = window.innerWidth - this.annotCardWidth - 20;
 
       let leftPos = Math.min(idealLeftPos, maxLeftPos);
 
