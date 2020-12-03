@@ -21,7 +21,7 @@
       />
       <AnnotationTrack
         class='annotationTrack'
-        :annotToDisplay="gffData"
+        :annotToDisplay=""
         :firstNtToDisplay="firstNt"
         :lastNtToDisplay="lastNt"
         :trackWidth="displayWindowWidth"
@@ -135,6 +135,27 @@ export default {
       let filteredArray = this.allColoredHollowAreas.filter( function(triple) {
         let start = triple[0];
         let stop = triple[1];
+        let isInDisplayWindow;
+
+        if (lastNtOfDisplay < start || stop < firstNtOfDisplay) {
+          isInDisplayWindow = false
+        } else {
+          isInDisplayWindow = true
+        }
+
+        return isInDisplayWindow;
+      });
+
+      //console.log({filteredArray});
+      return filteredArray;
+    },
+    () {
+      let firstNtOfDisplay = this.firstNt;
+      let lastNtOfDisplay = this.lastNt;
+
+      let filteredArray = this.gffData.filter( function(annotObject) {
+        let start = annotObject.geneStart;
+        let stop = annotObject.geneStop;
         let isInDisplayWindow;
 
         if (lastNtOfDisplay < start || stop < firstNtOfDisplay) {
