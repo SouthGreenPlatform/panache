@@ -21,7 +21,7 @@
       />
       <AnnotationTrack
         class='annotationTrack'
-        :annotToDisplay=""
+        :annotToDisplay="filteredGffData"
         :firstNtToDisplay="firstNt"
         :lastNtToDisplay="lastNt"
         :trackWidth="displayWindowWidth"
@@ -149,7 +149,7 @@ export default {
       //console.log({filteredArray});
       return filteredArray;
     },
-    () {
+    filteredGffData() {
       let firstNtOfDisplay = this.firstNt;
       let lastNtOfDisplay = this.lastNt;
 
