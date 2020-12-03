@@ -1,25 +1,29 @@
 <template>
-  <div>
-    <svg class="" :width="trackWidth" :height="trackHeight">
-      <g >
-        <rect v-for="(geneAnnot, rectIdx) in annotToDisplay"
-          :key="geneAnnot.geneName"
+  <div id="swarm_container" :style="swarmContainerStyle">
+    <svg :width="trackWidth" :height="swarm.height + swarm.marginTop">
+      <g>
+        <rect
+          v-for="(geneAnnot, rectIdx) in squares"
+          :key="geneAnnot.data.geneName"
           :ref="`annotRect_${rectIdx}`"
-          :x="ntToPx(middlePosAnnot(geneAnnot)) - squareSize / 2"
-          :y="yPosOf(geneAnnot)"
+          :x="geneAnnot.x"
+          :y="(geneAnnot.y + swarm.height - swarm.marginTop) * -1"
+          :rx="selectedShape === 'circle' ? 20 : 0"
+          :ry="selectedShape === 'circle' ? 20 : 0"
           :width="squareSize"
           :height="squareSize"
+          stroke="white"
+          stroke-width="1"
           :fill="geneAnnot.color"
-          @click="toggleStroke"
-          @mouseover="function() {
+          @mouseover="
             showAnnot(
-              geneAnnot,
+              geneAnnot.data,
               rectIdx,
-              ntToPx(middlePosAnnot(geneAnnot)),
-              yPosOf(geneAnnot),
-            )}"
-          @mouseout="function() { hideAnnot(self) }"
-          :transform="writeTranslate(0, (trackHeight - squareSize)/2)"
+              ntToPx(middlePosAnnot(geneAnnot.data)),
+              (geneAnnot.y + swarm.height - 40) * -1,
+            )"
+          @mouseout="hideAnnot"
+          :transform="writeTranslate(0, (swarm.height - squareSize) * 2)"
         />
       </g>
     </svg>
@@ -36,7 +40,6 @@
       :writtenAnnot="annotCurrentContent.annotation"
     />
   </div>
-
 </template>
 
 <script>
@@ -72,19 +75,23 @@ export default {
   },
   data() {
     return {
+      squares: [],
       squareSize: 10,
+      swarm: {
+        marginTop: 30,
+        height: 0,
+        radius: 13,
+      },
       //set default values for current annotation to display
       annotCurrentContent: {
         geneName: 'FakeGene',
         geneStrand: +1,
         geneStart: 0,
         geneStop: 30,
-        exons: [
-          {
+        exons: [{
             start: 0,
             stop: 13,
-          },
-          {
+          }, {
             start: 23,
             stop: 30,
           },
@@ -101,56 +108,121 @@ export default {
         visibility: 'hidden',
         position: 'absolute',
         opacity: 0,
-        transition: 'opacity 0.1s',
+        transition: 'opacity 0.1.',
         'z-index': 333,
         //'pointer-events': 'none'; //let mouse events pass through
       },
       annotCardWidth: 0,
     }
   },
-  beforeMount() {
+  watch: {
+    annotToDisplay(data) {
+      this.updateDataIntersection(data);
+    },
+    firstNtToDisplay() {
+      this.updateDataIntersection(this.annotToDisplay);
+    },
+    lastNtToDisplay() {
+      this.updateDataIntersection(this.annotToDisplay);
+    }
   },
   mounted() {
-    //Store width of AnnotationCard html object, will be useful in displayAnnot()
-    let width = this.$refs.AnnotationCard.$el.offsetWidth;
-    this.annotCardWidth = width;
+    this.annotCardWidth = this.$refs.AnnotationCard.$el.offsetWidth;
   },
   computed: {
+    selectedShape() {
+      return this.$store.state.displayShapeSelected;
+    },
+    swarmContainerStyle() {
+      return {
+        background: '#2125290a',
+        width: this.trackWidth + 'px',
+        height: '100%',
+        'max-height': '80px',
+        'overflow-x': 'hidden',
+        'overflow-y': 'auto'
+      };
+    },
     ntToPx() {
-      let firstNt, lastNt;
-      firstNt = this.firstNtToDisplay;
-      lastNt = this.lastNtToDisplay;
-
-      let firstPx, lastPx;
-      firstPx = 0;
-      lastPx = this.trackWidth;
-
-      let scale = d3.scaleLinear()
-        .domain([firstNt, lastNt])
-        .range([firstPx, lastPx])
-
-      return scale;
-    },
-    self() {
-      return this;
-    },
+      return d3.scaleLinear()
+        .domain([this.firstNtToDisplay, this.lastNtToDisplay])
+        .range([0, this.trackWidth])
+    }
   },
   methods: {
-    middlePosAnnot: function(annotation) {
+    updateDataIntersection(data) {
+      this.squares = this.prepareDataIntersection(data);
+      document.querySelector("#swarm_container").scrollTop = this.swarm.height;
+    },
+    prepareDataIntersection(data) {
+      const radius = this.swarm.radius ** 2;
+      const epsilon = 1e-3;
+      let height = 0;
+
+      let squares = data.map(d => {
+        return {
+          x: this.ntToPx(this.middlePosAnnot(d)) - this.squareSize * 0.5,
+          data: d
+        }
+      }).sort((a, b) => a.x - b.x);
+
+      let head = null, tail = null;
+
+      let intersects = (x, y) => {
+        let a = head;
+
+        while (a) {
+          if (radius - epsilon > (a.x - x) ** 2 + (a.y - y) ** 2)
+            return true;
+
+          a = a.next;
+        }
+      }
+
+      for (let b of squares) {
+        while (head && head.x < b.x - radius)
+          head = head.next;
+
+        if (intersects(b.x, b.y = 0)) {
+          let a = head;
+          b.y = Infinity;
+
+          do {
+            let y = a.y + Math.sqrt(radius - (a.x - b.x) ** 2);
+
+            if (y < b.y && !intersects(b.x, y))
+              b.y = y;
+
+            a = a.next;
+          } while (a);
+
+          if (b.y > height)
+            height = b.y;
+        }
+
+        b.next = null;
+
+        if (head === null)
+          head = tail = b;
+        else
+          tail = tail.next = b;
+      }
+
+      this.swarm.height = height;
+
+      return squares;
+    },
+    middlePosAnnot: function (annotation) {
       return (annotation.geneStart + annotation.geneStop) / 2;
     },
-    writeTranslate: function(x=0,y=0) {
+    writeTranslate: function (x = 0, y = 0) {
       return `translate(${x},${y})`
     },
-    yPosOf: function() {
-      // TODO : à adapter pour gérer les overlaps physiques de marques d'annot
-      return 0;
-    },
-    showAnnot: function(geneAnnot, svgIdx, xPos, yPos) {
+    showAnnot: function (geneAnnot, svgIdx, xPos, yPos) {
       this.updateCurrentAnnot(geneAnnot);
       this.displayAnnot(svgIdx, xPos, yPos);
     },
-    updateCurrentAnnot: function(geneAnnot) {
+    updateCurrentAnnot: function (geneAnnot) {
       //A deep copy is needed since there are inner Object / Array elements to copy
       //Following answer might not work with special cases (see https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089)
       //"If you do not use Dates, functions, undefined, Infinity, [NaN],
@@ -159,8 +231,9 @@ export default {
       //one liner to deep clone an object is: JSON.parse(JSON.stringify(object))”
       this.annotCurrentContent = JSON.parse(JSON.stringify(geneAnnot));
     },
-    displayAnnot: function(svgIdx, xPos, yPos) {
-      let coordConvMatrix = this.$refs[`annotRect_${svgIdx}`][0].getScreenCTM()
+    displayAnnot: function (svgIdx, xPos, yPos) {
+      let coordConvMatrix = this.$refs[`annotRect_${svgIdx}`][0]
+        .getScreenCTM()
         .translate(+xPos, +yPos);
 
       let idealLeftPos = window.pageXOffset + coordConvMatrix.e + 1.5 * this.squareSize;
@@ -172,20 +245,13 @@ export default {
       this.tooltipStyle.left = `${leftPos}px`;
       this.tooltipStyle.top = `${idealTopPos}px`;
       this.tooltipStyle.visibility = 'visible';
+      this.tooltipStyle.transition = 'visibility 0.15s linear,opacity 0.15s linear';
       this.tooltipStyle.opacity = 1;
     },
-    hideAnnot: function() {
+    hideAnnot() {
       this.tooltipStyle.opacity = 0;
       this.tooltipStyle.visibility = 'hidden';
-    },
-    toggleStroke: function() {
-      return
-    },
+    }
   }
 }
 </script>
-
-
-<style>
-
-</style>

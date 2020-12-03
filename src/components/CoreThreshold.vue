@@ -1,7 +1,51 @@
 <template>
-
   <div>
-
+    <div class="row mb-1">
+      <div class="col-12 text-muted text-center">
+        <div class="row">
+          <div class="col-12">
+            <small>Shape type</small>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 pr-0">
+            <svg
+              :width="shapeSize * 2"
+              :height="shapeSize * 2"
+              @click="selectShape('square')"
+              class="float-right mr-0">
+              <title>{{ 'square' | capitalize}}</title>
+              <rect
+                :x="shapeSize * 0.5"
+                :y="shapeSize * 0.5"
+                :width="shapeSize"
+                :height="shapeSize"
+                :fill="shapeFillColor"
+                stroke-width="3"
+                :stroke="selectedShape === 'square' ? shapeStrokeColorSelected : shapeStrokeColor">
+              </rect>
+            </svg>
+          </div>
+          <div class="col-6 pl-0">
+            <svg
+              :width="shapeSize * 2"
+              :height="shapeSize * 2"
+              @click="selectShape('circle')"
+              class="float-left ml-0">
+              <title>{{ 'circle' | capitalize}}</title>
+              <circle
+                :cx="(shapeSize * 2) * 0.5"
+                :cy="(shapeSize * 2) * 0.5"
+                :r="shapeSize * 0.5"
+                :fill="shapeFillColor"
+                stroke-width="3"
+                :stroke="selectedShape === 'circle' ? shapeStrokeColorSelected : shapeStrokeColor">
+              </circle>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="row">
       <div class="col-12 text-center text-muted">
@@ -70,6 +114,10 @@ export default {
     let [leftPx, rightPx] = [0, 100];
 
     return {
+      shapeSize: 15,
+      shapeFillColor: 'black',
+      shapeStrokeColor: 'white',
+      shapeStrokeColorSelected: '#fd7e14',
       threshold: 0.85,
       width: 300,
       height: 40,
@@ -94,9 +142,15 @@ export default {
     }
   },
   computed: {
-    thresholdAsPercent() {return `${Math.round(this.threshold*100)}%`}
+    thresholdAsPercent() {return `${Math.round(this.threshold*100)}%`},
+    selectedShape() {
+      return this.$store.state.displayShapeSelected;
+    }
   },
   methods: {
+    selectShape(type) {
+        this.$store.dispatch('updateDisplayShapeSelected', type);
+    },
     makeArea: d3.area()
         .x(function(d) { return d[0] })
         .y0(function(d) { return d[1] }) //2nd elements are considered as the lower baseline of the shape
@@ -205,6 +259,11 @@ export default {
       }));
 
     this.translateContent();
+  },
+  filters: {
+    capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.substr( 1, str.length);
+    }
   }
 }
 </script>

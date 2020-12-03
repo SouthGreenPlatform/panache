@@ -32,6 +32,8 @@ export default new Vuex.Store({
     blueColorScale: d3.scaleLinear().range([d3.hcl('blue'), d3.hcl('blue')]),
     orangeColorScale: d3.scaleLinear().range([d3.hcl('orange'), d3.hcl('orange')]),
 
+    displayShapeSelected: 'square',
+
     //Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
       if (scaleLinear) {
@@ -160,6 +162,9 @@ export default new Vuex.Store({
     },
     SET_NEW_COORDS_OF_HOLLOW_AREAS(state, payload) {
       state.coordsOfHollowAreas = payload
+    },
+    SET_DISPLAY_SHAPE_SELECTED(state, payload) {
+      state.displayShapeSelected = payload;
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -193,6 +198,9 @@ export default new Vuex.Store({
     },
     updateCoordsOfHollowAreas({commit}, mapOfCoords) {
       commit('SET_NEW_COORDS_OF_HOLLOW_AREAS', mapOfCoords)
+    },
+    updateDisplayShapeSelected({commit}, shape) {
+      commit('SET_DISPLAY_SHAPE_SELECTED', shape);
     }
   },
 })
