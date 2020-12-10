@@ -1,10 +1,22 @@
 <template>
-  <div>
-    <div class="row border-bottom bg-light" style="position: relative">
+  <div style="position: relative;">
+    <div class="row border-bottom bg-light text-center" style="position: relative">
       <b-icon icon="filter" scale="1.5" class="filters-icon"></b-icon>
       <h5 class="mt-2 text-center w-100">
         Filters
+        <div class="float-right" v-if="isLoading">
+          <b-spinner
+            label="Spinning"
+            :small="true"
+            style="position: absolute; top: 12px; right: 15px;border-width: 2px;">
+          </b-spinner>
+        </div>
       </h5>
+    </div>
+    <div class="row" style="position: absolute;left: 0;right: 0">
+        <b-progress :max="100" height="2px" class="w-100" striped>
+          <b-progress-bar variant="primary" :value="loadingPercent"></b-progress-bar>
+        </b-progress>
     </div>
 
     <div class="row">
@@ -107,7 +119,8 @@ export default {
   },
   props: {},
   data() {
-    return {}
+    return {
+    }
   },
   computed: {
     ...mapState({
@@ -122,6 +135,8 @@ export default {
       globalLastNt: 'lastNtOfChrom',
       nbOfGenomes: 'nbOfGenomesInDisplay',
       displayWindowWidth: 'displayWindowWidth',
+      isLoading: 'isLoading',
+      loadingPercent: "loadingPercent"
     })
   },
   methods: {

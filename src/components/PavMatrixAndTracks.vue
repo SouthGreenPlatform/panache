@@ -1,147 +1,155 @@
 <template>
-<div>
-  <svg ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
-    <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
+
+<div class="h-100 w-100">
+  <div style="height: 1000%; max-height: 215px; overflow-x:hidden;   overflow-y: scroll;width: calc(100% - 1em);" id="container_svg">
+    <svg ref='PanacheSvgContainer' style="height: fit-content;overflow:visible" :width="displayWidth">
+      <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
       <defs>
         <linearGradient v-for="gradient in bgGradients" :key="gradient.side" :id="`repeatsBgLabelGradient_${gradient.side}`" :x1="gradient.x1" :x2="gradient.x2" y1="0" y2="0">
           <stop v-for="stop in stops" :key="`offset_${stop.offset}`" :offset="stop.offset" :stop-color="stop.color" :stop-opacity="stop.opacity"/>
         </linearGradient>
       </defs>
-    <!-- SVG CONTAINER FOR THE PAV MATRIX -->
-    <!-- That way the bottom of the blocks is automatically cropped -->
-    <svg ref='pavMatrix' :height="autoComputeMatrixHeight" :width="displayWidth">
-      <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
-        <rect v-for="(block, idxInArray) in filteredData"
-          :key="`idxForMatrix_${idxInArray}`"
-          class='movableBlock'
-          :x="ntToPx(block.index)"
-          :y="applyOffset(index * blocksDimensions.height)"
-          :transform="writeTranslateWithOffSet(0,0)"
-          :height="blocksDimensions.height"
-          :width="ntToPx(block.FeatureStop - block.FeatureStart)"
-          :fill="colorScaleFunction(block)"
-          :opacity="calcPavBlockOpacity(block[`${genome}`])"
-          @mouseover="XXXsomeConditionalEventXXX"
-          @mouseout="XXXsomeConditionalEventXXX"
-        />
-      </g>
-      <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
-      <g ref='genomeLegend'
-        id='genomeLegend'
-        @mouseover="function() {eventFadeOutRef('genomeLegend')}"
-        @mouseout="function() {eventFadeInRef('genomeLegend')}">
-            <rect x='0' y='0' :height="autoComputeMatrixHeight+1" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
-            <text v-for="(genome, index) in genomeList"
-              :key="`genomeLabel_${genome}`"
-              x='2'
-              :y="applyOffset(index * blocksDimensions.height)"
-              dominant-baseline='hanging'
-              font-family='sans-serif'
-              font-size='10px'
-              text-anchor='start'
-              >
-              {{genome}}
-            </text>
-          </g>
-
-      <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
-      <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
-      <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
-      <g v-show="heightOfTotBlocks > autoComputeMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
-        <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
-        <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
-        <circle :cy="blockVerticalOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
-        <line y1='-10' :y2="`${blockVerticalOffsetToSliderScale.range()[1]+10}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
-      </g>
-    </svg>
-    <g>
-      <!-- TRACKS OF INFORMATION -->
-      <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, autoComputeMatrixHeight+5)">
-        <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
+      <!-- SVG CONTAINER FOR THE PAV MATRIX -->
+      <!-- That way the bottom of the blocks is automatically cropped -->
+      <svg ref='pavMatrix' style="height: calc(100% + 150px); overflow: visible" :width="displayWidth">
+        <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
           <rect v-for="(block, idxInArray) in filteredData"
-            :key="`idxForTracks_${idxInArray}`"
-            :ref="`block${idxInArray}_${track.name}`"
-            class='movableBlock'
-            :x="ntToPx(block.index)"
-            y='0'
-            :transform="writeTranslateWithOffSet(0,0)"
-            :height="blocksDimensions.height"
-            :width="ntToPx(FeatureWidth(block))"
-            :fill="track.colorScale(block)"
+                :key="`idxForMatrix_${idxInArray}`"
+                class='movableBlock'
+                :x="ntToPx(block.index)"
+                :y="applyOffset(index * blocksDimensions.height)"
+                :transform="writeTranslateWithOffSet(0,0)"
+                :height="blocksDimensions.height"
+                :width="ntToPx(block.FeatureStop - block.FeatureStart)"
+                :fill="colorScaleFunction(block)"
+                :opacity="calcPavBlockOpacity(block[`${genome}`])"
+                @mouseover="XXXsomeConditionalEventXXX"
+                @mouseout="XXXsomeConditionalEventXXX"
           />
         </g>
+        <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
+        <g ref='genomeLegend'
+           id='genomeLegend'
+           @mouseover="function() {eventFadeOutRef('genomeLegend')}"
+           @mouseout="function() {eventFadeInRef('genomeLegend')}">
+          <rect x='0' y='0' height="0" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
+          <text v-for="(genome, index) in genomeList"
+                :key="`genomeLabel_${genome}`"
+                x='2'
+                :y="applyOffset(index * blocksDimensions.height)"
+                dominant-baseline='hanging'
+                font-family='sans-serif'
+                font-size='10px'
+                text-rendering="optimizeSpeed"
+                text-anchor='start'
+          >
+            {{genome}}
+          </text>
+        </g>
+
+        <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
+        <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
+        <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
+<!--        <g v-show="heightOfTotBlocks > autoComputeMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >-->
+<!--          <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>-->
+<!--          <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>-->
+<!--          <circle :cy="blockVerticalOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>-->
+<!--          <line y1='-10' :y2="`${blockVerticalOffsetToSliderScale.range()[1]+10}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>-->
+<!--        </g>-->
+      </svg>
+
+      <!-- TOOLTIP -->
+      <g :visibility="tooltipVisibility" id="hoverTooltip">
+        <rect :x="tooltipData.x - tooltipData.margin"
+              :y="tooltipData.y - tooltipData.margin"
+              :height="tooltipData.height + 2 * tooltipData.margin"
+              :width="tooltipData.width + 2 * tooltipData.margin"
+              :fill="hclToRgb(83, 4, 96)"
+              fill-opacity='0.9'
+              :stroke="hclToRgb(86, 5, 80)"
+              stroke-opacity='0.9'/>
+        <text ref='tooltipForTracksAndPavMatrix'
+              :x="tooltipData.x"
+              :y="tooltipData.y"
+              dominant-baseline='hanging'
+              font-family='sans-serif'
+              :font-size="tooltipFontSize"
+              text-anchor='start'>
+          {{tooltipTxtContent}}
+        </text>
       </g>
-      <!-- SIMILARITY BOXES -->
-      <!-- Hard written traslation could surely be improved-->
-      <g id='structureInfo' :transform="writeTranslate(0, autoComputeMatrixHeight+5 + 55)">
-        <g id='blocksStructuralVariation'>
-          <g v-for="(chromName, index) in chromList"
-            :key="`chrom_${chromName}`"
-            :id="`duplicationBoxes_${chromName}`"
-            :transform="writeTranslate(0, index * blocksDimensions.height)">
-            <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
-            <!-- similarity boxes are translated in order to be centered-->
+    </svg>
+  </div>
+  <div>
+    <svg :height="displayHeight" :width="displayWidth">
+      <g>
+        <!-- TRACKS OF INFORMATION -->
+        <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, autoComputeMatrixHeight+5)">
+          <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
             <rect v-for="(block, idxInArray) in filteredData"
-              :key="`idxForStruct_${idxInArray}`"
-              class='movableBoxes'
-              :x="ntToPx(block.index)"
-              y='0'
-              :transform="writeTranslateWithOffSet( 0.5* (ntToPx(FeatureWidth(block)) - pptionBasedWidth(block, chromName) ), 0)"
-              :width="pptionBasedWidth(block, chromName)"
-              :height="blocksDimensions.height"
-              :fill="similarityFill(block, chromName)"
-              :stroke="similarityStroke(block)"
-              :stroke-opacity="`${(block[`copyPptionInChr_${chromName}`] > 0 ? 0.8 : 0)}`"
-              stroke-width='0.5'
+                  :key="`idxForTracks_${idxInArray}`"
+                  :ref="`block${idxInArray}_${track.name}`"
+                  class='movableBlock'
+                  :x="ntToPx(block.index)"
+                  y='0'
+                  :transform="writeTranslateWithOffSet(0,0)"
+                  :height="blocksDimensions.height"
+                  :width="ntToPx(FeatureWidth(block))"
+                  :fill="track.colorScale(block)"
             />
           </g>
         </g>
-        <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
-        <!-- Following labels could be more automatized through a data containing ids and positions depending on right/left legends /-->
-        <g v-for="panel in structLegendPanels"
-        :key="panel.side"
-        :ref="`panChromLegend_${panel.side}`"
-        :id="`panChromLegend_${panel.side}`"
-        :transform="panel.translation"
-        @mouseover="function() {eventFadeOutRef(`panChromLegend_${panel.side}`)}"
-        @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
-          <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="chromLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
-          <text v-for="(chromName, index) in chromList"
-            :key="`duplicationBoxes_${chromName}`"
-            :x="panel.xPos"
-            :y="index * (blocksDimensions.height)"
-            dominant-baseline='hanging'
-            font-family='sans-serif'
-            font-size='10px'
-            :text-anchor="panel.anchor"
+        <!-- SIMILARITY BOXES -->
+        <!-- Hard written traslation could surely be improved-->
+        <g id='structureInfo' :transform="writeTranslate(0, autoComputeMatrixHeight+5 + 55)">
+          <g id='blocksStructuralVariation'>
+            <g v-for="(chromName, index) in chromList"
+               :key="`chrom_${chromName}`"
+               :id="`duplicationBoxes_${chromName}`"
+               :transform="writeTranslate(0, index * blocksDimensions.height)">
+              <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
+              <!-- similarity boxes are translated in order to be centered-->
+              <rect v-for="(block, idxInArray) in filteredData"
+                    :key="`idxForStruct_${idxInArray}`"
+                    class='movableBoxes'
+                    :x="ntToPx(block.index)"
+                    y='0'
+                    :transform="writeTranslateWithOffSet( 0.5* (ntToPx(FeatureWidth(block)) - pptionBasedWidth(block, chromName) ), 0)"
+                    :width="pptionBasedWidth(block, chromName)"
+                    :height="blocksDimensions.height"
+                    :fill="similarityFill(block, chromName)"
+                    :stroke="similarityStroke(block)"
+                    :stroke-opacity="`${(block[`copyPptionInChr_${chromName}`] > 0 ? 0.8 : 0)}`"
+                    stroke-width='0.5'
+              />
+            </g>
+          </g>
+          <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
+          <!-- Following labels could be more automatized through a data containing ids and positions depending on right/left legends /-->
+          <g v-for="panel in structLegendPanels"
+             :key="panel.side"
+             :ref="`panChromLegend_${panel.side}`"
+             :id="`panChromLegend_${panel.side}`"
+             :transform="panel.translation"
+             @mouseover="function() {eventFadeOutRef(`panChromLegend_${panel.side}`)}"
+             @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
+            <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="chromLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
+            <text v-for="(chromName, index) in chromList"
+                  :key="`duplicationBoxes_${chromName}`"
+                  :x="panel.xPos"
+                  :y="index * (blocksDimensions.height)"
+                  dominant-baseline='hanging'
+                  font-family='sans-serif'
+                  font-size='10px'
+                  :text-anchor="panel.anchor"
             >
-            {{chromName}}
-          </text>
+              {{chromName}}
+            </text>
+          </g>
         </g>
       </g>
-    </g>
-    <!-- TOOLTIP -->
-    <g :visibility="tooltipVisibility" id="hoverTooltip">
-      <rect :x="tooltipData.x - tooltipData.margin"
-      :y="tooltipData.y - tooltipData.margin"
-      :height="tooltipData.height + 2 * tooltipData.margin"
-      :width="tooltipData.width + 2 * tooltipData.margin"
-      :fill="hclToRgb(83, 4, 96)"
-      fill-opacity='0.9'
-      :stroke="hclToRgb(86, 5, 80)"
-      stroke-opacity='0.9'/>
-      <text ref='tooltipForTracksAndPavMatrix'
-        :x="tooltipData.x"
-        :y="tooltipData.y"
-        dominant-baseline='hanging'
-        font-family='sans-serif'
-        :font-size="tooltipFontSize"
-        text-anchor='start'>
-        {{tooltipTxtContent}}
-      </text>
-    </g>
-
-  </svg>
+    </svg>
+  </div>
   <canvas v-show='false' id='tooltipPreRenderingCanvas' ref='pavTooltipCanvas' height='50' :width="displayWidth"/>
 </div>
 </template>

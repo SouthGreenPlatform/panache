@@ -117,8 +117,11 @@ export default {
 
     d3.select(self.$refs.overlayOfCanvas)
       .call(d3.drag()
-        .on("start drag", function() {
-          self.slidingAlongBlocks(d3.mouse(this)[0]);
+        .on('drag', function() {
+          self.slidingAlongBlocks(d3.mouse(this)[0], );
+        })
+        .on("end", function() {
+          self.slidingAlongBlocks(d3.mouse(this)[0], true);
         })
       );
   },
@@ -306,7 +309,7 @@ export default {
     },
 
     //Updates firstNt when a user clicks on the browser bar
-    slidingAlongBlocks: function(mouse_xPos) {
+    slidingAlongBlocks: function(mouse_xPos, update = false) {
 
       //Borders for the accepted/available values of mouse_xPos
       //calculated for a centered handle
@@ -330,7 +333,8 @@ export default {
         desiredPxLeftPos = this.drawingWidth - this.widthOfHandle;
       }
 
-      this.updateFirstNt(this.drawingPxPosToNt(desiredPxLeftPos));
+      if (update)
+        this.updateFirstNt(this.drawingPxPosToNt(desiredPxLeftPos));
     },
 
     //Function that returns where a nt should be placed on the canvas's drawing

@@ -46,6 +46,10 @@ export default {
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
+svg {
+  shape-rendering: optimizeSpeed;
+}
+
 #app {
   font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -58,6 +62,7 @@ export default {
 body, html {
   background-color: #F8F8FF;
   height: 100% !important;
+  overflow: hidden;
 }
 
 .whiteBlock {
@@ -94,6 +99,7 @@ body, html {
 .main-view {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
   margin-top: 15px;
+  height: calc(100% - 30px);
 }
 
 .content-column {

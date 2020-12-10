@@ -27,7 +27,6 @@
         :trackWidth="displayWindowWidth"
       />
       <HollowAreaTrack
-        class='zoneHighlight'
         :coordsStartStop="filteredHollowAreas"
         :firstNtToDisplay="firstNt"
         :displaySizeOfNt="ntWidthInPx"
@@ -37,7 +36,6 @@
         :overlapingHeight="autoComputeMatrixHeight"
         />
       <PavMatrixAndTracks
-        class='displayMatrix'
         :filteredData="filteredData"
         :genomeList="genomeList"
         :chromList="chromNames"
@@ -90,16 +88,18 @@ export default {
       blocksDimensions: {width:20, height:14},
       haTrackHeight: 14,
       gridGapSize: 2,
+
+      cpus: Math.min(8, navigator.hardwareConcurrency),
+      workers: {},
+      sliceLoaded: 0,
+
+      currentWidestFeatureLength: 0
     }
   },
   computed: {
     // I SHOULD MANAGE DEFAULT VALUES HERE TOO
     lastBlockStart() {
       return Math.max(...this.chromData.map(d => Number(d.FeatureStart)))
-    },
-    currentWidestFeatureLength() {
-      let arrayOfLength = this.chromData.map( d => Number(d.FeatureStop) - Number(d.FeatureStart) );
-      return Math.max(...arrayOfLength);
     },
     coreThreshold() {
       return this.coreValue /100 * this.nbOfGenomes //Should not be data dependant...
@@ -227,10 +227,10 @@ export default {
   watch: {
 
     //Data that will change the Color Scales
-    pivotsForRainbow: function() {
+    pivotsForRainbow() {
       this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList);
     },
-    highestRepNumber: function() {
+    highestRepNumber() {
       this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
     },
     nbOfGenomes: {
@@ -242,57 +242,73 @@ export default {
     },
 
     //Update stored chromosome data when changes apply
-    tempChromData: function() {
+    tempChromData() {
       this.updateChromDataInDisplay(this.tempChromData)
     },
 
     //Update data in Display whenever the chromosome data change
-    chromData: function() {
+    chromData() {
       this.filterData();
     },
 
     //Everytime a border changes, filterData is updated
-    getDisplayBorders: function() {
+    getDisplayBorders() {
       this.filterData();
     },
 
   },
+  created() {
+    console.log('HARDWARE CONCURRENCY', this.cpus);
 
+    for (let i = 0; i < this.cpus; i++) {
+      this.workers[i] = new Worker('worker.js');
+    }
+  },
   methods: {
+    setDataSlice() {
+      console.log('CHROM-DATA LENGTH', this.chromData.length);
+      let blocSize = Math.round(this.chromData.length / this.cpus);
 
+      for (let index in this.workers) {
+        let offset = index * blocSize;
+
+        this.workers[index].postMessage({
+          type: 'set_slice',
+          slice: this.chromData.slice(offset, offset + blocSize)
+        })
+      }
+    },
     filterData() {
-      if (this.chromData[0] != undefined) {
-        //Looking for data that are before the first nt to show but might be
-        //wide enough to appear, and therefore should be included
-        let underThresholdArray = this.chromData.filter(
-          d => ( d.index <= this.firstNt ) && ( d.index >= this.firstNt - this.currentWidestFeatureLength )
-        );
+      if (typeof this.chromData[0] != 'undefined') {
+        this.$store.dispatch('setIsLoading', true);
 
-        //Setting and filling the filteredData array with at least one element
-        if (underThresholdArray.length != 0) {
-
-          //If there is at least one data with index < firstNtToDisplay <= index+width
-          //then the rightmost one is added to filteredData
-          let maxSubIndex = Math.max(...underThresholdArray.map( d => d.index ));
-          let arrayOfNearestUnselectedData = underThresholdArray.filter(
-            d => (Number(d.index) === maxSubIndex) //Number() is important here!
-          );
-
-          this.filteredData = arrayOfNearestUnselectedData;
-
-        } else {
-          //Else filteredData have at least the first data, so that it is never empty
-          this.filteredData = [this.chromData[0]]
+        if (this.sliceLoaded < 1) {
+          this.setDataSlice();
+          this.sliceLoaded++;
         }
 
-        //Getting all elements with indices within the desired range
-        let elementsWithIndexesWithinWindow = this.chromData.filter(
-          d => ( Number(d.index) >= this.firstNt ) && ( Number(d.index) <= this.lastNt )
-        );
+        let done = 0;
+        this.filteredData.splice(0);
 
-        //Adding selected elements to the filteredData array
-        elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
+        for (let i of Array(this.cpus).keys()) {
+          let worker = this.workers[i];
 
+          worker.postMessage({
+            type: 'request',
+            first: this.firstNt,
+            last: this.lastNt,
+            currentWidestFeatureLength: this.currentWidestFeatureLength
+          });
+
+          worker.onmessage = result => {
+            done++;
+            result.data.forEach(d => this.filteredData.push(d))
+
+            if (done === this.cpus) {
+              this.$store.dispatch('setIsLoading', false);
+            }
+          }
+        }
       }
     },
 
