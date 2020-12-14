@@ -1,8 +1,8 @@
 <template>
 
 <div class="h-100 w-100">
-  <div style="height: 1000%; max-height: 215px; overflow-x:hidden;   overflow-y: scroll;width: calc(100% - 1em);" id="container_svg">
-    <svg ref='PanacheSvgContainer' style="height: fit-content;overflow:visible" :width="displayWidth">
+  <div style="height: 210px" id="container_svg">
+    <svg ref='PanacheSvgContainer' style="height: 210px;overflow:visible" :width="canvasWidth">
       <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
       <defs>
         <linearGradient v-for="gradient in bgGradients" :key="gradient.side" :id="`repeatsBgLabelGradient_${gradient.side}`" :x1="gradient.x1" :x2="gradient.x2" y1="0" y2="0">
@@ -11,12 +11,12 @@
       </defs>
       <!-- SVG CONTAINER FOR THE PAV MATRIX -->
       <!-- That way the bottom of the blocks is automatically cropped -->
-      <svg ref='pavMatrix' style="height: calc(100% + 150px); overflow: visible" :width="displayWidth">
+      <svg ref='pavMatrix' style="height: 210px; overflow-y: visible; overflow-x: hidden" :width="canvasWidth">
         <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
           <rect v-for="(block, idxInArray) in filteredData"
                 :key="`idxForMatrix_${idxInArray}`"
                 class='movableBlock'
-                :x="ntToPx(block.index)"
+                :x="ntToPx(block.index) - blockXOffset"
                 :y="applyOffset(index * blocksDimensions.height)"
                 :transform="writeTranslateWithOffSet(0,0)"
                 :height="blocksDimensions.height"
@@ -30,8 +30,8 @@
         <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
         <g ref='genomeLegend'
            id='genomeLegend'
-           @mouseover="function() {eventFadeOutRef('genomeLegend')}"
-           @mouseout="function() {eventFadeInRef('genomeLegend')}">
+           @mouseover="function() { eventFadeOutRef('genomeLegend') }"
+           @mouseout="function() { eventFadeInRef('genomeLegend') }">
           <rect x='0' y='0' height="0" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
           <text v-for="(genome, index) in genomeList"
                 :key="`genomeLabel_${genome}`"
@@ -81,7 +81,7 @@
     </svg>
   </div>
   <div>
-    <svg :height="displayHeight" :width="displayWidth">
+    <svg :height="300" :width="canvasWidth">
       <g>
         <!-- TRACKS OF INFORMATION -->
         <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, autoComputeMatrixHeight+5)">
@@ -107,7 +107,7 @@
                :key="`chrom_${chromName}`"
                :id="`duplicationBoxes_${chromName}`"
                :transform="writeTranslate(0, index * blocksDimensions.height)">
-              <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
+              <line class='bgLine' x1='0' :x2='canvasWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
               <!-- similarity boxes are translated in order to be centered-->
               <rect v-for="(block, idxInArray) in filteredData"
                     :key="`idxForStruct_${idxInArray}`"
@@ -260,6 +260,7 @@ export default {
 
 
     return {
+      canvasWidth: this.displayWidth,
       heightOfTotBlocks:heightOfTotBlocks,
       blockOffset: 0,
       tooltipFontSize: 14,
@@ -341,10 +342,13 @@ export default {
     }
   },
   computed: {
+    blockXOffset() {
+      return 0;
+    },
     tooltipData() {
       return {
         x: this.tooltipXPos,
-        y: this.tooltipYPos,
+        y: this.tooltipYPos + 70,
         height: this.tooltipHeight,
         width: this.tooltipWidth,
         margin: this.tooltipMargin,
@@ -386,6 +390,14 @@ export default {
       .on("mouseover", function() {self.eventFadeInRef('pavConditionalSlider')})
       .on("mouseout", function() {self.eventFadeOutRef('pavConditionalSlider')});
 
+    // eslint-disable-next-line no-unused-vars
+    window.addEventListener('resize', event => {
+      this.canvasWidth = window.innerWidth - this.$store.state.optionPanelWidth - 80;
+
+      let longestSizeOfChromName = Math.max(...this.chromList.map( d => d.length));
+      let chromLegendPanelWidth = longestSizeOfChromName * 10;
+      this.structLegendPanels[1].translation = this.writeTranslate(this.canvasWidth - chromLegendPanelWidth,0);
+    });
   },
   updated() {
     if (this.tooltipEventIsApplied === true) {

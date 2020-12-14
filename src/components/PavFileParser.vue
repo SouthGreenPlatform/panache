@@ -1,5 +1,5 @@
 <template>
-    <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataURLToJson"/>
+  <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataURLToJson"/>
 </template>
 
 <script>
@@ -7,7 +7,13 @@ import FileLoader from '@/components/FileLoader.vue';
 
 import * as d3 from "d3";
 
+import Parser from '../lib/parser'
+
 export default {
+  created() {
+    let parser = new Parser();
+    console.log(parser);
+  },
   name: 'PavFileParser',
   components: {
     FileLoader,
@@ -43,7 +49,7 @@ export default {
       let pavData = await this.readDsv(loadedFile, '\t');
 
       //Defines the list/set of chromosome names
-      let CHROMOSOME_NAMES = [...new Set(pavData.map( d => d["#Chromosome"]))];
+      let CHROMOSOME_NAMES = [...new Set(pavData.map(d => d["#Chromosome"]))];
       this.updateChromNames(CHROMOSOME_NAMES);
       this.updateDefaultChrom(CHROMOSOME_NAMES[0]);
 
@@ -57,7 +63,7 @@ export default {
 
       //Defines the list of functions used
       // CAUTION IT WILL WORK DIFFERENTLY WITH TRUE GO TERMS!!!
-      let functionDiversity = [...new Set(pavData.map( d => d.Function))];
+      let functionDiversity = [...new Set(pavData.map(d => d.Function))];
       this.updateFunctionsDiversity(functionDiversity);
 
       //Rewrite data with correct column names and bonus columns
@@ -67,12 +73,16 @@ export default {
       console.log('Grouping Data');
       let chromGroupedData = this.groupDataPerKey_inHouse(improvedData, 'Chromosome');
 
+
+      console.log(chromGroupedData)
+
       //Send data to store
       this.updatePavData(chromGroupedData);
 
       console.log('Data sent to store');
       await this.$store.dispatch('setIsLoading', false)
     },
+
     async readDsv(filename, delimiter = '\t') {
       return new Promise((resolve) => {
         const reader = new FileReader();
@@ -86,25 +96,25 @@ export default {
 
             if (headers.length > 0) {
               lines.slice(1, lines.length).forEach((line, i) => {
-                  let cols = line.split(delimiter);
+                let cols = line.split(delimiter);
 
-                  if (cols.length > 1) {
-                    let obj = {};
+                if (cols.length > 1) {
+                  let obj = {};
 
-                    cols.forEach((col, index) => {
-                      obj[headers[index]] = col;
-                    });
+                  cols.forEach((col, index) => {
+                    obj[headers[index]] = col;
+                  });
 
-                    out.push(obj);
-                    let percent = Math.round((i / lines.length) * 100);
-                    this.$store.dispatch('setLoadingPercent', percent);
+                  out.push(obj);
+                  let percent = Math.round((i / lines.length) * 100);
+                  this.$store.dispatch('setLoadingPercent', percent);
 
-                    if (percent === 100) {
-                      setTimeout(() => {
-                        this.$store.dispatch('setLoadingPercent', 0);
-                      }, 100)
-                    }
+                  if (percent === 100) {
+                    setTimeout(() => {
+                      this.$store.dispatch('setLoadingPercent', 0);
+                    }, 100)
                   }
+                }
               })
             }
           }
@@ -112,7 +122,7 @@ export default {
           resolve(out);
         };
 
-        reader.onprogress = function(event) {
+        reader.onprogress = function (event) {
           if (event.lengthComputable) {
             // let percent = Math.round((event.loaded / event.total) * 100);
           }
@@ -138,7 +148,7 @@ export default {
     rewriteDsvColumns(dsvData, chromNames) {
 
       console.log('Rewriting pav blocks as objects', {chromNames});
-      let newData = dsvData.map( d => this.turnLineIntoObject(d, chromNames));
+      let newData = dsvData.map(d => this.turnLineIntoObject(d, chromNames));
       return newData;
 
     },
@@ -155,6 +165,9 @@ export default {
         ...rest //pav matrix, defined as opposed to previous variables
       } = dataLine;
 
+      dataLine.FeatureStart = parseInt(dataLine.FeatureStart);
+      dataLine.FeatureStop = parseInt(dataLine.FeatureStop);
+
       //INFO: '// eslint-disable-line no-unused-vars' tells eslint to not
       //consider any unused var on the matching line
 
@@ -163,27 +176,31 @@ export default {
 
       //prepares blockCount variable
       let pavList = [0].concat(Object.values(rest));
-      let blockCount = pavList.reduce(function(acc, val) {
+      let blockCount = pavList.reduce(function (acc, val) {
         // if val > 0 or val is String, presenceStatus <-- 1
         let presenceStatus = (Number(val) != 0 ? 1 : 0);
         return acc + presenceStatus;
       });
 
       //prepares calculation of copy proportion in every chromosome
-      let listOfRepeats = this. getListOfRepeats(similarBlocks);
+      let listOfRepeats = this.getListOfRepeats(similarBlocks);
       let chromsWithRepeat = this.getRepeatsOrigin(listOfRepeats);
-      let countOfRepeats = this.getRepeatCountPerChrom({ listOfChromWithRepeats: chromsWithRepeat, chromList: chromNames });
+      let countOfRepeats = this.getRepeatCountPerChrom({
+        listOfChromWithRepeats: chromsWithRepeat,
+        chromList: chromNames
+      });
       let maxCount = Math.max(...Object.values(countOfRepeats));
 
       //writes line as a new object, with additional columns
+
       let lineAsObject = Object.assign({
-        'index': ntStart,
-        'presenceCounter': blockCount,
+        'index': parseInt(ntStart),
+        'presenceCounter': parseInt(blockCount),
         'Chromosome': chromOfLine
       }, dataLine);
 
       //Adds copy proportion as new property for every chromosome
-      chromNames.forEach(function(chrom) {
+      chromNames.forEach(function (chrom) {
         let pption = 0;
 
         if (maxCount > 0) {
@@ -196,28 +213,28 @@ export default {
 
       return lineAsObject;
     },
-    getListOfRepeats(writtenRepeats, sep=';') {
+    getListOfRepeats(writtenRepeats, sep = ';') {
       return writtenRepeats.split(sep);
     },
-    getRepeatsOrigin(listOfRepeats, sep=':') {
+    getRepeatsOrigin(listOfRepeats, sep = ':') {
       let listOfOrigins = [];
-      listOfRepeats.forEach( function(copy) {
+      listOfRepeats.forEach(function (copy) {
         let chrom = copy.split(sep)[0];
         listOfOrigins.push(chrom);
       });
 
       return listOfOrigins;
     },
-    getRepeatCountPerChrom({ listOfChromWithRepeats, chromList }) {
+    getRepeatCountPerChrom({listOfChromWithRepeats, chromList}) {
 
       //initiates counts at 0
       let dictOfCounts = {};
-      chromList.forEach(function(chromName) {
+      chromList.forEach(function (chromName) {
         dictOfCounts[chromName] = 0;
       });
 
       //does +=1 when a chrom has a repeat
-      listOfChromWithRepeats.forEach(function(chromName) {
+      listOfChromWithRepeats.forEach(function (chromName) {
         if (undefined != dictOfCounts[chromName]) {
           dictOfCounts[chromName] += 1;
         }
@@ -231,12 +248,12 @@ export default {
       // "key2":[{...}, {...}, ...]},
       //  ...}
 
-      let setOfKey = [...new Set(iterable.map( d => d[keyToNest]))];
+      let setOfKey = [...new Set(iterable.map(d => d[keyToNest]))];
 
       let dataGroupedPerKey = {};
       // .map() must not be used here as we do not want an array as output
       // but an object!!! (Do we?)
-      setOfKey.forEach(function(key) {
+      setOfKey.forEach(function (key) {
 
         dataGroupedPerKey[key] =
           iterable.filter(d => d[keyToNest] === key);
