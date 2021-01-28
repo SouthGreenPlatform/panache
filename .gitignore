@@ -1,0 +1,14 @@
+poke_cli_app/node_modules/
+node_modules/
+public/allGenes_Bar.bedPAV
+poke_cli_app/public/coordinatesMerci.json
+poke_cli_app/public/coordinatesPilars.json
+poke_cli_app/public/corn_W22-2_vs_B73-5_m5dw2_layout.json
+poke_cli_app/public/corn_W22-2_vs_B73-5_m5dw2_noSameChrom_circos.json
+public/coordinatesMerci.json
+public/coordinatesPilars.json
+public/corn_W22-2_vs_B73-5_m5dw2_layout.json
+public/corn_W22-2_vs_B73-5_m5dw2_noSameChrom_circos.json
+
+dist/
+.idea/
