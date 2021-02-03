@@ -117,7 +117,7 @@ export default {
     let self = this;
 
     d3.select(self.$refs[`${self.id}_overlay`])
-      .call(d3.drag().on("end drag", function() {
+      .call(d3.drag().on("start drag", function() {
         self.updateNtToPxRatio(d3.event.x)
       }));
 
@@ -170,7 +170,8 @@ export default {
     updateNtToPxRatio(mousePos) {
       this.zoomHasBeenSelected = true;
       this.ntWidthInPixel = this.ratioToSliderPosScale().invert(mousePos);
-    }
+    },
+
   }
 }
 </script>

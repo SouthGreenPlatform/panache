@@ -1,6 +1,6 @@
 <template>
   <div id="swarm_container" :style="swarmContainerStyle">
-    <svg :width="canvasWidth" :height="swarm.height + swarm.marginTop">
+    <svg :width="trackWidth" :height="swarm.height + swarm.marginTop">
       <g>
         <rect
           v-for="(geneAnnot, rectIdx) in squares"
@@ -75,7 +75,6 @@ export default {
   },
   data() {
     return {
-      canvasWidth: this.trackWidth,
       squares: [],
       squareSize: 10,
       swarm: {
@@ -129,11 +128,6 @@ export default {
   },
   mounted() {
     this.annotCardWidth = this.$refs.AnnotationCard.$el.offsetWidth;
-
-    // eslint-disable-next-line no-unused-vars
-    window.addEventListener('resize', event => {
-      this.canvasWidth = window.innerWidth - this.$store.state.optionPanelWidth - 80;
-    });
   },
   computed: {
     selectedShape() {
@@ -142,7 +136,7 @@ export default {
     swarmContainerStyle() {
       return {
         background: '#2125290a',
-        width: this.canvasWidth + 'px',
+        width: this.trackWidth + 'px',
         height: '100%',
         'max-height': '80px',
         'overflow-x': 'hidden',

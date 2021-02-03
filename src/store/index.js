@@ -17,7 +17,7 @@ export default new Vuex.Store({
     fullChromData: [], //Chromosomal dataset
     fullGffData: [], //Gff linked to the displayed pav data
 
-    currentDisplayNtWidthInPx:0.1, // Updates --> minEfficiency per default, or user input
+    currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
     // Coords of the first and last nt to display on the block level vis
     firstNtToDisplay: 0,
     lastNtToDisplay: 1200,
@@ -35,9 +35,6 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
     isLoading: false,
     loadingPercent: 0,
-
-    cpus: 1,
-    workers: {},
 
     //Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
@@ -62,8 +59,6 @@ export default new Vuex.Store({
     },
   },
   getters: {
-    cpus: state => state.cpus,
-    workers: state => state.workers,
     isLoading: state => state.isLoading,
     loadingPercent: state => state.loadingPercent,
     nbOfGenomesInDisplay: state => {
@@ -91,11 +86,9 @@ export default new Vuex.Store({
       if (getters.chromDataInDisplay === undefined || getters.chromDataInDisplay[0] === undefined) {
         return 10000 //default value
       }
-
       return Math.max(...getters.chromDataInDisplay.map(d => Number(d.FeatureStop)));
     },
     functionDiversity: (state, getters) => {
-
       return [...new Set(getters.chromDataInDisplay.map( d => d['Function']))]
     },
     functionColorScale: (state, getters) => {
@@ -181,12 +174,6 @@ export default new Vuex.Store({
     },
     SET_LOADING_PERCENT(state, payload) {
       state.loadingPercent = payload;
-    },
-    ADD_WORKER(state, payload) {
-        state.workers[payload.worker_id] = payload.worker;
-    },
-    SET_CPUS(state, payload) {
-      state.cpus = payload;
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -229,12 +216,6 @@ export default new Vuex.Store({
     },
     setLoadingPercent({commit}, percent) {
       commit('SET_LOADING_PERCENT', percent);
-    },
-    addWorker({commit}, data) {
-      commit('ADD_WORKER', data);
-    },
-    setCpus({commit}, cpus) {
-      commit('SET_CPUS', cpus);
     }
   }
 })
