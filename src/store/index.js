@@ -33,8 +33,6 @@ export default new Vuex.Store({
     orangeColorScale: d3.scaleLinear().range([d3.hcl('orange'), d3.hcl('orange')]),
 
     displayShapeSelected: 'square',
-    isLoading: false,
-    loadingPercent: 0,
 
     //Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
@@ -57,10 +55,9 @@ export default new Vuex.Store({
       }
       return(breakpoints);
     },
+
   },
   getters: {
-    isLoading: state => state.isLoading,
-    loadingPercent: state => state.loadingPercent,
     nbOfGenomesInDisplay: state => {
       return state.genomeListInDisplay.length
     },
@@ -168,12 +165,6 @@ export default new Vuex.Store({
     },
     SET_DISPLAY_SHAPE_SELECTED(state, payload) {
       state.displayShapeSelected = payload;
-    },
-    SET_IS_LOADING(state, payload) {
-      state.isLoading = payload;
-    },
-    SET_LOADING_PERCENT(state, payload) {
-      state.loadingPercent = payload;
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -210,12 +201,6 @@ export default new Vuex.Store({
     },
     updateDisplayShapeSelected({commit}, shape) {
       commit('SET_DISPLAY_SHAPE_SELECTED', shape);
-    },
-    setIsLoading({commit}, value) {
-      commit('SET_IS_LOADING', value);
-    },
-    setLoadingPercent({commit}, percent) {
-      commit('SET_LOADING_PERCENT', percent);
     }
-  }
+  },
 })

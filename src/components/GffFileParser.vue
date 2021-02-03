@@ -41,10 +41,14 @@ export default {
     }
   },
   methods: {
-    parseDataToAnnotations: async function(filename) {
+    parseDataToAnnotations: async function(payload) {
 
-      let gffData = await this.readTsv(filename);
+      //console.log({payload});
 
+      let dataURL = payload.dataURL;
+
+      //Fetches the full annotation dataset
+      let gffData = await this.readTsv(dataURL);
       //console.log({gffData});
 
       //Overall variables
@@ -157,13 +161,11 @@ export default {
       //Stores annotation Array within the App
       console.log({groupedAnnot});
       this.updateAnnotationData(groupedAnnot);
-      this.$store.dispatch('setIsLoading', false);
+
     },
     //Turns gff dataURL to array of objects
-    readTsv: async function(filename) {
+    readTsv: async function(dataURL) {
       console.log('Converting dataURL of Gff to usable data');
-
-      let dataURL = window.URL.createObjectURL(filename);
 
       //CAUTION : I must use the fetch API first, not the dsv one
       //let dataPromise = d3.tsvParseRows(dataURL, this.returnDisplayableGffObject);
@@ -178,8 +180,6 @@ export default {
 
       //Removes first line (not useful if chrom filtering is applied)
       //data.shift();
-
-
 
       console.log('Gff data available');
 

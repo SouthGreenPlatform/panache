@@ -6,9 +6,7 @@
         type='file'
         @change="emitDataURL"
     />
-    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
-      {{filename || LabelToDisplay}}
-    </label>
+    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">{{LabelToDisplay}}</label>
   </div>
 
 <!--  <div class="wrapperFileLoader">-->
@@ -41,27 +39,22 @@ export default {
   },
   data() {
     return {
-      filename: null
     }
   },
   methods: {
     //Adapted from https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#Using_object_URLs
-    emitDataURL(event) {
+    emitDataURL: function(event) {
+      let loadedFile = event.target.files[0];
+      console.log(`File ${loadedFile.name} loaded from computer.`);
 
-      if (event.target.files.length > 0) {
-        let loadedFile = event.target.files[0];
+      //Turn file into accessible data URL
+      let dataURL = window.URL.createObjectURL(loadedFile);
 
-        if (typeof loadedFile != 'undefined') {
-          this.filename = loadedFile.name;
-          console.log(`File ${loadedFile.name} loaded from computer.`);
-          //Turn file into accessible data URL
-
-          this.$store.dispatch('setIsLoading', true);
-          this.$emit('file-loaded', loadedFile )
-        }
-      }
+      this.$emit('file-loaded', { dataURL } )
     },
   },
+  watch: {
+  }
 }
 </script>
 

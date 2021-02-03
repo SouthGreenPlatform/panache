@@ -34,13 +34,24 @@ export default {
       required: true
     },
   },
+  data() {
+    return {
+    }
+  },
+  computed: {
+    self() {
+      return this;
+    }
+  },
   methods: {
-    async parseDataURLToJson(loadedFile) {
+    async parseDataURLToJson(payload) {
+
+      let dataURL = payload.dataURL;
 
       //Extract global variables for chromNames, genoNames and functions
 
       //Fetches the full dataset, from which chromosomal data can be used
-      let pavData = await this.readDsv(loadedFile, '\t');
+      let pavData = await this.readDsv(dataURL);
 
       //Defines the list/set of chromosome names
       let CHROMOSOME_NAMES = [...new Set(pavData.map( d => d["#Chromosome"]))];
@@ -69,72 +80,18 @@ export default {
 
       //Send data to store
       this.updatePavData(chromGroupedData);
-
       console.log('Data sent to store');
-      await this.$store.dispatch('setIsLoading', false)
     },
-    async readDsv(filename, delimiter = '\t') {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        let out = [];
+    async readDsv(dataURL) {
+      console.log('Converting dataURL to JS usable data');
 
-        reader.onload = () => {
-          let lines = reader.result.split('\n');
+      let dataPromise = d3.dsv("\t", dataURL);
+      let data = await dataPromise;
 
-          if (lines.length > 0) {
-            let headers = lines[0].split(delimiter);
+      console.log('Data available');
 
-            if (headers.length > 0) {
-              lines.slice(1, lines.length).forEach((line, i) => {
-                  let cols = line.split(delimiter);
-
-                  if (cols.length > 1) {
-                    let obj = {};
-
-                    cols.forEach((col, index) => {
-                      obj[headers[index]] = col;
-                    });
-
-                    out.push(obj);
-                    let percent = Math.round((i / lines.length) * 100);
-                    this.$store.dispatch('setLoadingPercent', percent);
-
-                    if (percent === 100) {
-                      setTimeout(() => {
-                        this.$store.dispatch('setLoadingPercent', 0);
-                      }, 100)
-                    }
-                  }
-              })
-            }
-          }
-
-          resolve(out);
-        };
-
-        reader.onprogress = function(event) {
-          if (event.lengthComputable) {
-            // let percent = Math.round((event.loaded / event.total) * 100);
-          }
-        };
-
-        reader.readAsText(filename)
-      });
+      return data;
     },
-
-    // // eslint-disable-next-line no-unused-vars
-    // async readDsv(filename, delimiter = '\t') {
-    //   console.log('Converting dataURL to JS usable data');
-    //
-    //   let dataURL = window.URL.createObjectURL(filename);
-    //   let dataPromise = d3.tsv(dataURL);
-    //
-    //   let data = await dataPromise;
-    //
-    //   console.log('Data available');
-    //
-    //   return data;
-    // },
     rewriteDsvColumns(dsvData, chromNames) {
 
       console.log('Rewriting pav blocks as objects', {chromNames});
