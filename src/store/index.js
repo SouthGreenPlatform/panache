@@ -19,6 +19,9 @@ export default new Vuex.Store({
     ntWidthInPxThresholds: new Map(), // map[chromosome] -> {min: i, max: j}
 
     currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
+    minNbOfFeaturesToDisplay: 10,
+    maxNumberOfFeaturesToDisplay: 200,
+
     // Coords of the first and last nt to display on the block level vis
     firstNtToDisplay: 0,
     lastNtToDisplay: 1200,
@@ -86,23 +89,39 @@ export default new Vuex.Store({
       }
       return Math.max(...getters.chromDataInDisplay.map(d => Number(d.FeatureStop)));
     },
-    minNtWidthForNavigabilityInMainDisplay: state => {
-      let ntWidth;
+    ntWidthThresholdsCouple: (state, getters) => {
+      let ntCouple = {};
+
+      //If values are already stored, get them...
       if state.ntWidthInPxThresholds.has(state.selectedChrom) {
-        ntWidth = state.ntWidthInPxThresholds.get(state.selectedChrom)['min']
+        ntCouple = state.ntWidthInPxThresholds.get(state.selectedChrom);
+      //...else compute them and store them into the map
       } else {
-        ntWidth = 0.5
+        //Default values when no dataset is loaded
+        let minNtWidth = 0.5;
+        let maxNtWidth = 2;
+
+        //ntWidthInPx = (displayWidthInPx x totNumberOfFeatures) / (nbOfFeaturesToDisplay x LastNt)
+        if (getters.chromDataInDisplay !== undefined && getters.chromDataInDisplay[0] !== undefined) {
+          //CAUTION: Seing fewer features means that they should appear bigger, hence linked to maxNtWidth
+          //Same applies to minNtWidth and max nb of features.
+          minNtWidth = (getters.displayWindowWidth * getters.chromDataInDisplay.length) / ( state.maxNumberOfFeaturesToDisplay * getters.lastNtOfChrom);
+          maxNtWidth = (getters.displayWindowWidth * getters.chromDataInDisplay.length) / ( state.minNumberOfFeaturesToDisplay * getters.lastNtOfChrom);
+        }
+
+        ntCouple['min'] = minNtWidth;
+        ntCouple['max'] = maxNtWidth;
+
+        //Store value in map for future calls
+        state.ntWidthInPxThresholds.set(state.selectedChrom, ntCouple);
       }
-      return ntWidth;
+      return ntCouple;
     },
-    maxNtWidthInMainDisplay: state => {
-      let ntWidth;
-      if state.ntWidthInPxThresholds.has(state.selectedChrom) {
-        ntWidth = state.ntWidthInPxThresholds.get(state.selectedChrom)['max']
-      } else {
-        ntWidth = 2
-      }
-      return ntWidth;
+    minNtWidthForNavigabilityInMainDisplay: (state, getters) => {
+      return getters.ntWidthThresholdsCouple['min'];
+    },
+    maxNtWidthInMainDisplay: (state, getters) => {
+      return getters.ntWidthThresholdsCouple['max'];
     },
     functionDiversity: (state, getters) => {
       return [...new Set(getters.chromDataInDisplay.map( d => d['Function']))]
@@ -148,6 +167,8 @@ export default new Vuex.Store({
     },
     //Based on size of display
     displayWindowWidth: state => {
+
+      //TODO: Have an adaptative -80 for the borders, not a hardcoded value?
       return window.innerWidth - state.optionPanelWidth - 80
     },
   },
@@ -164,10 +185,10 @@ export default new Vuex.Store({
     SET_FULL_GFF_DATA(state, payload) {
       state.fullGffData = payload
     },
-    ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
-      let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
-      state.ntWidthInPxThresholds.set(payload['chromosome'], ntWidthCouple);
-    },
+    //ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
+    //  let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
+    //  state.ntWidthInPxThresholds.set(payload['chromosome'], ntWidthCouple);
+    //},
     SET_SELECTED_CHROM(state, payload) {
       state.selectedChrom = payload
     },
@@ -205,9 +226,9 @@ export default new Vuex.Store({
       commit('SET_FULL_GFF_DATA', gffData)
     },
     //ntWidthThresholds shaped as {'chromosome': 'chr1', 'minNtWidth': 0.5, 'maxNtWidth': 2}
-    addNtThresholdsToMap({commit}, ntWidthThresholds) {
-      commit('ADD_NT_THRESHOLDS_TO_MAP', ntWidthThresholds)
-    },
+    //addNtThresholdsToMap({commit}, ntWidthThresholds) {
+    //  commit('ADD_NT_THRESHOLDS_TO_MAP', ntWidthThresholds)
+    //},
     updateSelectedChrom({commit}, selectedChrom) {
       commit('SET_SELECTED_CHROM', selectedChrom)
     },

@@ -120,32 +120,30 @@ export default {
   },
   computed: {
     ...mapState({
-      genoNames: 'genomeListInDisplay',
       chromNames: 'chromNames',
       firstNt: 'firstNtToDisplay',
+      genoNames: 'genomeListInDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
       currentGffData: 'gffDataInDisplay',
+      displayWindowWidth: 'displayWindowWidth',
       globalLastNt: 'lastNtOfChrom',
       nbOfGenomes: 'nbOfGenomesInDisplay',
-      displayWindowWidth: 'displayWindowWidth',
-      minNtWidthInPx: 'minNtWidthForNavigabilityInMainDisplay',
-      maxNtWidthInPx: 'maxNtWidthInMainDisplay',
     })
   },
   methods: {
     //Get Actions from the store
     ...mapActions([
       'updateChromNames',
-      'updateGenomesInDisplay',
-      'updateFullChromData',
-      'updateFullGffData',
-      'updateSelectedChrom',
+      'updateCoordsOfHollowAreas',
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
-      'updateCoordsOfHollowAreas'
+      'updateFullChromData',
+      'updateFullGffData',
+      'updateGenomesInDisplay',
+      'updateSelectedChrom',
     ]),
   }
 }
