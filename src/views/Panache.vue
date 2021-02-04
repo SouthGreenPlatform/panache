@@ -84,7 +84,7 @@ export default {
 
       //Variables specific to PavMatrixAndTracks
       //Dims should be responsive, depending on the available space!
-      displayWindowHeight: 175,
+      displayWindowHeight: 400,
       filteredData: [],
 
       blocksDimensions: {width:20, height:14},

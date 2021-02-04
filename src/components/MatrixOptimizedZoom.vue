@@ -25,10 +25,12 @@ export default {
       type: String,
       default: 'zoomLegend'
     },
+    //nt width for panning
     smallestNtWidthInPx: {
       type: Number,
       required: true,
     },
+    //nt width for details
     largestNtWidthInPx: {
       type: Number,
       required: true,

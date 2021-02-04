@@ -45,12 +45,19 @@
 
     <CoreThreshold/>
 
-    <MatrixPavZoom
+    <MatrixOptimizedZoom
+        class='zoomSlider'
+        :smallestNtWidthInPx="minNtWidthInPx"
+        :largestNtWidthInPx="maxNtWidthInPx"
+        :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
+    />
+
+    <!--MatrixPavZoom
         class='zoomSlider'
         :lastNt="globalLastNt"
         :displayWindowWidth="displayWindowWidth"
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
-    />
+    /-->
 
     <div class="row">
       <div class="col-12">
@@ -89,6 +96,7 @@ import GffFileParser from '@/components/GffFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
+import MatrixOptimizedZoom from '@/components/MatrixPavZoom.vue';
 import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
@@ -100,6 +108,7 @@ export default {
     PavFileParser,
     GffFileParser,
     CoreThreshold,
+    MatrixOptimizedZoom,
     MatrixPavZoom,
     DropDownChoice,
     PavMatrixLegend,
@@ -122,6 +131,8 @@ export default {
       globalLastNt: 'lastNtOfChrom',
       nbOfGenomes: 'nbOfGenomesInDisplay',
       displayWindowWidth: 'displayWindowWidth',
+      minNtWidthInPx: 'minNtWidthForNavigabilityInMainDisplay',
+      maxNtWidthInPx: 'maxNtWidthInMainDisplay',
     })
   },
   methods: {
