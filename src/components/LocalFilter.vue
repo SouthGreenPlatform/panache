@@ -96,8 +96,8 @@ import GffFileParser from '@/components/GffFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
-import MatrixOptimizedZoom from '@/components/MatrixPavZoom.vue';
-import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
+import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
+//import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
@@ -109,7 +109,7 @@ export default {
     GffFileParser,
     CoreThreshold,
     MatrixOptimizedZoom,
-    MatrixPavZoom,
+//    MatrixPavZoom,
     DropDownChoice,
     PavMatrixLegend,
     HollowAreaFinder,
@@ -130,6 +130,8 @@ export default {
       currentGffData: 'gffDataInDisplay',
       displayWindowWidth: 'displayWindowWidth',
       globalLastNt: 'lastNtOfChrom',
+      maxNtWidthInPx: 'maxNtWidthInMainDisplay',
+      minNtWidthInPx: 'minNtWidthForNavigabilityInMainDisplay',
       nbOfGenomes: 'nbOfGenomesInDisplay',
     })
   },

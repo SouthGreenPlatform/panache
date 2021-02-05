@@ -9,7 +9,6 @@
           :max="largestNtWidthInPx"
           :v-model="ntWidthInPixel"
           :step="stepBetweenNtWidthInPx"
-          type="number"
         >
       </div>
     </div>
@@ -43,20 +42,17 @@ export default {
 
   data() {
 
-    let defaultNtWidthInPx;
-    defaultNtWidthInPx = (this.smallestNtWidthInPx + this.largestNtWidthInPx) / 2;
-
     return {
-      defaultNtWidthInPx: defaultNtWidthInPx,
-      //Whenever the props change, the zoom value will be reset to the default value
-      //TODO: think about whether it is a good behaviour
-      ntWidthInPixel: defaultNtWidthInPx,
+      ntWidthInPixel: this.largestNtWidthInPx,
     }
   },
 
   computed: {
+    defaultNtWidthInPx() {
+      return (this.smallestNtWidthInPx + this.largestNtWidthInPx) / 2;
+    },
     stepBetweenNtWidthInPx() {
-      return 0.1 * this.smallestNtWidthInPx
+      return 0.1 * this.smallestNtWidthInPx;
     },
   },
 
@@ -66,12 +62,32 @@ export default {
   },
 
   watch: {
+    defaultNtWidthInPx: {
+      handler: function() {
+        //Whenever the props change, the zoom value will be reset to the default value
+        //TODO: think about whether it is a good behaviour
+        this.ntWidthInPixel = this.defaultNtWidthInPx;
+      }
+    },
 
     //update stored zoom level if any
     ntWidthInPixel: {
       immediate: true,
       handler: function() {
+        console.warn({ntWidthUpdates: this.ntWidthInPixel});
         this.updateGlobalZoom(this.ntWidthInPixel);
+      }
+    },
+    smallestNtWidthInPx: {
+      immediate: true,
+      handler: function() {
+        console.log({minOfRange: this.smallestNtWidthInPx});
+      }
+    },
+    largestNtWidthInPx: {
+      immediate: true,
+      handler: function() {
+        console.log({maxOfRange: this.largestNtWidthInPx});
       }
     },
   },

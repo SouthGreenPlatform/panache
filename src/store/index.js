@@ -20,7 +20,7 @@ export default new Vuex.Store({
 
     currentDisplayNtWidthInPx: 0.5, // Updates --> minEfficiency per default, or user input
     minNbOfFeaturesToDisplay: 10,
-    maxNumberOfFeaturesToDisplay: 200,
+    maxNbOfFeaturesToDisplay: 200,
 
     // Coords of the first and last nt to display on the block level vis
     firstNtToDisplay: 0,
@@ -93,7 +93,7 @@ export default new Vuex.Store({
       let ntCouple = {};
 
       //If values are already stored, get them...
-      if state.ntWidthInPxThresholds.has(state.selectedChrom) {
+      if (state.ntWidthInPxThresholds.has(state.selectedChrom)) {
         ntCouple = state.ntWidthInPxThresholds.get(state.selectedChrom);
       //...else compute them and store them into the map
       } else {
@@ -105,15 +105,16 @@ export default new Vuex.Store({
         if (getters.chromDataInDisplay !== undefined && getters.chromDataInDisplay[0] !== undefined) {
           //CAUTION: Seing fewer features means that they should appear bigger, hence linked to maxNtWidth
           //Same applies to minNtWidth and max nb of features.
-          minNtWidth = (getters.displayWindowWidth * getters.chromDataInDisplay.length) / ( state.maxNumberOfFeaturesToDisplay * getters.lastNtOfChrom);
-          maxNtWidth = (getters.displayWindowWidth * getters.chromDataInDisplay.length) / ( state.minNumberOfFeaturesToDisplay * getters.lastNtOfChrom);
+          minNtWidth = (getters.displayWindowWidth * getters.chromDataInDisplay.length) / ( state.maxNbOfFeaturesToDisplay * getters.lastNtOfChrom);
+          maxNtWidth = (getters.displayWindowWidth * getters.chromDataInDisplay.length) / ( state.minNbOfFeaturesToDisplay * getters.lastNtOfChrom);
+
+          //Store value in map for future calls
+          state.ntWidthInPxThresholds.set(state.selectedChrom, ntCouple);
         }
 
         ntCouple['min'] = minNtWidth;
         ntCouple['max'] = maxNtWidth;
 
-        //Store value in map for future calls
-        state.ntWidthInPxThresholds.set(state.selectedChrom, ntCouple);
       }
       return ntCouple;
     },
