@@ -11,14 +11,7 @@
           v-model="ntWidthInPixel"
           :step="stepBetweenNtWidthInPx"
         >
-        <input
-          type="range"
-          :id="'idboo'"
-          min=0
-          max=150
-          v-model="fakeModel"
-          step="2"
-        >
+        <!-- CAUTION: v-model on range element returns a String object! -->
       </div>
     </div>
   </div>
@@ -53,7 +46,6 @@ export default {
 
     return {
       ntWidthInPixel: this.largestNtWidthInPx,
-      fakeModel: 4
     }
   },
 
@@ -87,30 +79,10 @@ export default {
     numericalNtWidthToStore: {
       immediate: true,
       handler: function() {
-        console.warn({ntWidthUpdates: this.numericalNtWidthToStore});
         this.updateGlobalZoom(this.numericalNtWidthToStore);
       }
     },
-    fakeModel: {
-      immediate: true,
-      handler: function() {
-        console.warn({fakeModel: this.fakeModel});
-        console.warn({fakeModel: Number(this.fakeModel)});
-      }
-    },
 
-    smallestNtWidthInPx: {
-      immediate: true,
-      handler: function() {
-        console.log({minOfRange: this.smallestNtWidthInPx});
-      }
-    },
-    largestNtWidthInPx: {
-      immediate: true,
-      handler: function() {
-        console.log({maxOfRange: this.largestNtWidthInPx});
-      }
-    },
   },
 
   methods: {
