@@ -3,12 +3,21 @@
     <div class="row">
       <div class="col-12">
       <!--By default, range inputs “snap” to integer values. To change this, you can specify a step value. In the example below, we double the number of steps by using step="0.5"-->
-        <input type="range"
+        <input
+          type="range"
           :id="id"
           :min="smallestNtWidthInPx"
           :max="largestNtWidthInPx"
-          :v-model="ntWidthInPixel"
+          v-model="ntWidthInPixel"
           :step="stepBetweenNtWidthInPx"
+        >
+        <input
+          type="range"
+          :id="'idboo'"
+          min=0
+          max=150
+          v-model="fakeModel"
+          step="2"
         >
       </div>
     </div>
@@ -44,6 +53,7 @@ export default {
 
     return {
       ntWidthInPixel: this.largestNtWidthInPx,
+      fakeModel: 4
     }
   },
 
@@ -54,6 +64,9 @@ export default {
     stepBetweenNtWidthInPx() {
       return 0.1 * this.smallestNtWidthInPx;
     },
+    numericalNtWidthToStore() {
+      return Number(this.ntWidthInPixel);
+    }
   },
 
   created() {
@@ -71,13 +84,21 @@ export default {
     },
 
     //update stored zoom level if any
-    ntWidthInPixel: {
+    numericalNtWidthToStore: {
       immediate: true,
       handler: function() {
-        console.warn({ntWidthUpdates: this.ntWidthInPixel});
-        this.updateGlobalZoom(this.ntWidthInPixel);
+        console.warn({ntWidthUpdates: this.numericalNtWidthToStore});
+        this.updateGlobalZoom(this.numericalNtWidthToStore);
       }
     },
+    fakeModel: {
+      immediate: true,
+      handler: function() {
+        console.warn({fakeModel: this.fakeModel});
+        console.warn({fakeModel: Number(this.fakeModel)});
+      }
+    },
+
     smallestNtWidthInPx: {
       immediate: true,
       handler: function() {

@@ -83,11 +83,11 @@ export default {
         d3.rgb(160, 250,130)],
 
       //Variables specific to PavMatrixAndTracks
-      //Dims should be responsive, depending on the available space!
-      displayWindowHeight: 400,
+      //TODO: Dims should be responsive, depending on the available space!
+      displayWindowHeight: 700,
       filteredData: [],
 
-      blocksDimensions: {width:20, height:14},
+      blocksDimensions: {width: 20, height: 14},
       haTrackHeight: 14,
       gridGapSize: 2,
     }
