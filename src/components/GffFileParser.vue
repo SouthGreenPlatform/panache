@@ -1,7 +1,7 @@
 <template>
 
     <FileLoader
-      :LabelToDisplay="'Optional gff'"
+      :labelToDisplay="'Optional gff'"
       :idBonus="'GffFile'"
       @file-loaded="parseDataToAnnotations"
     />
