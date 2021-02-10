@@ -1,5 +1,5 @@
 <template>
-    <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataURLToJson"/>
+    <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataToJson"/>
 </template>
 
 <script>
@@ -39,19 +39,14 @@ export default {
     }
   },
   computed: {
-    self() {
-      return this;
-    }
   },
   methods: {
-    async parseDataURLToJson(payload) {
-
-      let dataURL = payload.dataURL;
+    async parseDataToJson(loadedFile) {
 
       //Extract global variables for chromNames, genoNames and functions
 
       //Fetches the full dataset, from which chromosomal data can be used
-      let pavData = await this.readDsv(dataURL);
+      let pavData = await this.readDsv(loadedFile, '\t');
 
       //Defines the list/set of chromosome names
       let CHROMOSOME_NAMES = [...new Set(pavData.map( d => d["#Chromosome"]))];
@@ -82,10 +77,12 @@ export default {
       this.updatePavData(chromGroupedData);
       console.log('Data sent to store');
     },
-    async readDsv(dataURL) {
-      console.log('Converting dataURL to JS usable data');
+    async readDsv(loadedFile, delimiter='\t') {
+      console.log('Converting data to JS usable data');
 
-      let dataPromise = d3.dsv("\t", dataURL);
+      let dataURL = window.URL.createObjectURL(loadedFile);
+
+      let dataPromise = d3.dsv(delimiter, dataURL);
       let data = await dataPromise;
 
       console.log('Data available');

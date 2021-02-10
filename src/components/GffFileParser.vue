@@ -3,7 +3,7 @@
     <FileLoader
       :labelToDisplay="'Optional gff'"
       :idBonus="'GffFile'"
-      @file-loaded="parseDataToAnnotations"
+      @file-loaded="parseGffToAnnotationObjects"
     />
 
 </template>
@@ -41,17 +41,17 @@ export default {
     }
   },
   methods: {
-    parseDataToAnnotations: async function(payload) {
+    parseGffToAnnotationObjects: async function(gffFile) {
 
-      //console.log({payload});
+      //console.log({gffFile});
 
-      let dataURL = payload.dataURL;
+      //Reading the full annotation dataset
+      let gffData = await this.readTsv(gffFile);
 
-      //Fetches the full annotation dataset
-      let gffData = await this.readTsv(dataURL);
       //console.log({gffData});
 
       //Overall variables
+      //TODO: remove self declaration by using arrow function?
       let self = this.self
       let annotData = [];
       let currentIdx = 0;
@@ -159,13 +159,15 @@ export default {
       let groupedAnnot = this.groupDataPerKey_inHouse(annotData, 'chrom');
 
       //Stores annotation Array within the App
-      console.log({groupedAnnot});
+      //console.log({groupedAnnot});
       this.updateAnnotationData(groupedAnnot);
 
     },
-    //Turns gff dataURL to array of objects
-    readTsv: async function(dataURL) {
-      console.log('Converting dataURL of Gff to usable data');
+    //Turns gffFile to array of objects
+    readTsv: async function(gffFile) {
+      console.log('Converting Gff file to usable data');
+
+      let dataURL = window.URL.createObjectURL(gffFile);
 
       //CAUTION : I must use the fetch API first, not the dsv one
       //let dataPromise = d3.tsvParseRows(dataURL, this.returnDisplayableGffObject);

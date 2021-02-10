@@ -51,19 +51,22 @@ export default {
       if (event.target.files.length > 0) {
 
         let loadedFile = event.target.files[0];
+        console.log({loadedFile});
+        console.log(typeof loadedFile);
 
         if (typeof loadedFile != 'undefined') {
           this.fileName = loadedFile.name;
           console.log(`File ${loadedFile.name} loaded from computer.`);
 
           //Turn file into accessible data URL
-          let dataURL = window.URL.createObjectURL(loadedFile);
+          //let dataURL = window.URL.createObjectURL(loadedFile);
 
-          this.$emit('file-loaded', { dataURL } )
+          //this.$emit('file-loaded', { dataURL } )
 
           //TODO: update file loader to work directly with file objects, not the dataURL
           //this.$store.dispatch('setIsLoading', true);
-          //this.$emit('file-loaded', loadedFile )
+          console.log(loadedFile);
+          this.$emit('file-loaded', loadedFile )
         }
       }
     },
