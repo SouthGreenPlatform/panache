@@ -47,11 +47,11 @@
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
       <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
-      <g v-show="totBlockIsHigherThanMatrixheight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
-        <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
-        <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
-        <circle :cy="blockVerticalOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
-        <line y1='-10' :y2="`${blockVerticalOffsetToSliderScale.range()[1]+10}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
+      <g v-show="totBlockIsHigherThanMatrixheight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 0)" >
+        <line y1='10' :y2="autoComputeMatrixHeight - 10" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
+        <line y1='10' :y2="autoComputeMatrixHeight - 10" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
+        <circle :cy="handleCyPos" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
+        <line y1='0' :y2="`${autoComputeMatrixHeight}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
       </g>
     </svg>
     <g>
@@ -368,24 +368,14 @@ export default {
 
       return scale;
     },
+    handleCyPos() {
+      console.log({cyPos: this.blockVerticalOffsetToSliderScale(this.blockOffset)});
+      return this.blockVerticalOffsetToSliderScale(this.blockOffset);
+    },
   },
   watch: {
     filteredData() {
       this.tooltipEventIsApplied = false
-    },
-    heightOfTotBlocks: {
-      immediate: true,
-      handler: function() {
-        console.log({heightOfTotBlocksUpdates: this.heightOfTotBlocks});
-        console.log({matrixMinusTotBlockDiff: this.autoComputeMatrixHeight - this.heightOfTotBlocks});
-      }
-    },
-    autoComputeMatrixHeight: {
-      immediate: true,
-      handler: function() {
-        console.log({autoComputeMatrixHeightUpdates: this.autoComputeMatrixHeight});
-        console.log({matrixMinusTotBlockDiff: this.autoComputeMatrixHeight - this.heightOfTotBlocks});
-      }
     },
   },
   mounted() {
@@ -393,7 +383,8 @@ export default {
     let self = this;
     d3.select(this.$refs['pavConditionalSlider'])
       .call(d3.drag().on("start drag", function() {
-        self.updateBlockOffset(d3.event.y)
+        console.log({yPosOfMouse: d3.event.y});
+        self.updateBlockOffset(d3.event.y);
       }))
       .on("mouseover", function() {self.eventFadeInRef('pavConditionalSlider')})
       .on("mouseout", function() {self.eventFadeOutRef('pavConditionalSlider')});
