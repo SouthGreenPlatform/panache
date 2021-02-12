@@ -47,7 +47,7 @@
       <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
       <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
       <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
-      <g v-show="heightOfTotBlocks > autoComputeMatrixHeight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
+      <g v-show="totBlockIsHigherThanMatrixheight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 10)" >
         <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
         <line y1='0' :y2="blockVerticalOffsetToSliderScale.range()[1]" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
         <circle :cy="blockVerticalOffsetToSliderScale(blockOffset)" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
@@ -216,7 +216,7 @@ export default {
   data() {
     let self = this;
 
-    let heightOfTotBlocks = this.blocksDimensions.height * this.genomeList.length;
+    //let heightOfTotBlocks = this.blocksDimensions.height * this.genomeList.length;
 
     let colorScaleThresholdBased = function(data) {
       let value = data.presenceCounter;
@@ -252,7 +252,7 @@ export default {
 
 
     return {
-      heightOfTotBlocks:heightOfTotBlocks,
+      //heightOfTotBlocks: heightOfTotBlocks,
       blockOffset: 0,
       tooltipFontSize: 14,
       stops: [
@@ -354,6 +354,12 @@ export default {
       //console.log({autoHeight: heightOfMatrix});
       return heightOfMatrix;
     },
+    heightOfTotBlocks() {
+      return this.blocksDimensions.height * this.genomeList.length;
+    },
+    totBlockIsHigherThanMatrixheight() {
+      return this.heightOfTotBlocks > this.autoComputeMatrixHeight;
+    },
     blockVerticalOffsetToSliderScale() {
       let scale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
         .domain([0, this.heightOfTotBlocks - this.autoComputeMatrixHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- autoComputeMatrixHeight'
@@ -366,6 +372,20 @@ export default {
   watch: {
     filteredData() {
       this.tooltipEventIsApplied = false
+    },
+    heightOfTotBlocks: {
+      immediate: true,
+      handler: function() {
+        console.log({heightOfTotBlocksUpdates: this.heightOfTotBlocks});
+        console.log({matrixMinusTotBlockDiff: this.autoComputeMatrixHeight - this.heightOfTotBlocks});
+      }
+    },
+    autoComputeMatrixHeight: {
+      immediate: true,
+      handler: function() {
+        console.log({autoComputeMatrixHeightUpdates: this.autoComputeMatrixHeight});
+        console.log({matrixMinusTotBlockDiff: this.autoComputeMatrixHeight - this.heightOfTotBlocks});
+      }
     },
   },
   mounted() {
