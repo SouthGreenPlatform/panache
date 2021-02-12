@@ -363,7 +363,7 @@ export default {
     blockVerticalOffsetToSliderScale() {
       let scale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
         .domain([0, this.heightOfTotBlocks - this.autoComputeMatrixHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- autoComputeMatrixHeight'
-        .range([0, this.autoComputeMatrixHeight - 20]) //The scrolling bar will have the same height than the PA matrix svg, minus 20px
+        .range([10, this.autoComputeMatrixHeight - 10]) //The scrolling bar will have the same height than the PA matrix svg, minus 2*10px
         .clamp(true);
 
       return scale;
