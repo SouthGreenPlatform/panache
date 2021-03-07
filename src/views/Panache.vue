@@ -331,7 +331,6 @@ export default {
 }
 </script>
 
-<!--Here again are too many hardcoded values!!!/-->
 <style scoped>
 
 .canvasMiniature {
