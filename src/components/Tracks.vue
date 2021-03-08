@@ -140,18 +140,40 @@ import * as d3 from 'd3';
 export default {
   name: 'Tracks.vue',
   props: {
+    chromList: {
+      type: Array,
+      //Default must not be empty, so that length > 0 !
+      default: () => ['chrom0', 'chrom1', 'chrom2', 'chrom3']
+    },
     filteredData: {
       type: Array,
       default : () => []
+    },
+    firstNtToDisplay: {
+      type: Number,
+      default: 0
+    },
+    displaySizeOfNt: {
+      type: Number,
+      required : true
     },
     displayWidth: {
       type: Number,
       default : 1100
     },
-    chromList: {
-      type: Array,
-      //Default must not be empty, so that length > 0 !
-      default: () => ['chrom0', 'chrom1', 'chrom2', 'chrom3']
+    gridGapSize: {
+      type: Number,
+      default : 3
+    },
+    blocksDimensions: {
+      type: Object,
+      default: function() {
+        return {width: 20, height: 14}
+      }
+    },
+    coreThreshold: {
+      type: Number,
+      required : true
     },
     colorScaleRainbow: {
       type: Function,
@@ -161,24 +183,6 @@ export default {
       type: Function,
       default: d3.scaleLinear().range([d3.hcl('green'), d3.hcl('green')])
     },
-    coreThreshold: {
-      type: Number,
-      required : true
-    },
-    displaySizeOfNt: {
-      type: Number,
-      required : true
-    },
-    blocksDimensions: {
-      type: Object,
-      default: function() {
-        return {width: 20, height: 14}
-      }
-    },
-    firstNtToDisplay: {
-      type: Number,
-      default: 0
-    }
   },
   data() {
     //TODO: Remove self using arrow function instead
@@ -300,14 +304,11 @@ export default {
     mainTracksTotHeight() {
       return 3 * (this.blocksDimensions.height + 3)
     },
-    allChromsTotHeight() {
-      return this.chromList.length * this.blocksDimensions.height
-    },
     tracksWrapperStyle() {
       return {
         display: 'grid',
-        'grid-template-rows': `auto minmax(1fr, ${this.allChromsTotHeight})`,
-        row-gap: '3px',
+        'grid-template-rows': 'auto 1fr',
+        row-gap: `${this.gridGapSize}px`,
       }
     },
     tooltipData() {

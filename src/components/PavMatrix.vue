@@ -58,18 +58,18 @@ import * as d3 from 'd3';
 export default {
   name: 'PavMatrix.vue',
   props: {
-    filteredData: {
-      type: Array,
-      default : () => []
-    },
     genomeList: {
       type: Array,
       //Default must not be empty, so that length > 0 !
       default: () => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
     },
-    colorScaleFunction : {
-      type: Function,
-      default: () => 'purple'
+    filteredData: {
+      type: Array,
+      default : () => []
+    },
+    firstNtToDisplay: {
+      type: Number,
+      default: 0
     },
     displaySizeOfNt: {
       type: Number,
@@ -81,10 +81,10 @@ export default {
         return {width: 20, height: 14}
       }
     },
-    firstNtToDisplay: {
-      type: Number,
-      default: 0
-    }
+    colorScaleFunction : {
+      type: Function,
+      default: () => 'purple'
+    },
   },
   data() {
 

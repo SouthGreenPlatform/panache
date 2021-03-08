@@ -36,7 +36,7 @@
         :gapHeight="gridGapSize"
         :overlapingHeight="autoComputeMatrixHeight"
         />
-      <PavMatrixAndTracks
+      <!--PavMatrixAndTracks
         class='displayMatrix'
         :filteredData="filteredData"
         :genomeList="genomeList"
@@ -51,6 +51,28 @@
         :colorScaleFunction="colorScaleFunction"
         :colorScaleRainbow="colorScaleRainbow"
         :colorScaleSimilarities="colorScaleSimilarities"
+      /-->
+      <PavMatrix
+        class='displayMatrix'
+        :genomeList="genomeList"
+        :filteredData="filteredData"
+        :firstNtToDisplay="firstNt"
+        :displaySizeOfNt="ntWidthInPx"
+        :blocksDimensions="blocksDimensions"
+        :colorScaleFunction="colorScaleFunction"
+      />
+      <Tracks
+        class='displayTracks'
+        :chromList="chromNames"
+        :filteredData="filteredData"
+        :firstNtToDisplay="firstNt"
+        :displaySizeOfNt="ntWidthInPx"
+        :displayWidth="displayWindowWidth"
+        :gridGapSize="gridGapSize"
+        :blocksDimensions="blocksDimensions"
+        :coreThreshold="coreThreshold"
+        :colorScaleRainbow="colorScaleRainbow"
+        :colorScaleSimilarities="colorScaleSimilarities"
       />
     </div>
   </div>
@@ -61,6 +83,8 @@ import * as d3 from 'd3';
 
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
+import PavMatrix from '@/components/PavMatrix.vue';
+import Tracks from '@/components/Tracks.vue';
 import HollowAreaTrack from '@/components/HollowAreaTrack.vue';
 import AnnotationTrack from '@/components/AnnotationTrack.vue';
 
@@ -71,6 +95,8 @@ export default {
   components: {
     OverlayedCanvas,
     PavMatrixAndTracks,
+    PavMatrix,
+    Tracks,
     HollowAreaTrack,
     AnnotationTrack,
   },
@@ -180,12 +206,30 @@ export default {
       return heightOfMatrix;
     },
 
+    mainTracksTotHeight() {
+      return 3 * (this.blocksDimensions.height + 3)
+    },
+
+    allChromsTotHeight() {
+      return this.chromNames.length * this.blocksDimensions.height
+    },
+
+    tracksComponentMinHeight() {
+      return this.mainTracksTotHeight + this.gridGapSize + 2 * this.blocksDimensions.height
+    },
+
+    tracksComponentMaxHeight() {
+      return this.mainTracksTotHeight + this.gridGapSize + this.allChromsTotHeight
+    },
+
     //Style object to apply on css-grid wrapper
     displayWrapper() {
       return {
         display: 'grid',
 //        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
-        'grid-template-rows': `auto auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
+//        'grid-template-rows': `auto auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
+//max = size of main tracks + gapS + chromosome * block height
+        'grid-template-rows': `auto auto ${this.haTrackHeight}px 1fr minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
         'row-gap': `${this.gridGapSize}px`,
         'padding': '0.6em',
       }
@@ -346,18 +390,27 @@ export default {
   align-self: center;
   justify-self: center;
 }
+
 .zoneHighlight {
   grid-column: 1;
   grid-row: 3 / 5;
   align-self: start;
   justify-self: center;
 }
+
 .displayMatrix {
   grid-column: 1;
-  grid-row: 4 / 6;
+  grid-row: 4;
   align-self: start;
   justify-self: center;
   z-index: 2;
+}
+
+.displayTracks {
+  grid-column: 1;
+  grid-row: 5;
+  align-self: start;
+  justify-self: center;
 }
 
 </style>
