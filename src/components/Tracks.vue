@@ -308,7 +308,7 @@ export default {
       return {
         display: 'grid',
         'grid-template-rows': 'auto 1fr',
-        row-gap: `${this.gridGapSize}px`,
+        'row-gap': `${this.gridGapSize}px`,
       }
     },
     tooltipData() {

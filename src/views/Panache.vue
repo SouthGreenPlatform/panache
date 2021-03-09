@@ -1,6 +1,7 @@
 <template>
+  <!-- The global div has to stay, it will be replaced with TheRouterView within the app -->
   <div>
-    <div :style="displayWrapper">
+    <div id='PanacheMainView' :style="displayWrapper">
       <OverlayedCanvas
         class='canvasMiniature'
         :chromosomeData="chromData"
@@ -82,7 +83,7 @@
 import * as d3 from 'd3';
 
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
-import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
+//import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
 import PavMatrix from '@/components/PavMatrix.vue';
 import Tracks from '@/components/Tracks.vue';
 import HollowAreaTrack from '@/components/HollowAreaTrack.vue';
@@ -94,7 +95,7 @@ export default {
   name: 'Panache',
   components: {
     OverlayedCanvas,
-    PavMatrixAndTracks,
+    //PavMatrixAndTracks,
     PavMatrix,
     Tracks,
     HollowAreaTrack,
@@ -404,6 +405,7 @@ export default {
   align-self: start;
   justify-self: center;
   z-index: 2;
+  height: 100%;
 }
 
 .displayTracks {
@@ -411,6 +413,10 @@ export default {
   grid-row: 5;
   align-self: start;
   justify-self: center;
+}
+
+#PanacheMainView {
+  height: 100%;
 }
 
 </style>

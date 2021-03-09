@@ -1,5 +1,5 @@
 <template>
-<div>
+<div ref='pavMatrixDiv'>
   <svg id='pavMatrix' ref='PanacheSvgContainer'>
     <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
     <defs>
@@ -26,7 +26,14 @@
         id='genomeLegend'
         @mouseover="function() {eventFadeOutRef('genomeLegend')}"
         @mouseout="function() {eventFadeInRef('genomeLegend')}">
-            <rect x='0' y='0' :height="pavMatrixHeight+1" :width="genoLegendPanelWidth" :fill="`url(#bgLabelGradient_left)`"/>
+            <rect
+              ref='rectToWatchInPavMatrix'
+              x='0'
+              y='0'
+              :height="pavMatrixHeight+1"
+              :width="genoLegendPanelWidth"
+              :fill="`url(#bgLabelGradient_left)`"
+            />
             <text v-for="(genome, index) in genomeList"
               :key="`genomeLabel_${genome}`"
               x='2'
@@ -125,25 +132,30 @@ export default {
         },
       ],
       genoLegendPanelWidth: genoLegendPanelWidth,
+      pavMatrixHeight: 100,
+      svgContainerWidth: 100,
+      //resizeObserver, cf: https://stackoverflow.com/questions/43813731/how-to-trigger-an-event-when-element-is-resized-in-vue-js
+      resizeObserver: null,
     }
   },
   computed: {
-    //TODO: check if it updated after being mounted
+    /*//TODO: check if it updated after being mounted
     pavMatrixHeight() {
       let height = 100;
-      if this.$refs.PanacheSvgContainer !== undefined {
+      if (this.$refs.PanacheSvgContainer !== undefined) {
         height = this.$refs.PanacheSvgContainer.clientHeight
       }
+      console.log({HeightOfPavMatrix: height});
       return height;
     },
     //TODO: check if it updated after being mounted
     svgContainerWidth() {
       let width = 100;
-      if this.$refs.PanacheSvgContainer !== undefined {
+      if (this.$refs.PanacheSvgContainer !== undefined) {
         width = this.$refs.PanacheSvgContainer.clientWidth
       }
       return width;
-    },
+    },*/
     heightOfTotBlocks() {
       return this.blocksDimensions.height * this.genomeList.length;
     },
@@ -164,8 +176,24 @@ export default {
     },
   },
   watch: {
+    pavMatrixHeight: {
+      handler: function() {
+        console.log({pavMatrixHeight: this.pavMatrixHeight});
+        console.log({rectClientHeight: this.$refs.rectToWatchInPavMatrix.height});
+      },
+      immediate: false
+    },
   },
   mounted() {
+
+    //Add listener for resize event of the svg, to then update this.pavMatrixHeight
+    this.resizeObserver = new ResizeObserver(this.onResize).observe(this.$refs.PanacheSvgContainer);
+
+    // Set values linked to parent div size
+    //this.pavMatrixHeight = this.$refs.PanacheSvgContainer.clientHeight;
+    //console.log({clientHeight: this.$refs.PanacheSvgContainer.clientHeight});
+    this.svgContainerWidth = this.$refs.PanacheSvgContainer.clientWidth;
+
     //Applying the drag event on the rect of conditional slider
     let self = this;
     d3.select(this.$refs['pavConditionalSlider'])
@@ -178,6 +206,9 @@ export default {
 
   },
   updated() {
+  },
+  destroyed () {
+    delete this.resizeObserver
   },
   methods: {
     updateBlockOffset(mousePos) {
@@ -240,13 +271,20 @@ export default {
         .transition()
         .attr('opacity', 1);
     },
+    onResize () {
+      //this.$emit('resize', this.$refs.myElement.offsetHeight)
+      this.$emit('resize', this.$refs.PanacheSvgContainer.clientHeight);
+      console.log('I HAVE BEEN RESIZED - Height: ', this.$refs.PanacheSvgContainer.clientHeight);
+      console.log('I HAVE BEEN RESIZED - Width: ', this.$refs.PanacheSvgContainer.clientWidth);
+      this.pavMatrixHeight = this.$refs.PanacheSvgContainer.clientHeight;
+    },
   }
 }
 </script>
 
 <style>
 
-#PavMatrix {
+#pavMatrix {
   height: 100%;
   width: 100%;
 }
