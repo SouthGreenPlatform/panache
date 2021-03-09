@@ -97,4 +97,3 @@ Panache is published under the terms of the [GNU General Public License v3.0](./
 > *flashed his … smile and waved with the* panache *of a big-city mayor.* — Joe Morgenstern
 
 *Definition from Merriam-Webster*
->>>>>>> 7742a253837b32a5e77143d6d2840542957c46a9
