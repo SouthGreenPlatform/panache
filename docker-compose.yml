@@ -1,0 +1,18 @@
+version: '3.3'
+volumes:
+    data:
+networks:
+    panache:
+services:
+    web:
+        container_name: panache
+        build: .
+        ports:
+            - "8080:8080"
+            - "1337:1337"
+        volumes:
+            - ./:/app
+        networks:
+            - panache
+        
+        
