@@ -48,7 +48,7 @@
       </g>
 
     <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
-    <g v-show="totBlockIsHigherThanMatrixheight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(svgContainerWidth-10, 0)" >
+    <g v-show="totMatrixIsHigherThanSvgheight" ref='pavConditionalSlider' opacity='0' :transform="writeTranslate(svgContainerWidth-10, 0)" >
         <line y1='10' :y2="pavMatrixHeight - 10" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
         <line y1='10' :y2="pavMatrixHeight - 10" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
         <circle :cy="handleCyPos" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
@@ -159,7 +159,7 @@ export default {
     heightOfTotBlocks() {
       return this.blocksDimensions.height * this.genomeList.length;
     },
-    totBlockIsHigherThanMatrixheight() {
+    totMatrixIsHigherThanSvgheight() {
       return this.heightOfTotBlocks > this.pavMatrixHeight;
     },
     blockVerticalOffsetToSliderScale() {

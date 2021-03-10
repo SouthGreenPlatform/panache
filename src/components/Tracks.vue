@@ -70,14 +70,14 @@
   <!-- SIMILARITY BOTTOM SPACE -->
   <div id='distributionInChroms'>
     <!-- For now heigth is 'bruteforced' to be max 4 chromosomes -->
-    <svg id='distributionInChroms_svg' :height="4 * blocksDimensions.height" :width="displayWidth">
+    <svg id='distributionInChroms_svg' :height="simBoxesSvgHeight" :width="displayWidth">
 
       <!-- LINES AND BLOCKS FOR SIMILARITIES-->
       <g id='blocksStructuralVariation'>
           <g v-for="(chromName, index) in chromList"
             :key="`chrom_${chromName}`"
             :id="`duplicationBoxes_${chromName}`"
-            :transform="writeTranslate(0, index * blocksDimensions.height)">
+            :transform="writeTranslate(0, applyOffset(index * blocksDimensions.height))">
             <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
             <!-- similarity boxes are translated in order to be centered-->
             <rect v-for="(block, idxInArray) in filteredData"
@@ -94,6 +94,14 @@
               stroke-width='0.5'
             />
           </g>
+      </g>
+
+      <!-- VERTICAL SLIDER FOR THE SIMILARITIES ON OTHER CHROMS -->
+      <g v-show="totSimChromIsHigherThanSvgheight" ref='simBoxesConditionalSlider' opacity='0' :transform="writeTranslate(displayWidth-10, 0)" >
+          <line y1='10' :y2="simBoxesSvgHeight - 10" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
+          <line y1='10' :y2="simBoxesSvgHeight - 10" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
+          <circle :cy="handleCyPos" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
+          <line y1='0' :y2="`${simBoxesSvgHeight}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
       </g>
 
       <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
@@ -115,7 +123,7 @@
           <text v-for="(chromName, index) in chromList"
             :key="`duplicationBoxes_${chromName}`"
             :x="panel.xPos"
-            :y="index * (blocksDimensions.height)"
+            :y="applyOffset(index * (blocksDimensions.height))"
             dominant-baseline='hanging'
             font-family='sans-serif'
             font-size='10px'
@@ -279,12 +287,15 @@ export default {
           xPos: 0,
           translation: this.writeTranslate(0,0)
         },
+        //remove right labels for the vertical slider
+        /*
         {
           side: 'right',
           anchor: 'end',
           xPos: chromLegendPanelWidth,
           translation: this.writeTranslate(this.displayWidth - chromLegendPanelWidth, 0)
         }
+        */
       ],
       similarityFill: simFill,
       similarityStroke: simStroke,
@@ -305,8 +316,14 @@ export default {
     mainTracksTotHeight() {
       return 3 * (this.blocksDimensions.height + 3)
     },
+    simBoxesSvgHeight() {
+      return 4 * this.blocksDimensions.height
+    },
     similarityTrackTotHeight() {
       return this.chromList.length * this.blocksDimensions.height
+    },
+    totSimChromIsHigherThanSvgheight() {
+      return this.similarityTrackTotHeight > this.simBoxesSvgHeight
     },
     tracksWrapperStyle() {
       return {
@@ -325,22 +342,42 @@ export default {
         offset: this.tooltipXOffset
       }
     },
+    //Scale used for the slider on the right part of similarity boxes
+    simVerticalOffsetToSliderScale() {
+      let scale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
+        .domain([0, this.similarityTrackTotHeight - this.simBoxesSvgHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- simBoxesSvgHeight'
+        .range([10, this.simBoxesSvgHeight - 10]) //The scrolling bar will have the same height than the simBoxes svg, minus 2*10px
+        .clamp(true);
+
+      return scale;
+    },
+    handleCyPos() {
+      //console.log({cyPos: this.simVerticalOffsetToSliderScale(this.blockOffset)});
+      return this.simVerticalOffsetToSliderScale(this.blockOffset);
+    },
   },
   watch: {
     filteredData() {
       this.tooltipEventIsApplied = false
     },
+    blockOffset: {
+      handler: function() { //not supposed to change with the data, unless some genomes are hidden
+        console.log({blockOffsetSimBoxes: this.blockOffset})
+      },
+      immediate: true
+    },
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
+    //TODO: get rid of the 'self' with arrow functions
     let self = this;
-    d3.select(this.$refs['pavConditionalSlider'])
+    d3.select(this.$refs['simBoxesConditionalSlider'])
       .call(d3.drag().on("start drag", function() {
         console.log({yPosOfMouse: d3.event.y});
         self.updateBlockOffset(d3.event.y);
       }))
-      .on("mouseover", function() {self.eventFadeInRef('pavConditionalSlider')})
-      .on("mouseout", function() {self.eventFadeOutRef('pavConditionalSlider')});
+      .on("mouseover", function() {self.eventFadeInRef('simBoxesConditionalSlider')})
+      .on("mouseout", function() {self.eventFadeOutRef('simBoxesConditionalSlider')});
 
   },
   updated() {
@@ -375,7 +412,7 @@ export default {
   },
   methods: {
     updateBlockOffset(mousePos) {
-      this.blockOffset = this.blockVerticalOffsetToSliderScale.invert(mousePos)
+      this.blockOffset = this.simVerticalOffsetToSliderScale.invert(mousePos)
     },
     applyOffset(initialPos) {
       return initialPos - this.blockOffset
