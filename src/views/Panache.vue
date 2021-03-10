@@ -239,6 +239,7 @@ export default {
         //'grid-template-rows': `max-content max-content ${this.haTrackHeight}px minmax(${this.blocksDimensions.height}px, min(1fr, ${this.allPavTotHeight}px)) minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
         //'grid-template-rows': `max-content max-content ${this.haTrackHeight}px clamp(${this.blocksDimensions.height}px, ${this.allPavTotHeight}px, 1fr) minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
         //pbl related to min() within grid css? cf https://css-tricks.com/intrinsically-responsive-css-grid-with-minmax-and-min/
+        //It's the 'fr' or 'auto' that cannot be passed within it... Damned
         //'grid-template-rows': `max-content max-content ${this.haTrackHeight}px ${this.allPavTotHeight}px minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
         'grid-template-rows': `max-content max-content ${this.haTrackHeight}px minmax(10px, 1fr) max-content`,
         'row-gap': `${this.gridGapSize}px`,
