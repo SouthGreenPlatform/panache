@@ -360,12 +360,6 @@ export default {
     filteredData() {
       this.tooltipEventIsApplied = false
     },
-    blockOffset: {
-      handler: function() { //not supposed to change with the data, unless some genomes are hidden
-        console.log({blockOffsetSimBoxes: this.blockOffset})
-      },
-      immediate: true
-    },
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
@@ -373,7 +367,7 @@ export default {
     let self = this;
     d3.select(this.$refs['simBoxesConditionalSlider'])
       .call(d3.drag().on("start drag", function() {
-        console.log({yPosOfMouse: d3.event.y});
+        //console.log({yPosOfMouse: d3.event.y});
         self.updateBlockOffset(d3.event.y);
       }))
       .on("mouseover", function() {self.eventFadeInRef('simBoxesConditionalSlider')})

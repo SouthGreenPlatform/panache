@@ -176,13 +176,6 @@ export default {
     },
   },
   watch: {
-    pavMatrixHeight: {
-      handler: function() {
-        console.log({pavMatrixHeight: this.pavMatrixHeight});
-        console.log({rectClientHeight: this.$refs.rectToWatchInPavMatrix.height});
-      },
-      immediate: false
-    },
   },
   mounted() {
 
@@ -198,7 +191,7 @@ export default {
     let self = this;
     d3.select(this.$refs['pavConditionalSlider'])
       .call(d3.drag().on("start drag", function() {
-        console.log({yPosOfMouse: d3.event.y});
+        //console.log({yPosOfMouse: d3.event.y});
         self.updateBlockOffset(d3.event.y);
       }))
       .on("mouseover", function() {self.eventFadeInRef('pavConditionalSlider')})
@@ -274,8 +267,8 @@ export default {
     onResize () {
       //this.$emit('resize', this.$refs.myElement.offsetHeight)
       this.$emit('resize', this.$refs.PanacheSvgContainer.clientHeight);
-      console.log('I HAVE BEEN RESIZED - Height: ', this.$refs.PanacheSvgContainer.clientHeight);
-      console.log('I HAVE BEEN RESIZED - Width: ', this.$refs.PanacheSvgContainer.clientWidth);
+      //console.log('I HAVE BEEN RESIZED - Height: ', this.$refs.PanacheSvgContainer.clientHeight);
+      //console.log('I HAVE BEEN RESIZED - Width: ', this.$refs.PanacheSvgContainer.clientWidth);
       this.pavMatrixHeight = this.$refs.PanacheSvgContainer.clientHeight;
     },
   }
