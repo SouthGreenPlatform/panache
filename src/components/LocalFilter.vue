@@ -43,7 +43,10 @@
       </div>
     </div>
 
+    <!-- TODO: Extract the shape choice from the core threshold component... -->
     <CoreThreshold/>
+
+    <div class="mt-1"><small>Zoom Level</small></div>
 
     <MatrixOptimizedZoom
         class='zoomSlider'
