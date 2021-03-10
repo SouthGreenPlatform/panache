@@ -69,7 +69,8 @@
 
   <!-- SIMILARITY BOTTOM SPACE -->
   <div id='distributionInChroms'>
-    <svg id='distributionInChroms_svg' :width="displayWidth">
+    <!-- For now heigth is 'bruteforced' to be max 4 chromosomes -->
+    <svg id='distributionInChroms_svg' :height="4 * blocksDimensions.height" :width="displayWidth">
 
       <!-- LINES AND BLOCKS FOR SIMILARITIES-->
       <g id='blocksStructuralVariation'>
@@ -107,7 +108,7 @@
           <rect
             :x="panel.x"
             y='0'
-            :height="chromList.length * blocksDimensions.height"
+            :height="similarityTrackTotHeight"
             :width="chromLegendPanelWidth"
             :fill="`url(#repeatsBgLabelGradient_${panel.side})`"
           />
@@ -303,6 +304,9 @@ export default {
   computed: {
     mainTracksTotHeight() {
       return 3 * (this.blocksDimensions.height + 3)
+    },
+    similarityTrackTotHeight() {
+      return this.chromList.length * this.blocksDimensions.height
     },
     tracksWrapperStyle() {
       return {
@@ -570,9 +574,9 @@ export default {
   grid-column: 1;
   grid-row: 2;
 }
-
+/*
 #distributionInChroms_svg {
   height: 100%;
 }
-
+*/
 </style>

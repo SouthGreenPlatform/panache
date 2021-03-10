@@ -211,6 +211,10 @@ export default {
       return 3 * (this.blocksDimensions.height + 3)
     },
 
+    allPavTotHeight() {
+      return this.genomeList.length * this.blocksDimensions.height;
+    },
+
     allChromsTotHeight() {
       return this.chromNames.length * this.blocksDimensions.height
     },
@@ -227,10 +231,16 @@ export default {
     displayWrapper() {
       return {
         display: 'grid',
+        //TODO: find a way to have pavmatrix space == clamp(blockHeight, PavMatrix, 1fr)
+        //Now it is just bruteforced...
 //        'grid-template-rows': `auto ${this.haTrackHeight}px ${this.gridGapSize}px ${this.autoComputeMatrixHeight}px`,
 //        'grid-template-rows': `auto auto ${this.haTrackHeight}px ${this.autoComputeMatrixHeight}px 1fr`,
-//max = size of main tracks + gapS + chromosome * block height
-        'grid-template-rows': `auto auto ${this.haTrackHeight}px 1fr minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
+//         max = size of main tracks + gapS + chromosome * block height
+        //'grid-template-rows': `max-content max-content ${this.haTrackHeight}px minmax(${this.blocksDimensions.height}px, min(1fr, ${this.allPavTotHeight}px)) minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
+        //'grid-template-rows': `max-content max-content ${this.haTrackHeight}px clamp(${this.blocksDimensions.height}px, ${this.allPavTotHeight}px, 1fr) minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
+        //pbl related to min() within grid css? cf https://css-tricks.com/intrinsically-responsive-css-grid-with-minmax-and-min/
+        //'grid-template-rows': `max-content max-content ${this.haTrackHeight}px ${this.allPavTotHeight}px minmax(${this.tracksComponentMinHeight}px, ${this.tracksComponentMaxHeight}px)`,
+        'grid-template-rows': `max-content max-content ${this.haTrackHeight}px minmax(10px, 1fr) max-content`,
         'row-gap': `${this.gridGapSize}px`,
         'padding': '0.6em',
       }
