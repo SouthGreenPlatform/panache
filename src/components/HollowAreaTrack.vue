@@ -6,7 +6,7 @@
       x=0
       y=0
       :width="ntToPx(coordsTriplet[1]-coordsTriplet[0])"
-      :height="screenHeight"
+      height='100%'
       fill='yellow'
       fill-opacity=0.75
       :transform="writeTranslateWithOffSet(ntToPx(coordsTriplet[0]), 0)"
