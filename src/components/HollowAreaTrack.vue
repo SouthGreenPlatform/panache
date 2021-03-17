@@ -1,12 +1,12 @@
 <template>
 
-  <svg class="" :width="svgWidth" :height="svgHeight">
+  <svg id='haHighlightTrack' :width="svgWidth">
     <rect v-for="(coordsTriplet) in wideEnoughCoordsOnly"
       :key="`highlight_${coordsTriplet[0]}`"
       x=0
       y=0
       :width="ntToPx(coordsTriplet[1]-coordsTriplet[0])"
-      :height="svgHeight"
+      :height="screenHeight"
       fill='yellow'
       fill-opacity=0.75
       :transform="writeTranslateWithOffSet(ntToPx(coordsTriplet[0]), 0)"
@@ -76,8 +76,10 @@ export default {
   mounted() {
   },
   computed: {
-    svgHeight: function() {
-      return this.trackHeight + this.gapHeight + this.overlapingHeight
+    //Highlight won't be higher than screen size so let's use it for rect heigh.
+    //Extra length will be cut by the svg borders anyway.
+    screenHeight: function() {
+      return window.innerHeight;
     },
     //Attribute color to links if needed
     coordsTripleWithColor: function() {
@@ -218,5 +220,9 @@ export default {
 
 
 <style>
+
+#haHighlightTrack {
+  height: 100%;
+}
 
 </style>

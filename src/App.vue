@@ -94,6 +94,7 @@ body, html {
 .main-view {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
   margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 .content-column {
@@ -101,5 +102,9 @@ body, html {
   float: left;
   display: block;
   margin-left: 20px;
+}
+
+#TheRouterView {
+  height: calc(100% - 30px);
 }
 </style>

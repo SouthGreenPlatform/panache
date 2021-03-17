@@ -1,62 +1,31 @@
 <template>
-<div>
-  <svg ref='PanacheSvgContainer' :height="displayHeight" :width="displayWidth">
-    <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
+<!-- Tot height will be determined by parent's componenent limitations-->
+<div :style="tracksWrapperStyle">
+  <!-- TRACKS & TOOLTIPS FOR PAV STATUS, POSITION, SIMILARITY INFO-->
+  <div id="mainTracks">
+    <svg ref='PanacheSvgContainer' :height="mainTracksTotHeight" :width="displayWidth">
+
+      <!-- DEFS FOR THE WHITE TO TRANSPARENT LEGEND BACKGROUNDS -->
       <defs>
-        <linearGradient v-for="gradient in bgGradients" :key="gradient.side" :id="`repeatsBgLabelGradient_${gradient.side}`" :x1="gradient.x1" :x2="gradient.x2" y1="0" y2="0">
-          <stop v-for="stop in stops" :key="`offset_${stop.offset}`" :offset="stop.offset" :stop-color="stop.color" :stop-opacity="stop.opacity"/>
+        <linearGradient v-for="gradient in bgGradients"
+          :key="gradient.side"
+          :id="`repeatsBgLabelGradient_${gradient.side}`"
+          :x1="gradient.x1"
+          :x2="gradient.x2"
+          y1="0"
+          y2="0"
+          >
+          <stop v-for="stop in stops"
+            :key="`offset_${stop.offset}`"
+            :offset="stop.offset"
+            :stop-color="stop.color"
+            :stop-opacity="stop.opacity"
+            />
         </linearGradient>
       </defs>
-    <!-- SVG CONTAINER FOR THE PAV MATRIX -->
-    <!-- That way the bottom of the blocks is automatically cropped -->
-    <svg ref='pavMatrix' :height="autoComputeMatrixHeight" :width="displayWidth">
-      <g v-for="(genome, index) in genomeList" :key="`geno_${genome}`" :id="`presence_${genome}`">
-        <rect v-for="(block, idxInArray) in filteredData"
-          :key="`idxForMatrix_${idxInArray}`"
-          class='movableBlock'
-          :x="ntToPx(block.index)"
-          :y="applyOffset(index * blocksDimensions.height)"
-          :transform="writeTranslateWithOffSet(0,0)"
-          :height="blocksDimensions.height"
-          :width="ntToPx(block.FeatureStop - block.FeatureStart)"
-          :fill="colorScaleFunction(block)"
-          :opacity="calcPavBlockOpacity(block[`${genome}`])"
-          @mouseover="XXXsomeConditionalEventXXX"
-          @mouseout="XXXsomeConditionalEventXXX"
-        />
-      </g>
-      <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
-      <g ref='genomeLegend'
-        id='genomeLegend'
-        @mouseover="function() {eventFadeOutRef('genomeLegend')}"
-        @mouseout="function() {eventFadeInRef('genomeLegend')}">
-            <rect x='0' y='0' :height="autoComputeMatrixHeight+1" :width="genoLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_left)`"/>
-            <text v-for="(genome, index) in genomeList"
-              :key="`genomeLabel_${genome}`"
-              x='2'
-              :y="applyOffset(index * blocksDimensions.height)"
-              dominant-baseline='hanging'
-              font-family='sans-serif'
-              font-size='10px'
-              text-anchor='start'
-              >
-              {{genome}}
-            </text>
-          </g>
 
-      <!-- IMPORTANT The position of the handle does not seem to work properly, to investigate!-->
-      <!-- It is surely a pbl of 'blockOffset' being based on a wrong mouse position, cf y pos of line?-->
-      <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
-      <g v-show="totBlockIsHigherThanMatrixheight" ref='pavConditionalSlider' id="fadingScrollbar" opacity='0' :transform="writeTranslate(displayWidth-10, 0)" >
-        <line y1='10' :y2="autoComputeMatrixHeight - 10" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
-        <line y1='10' :y2="autoComputeMatrixHeight - 10" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
-        <circle :cy="handleCyPos" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
-        <line y1='0' :y2="`${autoComputeMatrixHeight}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
-      </g>
-    </svg>
-    <g>
       <!-- TRACKS OF INFORMATION -->
-      <g ref='informationTracks' id="informationTracks" :transform="writeTranslate(0, autoComputeMatrixHeight+5)">
+      <g ref='informationTracks'>
         <g v-for="(track, index) in tracks" :key="track.name" :id="track.name" :transform="writeTranslate(0, index * (blocksDimensions.height+3))">
           <rect v-for="(block, idxInArray) in filteredData"
             :key="`idxForTracks_${idxInArray}`"
@@ -71,14 +40,44 @@
           />
         </g>
       </g>
-      <!-- SIMILARITY BOXES -->
-      <!-- Hard written traslation could surely be improved-->
-      <g id='structureInfo' :transform="writeTranslate(0, autoComputeMatrixHeight+5 + 55)">
-        <g id='blocksStructuralVariation'>
+
+      <!-- TOOLTIP -->
+      <!-- TODO: Rework tooltip so that it is not an svg anymore -->
+      <g :visibility="tooltipVisibility" id="hoverTooltip">
+        <rect :x="tooltipData.x - tooltipData.margin"
+          :y="tooltipData.y - tooltipData.margin"
+          :height="tooltipData.height + 2 * tooltipData.margin"
+          :width="tooltipData.width + 2 * tooltipData.margin"
+          :fill="hclToRgb(83, 4, 96)"
+          fill-opacity='0.9'
+          :stroke="hclToRgb(86, 5, 80)"
+          stroke-opacity='0.9'
+        />
+        <text ref='tooltipForTracksAndPavMatrix'
+          :x="tooltipData.x"
+          :y="tooltipData.y"
+          dominant-baseline='hanging'
+          font-family='sans-serif'
+          :font-size="tooltipFontSize"
+          text-anchor='start'>
+          {{tooltipTxtContent}}
+        </text>
+      </g>
+
+    </svg>
+  </div>
+
+  <!-- SIMILARITY BOTTOM SPACE -->
+  <div id='distributionInChroms'>
+    <!-- For now heigth is 'bruteforced' to be max 4 chromosomes -->
+    <svg id='distributionInChroms_svg' :height="simBoxesSvgHeight" :width="displayWidth">
+
+      <!-- LINES AND BLOCKS FOR SIMILARITIES-->
+      <g id='blocksStructuralVariation'>
           <g v-for="(chromName, index) in chromList"
             :key="`chrom_${chromName}`"
             :id="`duplicationBoxes_${chromName}`"
-            :transform="writeTranslate(0, index * blocksDimensions.height)">
+            :transform="writeTranslate(0, applyOffset(index * blocksDimensions.height))">
             <line class='bgLine' x1='0' :x2='displayWidth' :y1="0.5*blocksDimensions.height" :y2="0.5*blocksDimensions.height" stroke='#eeeeee' stroke-width='6px'/>
             <!-- similarity boxes are translated in order to be centered-->
             <rect v-for="(block, idxInArray) in filteredData"
@@ -95,21 +94,36 @@
               stroke-width='0.5'
             />
           </g>
-        </g>
-        <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
-        <!-- Following labels could be more automatized through a data containing ids and positions depending on right/left legends /-->
-        <g v-for="panel in structLegendPanels"
-        :key="panel.side"
-        :ref="`panChromLegend_${panel.side}`"
-        :id="`panChromLegend_${panel.side}`"
-        :transform="panel.translation"
-        @mouseover="function() {eventFadeOutRef(`panChromLegend_${panel.side}`)}"
-        @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
-          <rect :x="panel.x" y='0' :height="chromList.length * blocksDimensions.height" :width="chromLegendPanelWidth" :fill="`url(#repeatsBgLabelGradient_${panel.side})`"/>
+      </g>
+
+      <!-- VERTICAL SLIDER FOR THE SIMILARITIES ON OTHER CHROMS -->
+      <g v-show="totSimChromIsHigherThanSvgheight" ref='simBoxesConditionalSlider' opacity='0' :transform="writeTranslate(displayWidth-10, 0)" >
+          <line y1='10' :y2="simBoxesSvgHeight - 10" :stroke="hclToRgb(0,0,25)" stroke-linecap='round' stroke-opacity='0.3' stroke-width='10px'/>
+          <line y1='10' :y2="simBoxesSvgHeight - 10" :stroke="hclToRgb(0,0,95)" stroke-linecap='round' stroke-width='8px'/>
+          <circle :cy="handleCyPos" r='7' :fill="hclToRgb(0,0,100)" :stroke="hclToRgb(0,0,25)" stroke-opacity='0.3' stroke-width='1.25px'/>
+          <line y1='0' :y2="`${simBoxesSvgHeight}`" cursor='ns-resize' stroke='transparent' stroke-width='120px'/>
+      </g>
+
+      <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
+      <!-- Following labels could be more automatized through a data containing ids and positions depending on right/left legends /-->
+      <g v-for="panel in structLegendPanels"
+          :key="panel.side"
+          :ref="`panChromLegend_${panel.side}`"
+          :id="`panChromLegend_${panel.side}`"
+          :transform="panel.translation"
+          @mouseover="function() {eventFadeOutRef(`panChromLegend_${panel.side}`)}"
+          @mouseout="function() {eventFadeInRef(`panChromLegend_${panel.side}`)}">
+          <rect
+            :x="panel.x"
+            y='0'
+            :height="similarityTrackTotHeight"
+            :width="chromLegendPanelWidth"
+            :fill="`url(#repeatsBgLabelGradient_${panel.side})`"
+          />
           <text v-for="(chromName, index) in chromList"
             :key="`duplicationBoxes_${chromName}`"
             :x="panel.xPos"
-            :y="index * (blocksDimensions.height)"
+            :y="applyOffset(index * (blocksDimensions.height))"
             dominant-baseline='hanging'
             font-family='sans-serif'
             font-size='10px'
@@ -117,31 +131,14 @@
             >
             {{chromName}}
           </text>
-        </g>
       </g>
-    </g>
-    <!-- TOOLTIP -->
-    <g :visibility="tooltipVisibility" id="hoverTooltip">
-      <rect :x="tooltipData.x - tooltipData.margin"
-      :y="tooltipData.y - tooltipData.margin"
-      :height="tooltipData.height + 2 * tooltipData.margin"
-      :width="tooltipData.width + 2 * tooltipData.margin"
-      :fill="hclToRgb(83, 4, 96)"
-      fill-opacity='0.9'
-      :stroke="hclToRgb(86, 5, 80)"
-      stroke-opacity='0.9'/>
-      <text ref='tooltipForTracksAndPavMatrix'
-        :x="tooltipData.x"
-        :y="tooltipData.y"
-        dominant-baseline='hanging'
-        font-family='sans-serif'
-        :font-size="tooltipFontSize"
-        text-anchor='start'>
-        {{tooltipTxtContent}}
-      </text>
-    </g>
 
-  </svg>
+      <!-- TODO: ADD VERTICAL SLIDER TO GO THROUGH CHROMOSOMES-->
+
+    </svg>
+  </div>
+
+  <!-- CANVAS FOR PRE-CALCULATION OF TOOLTIP SIZE, HIDDEN -->
   <canvas v-show='false' id='tooltipPreRenderingCanvas' ref='pavTooltipCanvas' height='50' :width="displayWidth"/>
 </div>
 </template>
@@ -150,37 +147,42 @@
 import * as d3 from 'd3';
 
 export default {
-  name: 'PavMatrixAndTracks.vue',
+  name: 'Tracks.vue',
   props: {
-    filteredData: {
-      type: Array,
-      default : () => []
-    },
-    displayWidth: {
-      type: Number,
-      default : 1100
-    },
-    displayHeight: {
-      type: Number,
-      default : 600
-    },
-    pavMatrixHeight: {
-      type: Number,
-      default: undefined
-    },
-    genomeList: {
-      type: Array,
-      //Default must not be empty, so that length > 0 !
-      default: () => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-    },
     chromList: {
       type: Array,
       //Default must not be empty, so that length > 0 !
       default: () => ['chrom0', 'chrom1', 'chrom2', 'chrom3']
     },
-    colorScaleFunction : {
-      type: Function,
-      default: () => 'purple'
+    filteredData: {
+      type: Array,
+      default : () => []
+    },
+    firstNtToDisplay: {
+      type: Number,
+      default: 0
+    },
+    displaySizeOfNt: {
+      type: Number,
+      required : true
+    },
+    displayWidth: {
+      type: Number,
+      default : 1100
+    },
+    gridGapSize: {
+      type: Number,
+      default : 3
+    },
+    blocksDimensions: {
+      type: Object,
+      default: function() {
+        return {width: 20, height: 14}
+      }
+    },
+    coreThreshold: {
+      type: Number,
+      required : true
     },
     colorScaleRainbow: {
       type: Function,
@@ -190,29 +192,10 @@ export default {
       type: Function,
       default: d3.scaleLinear().range([d3.hcl('green'), d3.hcl('green')])
     },
-    coreThreshold: {
-      type: Number,
-      required : true
-    },
-    displaySizeOfNt: {
-      type: Number,
-      required : true
-    },
-    blocksDimensions: {
-      type: Object,
-      default: function() {
-        return {width: 20, height: 14}
-      }
-    },
-    firstNtToDisplay: {
-      type: Number,
-      default: 0
-    }
   },
   data() {
+    //TODO: Remove self using arrow function instead
     let self = this;
-
-    //let heightOfTotBlocks = this.blocksDimensions.height * this.genomeList.length;
 
     let colorScaleThresholdBased = function(data) {
       let value = data.presenceCounter;
@@ -243,14 +226,10 @@ export default {
     let longestSizeOfChromName = Math.max(...this.chromList.map( d => d.length));
     let chromLegendPanelWidth = longestSizeOfChromName * 10;
 
-    let longestSizeOfGenoName = Math.max(...this.genomeList.map( d => d.length));
-    let genoLegendPanelWidth = longestSizeOfGenoName * 10;
-
-
     return {
-      //heightOfTotBlocks: heightOfTotBlocks,
       blockOffset: 0,
       tooltipFontSize: 14,
+      //Colors for white gradient used on labels
       stops: [
         {
           offset: 0,
@@ -268,6 +247,7 @@ export default {
           opacity: 0
         },
       ],
+      //Directions for white gradients used on labels
       bgGradients: [
         {
           side: 'left',
@@ -280,6 +260,7 @@ export default {
           x2: 0,
         },
       ],
+      //Name and color scales to use on main tracks
       tracks: [
         {
           name: 'panChrom_coreVSdispensable',
@@ -298,6 +279,7 @@ export default {
           }
         }
       ],
+      //Properties of rects used as backgrounds for similarity info
       structLegendPanels: [
         {
           side: 'left',
@@ -305,18 +287,20 @@ export default {
           xPos: 0,
           translation: this.writeTranslate(0,0)
         },
+        //remove right labels for the vertical slider
+        /*
         {
           side: 'right',
           anchor: 'end',
           xPos: chromLegendPanelWidth,
-          translation: this.writeTranslate(this.displayWidth-chromLegendPanelWidth,0)
+          translation: this.writeTranslate(this.displayWidth - chromLegendPanelWidth, 0)
         }
+        */
       ],
       similarityFill: simFill,
       similarityStroke: simStroke,
       blockOriginColor: d3.hcl(10,50,80),
       chromLegendPanelWidth: chromLegendPanelWidth,
-      genoLegendPanelWidth: genoLegendPanelWidth,
       tooltipTxtContent: '',
       tooltipVisibility: 'hidden',
       tooltipMargin: 10,
@@ -329,6 +313,25 @@ export default {
     }
   },
   computed: {
+    mainTracksTotHeight() {
+      return 3 * (this.blocksDimensions.height + 3)
+    },
+    simBoxesSvgHeight() {
+      return 4 * this.blocksDimensions.height
+    },
+    similarityTrackTotHeight() {
+      return this.chromList.length * this.blocksDimensions.height
+    },
+    totSimChromIsHigherThanSvgheight() {
+      return this.similarityTrackTotHeight > this.simBoxesSvgHeight
+    },
+    tracksWrapperStyle() {
+      return {
+        display: 'grid',
+        'grid-template-rows': 'auto 1fr',
+        'row-gap': `${this.gridGapSize}px`,
+      }
+    },
     tooltipData() {
       return {
         x: this.tooltipXPos,
@@ -339,34 +342,18 @@ export default {
         offset: this.tooltipXOffset
       }
     },
-    autoComputeMatrixHeight() {
-      let heightOfMatrix;
-      if (this.pavMatrixHeight != undefined) {
-        heightOfMatrix = this.pavMatrixHeight;
-      } else {
-        let thirdOfTotalHeight = Math.floor(this.displayHeight/3);
-        heightOfMatrix = Math.min(thirdOfTotalHeight, this.heightOfTotBlocks);
-      }
-      //console.log({autoHeight: heightOfMatrix});
-      return heightOfMatrix;
-    },
-    heightOfTotBlocks() {
-      return this.blocksDimensions.height * this.genomeList.length;
-    },
-    totBlockIsHigherThanMatrixheight() {
-      return this.heightOfTotBlocks > this.autoComputeMatrixHeight;
-    },
-    blockVerticalOffsetToSliderScale() {
+    //Scale used for the slider on the right part of similarity boxes
+    simVerticalOffsetToSliderScale() {
       let scale = d3.scaleLinear() //Attaches to each threshold value a position on the slider
-        .domain([0, this.heightOfTotBlocks - this.autoComputeMatrixHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- autoComputeMatrixHeight'
-        .range([10, this.autoComputeMatrixHeight - 10]) //The scrolling bar will have the same height than the PA matrix svg, minus 2*10px
+        .domain([0, this.similarityTrackTotHeight - this.simBoxesSvgHeight]) //The offset should not allow hiding the bottom of the matrix, hence '- simBoxesSvgHeight'
+        .range([10, this.simBoxesSvgHeight - 10]) //The scrolling bar will have the same height than the simBoxes svg, minus 2*10px
         .clamp(true);
 
       return scale;
     },
     handleCyPos() {
-      console.log({cyPos: this.blockVerticalOffsetToSliderScale(this.blockOffset)});
-      return this.blockVerticalOffsetToSliderScale(this.blockOffset);
+      //console.log({cyPos: this.simVerticalOffsetToSliderScale(this.blockOffset)});
+      return this.simVerticalOffsetToSliderScale(this.blockOffset);
     },
   },
   watch: {
@@ -376,24 +363,26 @@ export default {
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
+    //TODO: get rid of the 'self' with arrow functions
     let self = this;
-    d3.select(this.$refs['pavConditionalSlider'])
+    d3.select(this.$refs['simBoxesConditionalSlider'])
       .call(d3.drag().on("start drag", function() {
-        console.log({yPosOfMouse: d3.event.y});
+        //console.log({yPosOfMouse: d3.event.y});
         self.updateBlockOffset(d3.event.y);
       }))
-      .on("mouseover", function() {self.eventFadeInRef('pavConditionalSlider')})
-      .on("mouseout", function() {self.eventFadeOutRef('pavConditionalSlider')});
+      .on("mouseover", function() {self.eventFadeInRef('simBoxesConditionalSlider')})
+      .on("mouseout", function() {self.eventFadeOutRef('simBoxesConditionalSlider')});
 
   },
   updated() {
+    //Add tooltip event to all drawn blocks only when new data are to be visualized
     if (this.tooltipEventIsApplied === true) {
       return
     }
 
     //Wait until update is fully finished
     this.$nextTick(function() {
-
+      //TODO: Replace self using arrow functions
       let self = this;
 
       //Add the mouseoer events
@@ -417,24 +406,13 @@ export default {
   },
   methods: {
     updateBlockOffset(mousePos) {
-      this.blockOffset = this.blockVerticalOffsetToSliderScale.invert(mousePos)
+      this.blockOffset = this.simVerticalOffsetToSliderScale.invert(mousePos)
     },
     applyOffset(initialPos) {
       return initialPos - this.blockOffset
     },
     ntToPx(ntAmount) {
       return ntAmount * this.displaySizeOfNt
-    },
-    calcPavBlockOpacity(pavEntry) {
-      //pavEntry can be a Number or a String (eg. a genome name)
-      if (isNaN(Number(pavEntry))) {
-        //pavEntry not being a Number --> it is a String --> it is present
-        return 1;
-      } else {
-        //pavEntry is either 0, 1 , a float in between or a higher Number
-        //if >1, opacity will be set to 1 anyway
-        return pavEntry;
-      }
     },
     FeatureWidth(data) {
       return Number(data.FeatureStop) - Number(data.FeatureStart)
@@ -455,9 +433,6 @@ export default {
     hclToRgb(h, c, l) {
       let color = d3.hcl(h,c,l);
       return `${d3.rgb(color)}`
-    },
-    XXXsomeConditionalEventXXX() {
-      //Do something
     },
     selectSvgFromRefs(refName) {
       let ref = this.$refs[refName];
@@ -576,7 +551,7 @@ export default {
           //Borders are not the same since pos of a text elt is at its bottom-left
           //y-axis has not the same origin than the svgContainer !
           minBorder = this.tooltipData.margin + this.tooltipData.height;
-          maxBorder = this.displayHeight - this.tooltipData.margin;
+          maxBorder = this.mainTracksTotHeight - this.tooltipData.margin;
 
           belowBorderPos = minBorder;
           beyondBorderPos = maxBorder;
@@ -620,4 +595,19 @@ export default {
 </script>
 
 <style>
+
+#mainTracks {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+#distributionInChroms {
+  grid-column: 1;
+  grid-row: 2;
+}
+/*
+#distributionInChroms_svg {
+  height: 100%;
+}
+*/
 </style>

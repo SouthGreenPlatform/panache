@@ -1,8 +1,9 @@
 <template>
   <div>
     <div class="row">
-      <div class="col-12">
-      <!--By default, range inputs “snap” to integer values. To change this, you can specify a step value. In the example below, we double the number of steps by using step="0.5"-->
+      <div class="col-1">-</div>
+      <div class="col-9">
+        <!--By default, range inputs “snap” to integer values. To change this, you can specify a step value. -->
         <input
           type="range"
           :id="id"
@@ -13,6 +14,7 @@
         >
         <!-- CAUTION: v-model on range element returns a String object! -->
       </div>
+      <div class="col-1">+</div>
     </div>
   </div>
 </template>
@@ -91,6 +93,10 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
+
+.row{
+  justify-content: center;
+}
 
 </style>
