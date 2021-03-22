@@ -1,7 +1,8 @@
 <template>
   <!-- The global div has to stay, it will be replaced with TheRouterView within the app -->
   <div>
-    <div id='PanacheMainView' :style="displayWrapper">
+    <!-- div id='PanacheMainView' :style="displayWrapper"-->
+    <div id='PanacheMainView' :style="mainViewWrapper">
       <OverlayedCanvas
         class='canvasMiniature'
         :chromosomeData="chromData"
@@ -27,41 +28,43 @@
         :lastNtToDisplay="lastNt"
         :trackWidth="displayWindowWidth"
       />
-      <HollowAreaTrack
-        class='zoneHighlight'
-        :coordsStartStop="filteredHollowAreas"
-        :firstNtToDisplay="firstNt"
-        :displaySizeOfNt="ntWidthInPx"
-        :svgWidth="displayWindowWidth"
-        :trackHeight="haTrackHeight"
-        :gapHeight="gridGapSize"
-        :overlapingHeight="autoComputeMatrixHeight"
+      <div id='responsivePavDiv' :style="respPavDivWrapper">
+        <HollowAreaTrack
+          class='zoneHighlight'
+          :coordsStartStop="filteredHollowAreas"
+          :firstNtToDisplay="firstNt"
+          :displaySizeOfNt="ntWidthInPx"
+          :svgWidth="displayWindowWidth"
+          :trackHeight="haTrackHeight"
+          :gapHeight="gridGapSize"
+          :overlapingHeight="autoComputeMatrixHeight"
+          />
+        <!--PavMatrixAndTracks
+          class='displayMatrix'
+          :filteredData="filteredData"
+          :genomeList="genomeList"
+          :chromList="chromNames"
+          :coreThreshold="coreThreshold"
+          :blocksDimensions="blocksDimensions"
+          :displaySizeOfNt="ntWidthInPx"
+          :displayHeight="displayWindowHeight"
+          :displayWidth="displayWindowWidth"
+          :pavMatrixHeight="autoComputeMatrixHeight"
+          :firstNtToDisplay="firstNt"
+          :colorScaleFunction="colorScaleFunction"
+          :colorScaleRainbow="colorScaleRainbow"
+          :colorScaleSimilarities="colorScaleSimilarities"
+        /-->
+        <PavMatrix
+          class='displayMatrix'
+          :genomeList="genomeList"
+          :filteredData="filteredData"
+          :firstNtToDisplay="firstNt"
+          :displaySizeOfNt="ntWidthInPx"
+          :blocksDimensions="blocksDimensions"
+          :colorScaleFunction="colorScaleFunction"
         />
-      <!--PavMatrixAndTracks
-        class='displayMatrix'
-        :filteredData="filteredData"
-        :genomeList="genomeList"
-        :chromList="chromNames"
-        :coreThreshold="coreThreshold"
-        :blocksDimensions="blocksDimensions"
-        :displaySizeOfNt="ntWidthInPx"
-        :displayHeight="displayWindowHeight"
-        :displayWidth="displayWindowWidth"
-        :pavMatrixHeight="autoComputeMatrixHeight"
-        :firstNtToDisplay="firstNt"
-        :colorScaleFunction="colorScaleFunction"
-        :colorScaleRainbow="colorScaleRainbow"
-        :colorScaleSimilarities="colorScaleSimilarities"
-      /-->
-      <PavMatrix
-        class='displayMatrix'
-        :genomeList="genomeList"
-        :filteredData="filteredData"
-        :firstNtToDisplay="firstNt"
-        :displaySizeOfNt="ntWidthInPx"
-        :blocksDimensions="blocksDimensions"
-        :colorScaleFunction="colorScaleFunction"
-      />
+      </div>
       <Tracks
         class='displayTracks'
         :chromList="chromNames"
@@ -227,7 +230,8 @@ export default {
       return this.mainTracksTotHeight + this.gridGapSize + this.allChromsTotHeight
     },
 
-    //Style object to apply on css-grid wrapper
+    //Style object to apply on css-grid wrapper on all display
+    /*
     displayWrapper() {
       return {
         display: 'grid',
@@ -244,6 +248,32 @@ export default {
         'grid-template-rows': `max-content max-content ${this.haTrackHeight}px minmax(10px, 1fr) max-content`,
         'row-gap': `${this.gridGapSize}px`,
         'padding': '0.6em',
+      }
+    },
+    */
+    //Style Object for CSS properties of main view
+    mainViewWrapper() {
+      return {
+        height: '100%',
+        width: '100%',
+        display: 'flex',
+        'flex-direction': 'column',
+        gap: `${this.gridGapSize}px`,
+        'padding': '0.6em',
+      }
+    },
+
+    //Style object to apply on css-grid wrapper of pav matrix and HATracks
+    respPavDivWrapper() {
+      return {
+        //height: `${this.allPavTotHeight}px`,
+        height: '100%',
+        width: `${this.displayWindowWidth}px`,
+        'max-height': `${this.haTrackHeight + this.gridGapSize + this.allPavTotHeight}px`,
+        'overflow-y': 'hidden',
+        display: 'grid',
+        'grid-template-rows': `${this.haTrackHeight}px 1fr`,
+        'row-gap': `${this.gridGapSize}px`, //TODO?: remove gap and its uses?
       }
     },
 
@@ -390,44 +420,66 @@ export default {
 <style scoped>
 
 .canvasMiniature {
+  flex: 0 0 auto;
+  /*
   grid-column: 1;
   grid-row: 1;
   align-self: start;
   justify-self: center;
+  */
 }
 
 .AnnotationTrack {
+  flex: 0 0 auto;
+  /*
   grid-column: 1;
   grid-row: 2;
   align-self: center;
   justify-self: center;
+  */
 }
 
 .zoneHighlight {
+  height: 100%;
   grid-column: 1;
+  grid-row: 1 / 3;
+  /*
   grid-row: 3 / 5;
   align-self: start;
   justify-self: center;
+  */
 }
 
 .displayMatrix {
+  height: 100%;
+  z-index: 2;
   grid-column: 1;
+  grid-row: 2;
+  /*
   grid-row: 4;
   align-self: start;
   justify-self: center;
-  z-index: 2;
-  height: 100%;
+  */
 }
 
 .displayTracks {
+  flex: 0 0 auto;
+  /*
   grid-column: 1;
   grid-row: 5;
   align-self: start;
   justify-self: center;
+  */
 }
 
+/*
 #PanacheMainView {
   height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.6em;
 }
+*/
 
 </style>
