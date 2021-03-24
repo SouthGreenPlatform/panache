@@ -137,7 +137,7 @@ export default {
       return {
         background: '#2125290a',
         width: this.trackWidth + 'px',
-        height: '100%',
+        //height: '100%',
         'max-height': '80px',
         'overflow-x': 'hidden',
         'overflow-y': 'auto'
