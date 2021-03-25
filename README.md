@@ -32,12 +32,15 @@ With every block ordered on a single string, it becomes easier to parse the repr
 
 ![Visual explanation of pangenome linearization](imagesReadMe/pangenomeLinearization.png?raw=true "Pangenome linearization")
 
+## Data inputs
+Examples of data inputs are provided in the public folder.
+
 ## Live demo
 
 Coming soon...
 
 ## Citation
-A paper for Panache is currently being written. The corresponding reference will be updated when available.
+A manuscript for Panache is currently in preparation. Stay tuned.
 
 ## Acknowledgement
 
