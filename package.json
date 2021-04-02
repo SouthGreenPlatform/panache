@@ -11,7 +11,7 @@
   },
   "main": "babel.config.js",
   "dependencies": {
-    "@vue/cli": "^4.5.11",
+    "@vue/cli": "^4.5.12",
     "bootstrap-vue": "^2.1.0",
     "circos": "^2.1.0",
     "core-js": "^3.6.4",

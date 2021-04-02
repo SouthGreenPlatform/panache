@@ -138,6 +138,10 @@ export default {
       nbOfGenomes: 'nbOfGenomesInDisplay',
     })
   },
+  mounted() {
+    //this.updateFullChromData(pavData); //Should be shaped as chromGroupedData Object
+    //this.updateFullGffData(gffData); //Should be shaped as groupedAnnot object
+  },
   methods: {
     //Get Actions from the store
     ...mapActions([
