@@ -7,29 +7,6 @@
       </h5>
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Files</h6>
-      </div>
-      <div class="col-12 mb-1">
-        <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
-        <!-- updateFunctionDiversity is not used yet?-->
-        <PavFileParser
-            :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
-            :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
-            :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
-            :updateFunctionsDiversity="function() { return }"
-            :updatePavData="function(pavData) { updateFullChromData(pavData) }"
-        />
-      </div>
-      <div class="col-12">
-        <GffFileParser
-            :chromList="chromNames"
-            :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
-        />
-      </div>
-    </div>
-
     <DropDownChoice
         msg='Chromosome on display'
         :choices="chromNames"
@@ -54,13 +31,6 @@
         :largestNtWidthInPx="maxNtWidthInPx"
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
-
-    <!--MatrixPavZoom
-        class='zoomSlider'
-        :lastNt="globalLastNt"
-        :displayWindowWidth="displayWindowWidth"
-        :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
-    /-->
 
     <div class="row">
       <div class="col-12">
@@ -94,22 +64,19 @@
 
 <script>
 
-import PavFileParser from '@/components/PavFileParser.vue';
-import GffFileParser from '@/components/GffFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
-//import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
 
+import * as d3 from "d3";
+
 export default {
   name: 'LocalFilter',
   components: {
-    PavFileParser,
-    GffFileParser,
     CoreThreshold,
     MatrixOptimizedZoom,
 //    MatrixPavZoom,
@@ -139,8 +106,8 @@ export default {
     })
   },
   mounted() {
-    //this.updateFullChromData(pavData); //Should be shaped as chromGroupedData Object
-    //this.updateFullGffData(gffData); //Should be shaped as groupedAnnot object
+    //Pre-load vis with bananaGenomeHub data
+    this.updateBananaData();
   },
   methods: {
     //Get Actions from the store
@@ -154,6 +121,27 @@ export default {
       'updateGenomesInDisplay',
       'updateSelectedChrom',
     ]),
+    async updateBananaData() {
+
+      //Send parameters not directly extracted from the data files
+      this.updateChromNames([
+        'chr01', 'chr02', 'chr03', 'chr04', 'chr05', 'chr06', 'chr07', 'chr08',
+        'chr09', 'chr10', 'chr11', 'chrUn_random'
+        ]);
+      this.updateSelectedChrom('chr01');
+      this.updateGenomesInDisplay([
+        'Bile', 'BSK30', 'Calcutta', 'Ensete01', 'EnseteBedadit', 'EnseteDerea',
+        'FHIA', 'Itinerans', 'Kole', 'Lidi', 'MasKirana', 'Pahang', 'PKW',
+        'Tanduk', 'TongkatLangitMaluku'
+      ]);
+
+      //Send datasets to store
+      let pavData = await d3.json('./bananachePAV_preformatted.json');
+      this.updateFullChromData(pavData);
+      let gffData = await d3.json('./bananacheGFF_preformatted.json');
+      this.updateFullGffData(gffData);
+
+    }
   }
 }
 </script>
