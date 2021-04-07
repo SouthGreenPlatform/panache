@@ -112,6 +112,7 @@ export default {
   methods: {
     //Get Actions from the store
     ...mapActions([
+      'updateDisplayLoadingStatus',
       'updateChromNames',
       'updateCoordsOfHollowAreas',
       'updateCurrentZoomLvl',
@@ -122,6 +123,9 @@ export default {
       'updateSelectedChrom',
     ]),
     async updateBananaData() {
+
+      //Enable loadingSpinner in Panache view
+      this.updateDisplayLoadingStatus();
 
       //Send parameters not directly extracted from the data files
       this.updateChromNames([
@@ -143,6 +147,9 @@ export default {
 
       this.updateFullChromData(pavData);
       this.updateFullGffData(gffData);
+
+      //Disable loadingSpinner in Panache view
+      this.updateDisplayLoadingStatus();
 
     }
   }
