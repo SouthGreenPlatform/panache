@@ -1,8 +1,6 @@
 <template>
   <div v-show="isLoading" class='text-center'>
-    <div class="spinner-border text-info" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+    <b-spinner variant='info' label='Loading...'/>
   </div>
 </template>
 
@@ -32,8 +30,8 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-.spinner-border {
-  border: 0.4em solid currentColor;
+b-spinner {
+  border: 0.4em solid;
 }
 
 </style>
