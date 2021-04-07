@@ -1,7 +1,7 @@
 <template>
   <!-- The global div has to stay, it will be replaced with TheRouterView within the app -->
   <div>
-    <LoadingSpinner class='loading-spinner' :isLoading="displayIsLoading">
+    <LoadingSpinner class='loading-spinner' :isLoading="displayIsLoading" />
     <!-- div id='PanacheMainView' :style="displayWrapper"-->
     <div id='PanacheMainView' :style="mainViewWrapper">
       <OverlayedCanvas
