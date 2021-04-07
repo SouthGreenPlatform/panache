@@ -136,9 +136,12 @@ export default {
       ]);
 
       //Send datasets to store
-      let pavData = await d3.json('./bananachePAV_preformatted.json');
+      let pavDataPromise = d3.json('./bananachePAV_preformatted.json');
+      let gffDataPromise = d3.json('./bananacheGFF_preformatted.json');
+
+      let [pavData, gffData] = await Promise.all( [pavDataPromise, gffDataPromise] );
+
       this.updateFullChromData(pavData);
-      let gffData = await d3.json('./bananacheGFF_preformatted.json');
       this.updateFullGffData(gffData);
 
     }
