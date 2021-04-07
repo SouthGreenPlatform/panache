@@ -486,7 +486,8 @@ export default {
 }
 */
 
-.loadingSpinner {
+.loading-spinner {
+  position: absolute;
   z-index: 999;
 }
 
