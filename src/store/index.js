@@ -176,6 +176,12 @@ export default new Vuex.Store({
     },
   },
   mutations: {
+    TURN_LOADING_ON(state) {
+      state.displayIsLoading = true
+    },
+    TURN_LOADING_OFF(state) {
+      state.displayIsLoading = false
+    },
     SET_CHROM_NAMES(state, payload) {
       state.chromNames = payload
     },
@@ -216,6 +222,13 @@ export default new Vuex.Store({
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
+    updateDisplayLoadingStatus({commit, state}) {
+      if (state.displayIsLoading === true) {
+        commit('TURN_LOADING_OFF')
+      } else {
+        commit('TURN_LOADING_ON')
+      }
+    },
     updateChromNames({commit}, chromList) {
       commit('SET_CHROM_NAMES', chromList)
     },

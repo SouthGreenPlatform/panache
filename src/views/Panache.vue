@@ -1,6 +1,7 @@
 <template>
   <!-- The global div has to stay, it will be replaced with TheRouterView within the app -->
   <div>
+    <LoadingSpinner class='loading-spinner' :isLoading="displayIsLoading">
     <!-- div id='PanacheMainView' :style="displayWrapper"-->
     <div id='PanacheMainView' :style="mainViewWrapper">
       <OverlayedCanvas
@@ -85,6 +86,7 @@
 <script>
 import * as d3 from 'd3';
 
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import OverlayedCanvas from '@/components/OverlayedCanvas.vue';
 //import PavMatrixAndTracks from '@/components/PavMatrixAndTracks.vue';
 import PavMatrix from '@/components/PavMatrix.vue';
@@ -97,6 +99,7 @@ import { mapState, mapGetters, mapActions } from 'vuex';
 export default {
   name: 'Panache',
   components: {
+    LoadingSpinner,
     OverlayedCanvas,
     //PavMatrixAndTracks,
     PavMatrix,
@@ -284,6 +287,7 @@ export default {
 
     //Get values out of Vuex store
     ...mapState({
+      displayIsLoading: 'displayIsLoading',
       coreValue: 'coreThresholdSlide',
       genomeList: 'genomeListInDisplay',
       chromNames: 'chromNames',
@@ -481,5 +485,9 @@ export default {
   padding: 0.6em;
 }
 */
+
+.loadingSpinner {
+  z-index: 999;
+}
 
 </style>
