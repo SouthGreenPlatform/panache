@@ -38,7 +38,12 @@ export default new Vuex.Store({
 
     displayShapeSelected: 'square',
 
-    //Function to create color scales TODO : check other components to remove it from there
+    // Values to the sort functionality
+    sortChoice: ['None', 'Name (A - Z)', 'Name (Z - A)', 'Phylogenetic tree', 'Test4'],
+    selectedSortMode: 'None',
+    newicktTreeData: [],
+
+    // Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
       if (scaleLinear) {
         return d3.scaleLinear()
@@ -176,12 +181,15 @@ export default new Vuex.Store({
   mutations: {
     SET_CHROM_NAMES(state, payload) {
       state.chromNames = payload
+      console.log(state.chromNames)
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
       state.genomeListInDisplay = payload
+      console.log(state.genomeListInDisplay)
     },
     SET_FULL_CHROM_DATA(state, payload) {
       state.fullChromData = payload
+      console.log(state.fullChromData)
     },
     SET_FULL_GFF_DATA(state, payload) {
       state.fullGffData = payload
@@ -210,6 +218,10 @@ export default new Vuex.Store({
     },
     SET_DISPLAY_SHAPE_SELECTED(state, payload) {
       state.displayShapeSelected = payload;
+    },
+    SET_SELECTED_SORT_MODE(state, payload) {
+      state.selectedSortMode = payload
+      console.log(state.selectedSortMode);
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -250,6 +262,9 @@ export default new Vuex.Store({
     },
     updateDisplayShapeSelected({commit}, shape) {
       commit('SET_DISPLAY_SHAPE_SELECTED', shape);
-    }
+    },
+    updateSelectedSortMode({commit}, selectedSortMode) {
+      commit('SET_SELECTED_SORT_MODE', selectedSortMode)
+    },
   },
 })
