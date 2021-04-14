@@ -22,10 +22,15 @@
             :updatePavData="function(pavData) { updateFullChromData(pavData) }"
         />
       </div>
-      <div class="col-12">
+      <div class="col-12 mb-1">
         <GffFileParser
             :chromList="chromNames"
             :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+        />
+      </div>
+      <div v-show="selectedSortMode === sortChoice[3]" class="col-12">
+        <NewickFileParser
+            :genomeList="genoNames"
         />
       </div>
     </div>
@@ -112,10 +117,12 @@ import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
 import SortTracks from "@/components/SortTracks";
+import NewickFileParser from "@/components/NewickFileParser";
 
 export default {
   name: 'LocalFilter',
   components: {
+    NewickFileParser,
     SortTracks,
 //    ChangeVersion,
     PavFileParser,
@@ -137,6 +144,8 @@ export default {
       firstNt: 'firstNtToDisplay',
       genoNames: 'genomeListInDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
+      sortChoice: 'sortChoice',
+      selectedSortMode: 'selectedSortMode',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
@@ -159,6 +168,8 @@ export default {
       'updateFullGffData',
       'updateGenomesInDisplay',
       'updateSelectedChrom',
+      'updateSelectedSortMode',
+      'updateNewickTreeData',
     ]),
   }
 }

@@ -193,6 +193,11 @@ export default new Vuex.Store({
     },
     SET_FULL_GFF_DATA(state, payload) {
       state.fullGffData = payload
+      console.log(state.fullGffData)
+    },
+    SET_NEWICK_TREE_DATA(state, payload) {
+      state.newicktTreeData = payload
+      console.log(state.newicktTreeData)
     },
     //ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
     //  let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
@@ -265,6 +270,10 @@ export default new Vuex.Store({
     },
     updateSelectedSortMode({commit}, selectedSortMode) {
       commit('SET_SELECTED_SORT_MODE', selectedSortMode)
+    },
+
+    updateNewickTreeData({commit}, newickTreeData) {
+      commit('SET_NEWICK_TREE_DATA', newickTreeData)
     },
   },
 })
