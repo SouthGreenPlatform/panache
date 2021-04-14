@@ -37,6 +37,13 @@
         idBonus='Chrom'
     />
 
+    <SortTracks
+        msg='Sort the tracks'
+        :sortChoice="sortChoice"
+        :updateCurrentSortMode="function(sortMode) { updateSelectedSortMode(sortMode) }"
+        idBonus='SortMode'
+    />
+
     <div class="row">
       <div class="col-12">
         <h6 class="mt-3">Display parameters</h6>
@@ -104,10 +111,13 @@ import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
+import SortTracks from "@/components/SortTracks";
 
 export default {
   name: 'LocalFilter',
   components: {
+    SortTracks,
+//    ChangeVersion,
     PavFileParser,
     GffFileParser,
     CoreThreshold,
