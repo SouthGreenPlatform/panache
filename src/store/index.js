@@ -39,10 +39,10 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
 
     // Values to the sort functionality
-    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric', 'Phylogenetic tree'],
-    genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'],
-    selectedSortMode: 'None',
-    newicktTreeData: [],
+    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric', 'Phylogenetic tree'], // Sorting methods available to sort the genomes
+    genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'], // Save of the initial order of the genomes
+    selectedSortMode: 'None', // Sorting mode by default (change when the user select an other method
+    newicktTreeData: [], // Array that contain the data exported from the Newick file uploaded
 
     // Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
