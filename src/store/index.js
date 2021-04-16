@@ -39,7 +39,8 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
 
     // Values to the sort functionality
-    sortChoice: ['None', 'Name (A - Z)', 'Name (Z - A)', 'Phylogenetic tree', 'Test4'],
+    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric', 'Phylogenetic tree'],
+    genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'],
     selectedSortMode: 'None',
     newicktTreeData: [],
 
@@ -184,8 +185,13 @@ export default new Vuex.Store({
       console.log(state.chromNames)
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
-      state.genomeListInDisplay = payload
-      console.log(state.genomeListInDisplay)
+      state.genomeListInDisplay = payload;
+      console.log("UPDATE DISPLAY : " + state.genomeListInDisplay);
+      console.log("SAVE : " + state.genomeListInDisplaySave);
+    },
+    SET_GENOMES_IN_DISPLAY_SAVE(state, payload) {
+      state.genomeListInDisplaySave = payload
+      console.log("UPDATE SAVE : " + state.genomeListInDisplaySave)
     },
     SET_FULL_CHROM_DATA(state, payload) {
       state.fullChromData = payload
@@ -235,7 +241,10 @@ export default new Vuex.Store({
       commit('SET_CHROM_NAMES', chromList)
     },
     updateGenomesInDisplay({commit}, genoList) {
-      commit('SET_GENOMES_IN_DISPLAY', genoList)
+      commit('SET_GENOMES_IN_DISPLAY', genoList);
+    },
+    updateGenomesInDisplaySave({commit}, genoList) {
+      commit('SET_GENOMES_IN_DISPLAY_SAVE', genoList)
     },
     updateFullChromData({commit}, pavData) {
       commit('SET_FULL_CHROM_DATA', pavData)
@@ -271,7 +280,6 @@ export default new Vuex.Store({
     updateSelectedSortMode({commit}, selectedSortMode) {
       commit('SET_SELECTED_SORT_MODE', selectedSortMode)
     },
-
     updateNewickTreeData({commit}, newickTreeData) {
       commit('SET_NEWICK_TREE_DATA', newickTreeData)
     },
