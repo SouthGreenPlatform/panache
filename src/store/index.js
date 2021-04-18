@@ -40,6 +40,11 @@ export default new Vuex.Store({
 
     displayShapeSelected: 'square',
 
+    // Values to the sort functionality
+    sortChoice: ['None', 'Name (A - Z)', 'Name (Z - A)', 'Phylogenetic tree', 'Test4'],
+    selectedSortMode: 'None',
+    newicktTreeData: [],
+
     //Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
       if (scaleLinear) {
@@ -183,16 +188,24 @@ export default new Vuex.Store({
       state.displayIsLoading = false
     },
     SET_CHROM_NAMES(state, payload) {
-      state.chromNames = payload
+      state.chromNames = payload;
+      console.log(state.chromNames);
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
-      state.genomeListInDisplay = payload
+      state.genomeListInDisplay = payload;
+      console.log(state.genomeListInDisplay);
     },
     SET_FULL_CHROM_DATA(state, payload) {
-      state.fullChromData = payload
+      state.fullChromData = payload;
+      console.log(state.fullChromData);
     },
     SET_FULL_GFF_DATA(state, payload) {
-      state.fullGffData = payload
+      state.fullGffData = payload;
+      console.log(state.fullGffData);
+    },
+    SET_NEWICK_TREE_DATA(state, payload) {
+      state.newicktTreeData = payload;
+      console.log(state.newicktTreeData);
     },
     //ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
     //  let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
@@ -218,6 +231,10 @@ export default new Vuex.Store({
     },
     SET_DISPLAY_SHAPE_SELECTED(state, payload) {
       state.displayShapeSelected = payload;
+    },
+    SET_SELECTED_SORT_MODE(state, payload) {
+      state.selectedSortMode = payload;
+      console.log(state.selectedSortMode);
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -265,6 +282,12 @@ export default new Vuex.Store({
     },
     updateDisplayShapeSelected({commit}, shape) {
       commit('SET_DISPLAY_SHAPE_SELECTED', shape);
-    }
+    },
+    updateSelectedSortMode({commit}, selectedSortMode) {
+      commit('SET_SELECTED_SORT_MODE', selectedSortMode)
+    },
+    updateNewickTreeData({commit}, newickTreeData) {
+      commit('SET_NEWICK_TREE_DATA', newickTreeData)
+    },
   },
 })

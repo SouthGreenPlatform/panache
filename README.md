@@ -16,7 +16,7 @@ The visualization could be served on a custom IP when specified inside the nginx
 
 ### Without Docker
 
-If you wish to use another web server directly with the production version of files instead, you will have to run ```npm install```, followed with ```npm install @vue/cli```. Finally make sure to run ```npm run build``` to have the production version files available, they will be all stored in the file called 'dist', ready to be served.
+If you wish to use another web server directly with the production version of files instead, you will have to run ```npm install```, followed with ```npm install @vue/cli```. Finally make sure to run ```npm run build``` to have the production version files available, they will be all stored in the directory called 'dist', ready to be served.
 
 ## Main features and documentation
 
@@ -32,12 +32,15 @@ With every block ordered on a single string, it becomes easier to parse the repr
 
 ![Visual explanation of pangenome linearization](imagesReadMe/pangenomeLinearization.png?raw=true "Pangenome linearization")
 
+## Data inputs
+Examples of data inputs are provided in the public folder.
+
 ## Live demo
 
 Coming soon...
 
 ## Citation
-A paper for Panache is currently being written. The corresponding reference will be updated when available.
+A manuscript for Panache is currently in preparation. Stay tuned.
 
 ## Acknowledgement
 
