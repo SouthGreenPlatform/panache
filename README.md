@@ -37,7 +37,7 @@ Examples of data inputs are provided in the public folder.
 
 ## Live demo
 
-Coming soon...
+A version of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/)
 
 ## Citation
 A manuscript for Panache is currently in preparation. Stay tuned.
