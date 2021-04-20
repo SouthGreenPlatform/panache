@@ -22,17 +22,19 @@
             :updatePavData="function(pavData) { updateFullChromData(pavData) }"
         />
       </div>
-      <div class="col-12 mb-1">
-        <GffFileParser
-            :chromList="chromNames"
-            :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
-        />
-      </div>
-      <div v-show="selectedSortMode === sortChoice[3]" class="col-12">
-        <NewickFileParser
-            :genomeList="genoNames"
-        />
-      </div>
+      <CollapseMenu>
+        <div class="mb-1">
+          <GffFileParser
+              :chromList="chromNames"
+              :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+          />
+        </div>
+        <div class="">
+          <NewickFileParser
+              :genomeList="genoNames"
+          />
+        </div>
+      </CollapseMenu>
     </div>
 
     <DropDownChoice
@@ -107,24 +109,25 @@
 <script>
 
 import PavFileParser from '@/components/PavFileParser.vue';
-import GffFileParser from '@/components/GffFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
 //import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
+import SortTracks from "@/components/SortTracks";
+import GffFileParser from "@/components/GffFileParser";
+import NewickFileParser from "@/components/NewickFileParser";
+import CollapseMenu from "@/components/CollapseMenu";
 
 import {mapState, mapGetters, mapActions} from 'vuex';
-import SortTracks from "@/components/SortTracks";
-import NewickFileParser from "@/components/NewickFileParser";
 
 export default {
   name: 'LocalFilter',
   components: {
     NewickFileParser,
+    CollapseMenu,
     SortTracks,
-//    ChangeVersion,
     PavFileParser,
     GffFileParser,
     CoreThreshold,
