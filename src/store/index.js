@@ -12,6 +12,8 @@ export default new Vuex.Store({
 
     optionPanelWidth: 300,
 
+    displayIsLoading: false, //Whether a dataset is loading
+
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
     fullChromData: [], //Chromosomal dataset
@@ -180,6 +182,12 @@ export default new Vuex.Store({
     },
   },
   mutations: {
+    TURN_LOADING_ON(state) {
+      state.displayIsLoading = true
+    },
+    TURN_LOADING_OFF(state) {
+      state.displayIsLoading = false
+    },
     SET_CHROM_NAMES(state, payload) {
       state.chromNames = payload
       console.log(state.chromNames)
@@ -237,11 +245,18 @@ export default new Vuex.Store({
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
+    updateDisplayLoadingStatus({commit, state}) {
+      if (state.displayIsLoading === true) {
+        commit('TURN_LOADING_OFF')
+      } else {
+        commit('TURN_LOADING_ON')
+      }
+    },
     updateChromNames({commit}, chromList) {
       commit('SET_CHROM_NAMES', chromList)
     },
     updateGenomesInDisplay({commit}, genoList) {
-      commit('SET_GENOMES_IN_DISPLAY', genoList);
+      commit('SET_GENOMES_IN_DISPLAY', genoList)
     },
     updateGenomesInDisplaySave({commit}, genoList) {
       commit('SET_GENOMES_IN_DISPLAY_SAVE', genoList)
