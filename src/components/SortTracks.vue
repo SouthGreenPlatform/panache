@@ -51,7 +51,8 @@ export default {
     ...mapState({
       selectedSortMode: 'selectedSortMode',
       genomeList: 'genomeListInDisplay',
-      genomeListSave: 'genomeListInDisplaySave'
+      genomeListSave: 'genomeListInDisplaySave',
+      genomeListNewickTreeUpload: 'newickTreeData'
     }),
   },
   methods: {
@@ -80,6 +81,8 @@ export default {
         } else {
           this.updateGenomesInDisplay(genomeListSorted); // Update genomeListInDisplay with array sort by alphanumerically
         }
+      } else if (this.selectedSortMode === this.sortChoice[3]) {
+        this.updateGenomesInDisplay(this.genomeListNewickTreeUpload); // Update genomeListInDisplay with array sort by order in the Newick tree created by the Newick file uploaded.
       }
     },
     ...mapActions([
