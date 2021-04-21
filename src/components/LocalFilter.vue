@@ -8,32 +8,36 @@
     </div>
 
     <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Files</h6>
-      </div>
-      <div class="col-12 mb-1">
-        <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
-        <!-- updateFunctionDiversity is not used yet?-->
-        <PavFileParser
-            :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
-            :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
-            :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
-            :updateFunctionsDiversity="function() { return }"
-            :updatePavData="function(pavData) { updateFullChromData(pavData) }"
-        />
-      </div>
-      <CollapseMenu>
-        <div class="mb-1">
-          <GffFileParser
-              :chromList="chromNames"
-              :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
-          />
-        </div>
-        <div class="">
-          <NewickFileParser
-              :genomeList="genoNames"
-          />
-        </div>
+      <CollapseMenu idCollapse='collapseOptionalUpload'>
+        <template v-slot:title>
+          Files
+        </template>
+        <template v-slot:outside>
+          <div class="mb-1">
+            <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
+            <!-- updateFunctionDiversity is not used yet?-->
+            <PavFileParser
+                :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
+                :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
+                :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
+                :updateFunctionsDiversity="function() { return }"
+                :updatePavData="function(pavData) { updateFullChromData(pavData) }"
+            />
+          </div>
+        </template>
+        <template v-slot:inside>
+          <div class="mb-1">
+            <GffFileParser
+                :chromList="chromNames"
+                :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+            />
+          </div>
+          <div class="">
+            <NewickFileParser
+                :genomeList="genoNames"
+            />
+          </div>
+        </template>
       </CollapseMenu>
     </div>
 

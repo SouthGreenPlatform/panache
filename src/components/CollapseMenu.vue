@@ -1,16 +1,21 @@
 <template>
   <div class="col-12 mb-1">
-    <b-button
-        block
-        :class="visible ? null : 'collapsed'"
-        :aria-expanded="visible ? 'true' : 'false'"
-        aria-controls="collapse-4"
-        @click="visible = !visible"
-    >
-      Optional upload
-    </b-button>
-    <b-collapse id="collapse-4" v-model="visible" class="mt-2">
-      <slot></slot>
+    <div>
+      <h6 class="mt-3 floatL"><slot name="title"></slot></h6>
+      <b-button class="buttonC"
+                :size="'md'"
+                :class="visible ? null : 'collapsed'"
+                :aria-expanded="visible ? 'true' : 'false'"
+                variant="light"
+                v-bind:aria-controls="idCollapse"
+                @click="visible = !visible"
+      >
+        {{ visible ? "–" : '+' }}
+      </b-button>
+    </div>
+    <slot name="outside"></slot>
+    <b-collapse  v-bind:id="idCollapse" v-model="visible">
+      <slot name="inside"></slot>
     </b-collapse>
   </div>
 </template>
@@ -18,6 +23,16 @@
 <script>
 
 export default {
+  props: {
+    buttonText: {
+      type: String,
+      default: "+",
+    },
+    idCollapse: {
+      type: String,
+      required: true,
+    }
+  },
   data() {
     return {
       visible: false,
@@ -28,5 +43,20 @@ export default {
 </script>
 
 <style scoped>
-
+.buttonC {
+  padding: 0px !important;
+  float: right;
+  width: 28px;
+  height: 28px;
+  margin-top: 8px;
+  color: #495057;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+}
+.floatL {
+  float: left;
+}
+#collapse {
+  margin-top: 0;
+}
 </style>
