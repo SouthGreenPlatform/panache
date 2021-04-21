@@ -41,10 +41,10 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
 
     // Values to the sort functionality
-    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric', 'Phylogenetic tree'], // Sorting methods available to sort the genomes
+    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric'], // Sorting methods available to sort the genomes
     genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'], // Save of the initial order of the genomes
     selectedSortMode: 'None', // Sorting mode by default (change when the user select an other method
-    newicktTreeData: [], // Array that contain the data exported from the Newick file uploaded
+    newickTreeData: [], // Array that contain the data exported from the Newick file uploaded
 
     // Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
@@ -193,6 +193,7 @@ export default new Vuex.Store({
       console.log(state.chromNames)
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
+      console.log("SAVE : " + state.genomeListInDisplaySave);
       state.genomeListInDisplay = payload;
       console.log("UPDATE DISPLAY : " + state.genomeListInDisplay);
       console.log("SAVE : " + state.genomeListInDisplaySave);
@@ -210,8 +211,8 @@ export default new Vuex.Store({
       console.log(state.fullGffData)
     },
     SET_NEWICK_TREE_DATA(state, payload) {
-      state.newicktTreeData = payload
-      console.log(state.newicktTreeData)
+      state.newickTreeData = payload
+      console.log(state.newickTreeData)
     },
     //ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
     //  let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
@@ -241,6 +242,11 @@ export default new Vuex.Store({
     SET_SELECTED_SORT_MODE(state, payload) {
       state.selectedSortMode = payload
       console.log(state.selectedSortMode);
+    },
+    PUSH_IN_SORT_CHOICE(state, payload) {
+      if (!state.sortChoice.includes(payload)) {
+        state.sortChoice.push(payload);
+      }
     }
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -297,6 +303,9 @@ export default new Vuex.Store({
     },
     updateNewickTreeData({commit}, newickTreeData) {
       commit('SET_NEWICK_TREE_DATA', newickTreeData)
+    },
+    pushSortModeInSortChoice({commit}, sortMode) {
+      commit('PUSH_IN_SORT_CHOICE', sortMode)
     },
   },
 })
