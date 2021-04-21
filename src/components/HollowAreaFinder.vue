@@ -574,6 +574,20 @@ export default {
 
 <style>
 
+.borderR-left {
+  border-top-left-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}
+
+.borderR-right {
+  border-top-right-radius: .25rem;
+  border-bottom-right-radius: .25rem;
+}
+
+.noBorderR {
+  border-radius: 0px !important;
+}
+
 .textLabel {
   font: 10px sans-serif;
 }
