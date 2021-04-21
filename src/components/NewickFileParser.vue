@@ -14,6 +14,8 @@
 
 <script>
 
+import {mapActions} from "vuex";
+
 export default {
   name: 'NewickFileParser',
   props: {
@@ -40,6 +42,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions ([
+        'updateNewickTreeData',
+        'pushSortModeInSortChoice',
+    ]),
     readNewickFile(event) {
       let parser = require("biojs-io-newick");
       let newickTreeData = "";
@@ -47,18 +53,22 @@ export default {
       let file = event.target.files[0];
       console.log(file);
       if (file) {
-        this.fileName = file.name;
-        let reader = new FileReader();
-        reader.addEventListener("load", () => {
-          newickTreeData = reader.result;
-          console.log(newickTreeData);
-          parsedNewickData = parser.parse_newick(newickTreeData);
-          console.log(parsedNewickData);
-          let list = this.recursiveSearchChild(parsedNewickData).reverse();
-          console.log(list);
-          this.compareNewickListToGenomeList(list);
-        });
-        reader.readAsText(file);
+        if (file.name.split('.').pop() === "nwk") {
+          this.fileName = file.name;
+          let reader = new FileReader();
+          reader.addEventListener("load", () => {
+            newickTreeData = reader.result;
+            console.log(newickTreeData);
+            parsedNewickData = parser.parse_newick(newickTreeData);
+            console.log(parsedNewickData);
+            let list = this.recursiveSearchChild(parsedNewickData).reverse();
+            console.log(list);
+            this.compareNewickListToGenomeList(list);
+          });
+          reader.readAsText(file);
+        } else {
+          alert("ERROR : Bad file extension.\nThe right extension is .nwk");
+        }
       } else {
         alert("ERROR : Unable to load the file.");
       }
@@ -84,6 +94,8 @@ export default {
       console.log(this.genomeList);
       if (this.arrayCompare(this.genomeList, list)) {
         console.log("Ready to sort !");
+        this.updateNewickTreeData(list);
+        this.pushSortModeInSortChoice( 'Phylogenetic tree');
       }
     },
     arrayCompare(list1, list2) {
