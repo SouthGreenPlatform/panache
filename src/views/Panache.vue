@@ -295,7 +295,6 @@ export default {
       firstNt: 'firstNtToDisplay',
       lastNt: 'lastNtToDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
-      colorScaleRainbow: 'pseudoRainbowColorScale',
       colorScaleSimilarities: 'greenColorScale',
       colorScaleDisp: 'blueColorScale',
       colorScaleCore: 'orangeColorScale',
@@ -304,6 +303,7 @@ export default {
     ...mapGetters({
       chromData: 'chromDataInDisplay',
       gffData: 'gffDataInDisplay',
+      colorScaleRainbow: 'positionRainbowColorScale',
       colorScaleFunction: 'colorForFunctionElement',
       displayWindowWidth: 'displayWindowWidth',
       nbOfGenomes: 'nbOfGenomesInDisplay',
