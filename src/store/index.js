@@ -33,7 +33,6 @@ export default new Vuex.Store({
 
     // Color scales used throughout the app
     //TODO : create the color scales right here
-    pseudoRainbowColorScale: d3.scaleLinear().range([d3.hcl('yellow'), d3.hcl('yellow')]), //default
     colorsForPositionColorScale: [
       [0.17642634,0.09835639,0.08618555],
       [0.18231057,0.10054915,0.08071249],
@@ -291,7 +290,7 @@ export default new Vuex.Store({
       [0.98706941,0.97563829,0.95945595],
       [0.99025795,0.97969714,0.97233822],
       [0.99339633,0.98403048,0.98290965]
-    ],
+    ], //colors that will be used for the position track
     greenColorScale: d3.scaleLinear().range([d3.hcl('green'), d3.hcl('green')]),
     blueColorScale: d3.scaleLinear().range([d3.hcl('blue'), d3.hcl('blue')]),
     orangeColorScale: d3.scaleLinear().range([d3.hcl('orange'), d3.hcl('orange')]),
@@ -396,19 +395,13 @@ export default new Vuex.Store({
       return getters.ntWidthThresholdsCouple['max'];
     },
     rgbColorsForPositionColorScale: (state) => {
-      console.log([...state.colorsForPositionColorScale.map(d => d3.rgb(Math.round(d[0]*255), Math.round(d[1]*255), Math.round(d[2]*255))) ]);
       return [...state.colorsForPositionColorScale.map(d => d3.rgb(Math.round(d[0]*255), Math.round(d[1]*255), Math.round(d[2]*255))) ];
     },
     pivotsForPosRainbow: (state, getters) => {
       return state.domainPivotsMaker(state.colorsForPositionColorScale.length, getters.lastBlockStartOfChrom);
     },
     positionRainbowColorScale: (state, getters) => {
-      let scale = state.colorScaleMaker(getters.pivotsForPosRainbow, getters.rgbColorsForPositionColorScale);
-
-      console.log('scale0', scale(0));
-      console.log('scale9000', scale(9000));
-
-      return scale;
+      return state.colorScaleMaker(getters.pivotsForPosRainbow, getters.rgbColorsForPositionColorScale);
     },
     functionDiversity: (state, getters) => {
       return [...new Set(getters.chromDataInDisplay.map( d => d['Function']))]
