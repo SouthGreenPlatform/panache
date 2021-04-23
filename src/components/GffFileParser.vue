@@ -1,10 +1,11 @@
 <template>
 
-    <FileLoader
+  <FileLoader
       :labelToDisplay="'Optional gff'"
+      :allowedExtension="['gff']"
       :idBonus="'GffFile'"
       @file-loaded="parseGffToAnnotationObjects"
-    />
+  />
 
 </template>
 

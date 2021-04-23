@@ -1,23 +1,22 @@
 <template>
-  <div class="custom-file">
-    <input
-        class='custom-file-input form-control-sm'
-        :id="`fileSelector_NewickFile`"
-        type='file'
-        @change="readNewickFile"
-    />
-    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_NewickFile`">
-      {{fileName || labelToDisplay}}
-    </label>
-  </div>
+
+  <FileLoader
+      :labelToDisplay="'Optional Newick'"
+      :allowedExtension="['nwk']"
+      :idBonus="'NewickFile'"
+      @file-loaded="readNewickFile"
+  />
+
 </template>
 
 <script>
 
 import {mapActions} from "vuex";
+import FileLoader from "@/components/FileLoader";
 
 export default {
   name: 'NewickFileParser',
+  components: {FileLoader},
   props: {
     genomeList: {
       type: Array,
@@ -26,15 +25,6 @@ export default {
     genomeListNewickTree: {
       type: Array,
     },
-    labelToDisplay: {
-      type: String,
-      default: 'Optional Newick'
-    },
-  },
-  data() {
-    return {
-      fileName: null,
-    }
   },
   computed: {
     self() {
@@ -46,32 +36,22 @@ export default {
         'updateNewickTreeData',
         'pushSortModeInSortChoice',
     ]),
-    readNewickFile(event) {
+    readNewickFile(loadedFile) {
       let parser = require("biojs-io-newick");
       let newickTreeData = "";
       let parsedNewickData = "";
-      let file = event.target.files[0];
-      console.log(file);
-      if (file) {
-        if (file.name.split('.').pop() === "nwk") {
-          this.fileName = file.name;
-          let reader = new FileReader();
-          reader.addEventListener("load", () => {
-            newickTreeData = reader.result;
-            console.log(newickTreeData);
-            parsedNewickData = parser.parse_newick(newickTreeData);
-            console.log(parsedNewickData);
-            let list = this.recursiveSearchChild(parsedNewickData).reverse();
-            console.log(list);
-            this.compareNewickListToGenomeList(list);
-          });
-          reader.readAsText(file);
-        } else {
-          alert("ERROR : Bad file extension.\nThe right extension is .nwk");
-        }
-      } else {
-        alert("ERROR : Unable to load the file.");
-      }
+      let file = loadedFile;
+      let reader = new FileReader();
+      reader.addEventListener("load", () => {
+        newickTreeData = reader.result;
+        console.log(newickTreeData);
+        parsedNewickData = parser.parse_newick(newickTreeData);
+        console.log(parsedNewickData);
+        let list = this.recursiveSearchChild(parsedNewickData).reverse();
+        console.log(list);
+        this.compareNewickListToGenomeList(list);
+      });
+      reader.readAsText(file);
     },
     recursiveSearchChild(data) {
       let listGenome = [];
