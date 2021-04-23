@@ -13,7 +13,7 @@ export default new Vuex.Store({
     optionPanelWidth: 300,
 
     displayIsLoading: false, //Whether a dataset is loading
-    fileLoaded: false,
+    fileLoaded: false, // Reflect if the main file is loaded
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
