@@ -13,6 +13,7 @@ export default new Vuex.Store({
     optionPanelWidth: 300,
 
     displayIsLoading: false, //Whether a dataset is loading
+    fileLoaded: false,
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
@@ -188,6 +189,12 @@ export default new Vuex.Store({
     TURN_LOADING_OFF(state) {
       state.displayIsLoading = false
     },
+    SET_FILE_LOADED_TRUE(state) {
+      state.fileLoaded = true
+    },
+    SET_FILE_LOADED_FALSE(state) {
+      state.fileLoaded = false
+    },
     SET_CHROM_NAMES(state, payload) {
       state.chromNames = payload
       console.log(state.chromNames)
@@ -256,6 +263,13 @@ export default new Vuex.Store({
         commit('TURN_LOADING_OFF')
       } else {
         commit('TURN_LOADING_ON')
+      }
+    },
+    updateFileLoaded({commit}, value) {
+      if (value === false) {
+        commit('SET_FILE_LOADED_FALSE')
+      } else if (value === true) {
+        commit('SET_FILE_LOADED_TRUE')
       }
     },
     updateChromNames({commit}, chromList) {

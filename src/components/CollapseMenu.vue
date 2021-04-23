@@ -3,6 +3,7 @@
     <div>
       <h6 class="mt-3 floatL"><slot name="title"></slot></h6>
       <b-button class="buttonC"
+                v-show="fileLoaded === true"
                 :size="'md'"
                 :class="visible ? null : 'collapsed'"
                 :aria-expanded="visible ? 'true' : 'false'"
@@ -22,6 +23,8 @@
 
 <script>
 
+import {mapState} from "vuex";
+
 export default {
   props: {
     buttonText: {
@@ -32,6 +35,11 @@ export default {
       type: String,
       required: true,
     }
+  },
+  computed: {
+    ...mapState({
+      fileLoaded: 'fileLoaded',
+    }),
   },
   data() {
     return {

@@ -79,6 +79,7 @@ export default {
       //Send data to store
       this.updatePavData(chromGroupedData);
       console.log('Data sent to store');
+      this.updateFileLoaded(true);
     },
     async readDsv(loadedFile, delimiter='\t') {
       console.log('Converting data to JS usable data');
@@ -228,6 +229,7 @@ export default {
     },
     ...mapActions([
       'updateGenomesInDisplaySave',
+      'updateFileLoaded'
     ]),
   },
 }
