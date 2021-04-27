@@ -6,7 +6,7 @@ Panache is a web-based interface designed for the visualization of linearized pa
 ## Live demo
 An instance of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/) where anyone can upload its own data.
 
-To see an instance with an existing dataset (Banana Pangenome by 2.	Rijzaani H et al, 2021), you can visit the [https://banana-genome-hub.southgreen.fr/content/panache](Banana Genome Hub).
+To see an instance with an existing dataset (Banana Pangenome by 2.	Rijzaani H et al, 2021), you can visit the [Banana Genome Hub](https://banana-genome-hub.southgreen.fr/content/panache).
 
 ## Citation
 Durant E, Sabot F, Conte M and Rouard M. a Web Visualizer for Linearized Pangenomes. BioRxiv.
