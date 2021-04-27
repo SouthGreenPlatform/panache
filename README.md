@@ -37,10 +37,12 @@ Examples of data inputs are provided in the public folder.
 
 ## Live demo
 
-A version of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/)
+An instance of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/) where anyone can upload its own data.
+
+To see an instance with an existing dataset (Banana Pangenome by 2.	Rijzaani H et al, 2021), you can visit the [https://banana-genome-hub.southgreen.fr/content/panache] Banana Genome Hub.
 
 ## Citation
-A manuscript for Panache is currently in preparation. Stay tuned.
+Durant E, Sabot F, Conte M and Rouard M. a Web Visualizer for Linearized Pangenomes. BioRxiv.
 
 ## Acknowledgement
 
