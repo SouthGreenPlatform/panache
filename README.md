@@ -3,6 +3,14 @@ Panache is a web-based interface designed for the visualization of linearized pa
 
 ![Snapshot of banana data in Panache](imagesReadMe/panacheBanana_clipped.png?raw=true "Banana data in Panache")
 
+## Live demo
+An instance of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/) where anyone can upload its own data.
+
+To see an instance with an existing dataset (Banana Pangenome by 2.	Rijzaani H et al, 2021), you can visit the [https://banana-genome-hub.southgreen.fr/content/panache] Banana Genome Hub.
+
+## Citation
+Durant E, Sabot F, Conte M and Rouard M. a Web Visualizer for Linearized Pangenomes. BioRxiv.
+
 ## Installation
 
 ### With Docker
@@ -35,18 +43,11 @@ With every block ordered on a single string, it becomes easier to parse the repr
 ## Data inputs
 Examples of data inputs are provided in the public folder.
 
-## Live demo
-
-An instance of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/) where anyone can upload its own data.
-
-To see an instance with an existing dataset (Banana Pangenome by 2.	Rijzaani H et al, 2021), you can visit the [https://banana-genome-hub.southgreen.fr/content/panache] Banana Genome Hub.
-
-## Citation
-Durant E, Sabot F, Conte M and Rouard M. a Web Visualizer for Linearized Pangenomes. BioRxiv.
 
 ## Acknowledgement
 
 Panache would not have come to light without the help of Romain Basset (transition to Vue JS framework) and Mel Florance (Docker container and various enhancements).
+Thank you to Gaetan Droc for setting up Panache on the Banana Genome Hub.
 
 ## License
 Panache is published under the terms of the [MIT LICENSE](./LICENSE)
