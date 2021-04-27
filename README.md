@@ -9,7 +9,7 @@ An instance of Panache is currently running at [https://panache.ird.fr/](https:/
 To see an instance with an existing dataset (Banana Pangenome by 2.	Rijzaani H et al, 2021), you can visit the [Banana Genome Hub](https://banana-genome-hub.southgreen.fr/content/panache).
 
 ## Citation
-Durant E, Sabot F, Conte M and Rouard M. a Web Visualizer for Linearized Pangenomes. BioRxiv.
+Durant Eloi, Sabot François, Conte Matthieu and Rouard Mathieu. a Web Visualizer for Linearized Pangenomes. BioRxiv.
 
 ## Installation
 
