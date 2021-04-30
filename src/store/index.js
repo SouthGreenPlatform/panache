@@ -11,6 +11,7 @@ export default new Vuex.Store({
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
 
     optionPanelWidth: 300,
+    yOffsetOfPavBlocks: 0,
 
     displayIsLoading: false, //Whether a dataset is loading
     fileLoaded: false, // Reflect if the main file is loaded
@@ -254,7 +255,10 @@ export default new Vuex.Store({
       if (!state.sortChoice.includes(payload)) {
         state.sortChoice.push(payload);
       }
-    }
+    },
+    SET_Y_OFF_SET_OF_PAV_BLOCK(state, payload) {
+      state.yOffsetOfPavBlocks = payload
+    },
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
@@ -320,6 +324,9 @@ export default new Vuex.Store({
     },
     pushSortModeInSortChoice({commit}, sortMode) {
       commit('PUSH_IN_SORT_CHOICE', sortMode)
+    },
+    updateYOffsetOfPavBlocks({commit}, size) {
+      commit('SET_Y_OFF_SET_OF_PAV_BLOCK', size)
     },
   },
 })
