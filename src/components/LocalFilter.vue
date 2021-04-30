@@ -64,16 +64,12 @@
       <NewickTree/>
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Display parameters</h6>
-      </div>
-    </div>
+    <CategoryTitle title="Display parameters"/>
 
     <!-- TODO: Extract the shape choice from the core threshold component... -->
     <CoreThreshold/>
 
-    <div class="mt-1"><small>Zoom Level</small></div>
+    <CategoryTitle title="Zoom Level"/>
 
     <MatrixOptimizedZoom
         class='zoomSlider'
@@ -89,11 +85,7 @@
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     /-->
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Hollow area finder</h6>
-      </div>
-    </div>
+    <CategoryTitle title="Hollow are finder"/>
 
     <HollowAreaFinder
         :arrayOfPanFeatures="currentChromData"
@@ -107,11 +99,7 @@
         :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
     />
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Legend</h6>
-      </div>
-    </div>
+    <CategoryTitle title="Legend"/>
 
     <PavMatrixLegend
         class="pavLegend"
@@ -121,6 +109,7 @@
 
 <script>
 
+import {mapState, mapGetters, mapActions} from 'vuex';
 import PavFileParser from '@/components/PavFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
@@ -132,13 +121,13 @@ import SortTracks from "@/components/SortTracks";
 import GffFileParser from "@/components/GffFileParser";
 import NewickFileParser from "@/components/NewickFileParser";
 import CollapseMenu from "@/components/CollapseMenu";
-
-import {mapState, mapGetters, mapActions} from 'vuex';
 import NewickTree from "@/components/NewickTree";
+import CategoryTitle from "@/components/CategoryTitle";
 
 export default {
   name: 'LocalFilter',
   components: {
+    CategoryTitle,
     NewickTree,
     NewickFileParser,
     CollapseMenu,
