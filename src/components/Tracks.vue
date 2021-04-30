@@ -145,6 +145,7 @@
 
 <script>
 import * as d3 from 'd3';
+import {mapState} from "vuex";
 
 export default {
   name: 'Tracks.vue',
@@ -313,6 +314,9 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      genomeList: 'genomeListInDisplay',
+    }),
     mainTracksTotHeight() {
       return 3 * (this.blocksDimensions.height + 3)
     },
@@ -488,7 +492,7 @@ export default {
       switch(true) { //Function that will display information depending on the selected row
 
         case ("panChrom_coreVSdispensable" === parentNodeId):
-          textToDisplay = "This block appears in " + data.presenceCounter + " selected genome(s)" //Text content
+          textToDisplay = data.presenceCounter + " genome(s) (" + Math.round((data.presenceCounter/this.genomeList.length) * 100) + "%) owns this block" //Text content
           break;
 
         case ("panChrom_rainbowed" === parentNodeId):
