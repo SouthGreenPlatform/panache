@@ -55,6 +55,15 @@
         idBonus='SortMode'
     />
 
+    <div v-show="selectedSortMode === 'Phylogenetic tree'">
+      <div class="row">
+        <div class="col-12">
+          <h6 class="mt-3">Display phylogenetic tree</h6>
+        </div>
+      </div>
+      <NewickTree/>
+    </div>
+
     <div class="row">
       <div class="col-12">
         <h6 class="mt-3">Display parameters</h6>
@@ -125,10 +134,12 @@ import NewickFileParser from "@/components/NewickFileParser";
 import CollapseMenu from "@/components/CollapseMenu";
 
 import {mapState, mapGetters, mapActions} from 'vuex';
+import NewickTree from "@/components/NewickTree";
 
 export default {
   name: 'LocalFilter',
   components: {
+    NewickTree,
     NewickFileParser,
     CollapseMenu,
     SortTracks,
