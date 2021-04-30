@@ -15,6 +15,7 @@ export default new Vuex.Store({
 
     displayIsLoading: false, //Whether a dataset is loading
     fileLoaded: false, // Reflect if the main file is loaded
+    isGffUploaded: false, // Detect if a GFF file has been uploaded
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
@@ -264,6 +265,9 @@ export default new Vuex.Store({
     SET_Y_OFF_SET_OF_PAV_BLOCK(state, payload) {
       state.yOffsetOfPavBlocks = payload
     },
+    SET_GFF_UPLOADED_TRUE(state) {
+      state.isGffUploaded = true
+    },
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
@@ -335,6 +339,11 @@ export default new Vuex.Store({
     },
     updateYOffsetOfPavBlocks({commit}, size) {
       commit('SET_Y_OFF_SET_OF_PAV_BLOCK', size)
+    },
+    updateIsGffUploadedTRUE({commit, state}) {
+      if (state.isGffUploaded === false) {
+        commit('SET_GFF_UPLOADED_TRUE')
+      }
     },
   },
 })
