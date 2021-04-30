@@ -22,7 +22,7 @@
         :colorScaleRainbow="colorScaleRainbow"
         :colorScaleSimilarities="colorScaleSimilarities"
       />
-      <AnnotationTrack
+      <AnnotationTrack v-show="isGffUploaded"
         class='annotationTrack'
         :annotToDisplay="filteredGffData"
         :firstNtToDisplay="firstNt"
@@ -291,6 +291,7 @@ export default {
       colorScaleDisp: 'blueColorScale',
       colorScaleCore: 'orangeColorScale',
       coordsOfHollowAreas: 'coordsOfHollowAreas',
+      isGffUploaded: 'isGffUploaded',
     }),
     ...mapGetters({
       chromData: 'chromDataInDisplay',

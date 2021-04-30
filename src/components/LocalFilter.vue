@@ -8,31 +8,37 @@
     </div>
 
     <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Files</h6>
-      </div>
-      <div class="col-12 mb-1">
-        <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
-        <!-- updateFunctionDiversity is not used yet?-->
-        <PavFileParser
-            :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
-            :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
-            :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
-            :updateFunctionsDiversity="function() { return }"
-            :updatePavData="function(pavData) { updateFullChromData(pavData) }"
-        />
-      </div>
-      <div class="col-12 mb-1">
-        <GffFileParser
-            :chromList="chromNames"
-            :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
-        />
-      </div>
-      <div v-show="selectedSortMode === sortChoice[3]" class="col-12">
-        <NewickFileParser
-            :genomeList="genoNames"
-        />
-      </div>
+      <CollapseMenu idCollapse='collapseOptionalUpload'>
+        <template v-slot:title>
+          Files
+        </template>
+        <template v-slot:outside>
+          <div class="mb-1">
+            <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
+            <!-- updateFunctionDiversity is not used yet?-->
+            <PavFileParser
+                :updateChromNames="function(listOfChrom) { updateChromNames(listOfChrom) }"
+                :updateDefaultChrom="function(chrom) { updateSelectedChrom(chrom) }"
+                :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
+                :updateFunctionsDiversity="function() { return }"
+                :updatePavData="function(pavData) { updateFullChromData(pavData) }"
+            />
+          </div>
+        </template>
+        <template v-slot:inside>
+          <div class="mb-1">
+            <GffFileParser
+                :chromList="chromNames"
+                :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+            />
+          </div>
+          <div class="">
+            <NewickFileParser
+                :genomeList="genoNames"
+            />
+          </div>
+        </template>
+      </CollapseMenu>
     </div>
 
     <DropDownChoice
@@ -49,16 +55,21 @@
         idBonus='SortMode'
     />
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Display parameters</h6>
+    <div v-show="selectedSortMode === 'Phylogenetic tree'">
+      <div class="row">
+        <div class="col-12">
+          <h6 class="mt-3">Display phylogenetic tree</h6>
+        </div>
       </div>
+      <NewickTree/>
     </div>
+
+    <CategoryTitle title="Display parameters"/>
 
     <!-- TODO: Extract the shape choice from the core threshold component... -->
     <CoreThreshold/>
 
-    <div class="mt-1"><small>Zoom Level</small></div>
+    <CategoryTitle title="Zoom Level"/>
 
     <MatrixOptimizedZoom
         class='zoomSlider'
@@ -74,11 +85,7 @@
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     /-->
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Hollow area finder</h6>
-      </div>
-    </div>
+    <CategoryTitle title="Hollow are finder"/>
 
     <HollowAreaFinder
         :arrayOfPanFeatures="currentChromData"
@@ -92,11 +99,7 @@
         :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
     />
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Legend</h6>
-      </div>
-    </div>
+    <CategoryTitle title="Legend"/>
 
     <PavMatrixLegend
         class="pavLegend"
@@ -106,25 +109,29 @@
 
 <script>
 
+import {mapState, mapGetters, mapActions} from 'vuex';
 import PavFileParser from '@/components/PavFileParser.vue';
-import GffFileParser from '@/components/GffFileParser.vue';
 import CoreThreshold from '@/components/CoreThreshold.vue';
 import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
 //import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
-
-import {mapState, mapGetters, mapActions} from 'vuex';
 import SortTracks from "@/components/SortTracks";
+import GffFileParser from "@/components/GffFileParser";
 import NewickFileParser from "@/components/NewickFileParser";
+import CollapseMenu from "@/components/CollapseMenu";
+import NewickTree from "@/components/NewickTree";
+import CategoryTitle from "@/components/CategoryTitle";
 
 export default {
   name: 'LocalFilter',
   components: {
+    CategoryTitle,
+    NewickTree,
     NewickFileParser,
+    CollapseMenu,
     SortTracks,
-//    ChangeVersion,
     PavFileParser,
     GffFileParser,
     CoreThreshold,

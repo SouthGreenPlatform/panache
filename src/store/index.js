@@ -11,8 +11,11 @@ export default new Vuex.Store({
     coreThresholdSlide: 85, // Minimal presence ratio to be part of core, should be turn into a % !
 
     optionPanelWidth: 300,
+    yOffsetOfPavBlocks: 0,
 
     displayIsLoading: false, //Whether a dataset is loading
+    fileLoaded: false, // Reflect if the main file is loaded
+    isGffUploaded: false, // Detect if a GFF file has been uploaded
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
 
@@ -298,11 +301,13 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
 
     // Values to the sort functionality
-    sortChoice: ['None', 'Name (A - Z)', 'Name (Z - A)', 'Phylogenetic tree', 'Test4'],
-    selectedSortMode: 'None',
-    newicktTreeData: [],
+    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric'], // Sorting methods available to sort the genomes
+    genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'], // Save of the initial order of the genomes
+    selectedSortMode: 'None', // Sorting mode by default (change when the user select an other method
+    newickTreeDataString: "", // Value extracted from the Newick file uploaded
+    newickTreeData: [], // Array that contain the data exported from the Newick file uploaded
 
-    //Function to create color scales TODO : check other components to remove it from there
+    // Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
       if (scaleLinear) {
         return d3.scaleLinear()
@@ -459,25 +464,41 @@ export default new Vuex.Store({
     TURN_LOADING_OFF(state) {
       state.displayIsLoading = false
     },
+    SET_FILE_LOADED_TRUE(state) {
+      state.fileLoaded = true
+    },
+    SET_FILE_LOADED_FALSE(state) {
+      state.fileLoaded = false
+    },
     SET_CHROM_NAMES(state, payload) {
-      state.chromNames = payload;
-      console.log(state.chromNames);
+      state.chromNames = payload
+      console.log(state.chromNames)
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
-      state.genomeListInDisplay = payload;
-      console.log(state.genomeListInDisplay);
+      console.log("SAVE : " + state.genomeListInDisplaySave);
+      state.genomeListInDisplay = [...payload];
+      console.log("UPDATE DISPLAY : " + state.genomeListInDisplay);
+      console.log("SAVE : " + state.genomeListInDisplaySave);
+    },
+    SET_GENOMES_IN_DISPLAY_SAVE(state, payload) {
+      state.genomeListInDisplaySave = [...payload]
+      console.log("UPDATE SAVE : " + state.genomeListInDisplaySave)
     },
     SET_FULL_CHROM_DATA(state, payload) {
-      state.fullChromData = payload;
-      console.log(state.fullChromData);
+      state.fullChromData = payload
+      console.log(state.fullChromData)
     },
     SET_FULL_GFF_DATA(state, payload) {
-      state.fullGffData = payload;
-      console.log(state.fullGffData);
+      state.fullGffData = payload
+      console.log(state.fullGffData)
     },
     SET_NEWICK_TREE_DATA(state, payload) {
-      state.newicktTreeData = payload;
-      console.log(state.newicktTreeData);
+      state.newickTreeData = payload
+      console.log(state.newickTreeData)
+    },
+    SET_NEWICK_TREE_DATA_STRING(state, payload) {
+      state.newickTreeDataString = payload
+      console.log(state.newickTreeDataString)
     },
     //ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
     //  let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
@@ -505,9 +526,20 @@ export default new Vuex.Store({
       state.displayShapeSelected = payload;
     },
     SET_SELECTED_SORT_MODE(state, payload) {
-      state.selectedSortMode = payload;
+      state.selectedSortMode = payload
       console.log(state.selectedSortMode);
-    }
+    },
+    PUSH_IN_SORT_CHOICE(state, payload) {
+      if (!state.sortChoice.includes(payload)) {
+        state.sortChoice.push(payload);
+      }
+    },
+    SET_Y_OFF_SET_OF_PAV_BLOCK(state, payload) {
+      state.yOffsetOfPavBlocks = payload
+    },
+    SET_GFF_UPLOADED_TRUE(state) {
+      state.isGffUploaded = true
+    },
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
@@ -518,11 +550,21 @@ export default new Vuex.Store({
         commit('TURN_LOADING_ON')
       }
     },
+    updateFileLoaded({commit}, value) {
+      if (value === false) {
+        commit('SET_FILE_LOADED_FALSE')
+      } else if (value === true) {
+        commit('SET_FILE_LOADED_TRUE')
+      }
+    },
     updateChromNames({commit}, chromList) {
       commit('SET_CHROM_NAMES', chromList)
     },
     updateGenomesInDisplay({commit}, genoList) {
       commit('SET_GENOMES_IN_DISPLAY', genoList)
+    },
+    updateGenomesInDisplaySave({commit}, genoList) {
+      commit('SET_GENOMES_IN_DISPLAY_SAVE', genoList)
     },
     updateFullChromData({commit}, pavData) {
       commit('SET_FULL_CHROM_DATA', pavData)
@@ -560,6 +602,20 @@ export default new Vuex.Store({
     },
     updateNewickTreeData({commit}, newickTreeData) {
       commit('SET_NEWICK_TREE_DATA', newickTreeData)
+    },
+    updateNewickTreeDataString({commit}, newickTreeDataString) {
+      commit('SET_NEWICK_TREE_DATA_STRING', newickTreeDataString)
+    },
+    pushSortModeInSortChoice({commit}, sortMode) {
+      commit('PUSH_IN_SORT_CHOICE', sortMode)
+    },
+    updateYOffsetOfPavBlocks({commit}, size) {
+      commit('SET_Y_OFF_SET_OF_PAV_BLOCK', size)
+    },
+    updateIsGffUploadedTRUE({commit, state}) {
+      if (state.isGffUploaded === false) {
+        commit('SET_GFF_UPLOADED_TRUE')
+      }
     },
   },
 })

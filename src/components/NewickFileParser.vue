@@ -1,33 +1,30 @@
 <template>
 
-    <FileLoader
+  <FileLoader
       :labelToDisplay="'Optional Newick'"
+      :allowedExtension="['nwk']"
       :idBonus="'NewickFile'"
-      @file-loaded="parseFileToNewickObjects"
-    />
+      @file-loaded="readNewickFile"
+  />
 
 </template>
 
 <script>
-import FileLoader from '@/components/FileLoader.vue';
 
-import * as d3 from "d3";
+import {mapActions} from "vuex";
+import FileLoader from "@/components/FileLoader";
 
 export default {
   name: 'NewickFileParser',
-  components: {
-    FileLoader,
-  },
+  components: {FileLoader},
   props: {
     genomeList: {
       type: Array,
       required: true
     },
-  },
-  data() {
-    return {
-
-    }
+    genomeListNewickTree: {
+      type: Array,
+    },
   },
   computed: {
     self() {
@@ -35,61 +32,72 @@ export default {
     }
   },
   methods: {
-    parseFileToNewickObjects: async function(newickFile) {
-
-      // eslint-disable-next-line no-undef, no-unused-vars
-      let tree = new Newick("test", []);
-      console.log(tree);
-      let newickData = await this.readNewick(newickFile);
-
-      console.log(newickData);
+    ...mapActions ([
+        'updateNewickTreeData',
+        'updateNewickTreeDataString',
+        'pushSortModeInSortChoice',
+    ]),
+    readNewickFile(loadedFile) {
+      let parser = require("biojs-io-newick");
+      let newickTreeData = "";
+      let parsedNewickData = "";
+      let file = loadedFile;
+      let reader = new FileReader();
+      reader.addEventListener("load", () => {
+        newickTreeData = reader.result;
+        console.log(newickTreeData);
+        this.updateNewickTreeDataString(newickTreeData);
+        parsedNewickData = parser.parse_newick(newickTreeData);
+        console.log(parsedNewickData);
+        //let list = this.recursiveSearchChild(parsedNewickData).reverse();
+        let list = this.recursiveSearchChild(parsedNewickData);
+        console.log(list);
+        this.compareNewickListToGenomeList(list);
+      });
+      reader.readAsText(file);
     },
-    // Turns newickFile to array of objects
-    readNewick: async function(newickFile) {
-      console.log('Converting Newick file to usable data');
-
-      let dataURL = window.URL.createObjectURL(newickFile);
-
-      //CAUTION : I must use the fetch API first, not the dsv one
-      //let dataPromise = d3.tsvParseRows(dataURL, this.returnDisplayableGffObject);
-      //TODO: check if I could extract the dsv directly from a file object instead of dataURL
-      let blobPromise = d3.blob(dataURL);
-      let blob = await blobPromise;
-      let textBlob = await blob.text();
-      //console.log({textBlob});
-
-      let dataPromise = d3.tsvParseRows(textBlob, this.returnDisplayableGffObject);
-      let data = await dataPromise;
-
-      //Removes first line (not useful if chrom filtering is applied)
-      //data.shift();
-
-      console.log('Newick data available');
-
-      return data;
+    recursiveSearchChild(data) {
+      let listGenome = [];
+      if (data !== null && data !== undefined) {
+        this.recursiveSearchChildAux(listGenome, data);
+        return listGenome;
+      }
     },
-    returnDisplayableGffObject: function(newickArray) {
-      let chromName = newickArray[0];
-      if (this.chromList.includes(chromName)) {
-        return this.turnLineIntoObject(newickArray)
+    recursiveSearchChildAux(list, data) {
+      if (data !== null && data !== undefined && data.children !== undefined) {
+        for (let i = 0; i < data.children.length; i++) {
+          this.recursiveSearchChildAux(list, data.children[i]);
+          if (data.children[i].name !== "") {
+            list.push(data.children[i].name);
+          }
+        }
+      }
+    },
+    compareNewickListToGenomeList(list) {
+      console.log(this.genomeList);
+      if (this.arrayCompare(this.genomeList, list)) {
+        console.log("Ready to sort !");
+        this.updateNewickTreeData(list);
+        this.pushSortModeInSortChoice( 'Phylogenetic tree');
+      }
+    },
+    arrayCompare(list1, list2) {
+      if (Array.isArray(list1) && Array.isArray(list2) && list1.length === list2.length) { // Verify that the two parameters are Array and that they have the same length
+        // Concatenate and sort the Array to have the same order in both of them
+        let array1 = list1.concat().sort();
+        let array2 = list2.concat().sort();
+
+        // Compare elements in each list one by one
+        for (let i = 0; i < array1.length; i++) {
+          if (array2[i] !== array2[i]) { // If not equals
+            return false;
+          }
+        }
+        return true;
       } else {
-        //Nothing
+        return false;
       }
-    },
-    //Extracts gff columns as objects
-    turnLineIntoObject: function(newickArray) {
-      return {
-        seqname: newickArray[0],
-        source: newickArray[1],
-        feature: newickArray[2],
-        start: this.startPos_oneBasedToZeroBased(+newickArray[3]), //Start Pos converted from 1-based (gff) to 0-based; converted to Number
-        end: +newickArray[4], //No coords conversion needed, 1-based and 0-based stops are the same; converted to Number
-        score: newickArray[5],
-        strand: +`${newickArray[6]}1`,
-        frame: newickArray[7],
-        attribute: newickArray[8],
-      }
-    },
+    }
   },
 }
 </script>

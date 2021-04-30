@@ -7,7 +7,7 @@
     </div>
 
     <div class="mb-1 col-12">
-      <select :id="`dropDownButton_${idBonus}`" :ref="`dropDownButton`" @change="setChosen" class="form-control form-control-sm">
+      <select :id="`dropDownButton_${idBonus}`" :ref="`dropDownButton`" @change="sort" class="form-control form-control-sm">
         <option v-for="choice in sortChoice" :key="choice" :value="choice">{{ choice }}</option>
       </select>
     </div>
@@ -36,7 +36,7 @@ export default {
     },
     sortChoice: {
       type: Array,
-      default: () => ['']
+      required: true,
     },
     updateCurrentSortMode: {
       type: Function,
@@ -51,41 +51,39 @@ export default {
     ...mapState({
       selectedSortMode: 'selectedSortMode',
       genomeList: 'genomeListInDisplay',
+      genomeListSave: 'genomeListInDisplaySave',
+      genomeListNewickTreeUpload: 'newickTreeData'
     }),
   },
   methods: {
-    setChosen() {
-      let value = d3.select(this.$refs['dropDownButton']).node().value;
-      this.updateCurrentSortMode(value);
-      // eslint-disable-next-line no-undef
-      /*for (let i = 0; i < this.sortChoice.length; i++) {
-        console.log(this.sortChoice[i]);
-      }*/
-      if (this.selectedSortMode === this.sortChoice[1]) {
-        this.sortAZ();
-        // eslint-disable-next-line no-undef
-      } else if (this.selectedSortMode === this.sortChoice[2]) {
-        this.sortZA()
+    /**
+     *  Sorting method who sort the array genomeListInDisplay in function of the choice in input dropDownButton_SortMode
+     *  There is 4 sorting mode at the moment :
+     *  - None (position by default) : choosing it will restore a save of initial order of the genome from the file uploaded.
+     *  - Alphanumerically : sort by letters and numbers ("a" before "b" and "5" before "13" for example).
+     *  - Reverse alphanumerically : its the inverse of the one before.
+     *  - By phylogenetic tree : will allow the user to upload a Newick file that is a tree of link between the genomes.
+     */
+    sort() {
+      let value = d3.select(this.$refs['dropDownButton']).node().value; // Get the value chosen by the user
+      this.updateCurrentSortMode(value); // Update the sorting type
+      if (this.selectedSortMode === this.sortChoice[0]) { // If the choice of sort is "None"
+        this.updateGenomesInDisplay(this.genomeListSave); // Use the save to reload the inital order
+        //console.log("CHOICE NONE SAVE : " + this.genomeListSave);
+      } else if (this.selectedSortMode === this.sortChoice[1] || this.selectedSortMode === this.sortChoice[2]) { // If the choice of sort is "Alphanumerically" or "Reverse alphanumerically"
+        let genomeListSorted = [];
+        genomeListSorted = this.genomeList; // We make a copy of this list to avoid any issue
+        genomeListSorted.sort(function (a,b) {
+          return a.localeCompare(b, 'en', { numeric: true }); // We compare the letters and numbers (uppercase are treated as lowercase )
+        });
+        if (this.selectedSortMode === this.sortChoice[2]) { // If the choice of sort is "Reverse alphanumerically"
+          this.updateGenomesInDisplay(genomeListSorted.reverse()); // Reverse the array previously made and update genomeListInDisplay with it
+        } else {
+          this.updateGenomesInDisplay(genomeListSorted); // Update genomeListInDisplay with array sort by alphanumerically
+        }
+      } else if (this.selectedSortMode === this.sortChoice[3]) {
+        this.updateGenomesInDisplay(this.genomeListNewickTreeUpload); // Update genomeListInDisplay with array sort by order in the Newick tree created by the Newick file uploaded.
       }
-    },
-    sortAZ() {
-      // eslint-disable-next-line no-unused-vars
-      let genomeListSorted = [];
-      genomeListSorted = this.genomeList;
-      genomeListSorted.sort(function (a, b) {
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-      });
-      this.updateGenomesInDisplay(genomeListSorted)
-      //console.log(this.genomeList);
-    },
-    sortZA() {
-      let genomeListSorted = [];
-      genomeListSorted = this.genomeList;
-      genomeListSorted.sort(function (a, b) {
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-      }).reverse();
-      this.updateGenomesInDisplay(genomeListSorted)
-      //console.log(this.genomeList);
     },
     ...mapActions([
       'updateGenomesInDisplay',

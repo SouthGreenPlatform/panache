@@ -36,76 +36,78 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <div class="alert alert-info p-1 text-center">
-          <small>There are <b>{{ nbOfRegionsFound }}</b> regions matching these criteria</small>
-        </div>
-      </div>
-    </div>
-
-    <div class="row text-center">
-      <div class="col-6 border-right pb-2">
-        <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsBefore }}</h6>
-        <small>Before</small>
-      </div>
-      <div class="col-6">
-        <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsAfter }}</h6>
-        <small>After</small>
-      </div>
-    </div>
-    <hr class="mt-0 mb-2">
-    <div class="row text-center">
-      <div class="col-12">
-        <h6 class="mb-0 font-weight-bold">{{ targetedPosNt }}</h6>
-        <small>Targeted position</small>
-      </div>
-    </div>
-
-    <div class="row mt-2">
-      <div class="col-6 pr-0">
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
-                @click="skipBackward"
-                :disabled="leftmostAreaIsReached">
-              <b-icon icon="skip-backward-fill"></b-icon>
-            </button>
-          </div>
-          <div class="input-group-text distance-area-msg">
-            <small>{{ distanceToPreviousAreaMsg }}</small>
-          </div>
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
-                @click="goBackward"
-                :disabled="leftmostAreaIsReached">
-              <b-icon icon="play-fill" rotate="180"></b-icon>
-            </button>
+    <div v-show="!(paramAbsenceRate === 0 && paramConsecutiveBlock === 0)">
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-info p-1 text-center">
+            <small>There are <b>{{ nbOfRegionsFound }}</b> regions matching these criteria</small>
           </div>
         </div>
       </div>
-      <div class="col-6 pl-0">
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
-                @click="goForward"
-                :disabled="rightmostAreaIsReached">
-              <b-icon icon="play-fill"></b-icon>
-            </button>
+
+      <div class="row text-center">
+        <div class="col-6 border-right pb-2">
+          <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsBefore }}</h6>
+          <small>Before</small>
+        </div>
+        <div class="col-6">
+          <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsAfter }}</h6>
+          <small>After</small>
+        </div>
+      </div>
+      <hr class="mt-0 mb-2">
+      <div class="row text-center">
+        <div class="col-12">
+          <h6 class="mb-0 font-weight-bold">{{ targetedPosNt }}</h6>
+          <small>Targeted position</small>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-6 pr-0">
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
+                  @click="skipBackward"
+                  :disabled="leftmostAreaIsReached">
+                <b-icon icon="skip-backward-fill"></b-icon>
+              </button>
+            </div>
+            <div class="input-group-text distance-area-msg">
+              <small>{{ distanceToPreviousAreaMsg }}</small>
+            </div>
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
+                  @click="goBackward"
+                  :disabled="leftmostAreaIsReached">
+                <b-icon icon="play-fill" rotate="180"></b-icon>
+              </button>
+            </div>
           </div>
-          <div class="input-group-text distance-area-msg">
-            <small>{{ distanceToNextAreaMsg }}</small>
-          </div>
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
-                @click="skipForward"
-                :disabled="rightmostAreaIsReached">
-              <b-icon icon="skip-forward-fill"></b-icon>
-            </button>
+        </div>
+        <div class="col-6 pl-0">
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                  @click="goForward"
+                  :disabled="rightmostAreaIsReached">
+                <b-icon icon="play-fill"></b-icon>
+              </button>
+            </div>
+            <div class="input-group-text distance-area-msg">
+              <small>{{ distanceToNextAreaMsg }}</small>
+            </div>
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                  @click="skipForward"
+                  :disabled="rightmostAreaIsReached">
+                <b-icon icon="skip-forward-fill"></b-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -573,6 +575,20 @@ export default {
 
 
 <style>
+
+.borderR-left {
+  border-top-left-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}
+
+.borderR-right {
+  border-top-right-radius: .25rem;
+  border-bottom-right-radius: .25rem;
+}
+
+.noBorderR {
+  border-radius: 0px !important;
+}
 
 .textLabel {
   font: 10px sans-serif;

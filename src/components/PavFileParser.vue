@@ -6,6 +6,7 @@
 import FileLoader from '@/components/FileLoader.vue';
 
 import * as d3 from "d3";
+import {mapActions} from "vuex";
 
 export default {
   name: 'PavFileParser',
@@ -60,6 +61,8 @@ export default {
       //assuming it is the PAV part.
       let INITIAL_GENOMES_NAMES = Object.getOwnPropertyNames(pavData[0]).slice(6,);
       this.updateGenoNames(INITIAL_GENOMES_NAMES);
+      let INITIAL_GENOMES_NAMES_SAVE = Object.getOwnPropertyNames(pavData[0]).slice(6,);
+      this.updateGenomesInDisplaySave(INITIAL_GENOMES_NAMES_SAVE);
 
       //Defines the list of functions used
       // CAUTION IT WILL WORK DIFFERENTLY WITH TRUE GO TERMS!!!
@@ -76,6 +79,7 @@ export default {
       //Send data to store
       this.updatePavData(chromGroupedData);
       console.log('Data sent to store');
+      this.updateFileLoaded(true);
     },
     async readDsv(loadedFile, delimiter='\t') {
       console.log('Converting data to JS usable data');
@@ -223,6 +227,10 @@ export default {
       //}
       return d3.group(iterable, d => d[keyToNest])
     },
+    ...mapActions([
+      'updateGenomesInDisplaySave',
+      'updateFileLoaded'
+    ]),
   },
 }
 </script>

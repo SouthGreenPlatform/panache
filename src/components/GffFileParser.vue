@@ -1,10 +1,11 @@
 <template>
 
-    <FileLoader
+  <FileLoader
       :labelToDisplay="'Optional gff'"
+      :allowedExtension="['gff']"
       :idBonus="'GffFile'"
       @file-loaded="parseGffToAnnotationObjects"
-    />
+  />
 
 </template>
 
@@ -12,6 +13,7 @@
 import FileLoader from '@/components/FileLoader.vue';
 
 import * as d3 from "d3";
+import {mapActions} from "vuex";
 
 export default {
   name: 'GffFileParser',
@@ -41,6 +43,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+       'updateIsGffUploadedTRUE'
+    ]),
     parseGffToAnnotationObjects: async function(gffFile) {
 
       //console.log({gffFile});
@@ -161,7 +166,7 @@ export default {
       //Stores annotation Array within the App
       //console.log({groupedAnnot});
       this.updateAnnotationData(groupedAnnot);
-
+      this.updateIsGffUploadedTRUE();
     },
     //Turns gffFile to array of objects
     readTsv: async function(gffFile) {
