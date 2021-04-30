@@ -34,6 +34,7 @@ export default {
   methods: {
     ...mapActions ([
         'updateNewickTreeData',
+        'updateNewickTreeDataString',
         'pushSortModeInSortChoice',
     ]),
     readNewickFile(loadedFile) {
@@ -45,9 +46,11 @@ export default {
       reader.addEventListener("load", () => {
         newickTreeData = reader.result;
         console.log(newickTreeData);
+        this.updateNewickTreeDataString(newickTreeData);
         parsedNewickData = parser.parse_newick(newickTreeData);
         console.log(parsedNewickData);
-        let list = this.recursiveSearchChild(parsedNewickData).reverse();
+        //let list = this.recursiveSearchChild(parsedNewickData).reverse();
+        let list = this.recursiveSearchChild(parsedNewickData);
         console.log(list);
         this.compareNewickListToGenomeList(list);
       });
