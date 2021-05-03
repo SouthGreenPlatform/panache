@@ -2,6 +2,7 @@
   <div class="custom-file">
     <input
         class='custom-file-input form-control-sm'
+        :disabled="isNewickTreeDisplayed"
         :id="`fileSelector_${idBonus}`"
         type='file'
         @change="checkExtensionFile"
@@ -28,6 +29,8 @@
 <script>
 //import * as d3 from "d3";
 
+import {mapState} from "vuex";
+
 export default {
   name: 'FileLoader',
   props: {
@@ -41,6 +44,11 @@ export default {
     allowedExtension: {
       type: Array,
     }
+  },
+  computed: {
+    ...mapState({
+      isNewickTreeDisplayed: 'isNewickTreeDisplayed',
+    }),
   },
   data() {
     return {

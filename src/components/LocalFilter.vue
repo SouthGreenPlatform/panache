@@ -56,11 +56,7 @@
     />
 
     <div v-show="selectedSortMode === 'Phylogenetic tree'">
-      <div class="row">
-        <div class="col-12">
-          <h6 class="mt-3">Display phylogenetic tree</h6>
-        </div>
-      </div>
+      <CategoryTitle title="Display phylogenetic tree"/>
       <NewickTree/>
     </div>
 
@@ -85,7 +81,7 @@
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     /-->
 
-    <CategoryTitle title="Hollow are finder"/>
+    <CategoryTitle title="Hollow area finder"/>
 
     <HollowAreaFinder
         :arrayOfPanFeatures="currentChromData"
