@@ -74,7 +74,7 @@
                 <b-icon icon="skip-backward-fill"></b-icon>
               </button>
             </div>
-            <div class="input-group-text distance-area-msg">
+            <div class="input-group-text distance-area-msg noBorderRadius">
               <small>{{ distanceToPreviousAreaMsg }}</small>
             </div>
             <div class="input-group-prepend">
@@ -92,17 +92,19 @@
             <div class="input-group-prepend">
               <button
                   :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                  class="noBorderRadius"
                   @click="goForward"
                   :disabled="rightmostAreaIsReached">
                 <b-icon icon="play-fill"></b-icon>
               </button>
             </div>
-            <div class="input-group-text distance-area-msg">
+            <div class="input-group-text distance-area-msg noBorderRadius">
               <small>{{ distanceToNextAreaMsg }}</small>
             </div>
             <div class="input-group-prepend">
               <button
                   :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                  class="borderRadius-right"
                   @click="skipForward"
                   :disabled="rightmostAreaIsReached">
                 <b-icon icon="skip-forward-fill"></b-icon>
@@ -576,17 +578,17 @@ export default {
 
 <style>
 
-.borderR-left {
+.borderRadius-left {
   border-top-left-radius: .25rem;
   border-bottom-left-radius: .25rem;
 }
 
-.borderR-right {
-  border-top-right-radius: .25rem;
-  border-bottom-right-radius: .25rem;
+.borderRadius-right {
+  border-top-right-radius: .25rem !important;
+  border-bottom-right-radius: .25rem !important;
 }
 
-.noBorderR {
+.noBorderRadius {
   border-radius: 0px !important;
 }
 

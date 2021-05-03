@@ -1,11 +1,11 @@
 <template>
   <div>
-    <b-button class="buttonNT" block variant="light" @click="displayNewickTree">{{ displayed ? "Hide newick tree" : "Display newick tree" }}</b-button>
+    <b-button id="newickTreeDisplayButton" class="buttonNT" :class="isNewickTreeDisplayed ? 'newickDisplayed' : null" block variant="light" @click="displayNewickTree">{{ displayed ? "Hide newick tree" : "Display newick tree" }}</b-button>
   </div>
 </template>
 
 <script>
-  import {mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
   import treeLib from '@/plugins/treelib';
 
   export default {
@@ -26,14 +26,19 @@
         newickTreeDataString: 'newickTreeDataString',
         genomeList: 'genomeListInDisplay',
         blockOffset: 'yOffsetOfPavBlocks',
+        isNewickTreeDisplayed: 'isNewickTreeDisplayed',
       }),
     },
     methods: {
+      ...mapActions([
+          'updateIsNewickTreeDisplayed',
+      ]),
       /**
        * Function that switch the data named displayed.
        */
       updateDisplayed() {
         this.displayed = !this.displayed;
+        this.updateIsNewickTreeDisplayed();
       },
       /**
        * Function that display or hide the Newick tree in function of its current state of display.
@@ -102,9 +107,35 @@
 </script>
 
 <style scoped>
+
 .buttonNT {
   color: #495057;
   background-color: #e9ecef;
   border: 1px solid #ced4da;
 }
+
+.newickDisplayed {
+  box-shadow: 0 0 5px 2px rgba(255, 0, 0, 0.67);
+}
+
+.newickDisplayedPulse {
+  cursor: pointer;
+  -webkit-animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+  -moz-animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+  -ms-animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+  animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+.newickDisplayedPulse:hover {
+  -webkit-animation: none;
+  -moz-animation: none;
+  -ms-animation: none;
+  animation: none;
+}
+
+@-webkit-keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+@-moz-keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+@-ms-keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+@keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+
 </style>

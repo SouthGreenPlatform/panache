@@ -306,6 +306,7 @@ export default new Vuex.Store({
     selectedSortMode: 'None', // Sorting mode by default (change when the user select an other method
     newickTreeDataString: "", // Value extracted from the Newick file uploaded
     newickTreeData: [], // Array that contain the data exported from the Newick file uploaded
+    isNewickTreeDisplayed: false, // Detect if the Newick tree is displayed
 
     // Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
@@ -475,7 +476,6 @@ export default new Vuex.Store({
       console.log(state.chromNames)
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
-      console.log("SAVE : " + state.genomeListInDisplaySave);
       state.genomeListInDisplay = [...payload];
       console.log("UPDATE DISPLAY : " + state.genomeListInDisplay);
       console.log("SAVE : " + state.genomeListInDisplaySave);
@@ -539,6 +539,12 @@ export default new Vuex.Store({
     },
     SET_GFF_UPLOADED_TRUE(state) {
       state.isGffUploaded = true
+    },
+    TURN_NEWICK_TREE_DISPLAYED_ON(state) {
+      state.isNewickTreeDisplayed = true
+    },
+    TURN_NEWICK_TREE_DISPLAYED_OFF(state) {
+      state.isNewickTreeDisplayed = false
     },
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -615,6 +621,13 @@ export default new Vuex.Store({
     updateIsGffUploadedTRUE({commit, state}) {
       if (state.isGffUploaded === false) {
         commit('SET_GFF_UPLOADED_TRUE')
+      }
+    },
+    updateIsNewickTreeDisplayed({commit, state}) {
+      if (state.isNewickTreeDisplayed === true) {
+        commit('TURN_NEWICK_TREE_DISPLAYED_OFF')
+      } else {
+        commit('TURN_NEWICK_TREE_DISPLAYED_ON')
       }
     },
   },
