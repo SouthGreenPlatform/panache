@@ -7,7 +7,7 @@
     </div>
 
     <div class="mb-1 col-12">
-      <select :id="`dropDownButton_${idBonus}`" :disabled="isNewickTreeDisplayed" :ref="`dropDownButton`" @change="sort" @click="alertNewick" class="form-control form-control-sm">
+      <select :id="`dropDownButton_${idBonus}`" :disabled="isNewickTreeDisplayed" :ref="`dropDownButton`" @change="sort" class="form-control form-control-sm">
         <option v-for="choice in sortChoice" :key="choice" :value="choice">{{ choice }}</option>
       </select>
     </div>
