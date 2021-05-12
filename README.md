@@ -41,7 +41,7 @@ With every block ordered on a single string, it becomes easier to parse the repr
 ![Visual explanation of pangenome linearization](imagesReadMe/pangenomeLinearization.png?raw=true "Pangenome linearization")
 
 ## Data inputs
-Examples of data inputs are provided in the public folder.
+File examples can be find in the `public` folder, and detailed information are available in the [Files and Formats](https://github.com/SouthGreenPlatform/panache/wiki/Files-&-formats) section of the wiki
 
 
 ## Acknowledgement
