@@ -43,6 +43,9 @@ With every block ordered on a single string, it becomes easier to parse the repr
 ## Data inputs
 File examples can be find in the `public` folder, and detailed information are available in the [Files and Formats](https://github.com/SouthGreenPlatform/panache/wiki/Files-&-formats) section of the wiki
 
+## Full Documentation
+
+See the [Wiki](https://github.com/SouthGreenPlatform/panache/wiki) for full documentation, examples and other information.
 
 ## Acknowledgement
 
