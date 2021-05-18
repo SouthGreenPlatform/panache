@@ -18,6 +18,8 @@ export default new Vuex.Store({
     isGffUploaded: false, // Detect if a GFF file has been uploaded
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
+    geneList: new Map(), // List of every gene present in the genomes in display
+    geneListFilter: new Map(),
 
     fullChromData: [], //Chromosomal dataset
     fullGffData: [], //Gff linked to the displayed pav data
@@ -484,13 +486,48 @@ export default new Vuex.Store({
       state.genomeListInDisplaySave = [...payload]
       console.log("UPDATE SAVE : " + state.genomeListInDisplaySave)
     },
+    SET_GENE_LIST(state, payload) {
+      state.geneList = [...payload]
+      console.log("UPDATE GENE LIST : " + state.geneList)
+    },
     SET_FULL_CHROM_DATA(state, payload) {
-      state.fullChromData = payload
+      state.fullChromData = payload;
+      for (let i = 0; i < state.chromNames.length; i++) {
+        state.fullChromData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their index
+          if (parseInt(a.index) < parseInt(b.index)) {
+            return -1;
+          } else if (parseInt(a.index) > parseInt(b.index)) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+      }
       console.log(state.fullChromData)
     },
     SET_FULL_GFF_DATA(state, payload) {
-      state.fullGffData = payload
-      console.log(state.fullGffData)
+      state.fullGffData = payload;
+      for (let i = 0; i < state.chromNames.length; i++) {
+        state.fullGffData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their start (number)
+          if (a.geneStart < b.geneStart) {
+            return -1;
+          } else if (a.geneStart > b.geneStart) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+      }
+      // Extraction of the every genes, their position and their chromosome in a Map <---> { name, [positon , chromosome] }
+      let arrayGeneNameListUnSort = new Map;
+      for (let i = 0; i < state.chromNames.length; i++) {
+        for (let j = 0; j < state.fullGffData[state.chromNames[i]].length; j++) {
+          let gene = state.fullGffData[state.chromNames[i]][j];
+          arrayGeneNameListUnSort.set(gene.geneName, [gene.geneStart, state.chromNames[i]]);
+        }
+      }
+      state.geneList = new Map([...arrayGeneNameListUnSort].sort()); // Sort the Map by alphabetical order.
+      console.log(state.geneList);
     },
     SET_NEWICK_TREE_DATA(state, payload) {
       state.newickTreeData = payload
@@ -571,6 +608,9 @@ export default new Vuex.Store({
     },
     updateGenomesInDisplaySave({commit}, genoList) {
       commit('SET_GENOMES_IN_DISPLAY_SAVE', genoList)
+    },
+    updateGeneList({commit}, geneList) {
+      commit('SET_GENE_LIST', geneList)
     },
     updateFullChromData({commit}, pavData) {
       commit('SET_FULL_CHROM_DATA', pavData)
