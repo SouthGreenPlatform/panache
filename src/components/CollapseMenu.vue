@@ -3,7 +3,7 @@
     <div>
       <h6 class="mt-3 floatL"><slot name="title"></slot></h6>
       <b-button class="buttonC"
-                v-show="fileLoaded === true"
+                v-show="conditionShowPlus"
                 :size="'md'"
                 :class="visible ? null : 'collapsed'"
                 :aria-expanded="visible ? 'true' : 'false'"
@@ -15,15 +15,13 @@
       </b-button>
     </div>
     <slot name="outside"></slot>
-    <b-collapse  v-bind:id="idCollapse" v-model="visible">
+    <b-collapse v-bind:id="idCollapse" v-model="visible">
       <slot name="inside"></slot>
     </b-collapse>
   </div>
 </template>
 
 <script>
-
-import {mapState} from "vuex";
 
 export default {
   props: {
@@ -34,12 +32,9 @@ export default {
     idCollapse: {
       type: String,
       required: true,
+    },
+    conditionShowPlus: {
     }
-  },
-  computed: {
-    ...mapState({
-      fileLoaded: 'fileLoaded',
-    }),
   },
   data() {
     return {

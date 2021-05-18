@@ -8,7 +8,7 @@
     </div>
 
     <div class="row">
-      <CollapseMenu idCollapse='collapseOptionalUpload'>
+      <CollapseMenu idCollapse='collapseOptionalUpload' :conditionShowPlus="fileLoaded === true">
         <template v-slot:title>
           Files
         </template>
