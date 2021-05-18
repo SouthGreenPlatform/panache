@@ -48,6 +48,28 @@
         idBonus='Chrom'
     />
 
+    <div>
+      <CategoryTitle title="Jump to position"/>
+      <InputPosition
+          :lastNt="globalLastNt"
+          :displayWindowWidth="displayWindowWidth"
+          :ntWidthInPixel="ntWidthInPx"
+          :currentFirstNt="firstNt"
+          :chromList="chromNames"
+          :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"/>
+    </div>
+
+    <div v-show="isGffUploaded">
+      <CategoryTitle title="Jump to gene position"/>
+      <GenePosition
+          :lastNt="globalLastNt"
+          :displayWindowWidth="displayWindowWidth"
+          :ntWidthInPixel="ntWidthInPx"
+          :currentFirstNt="firstNt"
+          :chromList="chromNames"
+          :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"/>
+    </div>
+
     <SortTracks
         msg='Sort the tracks'
         :sortChoice="sortChoice"
@@ -119,10 +141,14 @@ import NewickFileParser from "@/components/NewickFileParser";
 import CollapseMenu from "@/components/CollapseMenu";
 import NewickTree from "@/components/NewickTree";
 import CategoryTitle from "@/components/CategoryTitle";
+import InputPosition from "@/components/InputPosition";
+import GenePosition from "@/components/GenePosition";
 
 export default {
   name: 'LocalFilter',
   components: {
+    GenePosition,
+    InputPosition,
     CategoryTitle,
     NewickTree,
     NewickFileParser,
@@ -149,6 +175,8 @@ export default {
       ntWidthInPx: 'currentDisplayNtWidthInPx',
       sortChoice: 'sortChoice',
       selectedSortMode: 'selectedSortMode',
+      isGffUploaded: 'isGffUploaded',
+      fileLoaded: 'fileLoaded',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
