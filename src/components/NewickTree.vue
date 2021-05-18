@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button id="newickTreeDisplayButton" class="buttonNT" :class="isNewickTreeDisplayed ? 'newickDisplayed' : null" block variant="light" @click="displayNewickTree">{{ displayed ? "Hide newick tree" : "Display newick tree" }}</b-button>
+    <b-button id="newickTreeDisplayButton" size="sm" class="buttonNT" :class="isNewickTreeDisplayed ? 'newickDisplayed' : null" block variant="light" @click="displayNewickTree">{{ displayed ? "Hide newick tree" : "Display newick tree" }}</b-button>
   </div>
 </template>
 
