@@ -9,7 +9,7 @@
 
     <b-form-group class="noMarginBottom">
       <b-form-tags id="tags-with-dropdown" v-model="value" no-outer-focus class="revokeBootstrapCSS">
-        <template>
+        <template v-slot="{disabled}">
           <!-- SEARCH BAR -->
           <b-dropdown size="sm" variant="outline-info" class="mb-2" block menu-class="w-100">
             <template #button-content>
@@ -91,8 +91,7 @@ export default {
     return {
       targetedPosNt: Number(),
       selectedChrom: null,
-      selectedNt: 0,
-      selectedGene: 0,
+      selectedGene: 'GeneName',
       GeneListChrom: Array,
       search: '',
       value: [],
@@ -102,6 +101,8 @@ export default {
   computed: {
     ...mapState({
       geneList: 'geneList',
+      geneListSelectedChrom: 'geneListChromInDisplay',
+      selectedChrom: 'selectedChrom',
     }),
     maxFirstNt() {
       return this.lastNt - this.pxToNt(this.displayWindowWidth);
@@ -137,7 +138,7 @@ export default {
       const criteria = this.criteria; // Get the criteria
       // Filter out already selected options
       if (criteria.length >= this.searchMinChar) { // Verify if the criteria is longer than the minimum of characters expected
-        const options = [...this.geneList.keys()].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that correspond to the criteria
+        const options = [...this.geneListSelectedChrom].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that correspond to the criteria
         if (criteria && criteria.length >= this.searchMinChar) {
           // Show only options that match criteria
           return options.filter(opt => opt.toLowerCase().indexOf(criteria) > -1);  // Return the options available

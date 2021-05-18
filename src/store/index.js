@@ -20,6 +20,7 @@ export default new Vuex.Store({
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
     geneList: new Map(), // List of every gene present in the genomes in display
     geneListFilter: new Map(),
+    geneListChromInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
 
     fullChromData: [], //Chromosomal dataset
     fullGffData: [], //Gff linked to the displayed pav data
@@ -487,7 +488,7 @@ export default new Vuex.Store({
       console.log("UPDATE SAVE : " + state.genomeListInDisplaySave)
     },
     SET_GENE_LIST(state, payload) {
-      state.geneList = [...payload]
+      state.geneList = payload
       console.log("UPDATE GENE LIST : " + state.geneList)
     },
     SET_FULL_CHROM_DATA(state, payload) {
@@ -520,13 +521,18 @@ export default new Vuex.Store({
       }
       // Extraction of the every genes, their position and their chromosome in a Map <---> { name, [positon , chromosome] }
       let arrayGeneNameListUnSort = new Map;
+      let geneListSelectedChrom = [];
       for (let i = 0; i < state.chromNames.length; i++) {
         for (let j = 0; j < state.fullGffData[state.chromNames[i]].length; j++) {
           let gene = state.fullGffData[state.chromNames[i]][j];
           arrayGeneNameListUnSort.set(gene.geneName, [gene.geneStart, state.chromNames[i]]);
+          if (state.chromNames[i] === state.selectedChrom) { // Put the genes of the selected chromosome in an other list
+            geneListSelectedChrom.push(gene.geneName);
+          }
         }
       }
       state.geneList = new Map([...arrayGeneNameListUnSort].sort()); // Sort the Map by alphabetical order.
+      state.geneListChromInDisplay = [...geneListSelectedChrom]; // Update the list of the displayed chromosome's genes
       console.log(state.geneList);
     },
     SET_NEWICK_TREE_DATA(state, payload) {
@@ -542,7 +548,15 @@ export default new Vuex.Store({
     //  state.ntWidthInPxThresholds.set(payload['chromosome'], ntWidthCouple);
     //},
     SET_SELECTED_CHROM(state, payload) {
-      state.selectedChrom = payload
+      state.selectedChrom = payload;
+      if (state.isGffUploaded) {
+        let geneList = [];
+        for (let i = 0; i < state.fullGffData[state.selectedChrom].length; i++) {
+          let gene = state.fullGffData[state.selectedChrom][i];
+          geneList.push(gene.geneName);
+        }
+        state.geneListChromInDisplay = [...geneList];
+      }
     },
     SET_NEW_FIRST_NT_OF_DISPLAY(state, payload) {
       state.firstNtToDisplay = payload
