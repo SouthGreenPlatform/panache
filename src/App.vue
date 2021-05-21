@@ -83,7 +83,7 @@ body, html {
 
 .side-panel {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
   float: left;
   display: block;
