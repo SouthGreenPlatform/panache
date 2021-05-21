@@ -104,13 +104,13 @@
     /-->
 
     <div class="row">
-      <CollapseMenu idCollapse='collapseHollowAreaFinder' @visibleStatus="getVisibleCollapse">
+      <CollapseMenu idCollapse='collapseHollowAreaFinder'>
         <template v-slot:title>
           Hollow area finder
         </template>
-        <template v-slot:inside>
+        <template v-slot:inside="exportedProp">
           <HollowAreaFinder
-              :visibleStatus="visibleCollapse"
+              :visibleStatus="exportedProp.visible"
               :arrayOfPanFeatures="currentChromData"
               :lastNt="globalLastNt"
               :genoNames="genoNames"
@@ -172,11 +172,7 @@ export default {
     HollowAreaFinder,
   },
   props: {},
-  data() {
-    return {
-      visibleCollapse: false,
-    }
-  },
+  data() {},
   computed: {
     ...mapState({
       chromNames: 'chromNames',
@@ -212,9 +208,6 @@ export default {
       'updateSelectedSortMode',
       'updateNewickTreeData',
     ]),
-    getVisibleCollapse(bool) {
-      this.visibleCollapse = bool;
-    }
   }
 }
 </script>

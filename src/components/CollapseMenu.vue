@@ -16,7 +16,7 @@
     </div>
     <slot name="outside"></slot>
     <b-collapse v-bind:id="idCollapse" v-model="visible">
-      <slot name="inside"></slot>
+      <slot name="inside" :visible="visible"></slot>
     </b-collapse>
   </div>
 </template>
