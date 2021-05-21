@@ -103,19 +103,27 @@
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     /-->
 
-    <CategoryTitle title="Hollow area finder"/>
-
-    <HollowAreaFinder
-        :arrayOfPanFeatures="currentChromData"
-        :lastNt="globalLastNt"
-        :genoNames="genoNames"
-        :nbOfGenomes="nbOfGenomes"
-        :currentFirstNt="firstNt"
-        :displayWindowWidth="displayWindowWidth"
-        :ntWidthInPixel="ntWidthInPx"
-        :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
-        :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
-    />
+    <div class="row">
+      <CollapseMenu idCollapse='collapseHollowAreaFinder' @visibleStatus="getVisibleCollapse">
+        <template v-slot:title>
+          Hollow area finder
+        </template>
+        <template v-slot:inside>
+          <HollowAreaFinder
+              :visibleStatus="visibleCollapse"
+              :arrayOfPanFeatures="currentChromData"
+              :lastNt="globalLastNt"
+              :genoNames="genoNames"
+              :nbOfGenomes="nbOfGenomes"
+              :currentFirstNt="firstNt"
+              :displayWindowWidth="displayWindowWidth"
+              :ntWidthInPixel="ntWidthInPx"
+              :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+              :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
+          />
+        </template>
+      </CollapseMenu>
+    </div>
 
     <CategoryTitle title="Legend"/>
 
@@ -165,7 +173,9 @@ export default {
   },
   props: {},
   data() {
-    return {}
+    return {
+      visibleCollapse: false,
+    }
   },
   computed: {
     ...mapState({
@@ -202,6 +212,9 @@ export default {
       'updateSelectedSortMode',
       'updateNewickTreeData',
     ]),
+    getVisibleCollapse(bool) {
+      this.visibleCollapse = bool;
+    }
   }
 }
 </script>
@@ -262,4 +275,5 @@ export default {
   top: 15px;
   left: 20px
 }
+
 </style>
