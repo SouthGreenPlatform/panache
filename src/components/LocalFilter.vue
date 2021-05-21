@@ -172,7 +172,9 @@ export default {
     HollowAreaFinder,
   },
   props: {},
-  data() {},
+  data() {
+    return {}
+  },
   computed: {
     ...mapState({
       chromNames: 'chromNames',
