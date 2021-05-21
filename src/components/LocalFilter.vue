@@ -82,6 +82,11 @@
       <NewickTree/>
     </div>
 
+    <div v-show="selectedSortMode === 'Gene presence status'">
+      <CategoryTitle title="Search by genes"/>
+      <GeneSearchBar/>
+    </div>
+
     <CategoryTitle title="Display parameters"/>
 
     <!-- TODO: Extract the shape choice from the core threshold component... -->
@@ -148,6 +153,7 @@ import GffFileParser from "@/components/GffFileParser";
 import NewickFileParser from "@/components/NewickFileParser";
 import CollapseMenu from "@/components/CollapseMenu";
 import NewickTree from "@/components/NewickTree";
+import GeneSearchBar from "@/components/GeneSearchBar";
 import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
@@ -158,6 +164,7 @@ export default {
     GenePosition,
     InputPosition,
     CategoryTitle,
+    GeneSearchBar,
     NewickTree,
     NewickFileParser,
     CollapseMenu,

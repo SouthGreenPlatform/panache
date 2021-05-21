@@ -19,8 +19,8 @@ export default new Vuex.Store({
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
     geneList: new Map(), // List of every gene present in the genomes in display
-    geneListFilter: new Map(),
     geneListChromInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
+    geneListNames: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
 
     fullChromData: [], //Chromosomal dataset
     fullGffData: [], //Gff linked to the displayed pav data
@@ -529,6 +529,7 @@ export default new Vuex.Store({
           if (state.chromNames[i] === state.selectedChrom) { // Put the genes of the selected chromosome in an other list
             geneListSelectedChrom.push(gene.geneName);
           }
+          state.geneListNames.push(gene.geneName)
         }
       }
       state.geneList = new Map([...arrayGeneNameListUnSort].sort()); // Sort the Map by alphabetical order.
