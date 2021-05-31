@@ -87,6 +87,11 @@
       <GeneSearchBar/>
     </div>
 
+    <div v-show="selectedSortMode === 'Local presence/absence pattern'">
+      <CategoryTitle title="Local presence/absence pattern sort"/>
+      <LocalGenePattern/>
+    </div>
+
     <CategoryTitle title="Display parameters"/>
 
     <!-- TODO: Extract the shape choice from the core threshold component... -->
@@ -157,10 +162,12 @@ import GeneSearchBar from "@/components/GeneSearchBar";
 import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
+import LocalGenePattern from "@/components/LocalGenePattern";
 
 export default {
   name: 'LocalFilter',
   components: {
+    LocalGenePattern,
     GenePosition,
     InputPosition,
     CategoryTitle,
