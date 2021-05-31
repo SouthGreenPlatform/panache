@@ -36,6 +36,7 @@ export default new Vuex.Store({
     chromNames: ['0', '1', '2', '3'],
     selectedChrom: '0', // Stores the id of the chrom to display at the block level vis
     coordsOfHollowAreas: new Map(),
+    localAreaSelected: [0, 10000],
 
     // Color scales used throughout the app
     //TODO : create the color scales right here
@@ -304,7 +305,7 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
 
     // Values to the sort functionality
-    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric'], // Sorting methods available to sort the genomes
+    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric', 'Local presence/absence pattern'], // Sorting methods available to sort the genomes
     genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'], // Save of the initial order of the genomes
     selectedSortMode: 'None', // Sorting mode by default (change when the user select an other method
     newickTreeDataString: "", // Value extracted from the Newick file uploaded
@@ -598,6 +599,9 @@ export default new Vuex.Store({
     TURN_NEWICK_TREE_DISPLAYED_OFF(state) {
       state.isNewickTreeDisplayed = false
     },
+    SET_LOCAL_AREA_SELECTED(state, payload) {
+      state.localAreaSelected = payload
+    },
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
@@ -684,6 +688,9 @@ export default new Vuex.Store({
       } else {
         commit('TURN_NEWICK_TREE_DISPLAYED_ON')
       }
+    },
+    updateLocalAreaSelected({commit}, coordinates) {
+      commit('SET_LOCAL_AREA_SELECTED', coordinates)
     },
   },
 })
