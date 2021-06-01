@@ -7,7 +7,7 @@
         class="buttonPanache"
         block
         variant="light">
-      Sort by local patter
+      Sort by local pattern
     </b-button>
 
 <!--    <div class="centerT" v-show="isLocalAreaSelectedDataDisplayed">
@@ -22,9 +22,7 @@
 
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
-import { clusterData } from "@greenelab/hclust";
-/*import { euclideanDistance } from "@greenelab/hclust";
-import { averageDistance } from "@greenelab/hclust";*/
+import {clusterData} from "@greenelab/hclust";
 
 export default {
   name: "LocalGenePattern",
@@ -53,48 +51,80 @@ export default {
     ...mapActions([
       'updateGenomesInDisplay',
     ]),
+    /**
+     * Transform the value in pixel to a value in nucleotide
+     * @param pxAmount value in pixel
+     * @returns {number} value in nucleotide
+     */
     pxToNt(pxAmount) {
-      if (pxAmount <= 0) {
+      if (pxAmount <= 0) { // Check if the value don't go in the negative (normally impossible)
         return 0;
-      } else if (pxAmount >= this.displayWindowWidth) {
+      } else if (pxAmount >= this.displayWindowWidth) { // Check if the value is not higher than the size of the display (this is the case at the beginning)
         return this.displayWindowWidth / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
-      } else {
+      } else { // If everything is alright
         return pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
       }
     },
+    /**
+     * Sort the genomes in display by local phylogeny with the gene between the
+     * two sliders (selected area) from the component PresencePatternSelector
+     */
     sortBetweenValues() {
+      //this.isLocalAreaSelectedDataDisplayed = !this.isLocalAreaSelectedDataDisplayed;
+
+      // Search the genes that match the selected area
       let geneBetweenValues = [];
-      let presencePatternList = [];
-      this.isLocalAreaSelectedDataDisplayed = !this.isLocalAreaSelectedDataDisplayed;
-      let selectedChromData = this.fullChromData[this.selectedChrom];
-      for (let i = 0; i < selectedChromData.length; i++) {
+      let selectedChromData = this.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
+      for (let i = 0; i < selectedChromData.length; i++) { // Check every gene of the chromosome
         if (selectedChromData[i].FeatureStart >= this.valueNT[0] &&
             selectedChromData[i].FeatureStop <= this.valueNT[1]) {
-          geneBetweenValues.push(selectedChromData[i]);
+          geneBetweenValues.push(selectedChromData[i]); // Add the gene to list if its in the selected area
         }
       }
+
+      // Create a list that contain a list for avery genome and their presence/absence pattern of avery gene in geneBetweenValues
+      let presencePatternList = [];
       for (let i = 0; i < this.genomeListInDisplay.length; i++) {
         presencePatternList.push([]);
       }
+
+      // Fill presencePatternList with the data of every gene status for every genome for every gene in geneBetweenValues
       for (let i = 0; i < geneBetweenValues.length; i++) {
         for (let j = 0; j < this.genomeListInDisplay.length; j++) {
-          if (parseInt(geneBetweenValues[i][this.genomeListInDisplay[j]]) >= 1) {
-            presencePatternList[j].push(1);
+          if (parseInt(geneBetweenValues[i][this.genomeListInDisplay[j]]) >= 1) { // Check if the presence status >= 1
+            presencePatternList[j].push(1); // If presence status >= 1
           } else {
-            presencePatternList[j].push(0);
+            presencePatternList[j].push(0); // If presence status = 0
           }
         }
       }
-      console.log({geneBetweenValues});
-      console.log({presencePatternList});
-      let clusterOrder = clusterData({ data: presencePatternList }).order;
-      console.log({clusterOrder});
-      let genomeListSorted = [];
+
+      // Usage of the hclust library to create a cluster and order the genome by local phylogeny with the gene in geneBetweenValues
+      let clusterOrder = clusterData({ data: presencePatternList, distance: this.simpleMatching }).order;
+      let genomeListSorted = []; // Create a list that will contain the genomes newly sorted
       for (let i = 0; i < clusterOrder.length; i++) {
-        genomeListSorted.push(this.genomeListInDisplay[clusterOrder[i]])
+        genomeListSorted.push(this.genomeListInDisplay[clusterOrder[i]]) // Fill the list with the genome by their order in clusterOrder
       }
-      console.log({genomeListSorted});
-      this.updateGenomesInDisplay(genomeListSorted);
+      this.updateGenomesInDisplay(genomeListSorted); // Update the genomes in display with he sorted list
+    },
+    /**
+     * Function that return the dissimilarity index between two arrays;
+     * @param a first binary array
+     * @param b second binary array
+     * @returns {number} dissimilarity index
+     */
+    simpleMatching(a, b) {
+      const size = Math.min(a.length, b.length); // Get the lowest array length as size for calculate (they have the same length normally)
+      let nbExactMatch = 0; // Initialising of the counter of similarity index
+
+      for (let index = 0; index < size; index++) { // For each value in the arrays
+        if ((a[index] === 1 && b[index] === 1) ||
+            (a[index] === 0 && b[index] === 0)) {
+          nbExactMatch++; // If the array both contains an 0 or an 1, increase the counter
+        }
+      }
+
+      return 1 - nbExactMatch / size; // Return the dissimilarity index
     },
   }
 }

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!--  Component Slider used  -->
     <Slider
         v-model="value"
         :min="minValue"
