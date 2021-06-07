@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="marTop15">
     <!--  Component Slider used  -->
     <Slider
         v-model="value"
@@ -67,5 +67,9 @@ export default {
 </style>
 
 <style scoped>
+
+.marTop15 {
+  margin-top: 15px;
+}
 
 </style>
