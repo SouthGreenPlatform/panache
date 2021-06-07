@@ -9,14 +9,14 @@
         variant="light">
       Sort by local pattern
     </b-button>
-
-<!--    <div class="centerT" v-show="isLocalAreaSelectedDataDisplayed">
+    <b-popover v-if="hasSortHappened" target="localGenePatternDisplayButton" triggers="hover" placement="top">
+      <template #title class="centerT">Informations about values</template>
       <p>
-        {{ valueNT[0] }}
+        Left value : {{ leftValue }}
         <br>
-        {{ valueNT[1] }}
+        Right value : {{ rightValue }}
       </p>
-    </div>-->
+    </b-popover>
   </div>
 </template>
 
@@ -28,7 +28,9 @@ export default {
   name: "LocalGenePattern",
   data() {
     return {
-      isLocalAreaSelectedDataDisplayed: false,
+      hasSortHappened: false,
+      rightValue: 0,
+      leftValue: 0,
     }
   },
   computed: {
@@ -43,9 +45,6 @@ export default {
     ...mapGetters({
       displayWindowWidth: 'displayWindowWidth',
     }),
-    valueNT() {
-      return [this.pxToNt(this.localAreaSelected[0]), this.pxToNt(this.localAreaSelected[1])];
-    },
   },
   methods: {
     ...mapActions([
@@ -65,19 +64,23 @@ export default {
         return pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
       }
     },
+
     /**
      * Sort the genomes in display by local phylogeny with the gene between the
-     * two sliders (selected area) from the component PresencePatternSelector
+     * two sliders (selected area) from the component PresencePatternSelector.
      */
     sortBetweenValues() {
-      //this.isLocalAreaSelectedDataDisplayed = !this.isLocalAreaSelectedDataDisplayed;
+      // Change the value of hasSortHappened to display informations
+      this.hasSortHappened = true;
 
       // Search the genes that match the selected area
       let geneBetweenValues = [];
       let selectedChromData = this.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
+      this.leftValue = Math.round(this.pxToNt(this.localAreaSelected[0]));
+      this.rightValue = Math.round(this.pxToNt(this.localAreaSelected[1]));
       for (let i = 0; i < selectedChromData.length; i++) { // Check every gene of the chromosome
-        if (selectedChromData[i].FeatureStart >= this.valueNT[0] &&
-            selectedChromData[i].FeatureStop <= this.valueNT[1]) {
+        if (selectedChromData[i].FeatureStart >= this.leftValue &&
+            selectedChromData[i].FeatureStop <= this.rightValue) {
           geneBetweenValues.push(selectedChromData[i]); // Add the gene to list if its in the selected area
         }
       }
@@ -91,24 +94,25 @@ export default {
       // Fill presencePatternList with the data of every gene status for every genome for every gene in geneBetweenValues
       for (let i = 0; i < geneBetweenValues.length; i++) {
         for (let j = 0; j < this.genomeListInDisplay.length; j++) {
-          if (parseInt(geneBetweenValues[i][this.genomeListInDisplay[j]]) >= 1) { // Check if the presence status >= 1
-            presencePatternList[j].push(1); // If presence status >= 1
+          if (parseInt(geneBetweenValues[i][this.genomeListInDisplay[j]]) === 0) { // Check if the presence status === 0
+            presencePatternList[j].push(0); // If presence status === 0
           } else {
-            presencePatternList[j].push(0); // If presence status = 0
+            presencePatternList[j].push(1); // If presence status >= 0
           }
         }
       }
 
       // Usage of the hclust library to create a cluster and order the genome by local phylogeny with the gene in geneBetweenValues
-      let clusterOrder = clusterData({ data: presencePatternList, distance: this.simpleMatching }).order;
+      let clusterOrder = clusterData({ data: presencePatternList, distance: this.simpleMatching, onProgress: this.displayNothing}).order;
       let genomeListSorted = []; // Create a list that will contain the genomes newly sorted
       for (let i = 0; i < clusterOrder.length; i++) {
         genomeListSorted.push(this.genomeListInDisplay[clusterOrder[i]]) // Fill the list with the genome by their order in clusterOrder
       }
       this.updateGenomesInDisplay(genomeListSorted); // Update the genomes in display with he sorted list
-    },
+    }
+    ,
     /**
-     * Function that return the dissimilarity index between two arrays;
+     * Function that return the dissimilarity index between two arrays.
      * @param a first binary array
      * @param b second binary array
      * @returns {number} dissimilarity index
@@ -126,6 +130,9 @@ export default {
 
       return 1 - nbExactMatch / size; // Return the dissimilarity index
     },
+    displayNothing() {
+      // Do nothing
+    }
   }
 }
 </script>
@@ -134,6 +141,15 @@ export default {
 
 .centerT {
   text-align: center;
+}
+
+</style>
+
+<style>
+
+.popover {
+  -webkit-box-shadow: 0px 0px 9px -3px #000000;
+  box-shadow: 0px 0px 9px -3px #000000;
 }
 
 </style>
