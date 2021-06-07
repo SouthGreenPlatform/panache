@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-button id="newickTreeDisplayButton" size="sm" class="buttonNT" :class="isNewickTreeDisplayed ? 'newickDisplayed' : null" block variant="light" @click="displayNewickTree">{{ displayed ? "Hide newick tree" : "Display newick tree" }}</b-button>
+    <b-button id="newickTreeDisplayButton" size="sm" class="buttonPanache" :class="isNewickTreeDisplayed ? 'newickDisplayed' : null" block variant="light" @click="displayNewickTree">{{ displayed ? "Hide newick tree" : "Display newick tree" }}</b-button>
   </div>
 </template>
 
@@ -15,6 +15,7 @@ import {mapActions, mapState} from "vuex";
     data() {
       return {
         displayed: false,
+        treeWidth: 100,
         groupSave: {
           type: Array,
           default: [],
@@ -58,7 +59,7 @@ import {mapActions, mapState} from "vuex";
         }
       },
       /**
-       * Adapted method from the library treelib that parse a string and create a phylogenetic tree with it.
+       * Method that use the library treeLib to parse a string and create a SVG phylogenetic tree with it.
        * @param newickTreeDataString = a sting imported from the Newick file uploaded.
        */
       showNewickTree(newickTreeDataString) {
@@ -77,7 +78,19 @@ import {mapActions, mapState} from "vuex";
             group.removeChild(group.lastChild);
           }
 
-          td.Init(t, {svg_id: 'genomeLegend', width: 200, height: (14 * (this.genomeList.length - 1)), fontHeight: 10, root_length: 0.1}); // Initialise the tree with parameters
+          // Update of the linear gradient width
+          let newLinearGradient = this.groupSave[0].cloneNode(true);
+          newLinearGradient.setAttribute('width', (this.treeWidth + 50).toString());
+          group.appendChild(newLinearGradient);
+
+          // Initialise the tree with parameters and draw it
+          td.Init(t, {
+            svg_id: 'genomeLegend',
+            width: this.treeWidth,
+            height: (14 * (this.genomeList.length - 1)),
+            fontHeight: 10,
+            root_length: 0.1
+          });
           td.CalcCoordinates(); // Calculate coordinates of paths and texts
           td.Draw();  // Draw the tree
 
