@@ -481,16 +481,15 @@ export default new Vuex.Store({
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
       state.genomeListInDisplay = [...payload];
-      console.log("UPDATE DISPLAY : " + state.genomeListInDisplay);
-      console.log("SAVE : " + state.genomeListInDisplaySave);
+      console.log("Display updated : " + state.genomeListInDisplay);
     },
     SET_GENOMES_IN_DISPLAY_SAVE(state, payload) {
       state.genomeListInDisplaySave = [...payload]
-      console.log("UPDATE SAVE : " + state.genomeListInDisplaySave)
+      console.log("Save updated : " + state.genomeListInDisplaySave)
     },
     SET_GENE_LIST(state, payload) {
       state.geneList = payload
-      console.log("UPDATE GENE LIST : " + state.geneList)
+      console.log("Gene list updated : " + state.geneList)
     },
     SET_FULL_CHROM_DATA(state, payload) {
       state.fullChromData = payload;

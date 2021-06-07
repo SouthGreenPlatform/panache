@@ -135,7 +135,7 @@ export default {
       const criteria = this.criteria; // Get the criteria
       // Filter out already selected options
       if (criteria.length >= this.searchMinChar) { // Verify if the criteria is longer than the minimum of characters expected
-        const options = [...this.geneList.keys()].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that correspond to the criteria from the gene list in the store
+        const options = [...this.geneList.keys()].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that match to the criteria from geneList
         return options.filter(opt => opt.toLowerCase().indexOf(criteria) > -1);  // Return the options available
       } else {
         return '';
@@ -147,7 +147,7 @@ export default {
       'updateGenomesInDisplay',
     ]),
     /**
-     * Add an gene to tags (a Bootstrap.Vue list)
+     * Add an gene to tags (a Bootstrap.Vue list).
      * @param option = Gene in that you want to add
      * @param addTag = function addTag of Bootstrap.Vue
      */
@@ -156,13 +156,15 @@ export default {
       this.search = ''; // Empty the search bar
     },
     /**
-     * Sort the genome in function of the gene in the filter.
+     * Sort the genome in function of the genes in the filter.
      */
     sortByTags() {
       let rankGenomes = new Map; // Create a map to rank the genomes in function on their correspondance with the tags
       for (let i = 0; i < this.genomeList.length; i++) {
         rankGenomes.set(this.genomeList[i], 0); // Set the Map with 0
       }
+
+      // Ranks genomes according to their correspondence with the gene in filter
       for (let i = 0; i < this.presenceMap.size; i++) { // For each gene in tags (for each filter applied)
         let gene = this.geneList.get([...this.presenceMap.keys()][i]); // Get the gene informations from geneList
         let geneStatus = [...this.presenceMap.values()][i]; // Get the gene's status
@@ -174,7 +176,8 @@ export default {
             for (let k = 0; k < this.genomeList.length; k++) { // If that the case then : full genome list exploration
               let genomeK = this.genomeList[k]; // Variable for the genome with index K of the list of genomes
               let presenceStatus = parseInt(geneListChrom[j][genomeK]); // Get the presence status of the gene for genomeK
-              if ((geneStatus && presenceStatus > 0) || (!geneStatus && presenceStatus === 0)) { // If it is actually present or absent and match the status requested
+              if ((geneStatus && presenceStatus > 0) ||
+                  (!geneStatus && presenceStatus === 0)) { // If the gene is actually present or absent and match the status requested
                 rankGenomes.set(genomeK, rankGenomes.get(genomeK) + 1); // Increase the points of correspondence of the genome
               }
             }
@@ -182,11 +185,16 @@ export default {
         }
       }
       rankGenomes = new Map([...rankGenomes.entries()].sort((a, b) => b[1] - a[1])); // Sort the ranking Map in function of their number of points.
+
+      // Update the of popup that give informations about the points
       this.popupDiv = []; // Empty the popup that give informations about the points
       for (let i = 0; i < this.genomeList.length; i++) {
         let genome = [...rankGenomes.keys()][i];
-        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)"); // Add information about the correspondence for each genome in the popup.
+        // Add informations about the correspondence for each genome in the popup.
+        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)");
       }
+
+      // Update the genomes in display with the sorted list
       this.updateGenomesInDisplay([...rankGenomes.keys()]); // Update the order of the genome in the store in function of their rank.
       this.hasSearchHappened = true; // Turn hasSearchHappened to true to allow the popup to appear on Panache
     },
