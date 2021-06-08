@@ -37,48 +37,65 @@ export default {
         'updateNewickTreeDataString',
         'pushSortModeInSortChoice',
     ]),
+    /**
+     * Function that read a newick file and call the parser function.
+     * @param loadedFile = file returned by the FileLoader
+     */
     readNewickFile(loadedFile) {
-      let parser = require("biojs-io-newick");
+      let parser = require("biojs-io-newick"); // Use the lib biojs-io-newick
       let newickTreeData = "";
       let parsedNewickData = "";
       let file = loadedFile;
       let reader = new FileReader();
-      reader.addEventListener("load", () => {
+      reader.addEventListener("load", () => { // When the reader is loaded
         newickTreeData = reader.result;
-        console.log(newickTreeData);
-        this.updateNewickTreeDataString(newickTreeData);
-        parsedNewickData = parser.parse_newick(newickTreeData);
-        console.log(parsedNewickData);
-        //let list = this.recursiveSearchChild(parsedNewickData).reverse();
-        let list = this.recursiveSearchChild(parsedNewickData);
-        console.log(list);
-        this.compareNewickListToGenomeList(list);
+        console.log({newickTreeData});
+        this.updateNewickTreeDataString(newickTreeData); // Update the store with the new newick data extracted from the file
+        parsedNewickData = parser.parse_newick(newickTreeData); // Parse the data with the function parse_newick of the biojs-io-newick into a newick tree
+        console.log({parsedNewickData});
+        let list = this.recursiveSearchChild(parsedNewickData); // Push the genomes in a list in function of their position in the tree.
+        console.log({list});
+        this.compareNewickListToGenomeList(list); // Verify that the list is correct
       });
       reader.readAsText(file);
     },
+    /**
+     * Function that return a list of the genome in the order of their place in the phylogenetic tree.
+     * @param data = data provided by the function readNewickFile
+     * @returns {[]} = list of the genome
+     */
     recursiveSearchChild(data) {
-      let listGenome = [];
-      if (data !== null && data !== undefined) {
-        this.recursiveSearchChildAux(listGenome, data);
+      let listGenome = []; // Initialise the list returned at the end of the research
+      if (data !== null && data !== undefined) { // Verify that de the data provided is not null or undefined
+        this.recursiveSearchChildAux(listGenome, data); // Lunch the recursive research of the child
         return listGenome;
       }
     },
+    /**
+     * Function that add in the list of the genome the name of the leaves (genomes) and search for other leaves.
+     * @param data = data provided by the function recursiveSearchChild
+     * @param list = list provided by the function recursiveSearchChild
+     */
     recursiveSearchChildAux(list, data) {
-      if (data !== null && data !== undefined && data.children !== undefined) {
-        for (let i = 0; i < data.children.length; i++) {
-          this.recursiveSearchChildAux(list, data.children[i]);
-          if (data.children[i].name !== "") {
-            list.push(data.children[i].name);
+      if (data !== null &&
+          data !== undefined &&
+          data.children !== undefined) { // Verify that de the data provided is not null or undefined and the existence of data's children
+        for (let i = 0; i < data.children.length; i++) { // For each of data's children
+          this.recursiveSearchChildAux(list, data.children[i]); // Do the same thing (recursive)
+          if (data.children[i].name !== "") { // If the child as a name (its a leaf)
+            list.push(data.children[i].name); // Add the genome name into the list
           }
         }
       }
     },
+    /**
+     * Function that verify that the list extracted from the file contains the right genomes.
+     * @param list = list provided by the function readNewickFile
+     */
     compareNewickListToGenomeList(list) {
-      console.log(this.genomeList);
       if (this.arrayCompare(this.genomeList, list)) {
-        console.log("Ready to sort !");
-        this.updateNewickTreeData(list);
-        this.pushSortModeInSortChoice( 'Phylogenetic tree');
+        this.updateNewickTreeData(list); // Update updateNewickTreeData with the list
+        this.pushSortModeInSortChoice( 'Phylogenetic tree'); // Add the choice to sort by phylogenetic tree
       }
     },
     arrayCompare(list1, list2) {

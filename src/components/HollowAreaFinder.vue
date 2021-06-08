@@ -182,6 +182,10 @@ export default {
       type: Number,
       default: 5
     },
+    visibleStatus: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -189,6 +193,8 @@ export default {
       paramConsecutiveBlock: 2,
       targetedPosNt: Number(), //Linked to center of screen if possible,
       targetIsChangedInternally: false,
+      sparseArrayOfNext: [],
+      sparseArrayOfPrevious: [],
     }
   },
   computed: {
@@ -378,12 +384,6 @@ export default {
 
       return sparseArray;
     },
-    sparseArrayOfNext() { //Shallow copy of next portion
-      return this.sparseArrayOfMatChingIndices.slice(this.targetedPosNt, this.sparseArrayOfMatChingIndices.length)
-    },
-    sparseArrayOfPrevious() { //Shallow copy of previous portion
-      return this.sparseArrayOfMatChingIndices.slice(0, this.targetedPosNt + 1)
-    },
     sparseArrayOfPrevious_reversed() {
       let shallowCopy = this.sparseArrayOfPrevious.slice();
       shallowCopy.reverse();
@@ -490,6 +490,18 @@ export default {
       let floatTarget = (2 * this.currentFirstNt + this.pxToNt(this.displayWindowWidth)) / 2;
       this.targetedPosNt = Math.floor(floatTarget);
     },
+    targetedPosNt() {
+      if (this.visibleStatus) {
+        this.sparseArrayOfNext = this.sparseArrayOfMatChingIndices.slice(this.targetedPosNt, this.sparseArrayOfMatChingIndices.length);
+        this.sparseArrayOfPrevious = this.sparseArrayOfMatChingIndices.slice(0, this.targetedPosNt + 1);
+      }
+    },
+    sparseArrayOfMatChingIndices() {
+      if (this.visibleStatus) {
+        this.sparseArrayOfNext = this.sparseArrayOfMatChingIndices.slice(this.targetedPosNt, this.sparseArrayOfMatChingIndices.length);
+        this.sparseArrayOfPrevious = this.sparseArrayOfMatChingIndices.slice(0, this.targetedPosNt + 1);
+      }
+    }
   },
   methods: {
     ntToPx(ntAmount) {

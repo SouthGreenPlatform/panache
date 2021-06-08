@@ -44,7 +44,8 @@ export default {
   },
   methods: {
     ...mapActions([
-       'updateIsGffUploadedTRUE'
+      'updateIsGffUploadedTRUE',
+      'pushSortModeInSortChoice',
     ]),
     parseGffToAnnotationObjects: async function(gffFile) {
 
@@ -167,6 +168,7 @@ export default {
       //console.log({groupedAnnot});
       this.updateAnnotationData(groupedAnnot);
       this.updateIsGffUploadedTRUE();
+      this.pushSortModeInSortChoice('Gene presence status'); // Add the choice to sort by gene presence status with a search bar
     },
     //Turns gffFile to array of objects
     readTsv: async function(gffFile) {

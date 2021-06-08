@@ -58,20 +58,21 @@ export default {
   },
   methods: {
     /**
-     *  Sorting method who sort the array genomeListInDisplay in function of the choice in input dropDownButton_SortMode
-     *  There is 4 sorting mode at the moment :
+     *  Sorting method who sort the array genomeListInDisplay in function of the choice in the input dropDownButton_SortMode.
+     *  This component uniquely sort directly by four sorting mode :
      *  - None (position by default) : choosing it will restore a save of initial order of the genome from the file uploaded.
      *  - Alphanumerically : sort by letters and numbers ("a" before "b" and "5" before "13" for example).
      *  - Reverse alphanumerically : its the inverse of the one before.
      *  - By phylogenetic tree : will allow the user to upload a Newick file that is a tree of link between the genomes.
+     *  The others sort choices only modify the selected value in store to be used by other components.
      */
     sort() {
       let value = d3.select(this.$refs['dropDownButton']).node().value; // Get the value chosen by the user
       this.updateCurrentSortMode(value); // Update the sorting type
       if (this.selectedSortMode === 'None') { // If the choice of sort is "None"
-        this.updateGenomesInDisplay(this.genomeListSave); // Use the save to reload the inital order
-        //console.log("CHOICE NONE SAVE : " + this.genomeListSave);
-      } else if (this.selectedSortMode === 'Alphanumeric' || this.selectedSortMode === 'Reverse alphanumeric') { // If the choice of sort is "Alphanumerically" or "Reverse alphanumerically"
+        this.updateGenomesInDisplay(this.genomeListSave); // Use the save to reload the initial order
+      } else if (this.selectedSortMode === 'Alphanumeric' ||
+                 this.selectedSortMode === 'Reverse alphanumeric') { // If the choice of sort is "Alphanumerically" or "Reverse alphanumerically"
         let genomeListSorted = [];
         genomeListSorted = this.genomeList; // We make a copy of this list to avoid any issue
         genomeListSorted.sort(function (a,b) {
@@ -83,7 +84,7 @@ export default {
           this.updateGenomesInDisplay(genomeListSorted); // Update genomeListInDisplay with array sort by alphanumerically
         }
       } else if (this.selectedSortMode === 'Phylogenetic tree') {
-        this.updateGenomesInDisplay(this.genomeListNewickTreeUpload); // Update genomeListInDisplay with array sort by order in the Newick tree created by the Newick file uploaded.
+        this.updateGenomesInDisplay(this.genomeListNewickTreeUpload); // Update genomeListInDisplay with the array extracted from the Newick file uploaded.
       }
     },
     ...mapActions([

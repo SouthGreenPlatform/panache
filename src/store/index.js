@@ -18,6 +18,9 @@ export default new Vuex.Store({
     isGffUploaded: false, // Detect if a GFF file has been uploaded
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
+    geneList: new Map(), // List of every gene present in the genomes in display
+    geneListChromInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
+    geneListNames: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
 
     fullChromData: [], //Chromosomal dataset
     fullGffData: [], //Gff linked to the displayed pav data
@@ -33,6 +36,7 @@ export default new Vuex.Store({
     chromNames: ['0', '1', '2', '3'],
     selectedChrom: '0', // Stores the id of the chrom to display at the block level vis
     coordsOfHollowAreas: new Map(),
+    localAreaSelected: [0, 10000],
 
     // Color scales used throughout the app
     //TODO : create the color scales right here
@@ -301,7 +305,7 @@ export default new Vuex.Store({
     displayShapeSelected: 'square',
 
     // Values to the sort functionality
-    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric'], // Sorting methods available to sort the genomes
+    sortChoice: ['None', 'Alphanumeric', 'Reverse alphanumeric', 'Local presence/absence pattern'], // Sorting methods available to sort the genomes
     genomeListInDisplaySave: ['Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6'], // Save of the initial order of the genomes
     selectedSortMode: 'None', // Sorting mode by default (change when the user select an other method
     newickTreeDataString: "", // Value extracted from the Newick file uploaded
@@ -477,20 +481,60 @@ export default new Vuex.Store({
     },
     SET_GENOMES_IN_DISPLAY(state, payload) {
       state.genomeListInDisplay = [...payload];
-      console.log("UPDATE DISPLAY : " + state.genomeListInDisplay);
-      console.log("SAVE : " + state.genomeListInDisplaySave);
+      console.log("Display updated : " + state.genomeListInDisplay);
     },
     SET_GENOMES_IN_DISPLAY_SAVE(state, payload) {
       state.genomeListInDisplaySave = [...payload]
-      console.log("UPDATE SAVE : " + state.genomeListInDisplaySave)
+      console.log("Save updated : " + state.genomeListInDisplaySave)
+    },
+    SET_GENE_LIST(state, payload) {
+      state.geneList = payload
+      console.log("Gene list updated : " + state.geneList)
     },
     SET_FULL_CHROM_DATA(state, payload) {
-      state.fullChromData = payload
+      state.fullChromData = payload;
+      for (let i = 0; i < state.chromNames.length; i++) {
+        state.fullChromData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their index
+          if (parseInt(a.index) < parseInt(b.index)) {
+            return -1;
+          } else if (parseInt(a.index) > parseInt(b.index)) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+      }
       console.log(state.fullChromData)
     },
     SET_FULL_GFF_DATA(state, payload) {
-      state.fullGffData = payload
-      console.log(state.fullGffData)
+      state.fullGffData = payload;
+      for (let i = 0; i < state.chromNames.length; i++) {
+        state.fullGffData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their start (number)
+          if (a.geneStart < b.geneStart) {
+            return -1;
+          } else if (a.geneStart > b.geneStart) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+      }
+      // Extraction of the every genes, their position and their chromosome in a Map <---> { name, [positon , chromosome] }
+      let arrayGeneNameListUnSort = new Map;
+      let geneListSelectedChrom = [];
+      for (let i = 0; i < state.chromNames.length; i++) {
+        for (let j = 0; j < state.fullGffData[state.chromNames[i]].length; j++) {
+          let gene = state.fullGffData[state.chromNames[i]][j];
+          arrayGeneNameListUnSort.set(gene.geneName, [gene.geneStart, state.chromNames[i]]);
+          if (state.chromNames[i] === state.selectedChrom) { // Put the genes of the selected chromosome in an other list
+            geneListSelectedChrom.push(gene.geneName);
+          }
+          state.geneListNames.push(gene.geneName)
+        }
+      }
+      state.geneList = new Map([...arrayGeneNameListUnSort].sort()); // Sort the Map by alphabetical order.
+      state.geneListChromInDisplay = [...geneListSelectedChrom]; // Update the list of the displayed chromosome's genes
+      console.log(state.geneList);
     },
     SET_NEWICK_TREE_DATA(state, payload) {
       state.newickTreeData = payload
@@ -505,7 +549,15 @@ export default new Vuex.Store({
     //  state.ntWidthInPxThresholds.set(payload['chromosome'], ntWidthCouple);
     //},
     SET_SELECTED_CHROM(state, payload) {
-      state.selectedChrom = payload
+      state.selectedChrom = payload;
+      if (state.isGffUploaded) {
+        let geneList = [];
+        for (let i = 0; i < state.fullGffData[state.selectedChrom].length; i++) {
+          let gene = state.fullGffData[state.selectedChrom][i];
+          geneList.push(gene.geneName);
+        }
+        state.geneListChromInDisplay = [...geneList];
+      }
     },
     SET_NEW_FIRST_NT_OF_DISPLAY(state, payload) {
       state.firstNtToDisplay = payload
@@ -546,6 +598,9 @@ export default new Vuex.Store({
     TURN_NEWICK_TREE_DISPLAYED_OFF(state) {
       state.isNewickTreeDisplayed = false
     },
+    SET_LOCAL_AREA_SELECTED(state, payload) {
+      state.localAreaSelected = payload
+    },
   },
   // Functions to call within the app to apply mutations to the store, asynch
   actions: {
@@ -571,6 +626,9 @@ export default new Vuex.Store({
     },
     updateGenomesInDisplaySave({commit}, genoList) {
       commit('SET_GENOMES_IN_DISPLAY_SAVE', genoList)
+    },
+    updateGeneList({commit}, geneList) {
+      commit('SET_GENE_LIST', geneList)
     },
     updateFullChromData({commit}, pavData) {
       commit('SET_FULL_CHROM_DATA', pavData)
@@ -629,6 +687,9 @@ export default new Vuex.Store({
       } else {
         commit('TURN_NEWICK_TREE_DISPLAYED_ON')
       }
+    },
+    updateLocalAreaSelected({commit}, coordinates) {
+      commit('SET_LOCAL_AREA_SELECTED', coordinates)
     },
   },
 })

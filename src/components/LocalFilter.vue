@@ -8,7 +8,7 @@
     </div>
 
     <div class="row">
-      <CollapseMenu idCollapse='collapseOptionalUpload'>
+      <CollapseMenu idCollapse='collapseOptionalUpload' :conditionShowPlus="fileLoaded === true">
         <template v-slot:title>
           Files
         </template>
@@ -48,6 +48,28 @@
         idBonus='Chrom'
     />
 
+    <div>
+      <CategoryTitle title="Jump to position"/>
+      <InputPosition
+          :lastNt="globalLastNt"
+          :displayWindowWidth="displayWindowWidth"
+          :ntWidthInPixel="ntWidthInPx"
+          :currentFirstNt="firstNt"
+          :chromList="chromNames"
+          :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"/>
+    </div>
+
+    <div v-show="isGffUploaded">
+      <CategoryTitle title="Jump to gene position"/>
+      <GenePosition
+          :lastNt="globalLastNt"
+          :displayWindowWidth="displayWindowWidth"
+          :ntWidthInPixel="ntWidthInPx"
+          :currentFirstNt="firstNt"
+          :chromList="chromNames"
+          :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"/>
+    </div>
+
     <SortTracks
         msg='Sort the tracks'
         :sortChoice="sortChoice"
@@ -58,6 +80,16 @@
     <div v-show="selectedSortMode === 'Phylogenetic tree'">
       <CategoryTitle title="Display phylogenetic tree"/>
       <NewickTree/>
+    </div>
+
+    <div v-show="selectedSortMode === 'Gene presence status'">
+      <CategoryTitle title="Search by genes"/>
+      <GeneSearchBar/>
+    </div>
+
+    <div v-show="selectedSortMode === 'Local presence/absence pattern'">
+      <CategoryTitle title="Local presence/absence pattern sort"/>
+      <LocalGenePattern/>
     </div>
 
     <CategoryTitle title="Display parameters"/>
@@ -81,19 +113,27 @@
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     /-->
 
-    <CategoryTitle title="Hollow area finder"/>
-
-    <HollowAreaFinder
-        :arrayOfPanFeatures="currentChromData"
-        :lastNt="globalLastNt"
-        :genoNames="genoNames"
-        :nbOfGenomes="nbOfGenomes"
-        :currentFirstNt="firstNt"
-        :displayWindowWidth="displayWindowWidth"
-        :ntWidthInPixel="ntWidthInPx"
-        :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
-        :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
-    />
+    <div class="row">
+      <CollapseMenu idCollapse='collapseHollowAreaFinder'>
+        <template v-slot:title>
+          Hollow area finder
+        </template>
+        <template v-slot:inside="exportedProp">
+          <HollowAreaFinder
+              :visibleStatus="exportedProp.visible"
+              :arrayOfPanFeatures="currentChromData"
+              :lastNt="globalLastNt"
+              :genoNames="genoNames"
+              :nbOfGenomes="nbOfGenomes"
+              :currentFirstNt="firstNt"
+              :displayWindowWidth="displayWindowWidth"
+              :ntWidthInPixel="ntWidthInPx"
+              :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+              :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
+          />
+        </template>
+      </CollapseMenu>
+    </div>
 
     <CategoryTitle title="Legend"/>
 
@@ -118,12 +158,20 @@ import GffFileParser from "@/components/GffFileParser";
 import NewickFileParser from "@/components/NewickFileParser";
 import CollapseMenu from "@/components/CollapseMenu";
 import NewickTree from "@/components/NewickTree";
+import GeneSearchBar from "@/components/GeneSearchBar";
 import CategoryTitle from "@/components/CategoryTitle";
+import InputPosition from "@/components/InputPosition";
+import GenePosition from "@/components/GenePosition";
+import LocalGenePattern from "@/components/LocalGenePattern";
 
 export default {
   name: 'LocalFilter',
   components: {
+    LocalGenePattern,
+    GenePosition,
+    InputPosition,
     CategoryTitle,
+    GeneSearchBar,
     NewickTree,
     NewickFileParser,
     CollapseMenu,
@@ -149,6 +197,8 @@ export default {
       ntWidthInPx: 'currentDisplayNtWidthInPx',
       sortChoice: 'sortChoice',
       selectedSortMode: 'selectedSortMode',
+      isGffUploaded: 'isGffUploaded',
+      fileLoaded: 'fileLoaded',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
@@ -234,4 +284,5 @@ export default {
   top: 15px;
   left: 20px
 }
+
 </style>
