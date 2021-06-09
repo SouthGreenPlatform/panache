@@ -7,7 +7,7 @@
         type='file'
         @change="checkExtensionFile"
     />
-    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
+    <label class="ellipsis custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
       {{fileName || labelToDisplay}}
     </label>
   </div>
@@ -105,6 +105,11 @@ export default {
 .loaderInput {
   grid-row: 2;
   align-self: center;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 </style>
