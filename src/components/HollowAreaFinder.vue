@@ -209,12 +209,12 @@ export default {
       let arrayOfConsecutivenessPerGeno = new Array(this.arrayOfPanFeatures.length);
 
       //Explore dataset to find matching hollow areas
-      this.arrayOfPanFeatures.forEach(function (d, i) {
+      this.arrayOfPanFeatures.forEach( (d, i) => {
 
         let mapFromGenoToConsec = new Map();
 
         //Map a consecTracer to every genome
-        genoNames.forEach(function (name) {
+        genoNames.forEach( (name) => {
 
           let previousCount;
           let oldStartPos;
@@ -227,7 +227,6 @@ export default {
             //... or if there is no previous data, at the very beginning
           } else {
             previousCount = 0;
-            //TODO: replace oldSartPos with global first nt in case it is not 0
             oldStartPos = 0;
           }
 
