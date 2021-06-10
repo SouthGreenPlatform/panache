@@ -37,11 +37,6 @@ export default {
       titleOfAnnotation: 'Note',
     }
   },
-  computed: {
-    self() {
-      return this;
-    }
-  },
   methods: {
     ...mapActions([
       'updateIsGffUploadedTRUE',
@@ -57,8 +52,6 @@ export default {
       //console.log({gffData});
 
       //Overall variables
-      //TODO: remove self declaration by using arrow function?
-      let self = this.self
       let annotData = [];
       let currentIdx = 0;
 
@@ -74,14 +67,14 @@ export default {
       let mapOfOverlaps = new Map();
 
       //Creates an annotation object for each gene
-      gffData.forEach(function(lineObj) {
+      gffData.forEach((lineObj) => {
 
         isNewChrom = (lineObj.seqname !== currentChrom);
 
         if (isNewChrom) {
           //Stores last annotation of previous chrom
           if (currentAnnotation !== undefined) {
-            self.storeAnnotation({
+            this.storeAnnotation({
               mapOfOverlaps,
               annotObj: currentAnnotation,
               idx: currentIdx,
@@ -106,7 +99,7 @@ export default {
             //Stores info of previous annot once everything is recorded
             if (currentAnnotation !== undefined) {
 
-              self.storeAnnotation({
+              this.storeAnnotation({
                 mapOfOverlaps,
                 annotObj: currentAnnotation,
                 idx: currentIdx,
@@ -119,8 +112,7 @@ export default {
             }
 
             //Instanciates new annotation
-            //console.log(this); --> undefined, hence using 'self' instead
-            addInfo = self.extractNameAndNote(lineObj)
+            addInfo = this.extractNameAndNote(lineObj)
 
             currentAnnotation = {
               chrom: lineObj.seqname,
@@ -226,22 +218,21 @@ export default {
     },
     //Returns a {geneName, annotation} object out of an attribute column
     findNameAndNote: function(attribute) {
-      let self = this.self;
       let geneName;
       let annotation = '';
       let addInfoList;
 
       addInfoList = attribute.split(';');
-      addInfoList.forEach(function(addInfo) {
+      addInfoList.forEach((addInfo) => {
         let keyValue = addInfo.split('=');
 
         switch (keyValue[0]) {
 
-          case self.titleOfGeneName: //using self instead of this
+          case this.titleOfGeneName:
             geneName = keyValue[1];
             break;
 
-          case self.titleOfAnnotation: //using self instead of this
+          case this.titleOfAnnotation:
             annotation = keyValue[1]
             break;
 
