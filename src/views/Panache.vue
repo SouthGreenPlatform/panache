@@ -301,6 +301,7 @@ export default {
       isGffUploaded: 'isGffUploaded',
       selectedSortMode: 'selectedSortMode',
       currentDisplayNtWidthInPx: 'currentDisplayNtWidthInPx',
+      colorScaleMaker: 'colorScaleMaker',
     }),
     ...mapGetters({
       chromData: 'chromDataInDisplay',
@@ -382,20 +383,6 @@ export default {
         //Adding selected elements to the filteredData array
         elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
 
-      }
-    },
-
-    //This should be a stored function instead, or from a module at least
-    colorScaleMaker(domain, range, scaleLinear = true) {
-      if (scaleLinear) {
-        return d3.scaleLinear()
-            .domain(domain)
-            .interpolate(d3.interpolateHcl)
-            .range(range);
-      } else {
-          return d3.scaleOrdinal()
-              .domain(domain)
-              .range(range);
       }
     },
 

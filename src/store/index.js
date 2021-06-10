@@ -39,7 +39,6 @@ export default new Vuex.Store({
     localAreaSelected: [0, 10000],
 
     // Color scales used throughout the app
-    //TODO : create the color scales right here
     colorsForPositionColorScale: [
       [0.17642634,0.09835639,0.08618555],
       [0.18231057,0.10054915,0.08071249],
@@ -312,7 +311,6 @@ export default new Vuex.Store({
     newickTreeData: [], // Array that contain the data exported from the Newick file uploaded
     isNewickTreeDisplayed: false, // Detect if the Newick tree is displayed
 
-    // Function to create color scales TODO : check other components to remove it from there
     colorScaleMaker: function(domain, range, scaleLinear = true) {
       if (scaleLinear) {
         return d3.scaleLinear()
