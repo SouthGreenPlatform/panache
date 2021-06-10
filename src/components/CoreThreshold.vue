@@ -4,6 +4,7 @@
       <div class="col-12 text-muted text-center">
         <div class="row">
           <div class="col-12">
+            <!-- TODO: Extract the shape choice from the core threshold component... -->
             <small>Shape type</small>
           </div>
         </div>

@@ -94,7 +94,6 @@
 
     <CategoryTitle title="Display parameters"/>
 
-    <!-- TODO: Extract the shape choice from the core threshold component... -->
     <CoreThreshold/>
 
     <CategoryTitle title="Zoom Level"/>

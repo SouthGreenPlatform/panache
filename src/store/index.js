@@ -323,7 +323,6 @@ export default new Vuex.Store({
               .range(range);
       }
     },
-    //Function to create pivots for domains of color scales TODO : check other components to remove it from there
     domainPivotsMaker: function(breakpointsNb, maxValue) {
       let breakpoints = [];
       for (var i = 0; i < breakpointsNb; ++i) {

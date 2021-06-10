@@ -143,23 +143,6 @@ export default {
     ...mapState({
       blockOffset: 'yOffsetOfPavBlocks',
     }),
-    /*//TODO: check if it updated after being mounted
-    pavMatrixHeight() {
-      let height = 100;
-      if (this.$refs.PanacheSvgContainer !== undefined) {
-        height = this.$refs.PanacheSvgContainer.clientHeight
-      }
-      console.log({HeightOfPavMatrix: height});
-      return height;
-    },
-    //TODO: check if it updated after being mounted
-    svgContainerWidth() {
-      let width = 100;
-      if (this.$refs.PanacheSvgContainer !== undefined) {
-        width = this.$refs.PanacheSvgContainer.clientWidth
-      }
-      return width;
-    },*/
     heightOfTotBlocks() {
       return this.blocksDimensions.height * this.genomeList.length;
     },
@@ -175,7 +158,6 @@ export default {
       return scale;
     },
     handleCyPos() {
-      //console.log({cyPos: this.blockVerticalOffsetToSliderScale(this.blockOffset)});
       return this.blockVerticalOffsetToSliderScale(this.blockOffset);
     },
   },

@@ -55,7 +55,6 @@ export default {
     defaultNtWidthInPx: {
       handler: function() {
         //Whenever the props change, the zoom value will be reset to the default value
-        //TODO: think about whether it is a good behaviour
         this.ntWidthInPixel = this.defaultNtWidthInPx;
       }
     },

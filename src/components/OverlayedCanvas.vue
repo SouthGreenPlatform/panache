@@ -130,7 +130,6 @@ export default {
       return Math.min(this.firstNtToDisplay + this.amountOfNtToDisplay, this.rightmostNt)
     },
     widthOfHandle() {
-      //TODO: check if including svgPadding in the scale is not going to break this
       return this.ntToDrawingPxPos(this.lastNtToDisplay) - this.ntToDrawingPxPos(this.firstNtToDisplay)
     },
     drawingWidth() {
