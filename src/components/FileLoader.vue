@@ -75,7 +75,12 @@ export default {
       }
     },
     emitDataURL: function(loadedFile) {
-      this.fileName = loadedFile.name;
+      let nbMaxChar = 23;
+      if (loadedFile.name.length > nbMaxChar) {
+        this.fileName = loadedFile.name.slice(0, nbMaxChar) + "...";
+      } else {
+        this.fileName = loadedFile.name;
+      }
       console.log(`File ${loadedFile.name} loaded from computer.`);
       console.log(loadedFile);
       this.$emit('file-loaded', loadedFile )
