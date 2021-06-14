@@ -73,7 +73,7 @@
 
           <!-- LIST OF THE TAGS (GENE) YOU WANT TO USE AS FILTER -->
           <div :key="componentKey">
-            <b-input-group v-for="tag in tags" :key="tag" size="sm" v-show="presenceMap.has(tag)" :prepend="presenceMap.get(tag) ? 'Presence' : 'Absence'" class="mb-2">
+            <b-input-group v-for="tag in tags" :key="tag" size="sm" v-show="presenceMap.has(tag)" :prepend="presenceMap.get(tag) ? 'Presence' : 'Absence'" class="mb-2 tagCustomCSS">
               <b-input-group-prepend is-text>
                 <!-- CHECKBOX TO CHANGE THE STATUS OF THE GENE IN THE FILTER -->
                 <b-form-checkbox
@@ -288,6 +288,14 @@ export default {
 
 .inputTag::placeholder {
   color: #495057;
+}
+
+</style>
+
+<style>
+
+.tagCustomCSS .input-group-prepend:first-child .input-group-text {
+  width: 78px !important;
 }
 
 </style>

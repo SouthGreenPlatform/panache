@@ -7,7 +7,7 @@
         type='file'
         @change="checkExtensionFile"
     />
-    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
+    <label class="ellipsis custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
       {{fileName || labelToDisplay}}
     </label>
   </div>
@@ -75,7 +75,12 @@ export default {
       }
     },
     emitDataURL: function(loadedFile) {
-      this.fileName = loadedFile.name;
+      let nbMaxChar = 23;
+      if (loadedFile.name.length > nbMaxChar) {
+        this.fileName = loadedFile.name.slice(0, nbMaxChar) + "...";
+      } else {
+        this.fileName = loadedFile.name;
+      }
       console.log(`File ${loadedFile.name} loaded from computer.`);
       console.log(loadedFile);
       this.$emit('file-loaded', loadedFile )
@@ -105,6 +110,11 @@ export default {
 .loaderInput {
   grid-row: 2;
   align-self: center;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 </style>
