@@ -233,15 +233,9 @@ export default {
     sortBlocksOnIndex(groupedData, chromList) {
       let sortedData = JSON.parse(JSON.stringify(groupedData));
       chromList.forEach(chromName => {
-        sortedData[chromName].sort(function (a,b) { // Sort the genes in every chromosomes by their index
-          if (parseInt(a.index) < parseInt(b.index)) {
-            return -1;
-          } else if (parseInt(a.index) > parseInt(b.index)) {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
+        // Sort the genes in every chromosomes by their index
+        //custom sort function, cf https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#description
+        sortedData[chromName].sort( (a,b) => Number(a.index) - Number(b.index) );
       });
       return sortedData;
     },
