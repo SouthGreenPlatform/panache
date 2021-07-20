@@ -490,18 +490,6 @@ export default new Vuex.Store({
     },
     SET_FULL_CHROM_DATA(state, payload) {
       state.fullChromData = payload;
-      for (let i = 0; i < state.chromNames.length; i++) {
-        state.fullChromData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their index
-          if (parseInt(a.index) < parseInt(b.index)) {
-            return -1;
-          } else if (parseInt(a.index) > parseInt(b.index)) {
-            return 1;
-          } else {
-            return 0;
-          }
-        });
-      }
-      console.log(state.fullChromData)
     },
     SET_FULL_GFF_DATA(state, payload) {
       state.fullGffData = payload;
@@ -535,16 +523,10 @@ export default new Vuex.Store({
     },
     SET_NEWICK_TREE_DATA(state, payload) {
       state.newickTreeData = payload
-      console.log(state.newickTreeData)
     },
     SET_NEWICK_TREE_DATA_STRING(state, payload) {
       state.newickTreeDataString = payload
-      console.log(state.newickTreeDataString)
     },
-    //ADD_NT_THRESHOLDS_TO_MAP(state, payload) {
-    //  let ntWidthCouple = {'min': payload['minNtWidth'], 'max': payload['maxNtWidth']};
-    //  state.ntWidthInPxThresholds.set(payload['chromosome'], ntWidthCouple);
-    //},
     SET_SELECTED_CHROM(state, payload) {
       state.selectedChrom = payload;
       if (state.isGffUploaded) {
@@ -576,7 +558,6 @@ export default new Vuex.Store({
     },
     SET_SELECTED_SORT_MODE(state, payload) {
       state.selectedSortMode = payload
-      console.log(state.selectedSortMode);
     },
     PUSH_IN_SORT_CHOICE(state, payload) {
       if (!state.sortChoice.includes(payload)) {

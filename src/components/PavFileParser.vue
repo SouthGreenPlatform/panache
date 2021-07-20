@@ -76,6 +76,9 @@ export default {
       console.log('Grouping Data');
       let chromGroupedData = this.groupDataPerKey_inHouse(improvedData, 'Chromosome');
 
+      //Sort Data based on index
+      this.sortBlocksOnIndex(chromGroupedData, CHROMOSOME_NAMES);
+
       //Send data to store
       this.updatePavData(chromGroupedData);
       console.log('Data sent to store');
@@ -226,6 +229,21 @@ export default {
       //  ...
       //}
       return d3.group(iterable, d => d[keyToNest])
+    },
+    sortBlocksOnIndex(groupedData, chromList) {
+      let sortedData = JSON.parse(JSON.stringify(groupedData));
+      chromList.forEach(chromName => {
+        sortedData[chromName].sort(function (a,b) { // Sort the genes in every chromosomes by their index
+          if (parseInt(a.index) < parseInt(b.index)) {
+            return -1;
+          } else if (parseInt(a.index) > parseInt(b.index)) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+      });
+      return sortedData;
     },
     ...mapActions([
       'updateGenomesInDisplaySave',
