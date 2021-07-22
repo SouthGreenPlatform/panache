@@ -41,7 +41,7 @@ export default {
     idBonus: {
       type: String,
     },
-    allowedExtension: {
+    allowedExtensions: {
       type: Array,
     }
   },
@@ -62,15 +62,14 @@ export default {
         console.log({loadedFile});
         console.log(typeof loadedFile);
         if (typeof loadedFile !== 'undefined') {
-          if (this.allowedExtension !== undefined) {
-            if (this.allowedExtension.includes(loadedFile.name.split('.').pop())) {
+          if (this.allowedExtensions !== undefined) {
+            let fileExtension = loadedFile.name.split('.').pop();
+            if (this.allowedExtensions.includes(fileExtension)) {
               this.emitDataURL(loadedFile);
             } else {
-              alert("ERROR : Bad file extension.\nThe right extension is : " + this.allowedExtension);
+              alert("ERROR : Bad file extension.\nThe right extension is : " + this.allowedExtensions);
             }
-          } else if (this.allowedExtension === undefined) {
-            this.emitDataURL(loadedFile);
-          }
+          } else { this.emitDataURL(loadedFile) }
         }
       }
     },

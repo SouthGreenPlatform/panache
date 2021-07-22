@@ -2,7 +2,7 @@
 
   <FileLoader
       :labelToDisplay="'Optional gff'"
-      :allowedExtension="['gff']"
+      :allowedExtensions="['gff']"
       :idBonus="'GffFile'"
       @file-loaded="parseGffToAnnotationObjects"
   />

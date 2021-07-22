@@ -2,7 +2,7 @@
 
   <FileLoader
       :labelToDisplay="'Optional Newick'"
-      :allowedExtension="['nwk']"
+      :allowedExtensions="['nwk', 'tree', 'txt']"
       :idBonus="'NewickFile'"
       @file-loaded="readNewickFile"
   />
