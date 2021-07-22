@@ -15,7 +15,7 @@ import {mapActions, mapState} from "vuex";
     data() {
       return {
         displayed: false,
-        treeWidth: 100,
+        treeWidth: 30,
         groupSave: {
           type: Array,
           default: [],
