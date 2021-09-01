@@ -181,6 +181,10 @@ export default {
       'updateSelectedChrom',
       'updateSelectedSortMode',
       'updateNewickTreeData',
+      'updateGenomesInDisplaySave',
+      'updateFileLoaded',
+      'updateIsGffUploadedTRUE',
+      'pushSortModeInSortChoice',
     ]),
     async updateBananaData() {
 
@@ -198,6 +202,11 @@ export default {
         'FHIA', 'Itinerans', 'Kole', 'Lidi', 'MasKirana', 'Pahang', 'PKW',
         'Tanduk', 'TongkatLangitMaluku'
       ]);
+      this.updateGenomesInDisplaySave([
+        'Bile', 'BSK30', 'Calcutta', 'Ensete01', 'EnseteBedadit', 'EnseteDerea',
+        'FHIA', 'Itinerans', 'Kole', 'Lidi', 'MasKirana', 'Pahang', 'PKW',
+        'Tanduk', 'TongkatLangitMaluku'
+      ]);
 
       //Send datasets to store
       let pavDataPromise = d3.json('./bananachePAV_preformatted.json');
@@ -205,8 +214,14 @@ export default {
 
       let [pavData, gffData] = await Promise.all( [pavDataPromise, gffDataPromise] );
 
+      //Section dedicated to sending the pav updates to the store
       this.updateFullChromData(pavData);
+      this.updateFileLoaded(true); //Useful for...?
+
+      //Section dedicated to sending the gff updates to the store
       this.updateFullGffData(gffData);
+      this.updateIsGffUploadedTRUE(); //Useful for...? Why has at a difference syntaxe than for PAV?
+      this.pushSortModeInSortChoice('Gene presence status'); // Add the choice to sort by gene presence status with a search bar
 
       //Disable loadingSpinner in Panache view
       this.updateDisplayLoadingStatus();
