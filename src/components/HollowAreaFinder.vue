@@ -36,76 +36,80 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <div class="alert alert-info p-1 text-center">
-          <small>There are <b>{{ nbOfRegionsFound }}</b> regions matching these criteria</small>
-        </div>
-      </div>
-    </div>
-
-    <div class="row text-center">
-      <div class="col-6 border-right pb-2">
-        <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsBefore }}</h6>
-        <small>Before</small>
-      </div>
-      <div class="col-6">
-        <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsAfter }}</h6>
-        <small>After</small>
-      </div>
-    </div>
-    <hr class="mt-0 mb-2">
-    <div class="row text-center">
-      <div class="col-12">
-        <h6 class="mb-0 font-weight-bold">{{ targetedPosNt }}</h6>
-        <small>Targeted position</small>
-      </div>
-    </div>
-
-    <div class="row mt-2">
-      <div class="col-6 pr-0">
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
-                @click="skipBackward"
-                :disabled="leftmostAreaIsReached">
-              <b-icon icon="skip-backward-fill"></b-icon>
-            </button>
-          </div>
-          <div class="input-group-text distance-area-msg">
-            <small>{{ distanceToPreviousAreaMsg }}</small>
-          </div>
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
-                @click="goBackward"
-                :disabled="leftmostAreaIsReached">
-              <b-icon icon="play-fill" rotate="180"></b-icon>
-            </button>
+    <div v-show="!(paramAbsenceRate === 0 && paramConsecutiveBlock === 0)">
+      <div class="row">
+        <div class="col-12">
+          <div class="alert alert-info p-1 text-center">
+            <small>There are <b>{{ nbOfRegionsFound }}</b> regions matching these criteria</small>
           </div>
         </div>
       </div>
-      <div class="col-6 pl-0">
-        <div class="input-group input-group-sm mb-3">
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
-                @click="goForward"
-                :disabled="rightmostAreaIsReached">
-              <b-icon icon="play-fill"></b-icon>
-            </button>
+
+      <div class="row text-center">
+        <div class="col-6 border-right pb-2">
+          <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsBefore }}</h6>
+          <small>Before</small>
+        </div>
+        <div class="col-6">
+          <h6 class="mb-0 font-weight-bold">{{ nbOfRegionsAfter }}</h6>
+          <small>After</small>
+        </div>
+      </div>
+      <hr class="mt-0 mb-2">
+      <div class="row text-center">
+        <div class="col-12">
+          <h6 class="mb-0 font-weight-bold">{{ targetedPosNt }}</h6>
+          <small>Targeted position</small>
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-6 pr-0">
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
+                  @click="skipBackward"
+                  :disabled="leftmostAreaIsReached">
+                <b-icon icon="skip-backward-fill"></b-icon>
+              </button>
+            </div>
+            <div class="input-group-text distance-area-msg noBorderRadius">
+              <small>{{ distanceToPreviousAreaMsg }}</small>
+            </div>
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': leftmostAreaIsReached}"
+                  @click="goBackward"
+                  :disabled="leftmostAreaIsReached">
+                <b-icon icon="play-fill" rotate="180"></b-icon>
+              </button>
+            </div>
           </div>
-          <div class="input-group-text distance-area-msg">
-            <small>{{ distanceToNextAreaMsg }}</small>
-          </div>
-          <div class="input-group-prepend">
-            <button
-                :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
-                @click="skipForward"
-                :disabled="rightmostAreaIsReached">
-              <b-icon icon="skip-forward-fill"></b-icon>
-            </button>
+        </div>
+        <div class="col-6 pl-0">
+          <div class="input-group input-group-sm mb-3">
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                  class="noBorderRadius"
+                  @click="goForward"
+                  :disabled="rightmostAreaIsReached">
+                <b-icon icon="play-fill"></b-icon>
+              </button>
+            </div>
+            <div class="input-group-text distance-area-msg noBorderRadius">
+              <small>{{ distanceToNextAreaMsg }}</small>
+            </div>
+            <div class="input-group-prepend">
+              <button
+                  :class="{'btn btn-secondary btn-sm': true, 'not-allowed': rightmostAreaIsReached}"
+                  class="borderRadius-right"
+                  @click="skipForward"
+                  :disabled="rightmostAreaIsReached">
+                <b-icon icon="skip-forward-fill"></b-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -178,6 +182,10 @@ export default {
       type: Number,
       default: 5
     },
+    visibleStatus: {
+      type: Boolean,
+      default: false,
+    }
   },
   data() {
     return {
@@ -185,6 +193,8 @@ export default {
       paramConsecutiveBlock: 2,
       targetedPosNt: Number(), //Linked to center of screen if possible,
       targetIsChangedInternally: false,
+      sparseArrayOfNext: [],
+      sparseArrayOfPrevious: [],
     }
   },
   computed: {
@@ -199,12 +209,12 @@ export default {
       let arrayOfConsecutivenessPerGeno = new Array(this.arrayOfPanFeatures.length);
 
       //Explore dataset to find matching hollow areas
-      this.arrayOfPanFeatures.forEach(function (d, i) {
+      this.arrayOfPanFeatures.forEach( (d, i) => {
 
         let mapFromGenoToConsec = new Map();
 
         //Map a consecTracer to every genome
-        genoNames.forEach(function (name) {
+        genoNames.forEach( (name) => {
 
           let previousCount;
           let oldStartPos;
@@ -217,7 +227,6 @@ export default {
             //... or if there is no previous data, at the very beginning
           } else {
             previousCount = 0;
-            //TODO: replace oldSartPos with global first nt in case it is not 0
             oldStartPos = 0;
           }
 
@@ -374,12 +383,6 @@ export default {
 
       return sparseArray;
     },
-    sparseArrayOfNext() { //Shallow copy of next portion
-      return this.sparseArrayOfMatChingIndices.slice(this.targetedPosNt, this.sparseArrayOfMatChingIndices.length)
-    },
-    sparseArrayOfPrevious() { //Shallow copy of previous portion
-      return this.sparseArrayOfMatChingIndices.slice(0, this.targetedPosNt + 1)
-    },
     sparseArrayOfPrevious_reversed() {
       let shallowCopy = this.sparseArrayOfPrevious.slice();
       shallowCopy.reverse();
@@ -486,6 +489,18 @@ export default {
       let floatTarget = (2 * this.currentFirstNt + this.pxToNt(this.displayWindowWidth)) / 2;
       this.targetedPosNt = Math.floor(floatTarget);
     },
+    targetedPosNt() {
+      if (this.visibleStatus) {
+        this.sparseArrayOfNext = this.sparseArrayOfMatChingIndices.slice(this.targetedPosNt, this.sparseArrayOfMatChingIndices.length);
+        this.sparseArrayOfPrevious = this.sparseArrayOfMatChingIndices.slice(0, this.targetedPosNt + 1);
+      }
+    },
+    sparseArrayOfMatChingIndices() {
+      if (this.visibleStatus) {
+        this.sparseArrayOfNext = this.sparseArrayOfMatChingIndices.slice(this.targetedPosNt, this.sparseArrayOfMatChingIndices.length);
+        this.sparseArrayOfPrevious = this.sparseArrayOfMatChingIndices.slice(0, this.targetedPosNt + 1);
+      }
+    }
   },
   methods: {
     ntToPx(ntAmount) {
@@ -573,6 +588,20 @@ export default {
 
 
 <style>
+
+.borderRadius-left {
+  border-top-left-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}
+
+.borderRadius-right {
+  border-top-right-radius: .25rem !important;
+  border-bottom-right-radius: .25rem !important;
+}
+
+.noBorderRadius {
+  border-radius: 0px !important;
+}
 
 .textLabel {
   font: 10px sans-serif;

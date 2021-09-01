@@ -1,21 +1,8 @@
 <template>
   <div>
-    <div class="row">
-      <div class="col-1">-</div>
-      <div class="col-9">
-        <!--By default, range inputs “snap” to integer values. To change this, you can specify a step value. -->
-        <input
-          type="range"
-          :id="id"
-          :min="smallestNtWidthInPx"
-          :max="largestNtWidthInPx"
-          v-model="ntWidthInPixel"
-          :step="stepBetweenNtWidthInPx"
-        >
-        <!-- CAUTION: v-model on range element returns a String object! -->
-      </div>
-      <div class="col-1">+</div>
-    </div>
+    <b-input-group size="sm" prepend="–" append="+" class="mb-2 noBorder">
+      <b-form-input class="noBorder" type="range" :id="id" :min="smallestNtWidthInPx" :max="largestNtWidthInPx" :step="stepBetweenNtWidthInPx" v-model="ntWidthInPixel"></b-form-input>
+    </b-input-group>
   </div>
 </template>
 
@@ -45,12 +32,10 @@ export default {
   },
 
   data() {
-
     return {
       ntWidthInPixel: this.largestNtWidthInPx,
     }
   },
-
   computed: {
     defaultNtWidthInPx() {
       return (this.smallestNtWidthInPx + this.largestNtWidthInPx) / 2;
@@ -62,21 +47,17 @@ export default {
       return Number(this.ntWidthInPixel);
     }
   },
-
   created() {
   },
   mounted() {
   },
-
   watch: {
     defaultNtWidthInPx: {
       handler: function() {
         //Whenever the props change, the zoom value will be reset to the default value
-        //TODO: think about whether it is a good behaviour
         this.ntWidthInPixel = this.defaultNtWidthInPx;
       }
     },
-
     //update stored zoom level if any
     numericalNtWidthToStore: {
       immediate: true,
@@ -86,17 +67,28 @@ export default {
     },
 
   },
-
   methods: {
   },
 }
 </script>
 
-
 <style scoped>
 
-.row{
+.row {
   justify-content: center;
+}
+
+</style>
+
+<style>
+
+.noBorder  {
+  border: none !important;
+}
+
+.zoomSlider > .input-group > .input-group-append > .input-group-text, .zoomSlider > .input-group > .input-group-prepend > .input-group-text {
+  border: none !important;
+  background-color: white !important;
 }
 
 </style>

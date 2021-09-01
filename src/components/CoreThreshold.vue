@@ -1,9 +1,10 @@
 <template>
   <div>
-    <div class="row mb-1">
+    <div v-show="isGffUploaded" class="row mb-1">
       <div class="col-12 text-muted text-center">
         <div class="row">
           <div class="col-12">
+            <!-- TODO: Extract the shape choice from the core threshold component... -->
             <small>Shape type</small>
           </div>
         </div>
@@ -87,6 +88,7 @@
 
 <script>
 import * as d3 from "d3";
+import {mapState} from "vuex";
 
 export default {
   name: 'CoreThreshold',
@@ -145,7 +147,10 @@ export default {
     thresholdAsPercent() {return `${Math.round(this.threshold*100)}%`},
     selectedShape() {
       return this.$store.state.displayShapeSelected;
-    }
+    },
+    ...mapState({
+      isGffUploaded: 'isGffUploaded',
+    }),
   },
   methods: {
     selectShape(type) {

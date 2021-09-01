@@ -3,6 +3,14 @@ Panache is a web-based interface designed for the visualization of linearized pa
 
 ![Snapshot of banana data in Panache](imagesReadMe/panacheBanana_clipped.png?raw=true "Banana data in Panache")
 
+## Live demo
+An instance of Panache is currently running at [https://panache.ird.fr/](https://panache.ird.fr/) where anyone can upload its own data.
+
+To see an instance with an existing dataset (Banana Pangenome by Rijzaani H. et al, 2021), you can visit the [Banana Genome Hub](https://banana-genome-hub.southgreen.fr/content/panache).
+
+## Citation
+Eloi Durant,  François Sabot, Matthieu Conte and Mathieu Rouard. Panache: a Web Viewer for Linearized Pangenomes. BioRxiv. 2021.04.27.441597; doi: https://doi.org/10.1101/2021.04.27.441597 
+
 ## Installation
 
 ### With Docker
@@ -16,7 +24,7 @@ The visualization could be served on a custom IP when specified inside the nginx
 
 ### Without Docker
 
-If you wish to use another web server directly with the production version of files instead, you will have to run ```npm install```, followed with ```npm install @vue/cli```. Finally make sure to run ```npm run build``` to have the production version files available, they will be all stored in the file called 'dist', ready to be served.
+If you wish to use another web server directly with the production version of files instead, you will have to run ```npm install```, followed with ```npm install @vue/cli```. Finally make sure to run ```npm run build``` to have the production version files available, they will be all stored in the directory called 'dist', ready to be served.
 
 ## Main features and documentation
 
@@ -32,16 +40,17 @@ With every block ordered on a single string, it becomes easier to parse the repr
 
 ![Visual explanation of pangenome linearization](imagesReadMe/pangenomeLinearization.png?raw=true "Pangenome linearization")
 
-## Live demo
+## Data inputs
+File examples can be find in the `public` folder, and detailed information are available in the [Files and Formats](https://github.com/SouthGreenPlatform/panache/wiki/Files-&-formats) section of the wiki
 
-Coming soon...
+## Full Documentation
 
-## Citation
-A paper for Panache is currently being written. The corresponding reference will be updated when available.
+See the [Wiki](https://github.com/SouthGreenPlatform/panache/wiki) for full documentation, examples and other information.
 
 ## Acknowledgement
 
 Panache would not have come to light without the help of Romain Basset (transition to Vue JS framework) and Mel Florance (Docker container and various enhancements).
+Thank you to Gaetan Droc for setting up Panache on the Banana Genome Hub.
 
 ## License
 Panache is published under the terms of the [MIT LICENSE](./LICENSE)

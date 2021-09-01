@@ -16,6 +16,7 @@
 
 <script>
 import * as d3 from "d3";
+import {mapState} from "vuex";
 
 export default {
   name: 'DropDownChoice',
@@ -36,6 +37,12 @@ export default {
       default: ''
     },
   },
+  computed: {
+    ...mapState({
+      selectedChrom: 'selectedChrom',
+      chromList: 'chromNames',
+    }),
+  },
   data() {
     return {
     }
@@ -50,6 +57,13 @@ export default {
   watch: {
     chosen: function() {
       console.log(this.chosen);
+    },
+    selectedChrom() {
+      for (let i = 0; i < this.chromList.length; i++) {
+        if (this.chromList[i] === this.selectedChrom) {
+          document.getElementById("dropDownButton_Chrom").selectedIndex = i;
+        }
+      }
     }
   }
 }
@@ -69,6 +83,7 @@ export default {
   align-self: center;
   margin-bottom: 0;
 }
+
 #dropDownButton {
   grid-row: 2;
   align-self: center;

@@ -23,28 +23,30 @@
     </g>
     <!-- LEGENDS AND BG PANELS FOR CHROMOSOME NAMES -->
     <g ref='genomeLegend'
-        id='genomeLegend'
-        @mouseover="function() {eventFadeOutRef('genomeLegend')}"
-        @mouseout="function() {eventFadeInRef('genomeLegend')}">
-            <rect
-              ref='rectToWatchInPavMatrix'
-              x='0'
-              y='0'
-              :height="pavMatrixHeight+1"
-              :width="genoLegendPanelWidth"
-              :fill="`url(#bgLabelGradient_left)`"
-            />
-            <text v-for="(genome, index) in genomeList"
-              :key="`genomeLabel_${genome}`"
-              x='2'
-              :y="applyOffset(index * blocksDimensions.height)"
-              dominant-baseline='hanging'
-              font-family='sans-serif'
-              font-size='10px'
-              text-anchor='start'
-              >
-              {{genome}}
-            </text>
+       id='genomeLegend'
+       :transform="writeTranslate(0, -this.blockOffset)"
+       @mouseover="function() {eventFadeOutRef('genomeLegend')}"
+       @mouseout="function() {eventFadeInRef('genomeLegend')}">
+          <rect
+            ref='rectToWatchInPavMatrix'
+            x='0'
+            y='0'
+            :transform="writeTranslate(0, this.blockOffset)"
+            :height="pavMatrixHeight + 1"
+            :width="genoLegendPanelWidth"
+            :fill="`url(#bgLabelGradient_left)`"
+          />
+          <text v-for="(genome, index) in genomeList"
+            :key="`genomeLabel_${genome}`"
+            x='2'
+            :y="(index * blocksDimensions.height) + 3"
+            dominant-baseline='hanging'
+            font-family='sans-serif'
+            font-size='10px'
+            text-anchor='start'
+            >
+            {{genome}}
+          </text>
       </g>
 
     <!-- VERTICAL SLIDER FOR THE PAV MATRIX -->
@@ -61,6 +63,7 @@
 
 <script>
 import * as d3 from 'd3';
+import {mapActions, mapState} from "vuex";
 
 export default {
   name: 'PavMatrix.vue',
@@ -98,10 +101,8 @@ export default {
     let longestSizeOfGenoName = Math.max(...this.genomeList.map( d => d.length));
     let genoLegendPanelWidth = longestSizeOfGenoName * 10;
 
-
     return {
       //heightOfTotBlocks: heightOfTotBlocks,
-      blockOffset: 0,
       stops: [
         {
           offset: 0,
@@ -139,23 +140,9 @@ export default {
     }
   },
   computed: {
-    /*//TODO: check if it updated after being mounted
-    pavMatrixHeight() {
-      let height = 100;
-      if (this.$refs.PanacheSvgContainer !== undefined) {
-        height = this.$refs.PanacheSvgContainer.clientHeight
-      }
-      console.log({HeightOfPavMatrix: height});
-      return height;
-    },
-    //TODO: check if it updated after being mounted
-    svgContainerWidth() {
-      let width = 100;
-      if (this.$refs.PanacheSvgContainer !== undefined) {
-        width = this.$refs.PanacheSvgContainer.clientWidth
-      }
-      return width;
-    },*/
+    ...mapState({
+      blockOffset: 'yOffsetOfPavBlocks',
+    }),
     heightOfTotBlocks() {
       return this.blocksDimensions.height * this.genomeList.length;
     },
@@ -171,7 +158,6 @@ export default {
       return scale;
     },
     handleCyPos() {
-      //console.log({cyPos: this.blockVerticalOffsetToSliderScale(this.blockOffset)});
       return this.blockVerticalOffsetToSliderScale(this.blockOffset);
     },
   },
@@ -204,11 +190,14 @@ export default {
     delete this.resizeObserver
   },
   methods: {
+    ...mapActions ([
+      'updateYOffsetOfPavBlocks',
+    ]),
     updateBlockOffset(mousePos) {
-      this.blockOffset = this.blockVerticalOffsetToSliderScale.invert(mousePos)
+      this.updateYOffsetOfPavBlocks(this.blockVerticalOffsetToSliderScale.invert(mousePos));
     },
     applyOffset(initialPos) {
-      return initialPos - this.blockOffset
+      return initialPos - this.blockOffset;
     },
     ntToPx(ntAmount) {
       return ntAmount * this.displaySizeOfNt

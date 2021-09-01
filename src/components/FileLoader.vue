@@ -2,11 +2,12 @@
   <div class="custom-file">
     <input
         class='custom-file-input form-control-sm'
+        :disabled="isNewickTreeDisplayed"
         :id="`fileSelector_${idBonus}`"
         type='file'
-        @change="emitDataURL"
+        @change="checkExtensionFile"
     />
-    <label class="custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
+    <label class="ellipsis custom-file-label col-form-label-sm" :for="`fileSelector_${idBonus}`">
       {{fileName || labelToDisplay}}
     </label>
   </div>
@@ -28,6 +29,8 @@
 <script>
 //import * as d3 from "d3";
 
+import {mapState} from "vuex";
+
 export default {
   name: 'FileLoader',
   props: {
@@ -37,7 +40,15 @@ export default {
     },
     idBonus: {
       type: String,
+    },
+    allowedExtensions: {
+      type: Array,
     }
+  },
+  computed: {
+    ...mapState({
+      isNewickTreeDisplayed: 'isNewickTreeDisplayed',
+    }),
   },
   data() {
     return {
@@ -45,30 +56,33 @@ export default {
     }
   },
   methods: {
-    //Adapted from https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#Using_object_URLs
-    emitDataURL: function(event) {
-
+    checkExtensionFile: function(event) {
       if (event.target.files.length > 0) {
-
         let loadedFile = event.target.files[0];
         console.log({loadedFile});
         console.log(typeof loadedFile);
-
-        if (typeof loadedFile != 'undefined') {
-          this.fileName = loadedFile.name;
-          console.log(`File ${loadedFile.name} loaded from computer.`);
-
-          //Turn file into accessible data URL
-          //let dataURL = window.URL.createObjectURL(loadedFile);
-
-          //this.$emit('file-loaded', { dataURL } )
-
-          //TODO: update file loader to work directly with file objects, not the dataURL
-          //this.$store.dispatch('setIsLoading', true);
-          console.log(loadedFile);
-          this.$emit('file-loaded', loadedFile )
+        if (typeof loadedFile !== 'undefined') {
+          if (this.allowedExtensions !== undefined) {
+            let fileExtension = loadedFile.name.split('.').pop();
+            if (this.allowedExtensions.includes(fileExtension)) {
+              this.emitDataURL(loadedFile);
+            } else {
+              alert("ERROR : Bad file extension.\nThe right extension is : " + this.allowedExtensions);
+            }
+          } else { this.emitDataURL(loadedFile) }
         }
       }
+    },
+    emitDataURL: function(loadedFile) {
+      let nbMaxChar = 23;
+      if (loadedFile.name.length > nbMaxChar) {
+        this.fileName = loadedFile.name.slice(0, nbMaxChar) + "...";
+      } else {
+        this.fileName = loadedFile.name;
+      }
+      console.log(`File ${loadedFile.name} loaded from computer.`);
+      console.log(loadedFile);
+      this.$emit('file-loaded', loadedFile )
     },
   },
   watch: {
@@ -95,6 +109,11 @@ export default {
 .loaderInput {
   grid-row: 2;
   align-self: center;
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 </style>

@@ -22,12 +22,17 @@
         :colorScaleRainbow="colorScaleRainbow"
         :colorScaleSimilarities="colorScaleSimilarities"
       />
-      <AnnotationTrack
+      <AnnotationTrack v-show="isGffUploaded"
         class='annotationTrack'
         :annotToDisplay="filteredGffData"
         :firstNtToDisplay="firstNt"
         :lastNtToDisplay="lastNt"
         :trackWidth="displayWindowWidth"
+      />
+      <PresencePatternSelector
+          v-show="selectedSortMode === 'Local presence/absence pattern'"
+          :minValue="0"
+          :maxValue="displayWindowWidth"
       />
       <div id='responsivePavDiv' :style="respPavDivWrapper">
         <HollowAreaTrack
@@ -93,12 +98,14 @@ import PavMatrix from '@/components/PavMatrix.vue';
 import Tracks from '@/components/Tracks.vue';
 import HollowAreaTrack from '@/components/HollowAreaTrack.vue';
 import AnnotationTrack from '@/components/AnnotationTrack.vue';
+import PresencePatternSelector from "@/components/PresencePatternSelector.vue";
 
 import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Panache',
   components: {
+    PresencePatternSelector,
     LoadingSpinner,
     OverlayedCanvas,
     //PavMatrixAndTracks,
@@ -109,11 +116,6 @@ export default {
   },
   data() {
     return {
-
-      //Used to define the rainbow color Scale
-      pseudoRainbowList: [d3.rgb(0, 90, 200), d3.rgb(0, 200, 250),
-        d3.rgb(120, 50, 40), d3.rgb(190, 140, 60), d3.rgb(240, 240, 50),
-        d3.rgb(160, 250,130)],
 
       //Variables specific to PavMatrixAndTracks
       //TODO: Dims should be responsive, depending on the available space!
@@ -136,9 +138,6 @@ export default {
     },
     coreThreshold() {
       return this.coreValue /100 * this.nbOfGenomes //Should not be data dependant...
-    },
-    pivotsForRainbow() {
-      return this.domainPivotsMaker(this.pseudoRainbowList.length, this.lastBlockStart);
     },
     highestRepNumber() {
       return Math.max(...this.chromData.map(d => d.SimilarBlocks.split(";").length))
@@ -295,15 +294,19 @@ export default {
       firstNt: 'firstNtToDisplay',
       lastNt: 'lastNtToDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
-      colorScaleRainbow: 'pseudoRainbowColorScale',
       colorScaleSimilarities: 'greenColorScale',
       colorScaleDisp: 'blueColorScale',
       colorScaleCore: 'orangeColorScale',
       coordsOfHollowAreas: 'coordsOfHollowAreas',
+      isGffUploaded: 'isGffUploaded',
+      selectedSortMode: 'selectedSortMode',
+      currentDisplayNtWidthInPx: 'currentDisplayNtWidthInPx',
+      colorScaleMaker: 'colorScaleMaker',
     }),
     ...mapGetters({
       chromData: 'chromDataInDisplay',
       gffData: 'gffDataInDisplay',
+      colorScaleRainbow: 'positionRainbowColorScale',
       colorScaleFunction: 'colorForFunctionElement',
       displayWindowWidth: 'displayWindowWidth',
       nbOfGenomes: 'nbOfGenomesInDisplay',
@@ -317,9 +320,6 @@ export default {
   watch: {
 
     //Data that will change the Color Scales
-    pivotsForRainbow: function() {
-      this.$store.state.pseudoRainbowColorScale = this.colorScaleMaker(this.pivotsForRainbow, this.pseudoRainbowList);
-    },
     highestRepNumber: function() {
       this.$store.state.greenColorScale = this.colorScaleMaker([1, this.highestRepNumber], [d3.hcl(120, 2, 97), d3.hcl(125, 85, 54)]);
     },
@@ -384,30 +384,6 @@ export default {
         elementsWithIndexesWithinWindow.forEach( d => this.filteredData.push(d) );
 
       }
-    },
-
-    //This should be a stored function instead, or from a module at least
-    colorScaleMaker(domain, range, scaleLinear = true) {
-      if (scaleLinear) {
-        return d3.scaleLinear()
-            .domain(domain)
-            .interpolate(d3.interpolateHcl)
-            .range(range);
-      } else {
-          return d3.scaleOrdinal()
-              .domain(domain)
-              .range(range);
-      }
-    },
-
-    //Again this could be from a module instead
-    domainPivotsMaker(breakpointsNb, maxValue) {
-      let breakpoints = [];
-
-      for (var i = 0; i < breakpointsNb; ++i) {
-          breakpoints.push(Math.round( (i / (breakpointsNb - 1) ) * maxValue));
-      }
-      return(breakpoints);
     },
 
     //Get Actions from the store

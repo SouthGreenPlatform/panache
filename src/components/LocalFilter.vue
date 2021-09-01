@@ -14,16 +14,55 @@
         idBonus='Chrom'
     />
 
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Display parameters</h6>
-      </div>
+    <div>
+      <CategoryTitle title="Jump to position"/>
+      <InputPosition
+          :lastNt="globalLastNt"
+          :displayWindowWidth="displayWindowWidth"
+          :ntWidthInPixel="ntWidthInPx"
+          :currentFirstNt="firstNt"
+          :chromList="chromNames"
+          :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"/>
     </div>
 
-    <!-- TODO: Extract the shape choice from the core threshold component... -->
+    <div v-show="isGffUploaded">
+      <CategoryTitle title="Jump to gene position"/>
+      <GenePosition
+          :lastNt="globalLastNt"
+          :displayWindowWidth="displayWindowWidth"
+          :ntWidthInPixel="ntWidthInPx"
+          :currentFirstNt="firstNt"
+          :chromList="chromNames"
+          :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"/>
+    </div>
+
+    <SortTracks
+        msg='Sort the tracks'
+        :sortChoice="sortChoice"
+        :updateCurrentSortMode="function(sortMode) { updateSelectedSortMode(sortMode) }"
+        idBonus='SortMode'
+    />
+
+    <div v-show="selectedSortMode === 'Phylogenetic tree'">
+      <CategoryTitle title="Display phylogenetic tree"/>
+      <NewickTree/>
+    </div>
+
+    <div v-show="selectedSortMode === 'Gene presence status'">
+      <CategoryTitle title="Search by genes"/>
+      <GeneSearchBar/>
+    </div>
+
+    <div v-show="selectedSortMode === 'Local presence/absence pattern'">
+      <CategoryTitle title="Local presence/absence pattern sort"/>
+      <LocalGenePattern/>
+    </div>
+
+    <CategoryTitle title="Display parameters"/>
+
     <CoreThreshold/>
 
-    <div class="mt-1"><small>Zoom Level</small></div>
+    <CategoryTitle title="Zoom Level"/>
 
     <MatrixOptimizedZoom
         class='zoomSlider'
@@ -33,28 +72,28 @@
     />
 
     <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Hollow area finder</h6>
-      </div>
+      <CollapseMenu idCollapse='collapseHollowAreaFinder'>
+        <template v-slot:title>
+          Hollow area finder
+        </template>
+        <template v-slot:inside="exportedProp">
+          <HollowAreaFinder
+              :visibleStatus="exportedProp.visible"
+              :arrayOfPanFeatures="currentChromData"
+              :lastNt="globalLastNt"
+              :genoNames="genoNames"
+              :nbOfGenomes="nbOfGenomes"
+              :currentFirstNt="firstNt"
+              :displayWindowWidth="displayWindowWidth"
+              :ntWidthInPixel="ntWidthInPx"
+              :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
+              :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
+          />
+        </template>
+      </CollapseMenu>
     </div>
 
-    <HollowAreaFinder
-        :arrayOfPanFeatures="currentChromData"
-        :lastNt="globalLastNt"
-        :genoNames="genoNames"
-        :nbOfGenomes="nbOfGenomes"
-        :currentFirstNt="firstNt"
-        :displayWindowWidth="displayWindowWidth"
-        :ntWidthInPixel="ntWidthInPx"
-        :updateGlobalFirstNt="function(payload) { updateFirstNtToDisplay(payload) }"
-        :updateGlobalCoordOfHollowAreas="function(payload) { updateCoordsOfHollowAreas(payload) }"
-    />
-
-    <div class="row">
-      <div class="col-12">
-        <h6 class="mt-3">Legend</h6>
-      </div>
-    </div>
+    <CategoryTitle title="Legend"/>
 
     <PavMatrixLegend
         class="pavLegend"
@@ -69,6 +108,14 @@ import DropDownChoice from '@/components/DropDownChoice.vue';
 import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
+import SortTracks from "@/components/SortTracks";
+import CollapseMenu from "@/components/CollapseMenu";
+import NewickTree from "@/components/NewickTree";
+import GeneSearchBar from "@/components/GeneSearchBar";
+import CategoryTitle from "@/components/CategoryTitle";
+import InputPosition from "@/components/InputPosition";
+import GenePosition from "@/components/GenePosition";
+import LocalGenePattern from "@/components/LocalGenePattern";
 
 import {mapState, mapGetters, mapActions} from 'vuex';
 
@@ -79,10 +126,17 @@ export default {
   components: {
     CoreThreshold,
     MatrixOptimizedZoom,
-//    MatrixPavZoom,
     DropDownChoice,
     PavMatrixLegend,
     HollowAreaFinder,
+    SortTracks,
+    CollapseMenu,
+    NewickTree,
+    GeneSearchBar,
+    CategoryTitle,
+    InputPosition,
+    GenePosition,
+    LocalGenePattern,
   },
   props: {},
   data() {
@@ -94,6 +148,10 @@ export default {
       firstNt: 'firstNtToDisplay',
       genoNames: 'genomeListInDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
+      sortChoice: 'sortChoice',
+      selectedSortMode: 'selectedSortMode',
+      isGffUploaded: 'isGffUploaded',
+      fileLoaded: 'fileLoaded',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
@@ -121,6 +179,8 @@ export default {
       'updateFullGffData',
       'updateGenomesInDisplay',
       'updateSelectedChrom',
+      'updateSelectedSortMode',
+      'updateNewickTreeData',
     ]),
     async updateBananaData() {
 
@@ -212,4 +272,5 @@ export default {
   top: 15px;
   left: 20px
 }
+
 </style>

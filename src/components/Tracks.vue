@@ -133,8 +133,6 @@
           </text>
       </g>
 
-      <!-- TODO: ADD VERTICAL SLIDER TO GO THROUGH CHROMOSOMES-->
-
     </svg>
   </div>
 
@@ -145,6 +143,7 @@
 
 <script>
 import * as d3 from 'd3';
+import {mapState} from "vuex";
 
 export default {
   name: 'Tracks.vue',
@@ -194,30 +193,27 @@ export default {
     },
   },
   data() {
-    //TODO: Remove self using arrow function instead
-    let self = this;
-
-    let colorScaleThresholdBased = function(data) {
+    let colorScaleThresholdBased = (data) => {
       let value = data.presenceCounter;
 
-      if (value >= self.coreThreshold) {
-        return self.$store.state.orangeColorScale(value);
+      if (value >= this.coreThreshold) {
+        return this.$store.state.orangeColorScale(value);
       } else {
-        return self.$store.state.blueColorScale(value);
+        return this.$store.state.blueColorScale(value);
       }
     };
 
-    let simFill = function(d, chromName) {
-      let color = d3.hcl(self.colorScaleSimilarities.range()[1]);
+    let simFill = (d, chromName) => {
+      let color = d3.hcl(this.colorScaleSimilarities.range()[1]);
       color.h = 180;
       //Only the lightness changes between similarity boxes
       color.l = 100-(d[`copyPptionInChr_${chromName}`]*100*0.75);
       return color;
     }
 
-    let simStroke = function(d) {
+    let simStroke = (d) => {
       //stroke color depends on number of occurences of similarities
-      let color = d3.hcl(self.colorScaleSimilarities(d.SimilarBlocks.split(";").length));
+      let color = d3.hcl(this.colorScaleSimilarities(d.SimilarBlocks.split(";").length));
       color.l -= 20;
       color.h = 180;
       return color;
@@ -268,14 +264,14 @@ export default {
         },
         {
           name: 'panChrom_rainbowed',
-          colorScale: function(d) {
-            return self.colorScaleRainbow(d.FeatureStart)
+          colorScale: (d) => {
+            return this.colorScaleRainbow(d.FeatureStart)
           }
         },
         {
           name: 'panChrom_similarCount',
-          colorScale: function(d) {
-            return self.colorScaleSimilarities(d.SimilarBlocks.split(";").length)
+          colorScale: (d) => {
+            return this.colorScaleSimilarities(d.SimilarBlocks.split(";").length)
           }
         }
       ],
@@ -313,6 +309,9 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      genomeList: 'genomeListInDisplay',
+    }),
     mainTracksTotHeight() {
       return 3 * (this.blocksDimensions.height + 3)
     },
@@ -363,15 +362,13 @@ export default {
   },
   mounted() {
     //Applying the drag event on the track-overlay rect
-    //TODO: get rid of the 'self' with arrow functions
-    let self = this;
     d3.select(this.$refs['simBoxesConditionalSlider'])
-      .call(d3.drag().on("start drag", function() {
+      .call(d3.drag().on("start drag", () => {
         //console.log({yPosOfMouse: d3.event.y});
-        self.updateBlockOffset(d3.event.y);
+        this.updateBlockOffset(d3.event.y);
       }))
-      .on("mouseover", function() {self.eventFadeInRef('simBoxesConditionalSlider')})
-      .on("mouseout", function() {self.eventFadeOutRef('simBoxesConditionalSlider')});
+      .on("mouseover", () => {this.eventFadeInRef('simBoxesConditionalSlider')})
+      .on("mouseout", () => {this.eventFadeOutRef('simBoxesConditionalSlider')});
 
   },
   updated() {
@@ -382,21 +379,18 @@ export default {
 
     //Wait until update is fully finished
     this.$nextTick(function() {
-      //TODO: Replace self using arrow functions
-      let self = this;
 
       //Add the mouseoer events
-      self.tracks.forEach( function(track) {
-        self.filteredData.forEach( function(block, idxInArray) {
-          //console.log(self.$refs[`block${idxInArray}_${track.name}`]);
+      this.tracks.forEach( (track) => {
+        this.filteredData.forEach( (block, idxInArray) => {
           //display tooltip on hovering, based on data
-          d3.select(self.$refs[`block${idxInArray}_${track.name}`][0]).on('mouseover', function() {
-            self.eventShowTooltip(`block${idxInArray}_${track.name}`, block)
+          d3.select(this.$refs[`block${idxInArray}_${track.name}`][0]).on('mouseover', () => {
+            this.eventShowTooltip(`block${idxInArray}_${track.name}`, block)
           });
 
           //reset tooltip and block color
-          d3.select(self.$refs[`block${idxInArray}_${track.name}`][0]).on('mouseout', function() {
-            self.eventHideTooltip(`block${idxInArray}_${track.name}`)
+          d3.select(this.$refs[`block${idxInArray}_${track.name}`][0]).on('mouseout', () => {
+            this.eventHideTooltip(`block${idxInArray}_${track.name}`)
           });
         });
       });
@@ -488,7 +482,7 @@ export default {
       switch(true) { //Function that will display information depending on the selected row
 
         case ("panChrom_coreVSdispensable" === parentNodeId):
-          textToDisplay = "This block appears in " + data.presenceCounter + " selected genome(s)" //Text content
+          textToDisplay = data.presenceCounter + " genome(s) (" + Math.round((data.presenceCounter/this.genomeList.length) * 100) + "%) owns this block" //Text content
           break;
 
         case ("panChrom_rainbowed" === parentNodeId):
