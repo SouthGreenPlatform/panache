@@ -12,6 +12,7 @@
         <template v-slot:title>
           Files
         </template>
+
         <template v-slot:outside>
           <div class="mb-1">
             <!-- I should check if the output is what I truly expect from those two components vs what the store needs-->
@@ -25,19 +26,26 @@
             />
           </div>
         </template>
+
         <template v-slot:inside>
+
           <div class="mb-1">
             <GffFileParser
                 :chromList="chromNames"
                 :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
             />
           </div>
+
           <div class="">
             <NewickFileParser
                 :genomeList="genoNames"
+                :updateNewickTree="function(nwkTree) { updatePhylogenyTree(nwkTree) }"
+                :updateNewickString="function(nwkString) { updatePhylogenyString(nwkString) }"
             />
           </div>
+
         </template>
+
       </CollapseMenu>
     </div>
 
@@ -221,7 +229,8 @@ export default {
       'updateGenomesInDisplay',
       'updateSelectedChrom',
       'updateSelectedSortMode',
-      'updateNewickTreeData',
+      'updatePhylogenyTree',
+      'updatePhylogenyString',
     ]),
   }
 }
