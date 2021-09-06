@@ -642,10 +642,10 @@ export default new Vuex.Store({
     updateSelectedSortMode({commit}, selectedSortMode) {
       commit('SET_SELECTED_SORT_MODE', selectedSortMode)
     },
-    updateNewickTreeData({commit}, newickTreeData) {
+    updatePhylogenyTree({commit}, newickTreeData) {
       commit('SET_NEWICK_TREE_DATA', newickTreeData)
     },
-    updateNewickTreeDataString({commit}, newickTreeDataString) {
+    updatePhylogenyString({commit}, newickTreeDataString) {
       commit('SET_NEWICK_TREE_DATA_STRING', newickTreeDataString)
     },
     pushSortModeInSortChoice({commit}, sortMode) {

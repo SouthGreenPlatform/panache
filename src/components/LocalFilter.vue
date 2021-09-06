@@ -180,11 +180,12 @@ export default {
       'updateGenomesInDisplay',
       'updateSelectedChrom',
       'updateSelectedSortMode',
-      'updateNewickTreeData',
       'updateGenomesInDisplaySave',
       'updateFileLoaded',
       'updateIsGffUploadedTRUE',
       'pushSortModeInSortChoice',
+      'updatePhylogenyTree',
+      'updatePhylogenyString',
     ]),
     async updateBananaData() {
 
@@ -222,6 +223,11 @@ export default {
       this.updateFullGffData(gffData);
       this.updateIsGffUploadedTRUE(); //Useful for...? Why has at a difference syntaxe than for PAV?
       this.pushSortModeInSortChoice('Gene presence status'); // Add the choice to sort by gene presence status with a search bar
+
+      //Section dedicated to the newick phylogeny sent to the store
+      this.updatePhylogenyTree(["Ensete01","EnseteDerea","EnseteBedadit","TongkatLangitMaluku","Itinerans","PKW","FHIA","Bile","Tanduk","Kole","MasKirana","Calcutta","Lidi","Pahang","BSK30"]);
+      this.updatePhylogenyString("((Ensete01,(EnseteDerea,EnseteBedadit)),((TongkatLangitMaluku,(Itinerans,(PKW,(((FHIA,(Bile,Tanduk)),((Kole,MasKirana),(Calcutta,(Lidi,(Pahang,BSK30)))))))))));");
+      this.pushSortModeInSortChoice('Phylogenetic tree'); // Add the choice to sort by phylogenetic tree
 
       //Disable loadingSpinner in Panache view
       this.updateDisplayLoadingStatus();

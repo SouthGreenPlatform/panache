@@ -22,8 +22,13 @@ export default {
       type: Array,
       required: true
     },
-    genomeListNewickTree: {
-      type: Array,
+    updateNewickTree: {
+      type: Function,
+      required: true
+    },
+    updateNewickString: {
+      type: Function,
+      required: true
     },
   },
   computed: {
@@ -33,8 +38,6 @@ export default {
   },
   methods: {
     ...mapActions ([
-        'updateNewickTreeData',
-        'updateNewickTreeDataString',
         'pushSortModeInSortChoice',
     ]),
     /**
@@ -50,7 +53,7 @@ export default {
       reader.addEventListener("load", () => { // When the reader is loaded
         newickTreeData = reader.result;
         console.log({newickTreeData});
-        this.updateNewickTreeDataString(newickTreeData); // Update the store with the new newick data extracted from the file
+        this.updateNewickString(newickTreeData); // Update the store with the new newick data extracted from the file
         parsedNewickData = parser.parse_newick(newickTreeData); // Parse the data with the function parse_newick of the biojs-io-newick into a newick tree
         console.log({parsedNewickData});
         let list = this.recursiveSearchChild(parsedNewickData); // Push the genomes in a list in function of their position in the tree.
@@ -94,7 +97,7 @@ export default {
      */
     compareNewickListToGenomeList(list) {
       if (this.arrayCompare(this.genomeList, list)) {
-        this.updateNewickTreeData(list); // Update updateNewickTreeData with the list
+        this.updateNewickTree(list); // Update updateNewickTree with the list
         this.pushSortModeInSortChoice( 'Phylogenetic tree'); // Add the choice to sort by phylogenetic tree
       }
     },
