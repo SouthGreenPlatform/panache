@@ -81,7 +81,6 @@ export default {
 
       //Send data to store
       this.updatePavData(chromGroupedData);
-      console.log(JSON.stringify(chromGroupedData));
       console.log('Data sent to store');
       this.updateFileLoaded(true);
     },
