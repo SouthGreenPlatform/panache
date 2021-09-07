@@ -81,6 +81,7 @@ export default {
 
       //Send data to store
       this.updatePavData(chromGroupedData);
+      console.log(JSON.stringify(chromGroupedData));
       console.log('Data sent to store');
       this.updateFileLoaded(true);
     },
@@ -231,13 +232,12 @@ export default {
       return d3.group(iterable, d => d[keyToNest])
     },
     sortBlocksOnIndex(groupedData, chromList) {
-      let sortedData = JSON.parse(JSON.stringify(groupedData));
       chromList.forEach(chromName => {
         // Sort the genes in every chromosomes by their index
         //custom sort function, cf https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#description
-        sortedData[chromName].sort( (a,b) => Number(a.index) - Number(b.index) );
+        groupedData[chromName].sort( (a,b) => parseInt(a.index) - parseInt(b.index) );
       });
-      return sortedData;
+      return groupedData;
     },
     ...mapActions([
       'updateGenomesInDisplaySave',
