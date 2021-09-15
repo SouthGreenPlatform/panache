@@ -3,7 +3,7 @@
     <div class="container-fluid h-100">
       <div class="row h-100">
         <div class="bg-white h-100 side-panel">
-          <local-filter v-if="this.$route.name === 'Panache'"/>
+          <local-filter v-if="viewIsPanache"/>
         </div>
         <div class="content-column">
           <!-- Router view to display -->
@@ -32,6 +32,9 @@ export default {
         display: 'grid',
         'grid-template-columns': `${this.optionPanelWidth}px 1fr`,
       }
+    },
+    viewIsPanache() {
+      return (this.$route.name === 'Panache')
     },
     ...mapState({
       optionPanelWidth: 'optionPanelWidth',
