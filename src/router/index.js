@@ -8,12 +8,9 @@ Vue.use(VueRouter)
   const routes = [
   {
     path: '/',
+    alias: ['/panache', '/Panache'], //Could have been redirections to other routes
     name: 'Panache',
     component: Panache,
-  },
-  {
-    path: '/panache',
-    redirect: { name: 'Panache' },
   },
 ]
 
