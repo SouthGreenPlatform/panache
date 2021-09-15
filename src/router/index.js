@@ -7,22 +7,14 @@ Vue.use(VueRouter)
 
   const routes = [
   {
-    path: '/panache',
-    name: 'Panache',
-    component: Panache
-  },
-  {
     path: '/',
     name: 'Panache',
-    component: Panache
+    component: Panache,
   },
-  {  //I have no idea what this ones does, I'll have to check
-    path: '/local',
-    name: 'Panache',
-    props: true,
-
-    component: () => import('../views/Panache.vue')
-  }
+  {
+    path: '/panache',
+    redirect: { name: 'Panache' },
+  },
 ]
 
 const router = new VueRouter({
