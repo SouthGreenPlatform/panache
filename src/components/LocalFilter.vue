@@ -147,6 +147,16 @@
     <PavMatrixLegend
         class="pavLegend"
     />
+
+    <CategoryTitle title="More..."/>
+
+    <div>
+      Check out our wiki on <b-link href='https://github.com/SouthGreenPlatform/panache/wiki' target="_blank">Github</b-link>!
+    </div>
+
+
+
+
   </div>
 </template>
 
