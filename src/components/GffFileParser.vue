@@ -378,6 +378,8 @@ export default {
 
         // Deletion of the redundant property "Chromosome" which is already
         // determined by the main group.
+        // eslint-disable-next-line no-debugger
+        debugger;
         dataGroupedPerKey[key].forEach(d => delete d[keyToNest]);
       });
 

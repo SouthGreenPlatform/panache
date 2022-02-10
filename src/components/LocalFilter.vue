@@ -180,6 +180,7 @@ import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
 import LocalGenePattern from "@/components/LocalGenePattern";
+import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 export default {
   name: 'LocalFilter',
@@ -228,13 +229,16 @@ export default {
     })
   },
   methods: {
+    updateFullChromData(data) {
+      nonReactiveDataStore.fullChromeData = data;
+    },
     //Get Actions from the store
     ...mapActions([
       'updateChromNames',
       'updateCoordsOfHollowAreas',
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
-      'updateFullChromData',
+      // 'updateFullChromData',
       'updateFullGffData',
       'updateGenomesInDisplay',
       'updateSelectedChrom',

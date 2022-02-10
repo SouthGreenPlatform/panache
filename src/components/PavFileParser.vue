@@ -1,5 +1,5 @@
 <template>
-    <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataToJson"/>
+  <FileLoader :idBonus="'PavFile'" @file-loaded="parseDataToJson"/>
 </template>
 
 <script>
@@ -97,13 +97,13 @@ export default {
       return data;
     },
     rewriteDsvColumns(dsvData, chromNames) {
-
+      const chromCount = chromNames.reduce((agg, name) => { agg[name] = 0; return agg;}, {});
       console.log('Rewriting pav blocks as objects', {chromNames});
-      let newData = dsvData.map( d => this.turnLineIntoObject(d, chromNames));
+      let newData = dsvData.map( d => this.turnLineIntoObject(d, chromNames, chromCount));
       return newData;
 
     },
-    turnLineIntoObject(dataLine, chromNames) {
+    turnLineIntoObject(dataLine, chromNames, chromCount) {
 
       //defines and affects variables by deconstructing
       let {
@@ -113,76 +113,152 @@ export default {
         'Sequence_IUPAC_Plus': sequence, // eslint-disable-line no-unused-vars
         'SimilarBlocks': similarBlocks,
         'Function': geneOnto, // eslint-disable-line no-unused-vars
-        ...rest //pav matrix, defined as opposed to previous variables
+        // ...rest //pav matrix, defined as opposed to previous variables
       } = dataLine;
 
       //INFO: '// eslint-disable-line no-unused-vars' tells eslint to not
       //consider any unused var on the matching line
 
       //removes ill-named chromosome column, it will be replaced later
-      delete dataLine["#Chromosome"];
+      // delete dataLine["#Chromosome"];
 
       //prepares blockCount variable
-      let pavList = [0].concat(Object.values(rest));
-      let blockCount = pavList.reduce(function(acc, val) {
-        // if val > 0 or val is String, presenceStatus <-- 1
-        let presenceStatus = (Number(val) != 0 ? 1 : 0);
-        return acc + presenceStatus;
-      });
+      // let pavList = [0].concat(Object.values(rest));
+      // let blockCount = pavList.reduce((acc, val) => {
+      //   // if val > 0 or val is String, presenceStatus <-- 1
+      //   let presenceStatus = (Number(val) != 0 ? 1 : 0);
+      //   return acc + presenceStatus;
+      // });
+// eslint-disable-next-line no-debugger
+//       debugger;
 
+
+      let blockCount = Object.keys(dataLine).reduce((acc, key) => {
+        if (/^Geno\d+$/.test(key)) {
+          // if val > 0 or val is String, presenceStatus <-- 1
+          let presenceStatus = (dataLine[key] !== '1' ? 0 : 1);
+          return acc + presenceStatus;
+        } else if (!['#Chromosome', 'FeatureStart', 'FeatureStop', 'Sequence_IUPAC_Plus', 'SimilarBlocks', 'Function'].includes(key)) {
+          console.log('key', key, 'val', dataLine[key], 'acc', acc);
+        }
+        return acc;
+
+      }, 0);
+
+      // let blockCount = Object.values(rest).reduce((acc, val) => {
+      //   // if val > 0 or val is String, presenceStatus <-- 1
+      //   let presenceStatus = (val !== '1' ? 0 : 1);
+      //   return acc + presenceStatus;
+      // }, 0);
+
+      // if (blockCount !== blockCount2) {
+
+// eslint-disable-next-line no-debugger
+//         debugger;
+
+      // }
       //prepares calculation of copy proportion in every chromosome
-      let listOfRepeats = this. getListOfRepeats(similarBlocks);
-      let chromsWithRepeat = this.getRepeatsOrigin(listOfRepeats);
-      let countOfRepeats = this.getRepeatCountPerChrom({ listOfChromWithRepeats: chromsWithRepeat, chromList: chromNames });
+      // let listOfRepeats = this. getListOfRepeats(similarBlocks);
+      // let chromsWithRepeat = this.getRepeatsOrigin(listOfRepeats);
+
+
+      // console.log('');
+      // console.log('similarBlocks', similarBlocks);
+      // console.log('listOfRepeats', listOfRepeats);
+      // console.log('chromsWithRepeat', chromsWithRepeat);
+
+      // console.log('');
+
+      const chromsWithRepeat = similarBlocks.match(/([^;:]+)/g);
+      // console.log('mySplit', mySplit);
+      // console.log('firstSplit', firstSplit);
+      // console.log('');
+
+      // if (firstSplit !== chromsWithRepeat[0] || chromsWithRepeat.length > 1 || mySplit.length > 2) {
+      // eslint-disable-next-line no-debugger
+      // debugger;
+      // }
+
+      // let countOfRepeats = this.getRepeatCountPerChrom({ listOfChromWithRepeats: chromsWithRepeat, chromList: chromNames });
+      let countOfRepeats = this.getRepeatCountPerChrom(chromsWithRepeat, chromNames, {...chromCount});
       let maxCount = Math.max(...Object.values(countOfRepeats));
 
       //writes line as a new object, with additional columns
-      let lineAsObject = Object.assign({
-        'index': ntStart,
-        'presenceCounter': blockCount,
-        'Chromosome': chromOfLine
-      }, dataLine);
+      // let lineAsObject = Object.assign({
+      //   'index': ntStart,
+      //   'presenceCounter': blockCount,
+      //   'Chromosome': chromOfLine
+      // }, dataLine);
+      dataLine.index = ntStart;
+      dataLine.presenceCounter = blockCount;
+      dataLine.Chromosome = chromOfLine;
+
+      // let lineAsObject = Object.assign(dataLine, {
+      //   'index': ntStart,
+      //   'presenceCounter': blockCount,
+      //   'Chromosome': chromOfLine,
+      //   ...dataLine
+      // });
+
+      // let lineAsObject = {
+      //   'index': ntStart,
+      //   'presenceCounter': blockCount,
+      //   'Chromosome': chromOfLine,
+      //   ...dataLine
+      // };
 
       //Adds copy proportion as new property for every chromosome
-      chromNames.forEach(function(chrom) {
-        let pption = 0;
+      for (let chrom of chromNames) {
+        dataLine[`copyPptionInChr_${chrom}`] = maxCount > 0 ? countOfRepeats[chrom] / maxCount : 0 ; //pption;
+      }
+      // chromNames.forEach((chrom) => {
+      //   // let pption = 0;
+      //   //
+      //   // if (maxCount > 0) {
+      //   //   pption = countOfRepeats[chrom] / maxCount;
+      //   // }
+      //
+      //   dataLine[`copyPptionInChr_${chrom}`] = maxCount > 0 ? countOfRepeats[chrom] / maxCount : 0 ; //pption;
+      //   // lineAsObject[`copyPptionInChr_${chrom}`] = maxCount > 0 ? countOfRepeats[chrom] / maxCount : 0 ; //pption;
+      //   //lineAsObject[`copyPptionInChr_${i}`] = pption;
+      // });
 
-        if (maxCount > 0) {
-          pption = countOfRepeats[`${chrom}`] / maxCount;
-        }
-
-        lineAsObject[`copyPptionInChr_${chrom}`] = pption;
-        //lineAsObject[`copyPptionInChr_${i}`] = pption;
-      });
-
-      return lineAsObject;
+      return dataLine;
+      // return lineAsObject;
     },
     getListOfRepeats(writtenRepeats, sep=';') {
       return writtenRepeats.split(sep);
     },
     getRepeatsOrigin(listOfRepeats, sep=':') {
-      let listOfOrigins = [];
-      listOfRepeats.forEach( function(copy) {
-        let chrom = copy.split(sep)[0];
-        listOfOrigins.push(chrom);
-      });
+      // let listOfOrigins = [];
+      // listOfRepeats.forEach( (copy) => {
+      //   let chrom = copy.split(sep)[0];
+      //   listOfOrigins.push(chrom);
+      // });
 
-      return listOfOrigins;
+      return listOfRepeats.map( copy => copy.split(sep)[0]);
+
+      // return listOfOrigins;
     },
-    getRepeatCountPerChrom({ listOfChromWithRepeats, chromList }) {
+    getRepeatCountPerChrom(chromsWithRepeat, chromNames, dictOfCounts) {
 
       //initiates counts at 0
-      let dictOfCounts = {};
-      chromList.forEach(function(chromName) {
-        dictOfCounts[chromName] = 0;
-      });
+      // let dictOfCounts = {};
+      // chromNames.forEach((chromName) => {
+      //   dictOfCounts[chromName] = 0;
+      // });
 
       //does +=1 when a chrom has a repeat
-      listOfChromWithRepeats.forEach(function(chromName) {
+      for (let chromName of chromsWithRepeat) {
         if (undefined != dictOfCounts[chromName]) {
           dictOfCounts[chromName] += 1;
         }
-      });
+      }
+      // chromsWithRepeat.forEach((chromName) => {
+      //   if (undefined != dictOfCounts[chromName]) {
+      //     dictOfCounts[chromName] += 1;
+      //   }
+      // });
 
       return dictOfCounts;
     },
@@ -197,15 +273,23 @@ export default {
       let dataGroupedPerKey = {};
       // .map() must not be used here as we do not want an array as output
       // but an object!!! (Do we?)
-      setOfKey.forEach(function(key) {
-
+      for (let key of setOfKey) {
         dataGroupedPerKey[key] =
-          iterable.filter(d => d[keyToNest] === key);
-
-        // Deletion of the redundant property "Chromosome" which is already
-        // determined by the main group.
-        dataGroupedPerKey[key].forEach(d => delete d[keyToNest]);
-      });
+            iterable.filter(d => d[keyToNest] === key);
+      }
+      // setOfKey.forEach((key) => {
+      //
+      //   dataGroupedPerKey[key] =
+      //       iterable.filter(d => d[keyToNest] === key);
+      //
+      //   // Deletion of the redundant property "Chromosome" which is already
+      //   // determined by the main group.
+      //
+      //   // TODO CWS TESTING REMOVE DELETE
+      //   // eslint-disable-next-line no-debugger
+      //   // debugger;
+      //   // dataGroupedPerKey[key].forEach(d => delete d[keyToNest]);
+      // });
 
       return dataGroupedPerKey;
     },
@@ -216,8 +300,8 @@ export default {
       //  ...]
 
       let nestedData = d3.nest()
-        .key(d => d[keyToNest])
-        .entries(iterable);
+          .key(d => d[keyToNest])
+          .entries(iterable);
 
       return nestedData;
     },
@@ -231,11 +315,14 @@ export default {
       return d3.group(iterable, d => d[keyToNest])
     },
     sortBlocksOnIndex(groupedData, chromList) {
-      chromList.forEach(chromName => {
-        // Sort the genes in every chromosomes by their index
-        //custom sort function, cf https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#description
+      for (let chromName of chromList) {
         groupedData[chromName].sort( (a,b) => parseInt(a.index) - parseInt(b.index) );
-      });
+      }
+      // chromList.forEach(chromName => {
+      //   // Sort the genes in every chromosomes by their index
+      //   //custom sort function, cf https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#description
+      //   groupedData[chromName].sort( (a,b) => parseInt(a.index) - parseInt(b.index) );
+      // });
       return groupedData;
     },
     ...mapActions([
