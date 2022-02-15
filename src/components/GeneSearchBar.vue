@@ -171,7 +171,7 @@ export default {
         let geneStatus = [...this.presenceMap.values()][i]; // Get the gene's status
         let genePosition = gene[0]; // Get the gene's position
         let geneChrom = gene[1]; // Get the gene's chromosome
-        let geneListChrom = [...nonReactiveDataStore.fullChromeData[geneChrom]]; // Get the gene's chromosome's gene list
+        let geneListChrom = [...nonReactiveDataStore.fullChromData[geneChrom]]; // Get the gene's chromosome's gene list
         for (let j = 0; j < geneListChrom.length; j++) { // Full gene list exploration
           if (parseInt(geneListChrom[j].FeatureStart) - 1 === genePosition) { // Verify if the gene position match the gene.FeatureStart in the gene list
             for (let k = 0; k < this.genomeList.length; k++) { // If that the case then : full genome list exploration

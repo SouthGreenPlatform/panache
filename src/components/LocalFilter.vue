@@ -230,7 +230,7 @@ export default {
   },
   methods: {
     updateFullChromData(data) {
-      nonReactiveDataStore.fullChromeData = data;
+      nonReactiveDataStore.fullChromData = data;
     },
     //Get Actions from the store
     ...mapActions([

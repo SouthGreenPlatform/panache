@@ -339,7 +339,7 @@ export default new Vuex.Store({
       return state.genomeListInDisplay.length
     },
     chromDataInDisplay: state => {
-      const fullChromData = nonReactiveDataStore.fullChromeData;
+      const fullChromData = nonReactiveDataStore.fullChromData;
 
       //console.log('Within chromDataInDisplay', {chromNames: state.chromNames, fullSet: fullChromData, selectedChrom:state.selectedChrom, firstChrom:fullChromData[state.selectedChrom]})
       if (fullChromData[state.selectedChrom] === undefined || fullChromData[state.selectedChrom][0] === undefined) {

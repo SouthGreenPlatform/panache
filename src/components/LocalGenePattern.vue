@@ -76,7 +76,7 @@ export default {
 
       // Search the genes that match the selected area
       let geneBetweenValues = [];
-      let selectedChromData = nonReactiveDataStore.fullChromeData[this.selectedChrom]; // Get the data of the chromosome in display
+      let selectedChromData = nonReactiveDataStore.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
       this.leftValue = Math.round(this.pxToNt(this.localAreaSelected[0]));
       this.rightValue = Math.round(this.pxToNt(this.localAreaSelected[1]));
       for (let i = 0; i < selectedChromData.length; i++) { // Check every gene of the chromosome
