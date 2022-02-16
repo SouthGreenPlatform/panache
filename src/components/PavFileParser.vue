@@ -129,8 +129,8 @@ export default {
       //   let presenceStatus = (Number(val) != 0 ? 1 : 0);
       //   return acc + presenceStatus;
       // });
-// eslint-disable-next-line no-debugger
-//       debugger;
+
+//
 
 
       let blockCount = Object.keys(dataLine).reduce((acc, key) => {
@@ -153,8 +153,8 @@ export default {
 
       // if (blockCount !== blockCount2) {
 
-// eslint-disable-next-line no-debugger
-//         debugger;
+
+//
 
       // }
       //prepares calculation of copy proportion in every chromosome
@@ -175,8 +175,8 @@ export default {
       // console.log('');
 
       // if (firstSplit !== chromsWithRepeat[0] || chromsWithRepeat.length > 1 || mySplit.length > 2) {
-      // eslint-disable-next-line no-debugger
-      // debugger;
+
+      //
       // }
 
       // let countOfRepeats = this.getRepeatCountPerChrom({ listOfChromWithRepeats: chromsWithRepeat, chromList: chromNames });
@@ -286,8 +286,8 @@ export default {
       //   // determined by the main group.
       //
       //   // TODO CWS TESTING REMOVE DELETE
-      //   // eslint-disable-next-line no-debugger
-      //   // debugger;
+      //
+      //   //
       //   // dataGroupedPerKey[key].forEach(d => delete d[keyToNest]);
       // });
 

@@ -313,7 +313,7 @@ export default new Vuex.Store({
     newickTreeData: [], // Array that contain the data exported from the Newick file uploaded
     isNewickTreeDisplayed: false, // Detect if the Newick tree is displayed
 
-    colorScaleMaker: function(domain, range, scaleLinear = true) {
+    colorScaleMaker: (domain, range, scaleLinear = true) => {
       if (scaleLinear) {
         return d3.scaleLinear()
             .domain(domain)
@@ -325,7 +325,7 @@ export default new Vuex.Store({
               .range(range);
       }
     },
-    domainPivotsMaker: function(breakpointsNb, maxValue) {
+    domainPivotsMaker: (breakpointsNb, maxValue) => {
       let breakpoints = [];
       for (var i = 0; i < breakpointsNb; ++i) {
           breakpoints.push(Math.round( (i / (breakpointsNb - 1) ) * maxValue));
@@ -434,7 +434,7 @@ export default new Vuex.Store({
     //Rainbow of color in case function diversity is 1
     correspondancePosColor: (state, getters) => {
       let colorMap = new Map();
-      getters.chromDataInDisplay.forEach( function(d, i) {
+      getters.chromDataInDisplay.forEach( (d, i) => {
         colorMap.set(d['FeatureStart'], d3.interpolateRainbow( (i%14) /14))
       });
 
@@ -445,11 +445,11 @@ export default new Vuex.Store({
       let functionToReturn;
 
       if (getters.functionDiversity.length >= 2) {
-        functionToReturn = function(dataObject) {
+        functionToReturn = (dataObject) => {
           return getters.functionColorScale(dataObject['Function'])
         }
       } else {
-        functionToReturn = function(dataObject) {
+        functionToReturn = (dataObject) => {
           return getters.correspondancePosColor.get(dataObject['FeatureStart'])
         }
       }
@@ -498,7 +498,7 @@ export default new Vuex.Store({
     SET_FULL_GFF_DATA(state, payload) {
       state.fullGffData = payload;
       for (let i = 0; i < state.chromNames.length; i++) {
-        state.fullGffData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their start (number)
+        state.fullGffData[state.chromNames[i]].sort((a,b) => { // Sort the genes in every chromosomes by their start (number)
           if (a.geneStart < b.geneStart) {
             return -1;
           } else if (a.geneStart > b.geneStart) {

@@ -187,8 +187,8 @@ export default {
   updated() {
   },
   destroyed () {
-    // eslint-disable-next-line no-debugger
-    debugger;
+
+
     delete this.resizeObserver
   },
   methods: {
