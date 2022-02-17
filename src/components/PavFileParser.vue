@@ -113,7 +113,7 @@ export default {
         'Sequence_IUPAC_Plus': sequence, // eslint-disable-line no-unused-vars
         'SimilarBlocks': similarBlocks,
         'Function': geneOnto, // eslint-disable-line no-unused-vars
-        // ...rest //pav matrix, defined as opposed to previous variables
+        ...rest //pav matrix, defined as opposed to previous variables
       } = dataLine;
 
       //INFO: '// eslint-disable-line no-unused-vars' tells eslint to not
@@ -133,15 +133,15 @@ export default {
 //
 
 
-      let blockCount = Object.keys(dataLine).reduce((acc, key) => {
-        if (/^Geno\d+$/.test(key)) {
+      let blockCount = Object.values(rest).reduce((acc, val) => {
+        // if (/^Geno\d+$/.test(key)) {
           // if val > 0 or val is String, presenceStatus <-- 1
-          let presenceStatus = (dataLine[key] !== '1' ? 0 : 1);
+          let presenceStatus = (Number(val) != 0 ? 1 : 0);
           return acc + presenceStatus;
-        } else if (!['#Chromosome', 'FeatureStart', 'FeatureStop', 'Sequence_IUPAC_Plus', 'SimilarBlocks', 'Function'].includes(key)) {
-          console.log('key', key, 'val', dataLine[key], 'acc', acc);
-        }
-        return acc;
+        // } else if (!['#Chromosome', 'FeatureStart', 'FeatureStop', 'Sequence_IUPAC_Plus', 'SimilarBlocks', 'Function'].includes(key)) {
+        //   console.log('key', key, 'val', dataLine[key], 'acc', acc);
+        // }
+        // return acc;
 
       }, 0);
 
