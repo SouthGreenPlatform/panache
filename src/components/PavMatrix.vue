@@ -187,6 +187,8 @@ export default {
   updated() {
   },
   destroyed () {
+
+
     delete this.resizeObserver
   },
   methods: {
