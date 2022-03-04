@@ -48,8 +48,6 @@ def convertPav(pavFileToParse):
     pavData.rename(columns={"#Chromosome": "Chromosome"}, inplace=True)
     pavData.Chromosome = pavData.Chromosome.astype(str)
 
-    print("After rename", pavData.head())
-
     # Defines the list/set of chromosome names
     CHROMOSOME_NAMES = set(pavData.Chromosome.unique())
 
@@ -73,13 +71,15 @@ def convertPav(pavFileToParse):
     FUNCTION_DIVERSITY = list(pavData.Function.unique())
 
     # Rewrite data with correct column names and bonus columns
+    print('Parsing and rewriting pav blocks')
     overridePavData(pavData, INITIAL_GENOMES_NAMES, CHROMOSOME_NAMES)
-    print("After line rewritten", pavData.head())
 
     # Sort data per FeatureStart
+    print('Sorting Data')
     sortDfByStartPos(pavData)
 
     # Group data per chromosome, to have multiple subdatasets, into a dict!!!
+    print('Grouping Data')
     groupedPavDict = groupPav(pavData, CHROMOSOME_NAMES)
 
     return groupedPavDict, INITIAL_GENOMES_NAMES, CHROMOSOME_NAMES, FUNCTION_DIVERSITY
@@ -88,8 +88,6 @@ def overridePavData(pavDf, genoNames, chromNames):
     """
     Modifies pav dataframe to replace the current value of 'index' with 'FeatureStart'
     """
-
-    print('Parsing and rewriting pav blocks')
 
     # Initialize empty columns
     pavDf['index'] = 0
@@ -168,13 +166,13 @@ def groupPav(df, chromNames):
     """
     Groups the per-chromosome subdatasets into a dict of dicts
     """
-    print('Grouping Data')
     groups = df.groupby(df.Chromosome)
     groupedPavData = {}
+    #Write subgroups as dict, in record format (ie. one row after the other)
     for idx, chrom in enumerate(chromNames):
-        groupedPavData[chrom] = groups.get_group(chrom).to_dict()
+        groupedPavData[chrom] = groups.get_group(chrom).to_dict('records')
+        print(f"Grouped chromosome {idx+1}/{len(chromNames)}")
 
-    print(groupedPavData)
     return groupedPavData
 
 def writePavAsJson(dictOfDicts, outputPavName):
@@ -186,6 +184,7 @@ def writePavAsJson(dictOfDicts, outputPavName):
     outputPavFile = open(outputPavName, "w")
     outputPavFile.write(jsonStr)
     outputPavFile.close()
+    print(f"Pav Data written as JSON, in {outputPavName}")
 
 ################################################################################
 
