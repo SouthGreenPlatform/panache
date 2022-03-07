@@ -4,6 +4,7 @@ import argparse
 import pandas as pd
 import re
 import json
+import sys
 
 #####################################PARSER#####################################
 
@@ -77,10 +78,10 @@ def convertPav(pavFileToParse):
 
     pavData = pd.read_csv(pavFileToParse, sep='\t')
     pavData.rename(columns={"#Chromosome": "Chromosome"}, inplace=True)
-    pavData.Chromosome = pavData.Chromosome.astype(str)
+    pavData['Chromosome'] = pavData['Chromosome'].astype(str)
 
     # Defines the list/set of chromosome names
-    CHROMOSOME_NAMES = set(pavData.Chromosome.unique())
+    CHROMOSOME_NAMES = set(pavData['Chromosome'].unique())
 
     # Defines the list of genome names
     # CAUTION This definition assumes that the PAV part is at the end of the
@@ -99,7 +100,7 @@ def convertPav(pavFileToParse):
 
     # Defines the list of functions used
     # CAUTION IT WILL WORK DIFFERENTLY WITH TRUE GO TERMS!!!
-    FUNCTION_DIVERSITY = list(pavData.Function.unique())
+    FUNCTION_DIVERSITY = list(pavData['Function'].unique())
 
     # Rewrite data with correct column names and bonus columns
     print('Parsing and rewriting pav blocks')
@@ -130,9 +131,14 @@ def overridePavData(pavDf, genoNames, chromNames):
     for index in range(len(pavDf)):
 
         # Show progress on screen
+        progress(index, len(pavDf), status='Parsing Pav file')
+
+        # Former version:
+        """
         progressRate = round(index/len(pavDf) * 100, 0)
         if progressRate * 10 % 100 == 0:
             print(f"Parsing progress for PAV file: {progressRate}%")
+        """
 
         # Add positional index, to unlink postion x FeatureStart
         addIndex(pavDf, index)
@@ -142,6 +148,19 @@ def overridePavData(pavDf, genoNames, chromNames):
 
         # Compute proportions of block repetitions in all panchromosomes
         addCopyPption(pavDf, index, chromNames)
+
+def progress(count, total, status=''):
+    """
+    Progress bar as found in https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
+    """
+    bar_len = 60
+    filled_len = int(round(bar_len * count / float(total)))
+
+    percents = round(100.0 * count / float(total), 1)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+    sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', status))
+    sys.stdout.flush()
 
 def addIndex(df, idx):
     """
@@ -274,7 +293,7 @@ def convStart1To0(oneBasedStartPos):
     """
     Converts an int from a 1-based coordinate system into a 0-based coord system.
     """
-    return oneBasedStartPos - 1
+    return int(oneBasedStartPos) - 1
 
 def convStrand(strandSign):
     """
@@ -311,7 +330,9 @@ def parseGffAnnotations(dictOfGff):
     # A Dict to store geneName <--> { idx, stop, [overLeft, ...], [overRight, ...] }
     dictOfOverlaps = {}
 
-    for chrom in dictOfGff.keys():
+    for idx, chrom in enumerate(dictOfGff.keys()):
+        # Show progress on screen
+        progress(idx, len(dictOfGff.keys()), status='Parsing Gff file')
         annotData[chrom] = createAnnotObjects(dictOfGff[chrom], dictOfOverlaps)
 
     return annotData
@@ -351,13 +372,16 @@ def createAnnotObjects(gffDataPerChrom, dictOfOverlaps):
             #Instanciates new annotation
             supInfo = extractNameAndNote(gffRow)
 
+            print(supInfo)
+            print(supInfo.keys())
+
             currentAnnotation = {
-                    'chrom': gffRow.chrom,
-                    'geneName': supInfo.geneName,
-                    'geneStart': gffRow.start,
-                    'geneStop': gffRow.end,
-                    'geneStrand': gffRow.strand,
-                    'annotation': supInfo.annotation,
+                'chrom': gffRow.chrom,
+                'geneName': supInfo['geneName'],
+                'geneStart': gffRow.start,
+                'geneStop': gffRow.end,
+                'geneStrand': gffRow.strand,
+                'annotation': supInfo['annotation'],
             }
 
             # New gene implies new exon distribution
@@ -417,19 +441,19 @@ def checkAnnotsForOverlaps(annotToCompare, annotArray, annotIdx, dictOfOverlaps)
 
     # Adds overlaps info within annotArray and cleans dictOfOverlaps
     writeAndStoreOverlaps(
-        keysToRemove=foundOverlaps.keysToRemove,
+        keysToRemove=foundOverlaps['keysToRemove'],
         dictOfOverlaps=dictOfOverlaps,
         annotArray=annotArray
     )
 
     # Adds current annotation to list of potentially overlapped segments
-    dictOfOverlaps[annotToCompare.geneName] = {
+    dictOfOverlaps[annotToCompare['geneName']] = {
         'idx': annotIdx,
-        'start': annotToCompare.geneStart,
-        'stop': annotToCompare.geneStop,
+        'start': annotToCompare['geneStart'],
+        'stop': annotToCompare['geneStop'],
         # we assume all previous overlaps are already registered from previous loops
-        'listOfOverLeft': foundOverlaps.currentLeftOverlaps,
-        'listOfOverRight': foundOverlaps.currentRightOverlaps,
+        'listOfOverLeft': foundOverlaps['currentLeftOverlaps'],
+        'listOfOverRight': foundOverlaps['currentRightOverlaps'],
     }
 
 def connectOverlaps(dictOfOverlaps, annotToCompare):
@@ -446,9 +470,9 @@ def connectOverlaps_centerPosBased(dictOfOverlaps, annotToCompare):
     ...in case marks are placed based on center positions
     """
 
-    currentName = annotToCompare.geneName
-    currentStart = annotToCompare.geneStart
-    currentStop = annotToCompare.geneStop
+    currentName = annotToCompare['geneName']
+    currentStart = annotToCompare['geneStart']
+    currentStop = annotToCompare['geneStop']
 
     currentCenter = (currentStart + currentStop) / 2
 
@@ -461,16 +485,16 @@ def connectOverlaps_centerPosBased(dictOfOverlaps, annotToCompare):
     for geneName, annot in dictOfOverlaps.items():
 
         # When a previous annotation is overlapped...
-        if annot.stop > currentStart:
-            annotCenter = (annot.start + annot.stop) / 2
+        if annot['stop'] > currentStart:
+            annotCenter = (annot['start'] + annot['stop']) / 2
 
             #Places overlap names according to center position and saves them
             if annotCenter <= currentCenter:
-                dictOfOverlaps[geneName].listOfOverRight.append(currentName)
+                dictOfOverlaps[geneName]['listOfOverRight'].append(currentName)
                 currentLeftOverlaps.append(geneName)
 
             else:
-                dictOfOverlaps[geneName].listOfOverLeft.append(currentName)
+                dictOfOverlaps[geneName]['listOfOverLeft'].append(currentName)
                 currentRightOverlaps.append(geneName)
 
         # When no overlap is detected, previous annotation(s) shouldn't be checked anymore
@@ -490,9 +514,9 @@ def writeAndStoreOverlaps(keysToRemove, dictOfOverlaps, annotArray):
     """
 
     for geneName in keysToRemove:
-        idx = dictOfOverlaps[geneName].idx
-        listOfOverLeft = dictOfOverlaps[geneName].listOfOverLeft
-        listOfOverRight = dictOfOverlaps[geneName].listOfOverRight
+        idx = dictOfOverlaps[geneName]['idx']
+        listOfOverLeft = dictOfOverlaps[geneName]['listOfOverLeft']
+        listOfOverRight = dictOfOverlaps[geneName]['listOfOverRight']
 
         # Updates overlaps data within annotArray
         # Beware: idx might not be = to the pos within annot array, since it's taken from the original pandas df
