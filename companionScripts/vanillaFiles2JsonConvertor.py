@@ -80,8 +80,8 @@ def convertPav(pavFileToParse):
     pavData.rename(columns={"#Chromosome": "Chromosome"}, inplace=True)
     pavData['Chromosome'] = pavData['Chromosome'].astype(str)
 
-    # Defines the list/set of chromosome names
-    CHROMOSOME_NAMES = set(pavData['Chromosome'].unique())
+    # Defines the list of chromosome names
+    CHROMOSOME_NAMES = list(pavData['Chromosome'].unique())
 
     # Defines the list of genome names
     # CAUTION This definition assumes that the PAV part is at the end of the
@@ -218,14 +218,15 @@ def groupPav(df, chromNames, column="Chromosome", isForPrint=True):
     """
     groups = df.groupby(df[column])
     groupedData = {}
+
     #Write subgroups as dict, in record format (ie. one row after the other)
     for idx, chrom in enumerate(chromNames):
+
         if isForPrint:
             groupedData[chrom] = groups.get_group(chrom).to_dict('records')
         else:
             groupedData[chrom] = groups.get_group(chrom).reset_index()
-            print('GROUPED DATA')
-            print(groupedData[chrom])
+
         print(f"Grouped chromosome {idx+1}/{len(chromNames)}")
 
     return groupedData
@@ -375,9 +376,6 @@ def createAnnotObjects(gffDataPerChrom, dictOfOverlaps):
             #Instanciates new annotation
             supInfo = extractNameAndNote(gffRow)
 
-            print(supInfo)
-            print(supInfo.keys())
-
             currentAnnotation = {
                 'chrom': gffRow.chrom,
                 'geneName': supInfo['geneName'],
@@ -418,7 +416,8 @@ def storeAnnotation(annotDict, annotArray, dictOfOverlaps):
     Checks if annot has overlaps, then stores annotation "object" into
     the annotation array
     """
-
+    # index is not based on the actual index from the gff file (since lines
+    # != 'gene') are not stored
     nbOfAlreadyStoredAnnots = len(annotArray)
 
     # Looks through already stored annotations to find possible overlaps
@@ -525,8 +524,6 @@ def writeAndStoreOverlaps(keysToRemove, dictOfOverlaps, annotArray):
         # Updates overlaps data within annotArray
         # Beware: idx might not be = to the pos within annot array, since it's taken from the original pandas df
         # Would 'reset_index' after getting the subgroups in groupPav be enough ?
-        print(len(annotArray))
-        print(idx)
         annotArray[idx]['leftOverlaps'] = listOfOverLeft
         annotArray[idx]['rightOverlaps'] = listOfOverRight
 
