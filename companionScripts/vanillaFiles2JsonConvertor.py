@@ -217,16 +217,18 @@ def groupPav(df, chromNames, column="Chromosome", isForPrint=True):
     Groups the per-chromosome subdatasets into a dict of dicts, or dict of dataframes
     """
     groups = df.groupby(df[column])
-    groupedPavData = {}
+    groupedData = {}
     #Write subgroups as dict, in record format (ie. one row after the other)
     for idx, chrom in enumerate(chromNames):
         if isForPrint:
-            groupedPavData[chrom] = groups.get_group(chrom).to_dict('records')
+            groupedData[chrom] = groups.get_group(chrom).to_dict('records')
         else:
-            groupedPavData[chrom] = groups.get_group(chrom).reset_index()
+            groupedData[chrom] = groups.get_group(chrom).reset_index()
+            print('GROUPED DATA')
+            print(groupedData[chrom])
         print(f"Grouped chromosome {idx+1}/{len(chromNames)}")
 
-    return groupedPavData
+    return groupedData
 
 def writeFileAsJson(dictOfDicts, outputName, fileType='Pav'):
     """
@@ -246,6 +248,8 @@ def convertGff(gffFileToParse, chromNames):
     Reads only the "gene" and "intron" or "exon" lines. Gene names should be
     written in the last column with the "Name=" keyword
     """
+
+    print('Parsing and rewriting gff gene annotations')
 
     # Turns gff into a pandas dataframe
     gffData = readGff(gffFileToParse)
@@ -365,8 +369,7 @@ def createAnnotObjects(gffDataPerChrom, dictOfOverlaps):
                 storeAnnotation(
                     annotDict = currentAnnotation,
                     annotArray = annotPerChrom,
-                    idx = idx,
-                    dictOfOverlaps=dictOfOverlaps
+                    dictOfOverlaps = dictOfOverlaps
                 )
 
             #Instanciates new annotation
@@ -400,10 +403,9 @@ def createAnnotObjects(gffDataPerChrom, dictOfOverlaps):
     # Stores the last annotation of the chromosome once no other gene is found
     currentAnnotation['exons'] = currentGeneExons
     storeAnnotation(
-        annotDict=currentAnnotation,
-        annotArray=annotPerChrom,
-        idx=idx,
-        dictOfOverlaps=dictOfOverlaps
+        annotDict = currentAnnotation,
+        annotArray = annotPerChrom,
+        dictOfOverlaps = dictOfOverlaps
     )
 
     # In case the last annotation has overlaps, store them too
@@ -411,17 +413,19 @@ def createAnnotObjects(gffDataPerChrom, dictOfOverlaps):
 
     return annotPerChrom
 
-def storeAnnotation(annotDict, annotArray, idx,  dictOfOverlaps):
+def storeAnnotation(annotDict, annotArray, dictOfOverlaps):
     """
     Checks if annot has overlaps, then stores annotation "object" into
     the annotation array
     """
 
+    nbOfAlreadyStoredAnnots = len(annotArray)
+
     # Looks through already stored annotations to find possible overlaps
     checkAnnotsForOverlaps(
         annotToCompare=annotDict,
         annotArray=annotArray,
-        annotIdx=idx,
+        annotIdx=nbOfAlreadyStoredAnnots,
         dictOfOverlaps=dictOfOverlaps
     )
 
@@ -521,6 +525,8 @@ def writeAndStoreOverlaps(keysToRemove, dictOfOverlaps, annotArray):
         # Updates overlaps data within annotArray
         # Beware: idx might not be = to the pos within annot array, since it's taken from the original pandas df
         # Would 'reset_index' after getting the subgroups in groupPav be enough ?
+        print(len(annotArray))
+        print(idx)
         annotArray[idx]['leftOverlaps'] = listOfOverLeft
         annotArray[idx]['rightOverlaps'] = listOfOverRight
 
