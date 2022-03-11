@@ -98,6 +98,16 @@
     <PavMatrixLegend
         class="pavLegend"
     />
+
+    <CategoryTitle title="More..."/>
+
+    <div>
+      Check out our wiki on <b-link href='https://github.com/SouthGreenPlatform/panache/wiki' target="_blank">Github</b-link>!
+    </div>
+
+
+
+
   </div>
 </template>
 
@@ -116,6 +126,7 @@ import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
 import LocalGenePattern from "@/components/LocalGenePattern";
+import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
 
@@ -168,6 +179,9 @@ export default {
     this.updateBananaData();
   },
   methods: {
+    updateFullChromData(data) {
+      nonReactiveDataStore.fullChromData = data;
+    },
     //Get Actions from the store
     ...mapActions([
       'updateDisplayLoadingStatus',
@@ -175,7 +189,7 @@ export default {
       'updateCoordsOfHollowAreas',
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
-      'updateFullChromData',
+      // 'updateFullChromData',
       'updateFullGffData',
       'updateGenomesInDisplay',
       'updateSelectedChrom',

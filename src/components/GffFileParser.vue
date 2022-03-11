@@ -83,6 +83,9 @@ export default {
             });
           }
 
+          //Clears and stores the last overlaps from previous chrom
+          this.clearMapOfOverlaps(annotData, mapOfOverlaps);
+
           //Resets variables
           currentChrom = lineObj.seqname
           currentAnnotation = undefined;
@@ -150,6 +153,9 @@ export default {
         annotArray: annotData,
         exons: currentGeneExons
       });
+
+      //Clears and stores the very last overlaps
+      this.clearMapOfOverlaps(annotData, mapOfOverlaps);
 
       //console.log({annotData});
 
@@ -359,6 +365,18 @@ export default {
       annotObj['exons'] = exons;
       annotArray.push(annotObj);
     },
+    //Parse what remains in mapOfOverlaps and stores it into annotArray
+    clearMapOfOverlaps: function(annotArray, mapOfOverlaps) {
+
+      let remainingOverlaps = [...mapOfOverlaps.keys()]
+
+      this.writeAndStoreOverlaps({
+          keysToRemove: remainingOverlaps,
+          mapOfOverlaps: mapOfOverlaps,
+          annotArray: annotArray
+      })
+
+    },
     //Groups data under a given key
     groupDataPerKey_inHouse: function(iterable, keyToNest) {
       //would return an Object shaped as follows:
@@ -378,6 +396,8 @@ export default {
 
         // Deletion of the redundant property "Chromosome" which is already
         // determined by the main group.
+
+
         dataGroupedPerKey[key].forEach(d => delete d[keyToNest]);
       });
 

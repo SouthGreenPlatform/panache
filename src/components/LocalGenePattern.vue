@@ -23,6 +23,7 @@
 <script>
 import {mapActions, mapGetters, mapState} from "vuex";
 import {clusterData} from "@greenelab/hclust";
+import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 export default {
   name: "LocalGenePattern",
@@ -39,7 +40,7 @@ export default {
       firstNtToDisplay: 'firstNtToDisplay',
       currentDisplayNtWidthInPx : 'currentDisplayNtWidthInPx',
       selectedChrom: 'selectedChrom',
-      fullChromData: 'fullChromData',
+      // fullChromData: 'fullChromData',
       genomeListInDisplay: 'genomeListInDisplay',
     }),
     ...mapGetters({
@@ -75,7 +76,7 @@ export default {
 
       // Search the genes that match the selected area
       let geneBetweenValues = [];
-      let selectedChromData = this.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
+      let selectedChromData = nonReactiveDataStore.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
       this.leftValue = Math.round(this.pxToNt(this.localAreaSelected[0]));
       this.rightValue = Math.round(this.pxToNt(this.localAreaSelected[1]));
       for (let i = 0; i < selectedChromData.length; i++) { // Check every gene of the chromosome

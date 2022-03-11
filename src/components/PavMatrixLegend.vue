@@ -73,7 +73,7 @@ export default {
         },
         {
           class: 'colorMeaning',
-          text: 'Color => Function'
+          text: 'Color => Pan-Block'
         }
       ],
       pavPaths: [

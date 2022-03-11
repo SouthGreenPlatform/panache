@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import * as d3 from 'd3'
+import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 Vue.use(Vuex)
+
 
 // The store gives access to some variables through the whole app^
 // Values in here are mainly default values, to update depending on user inputs
@@ -22,7 +24,7 @@ export default new Vuex.Store({
     geneListChromInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
     geneListNames: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ],
 
-    fullChromData: [], //Chromosomal dataset
+    // fullChromData: [], //Chromosomal dataset
     fullGffData: [], //Gff linked to the displayed pav data
     ntWidthInPxThresholds: new Map(), // map[chromosome] -> {min: i, max: j}
 
@@ -311,7 +313,7 @@ export default new Vuex.Store({
     newickTreeData: [], // Array that contain the data exported from the Newick file uploaded
     isNewickTreeDisplayed: false, // Detect if the Newick tree is displayed
 
-    colorScaleMaker: function(domain, range, scaleLinear = true) {
+    colorScaleMaker: (domain, range, scaleLinear = true) => {
       if (scaleLinear) {
         return d3.scaleLinear()
             .domain(domain)
@@ -323,7 +325,7 @@ export default new Vuex.Store({
               .range(range);
       }
     },
-    domainPivotsMaker: function(breakpointsNb, maxValue) {
+    domainPivotsMaker: (breakpointsNb, maxValue) => {
       let breakpoints = [];
       for (var i = 0; i < breakpointsNb; ++i) {
           breakpoints.push(Math.round( (i / (breakpointsNb - 1) ) * maxValue));
@@ -337,12 +339,14 @@ export default new Vuex.Store({
       return state.genomeListInDisplay.length
     },
     chromDataInDisplay: state => {
-      //console.log('Within chromDataInDisplay', {chromNames: state.chromNames, fullSet: state.fullChromData, selectedChrom:state.selectedChrom, firstChrom:state.fullChromData[state.selectedChrom]})
-      if (state.fullChromData[state.selectedChrom] === undefined || state.fullChromData[state.selectedChrom][0] === undefined) {
+      const fullChromData = nonReactiveDataStore.fullChromData;
+
+      //console.log('Within chromDataInDisplay', {chromNames: state.chromNames, fullSet: fullChromData, selectedChrom:state.selectedChrom, firstChrom:fullChromData[state.selectedChrom]})
+      if (fullChromData[state.selectedChrom] === undefined || fullChromData[state.selectedChrom][0] === undefined) {
         return [] //default value
       }
 
-      let chromData = state.fullChromData[state.selectedChrom];
+      let chromData = fullChromData[state.selectedChrom];
 
       //console.log({chromData});
       return chromData;
@@ -430,7 +434,7 @@ export default new Vuex.Store({
     //Rainbow of color in case function diversity is 1
     correspondancePosColor: (state, getters) => {
       let colorMap = new Map();
-      getters.chromDataInDisplay.forEach( function(d, i) {
+      getters.chromDataInDisplay.forEach( (d, i) => {
         colorMap.set(d['FeatureStart'], d3.interpolateRainbow( (i%14) /14))
       });
 
@@ -441,11 +445,11 @@ export default new Vuex.Store({
       let functionToReturn;
 
       if (getters.functionDiversity.length >= 2) {
-        functionToReturn = function(dataObject) {
+        functionToReturn = (dataObject) => {
           return getters.functionColorScale(dataObject['Function'])
         }
       } else {
-        functionToReturn = function(dataObject) {
+        functionToReturn = (dataObject) => {
           return getters.correspondancePosColor.get(dataObject['FeatureStart'])
         }
       }
@@ -488,13 +492,13 @@ export default new Vuex.Store({
       state.geneList = payload
       console.log("Gene list updated : " + state.geneList)
     },
-    SET_FULL_CHROM_DATA(state, payload) {
-      state.fullChromData = payload;
-    },
+    // SET_FULL_CHROM_DATA(state, payload) {
+    //   fullChromData = payload;
+    // },
     SET_FULL_GFF_DATA(state, payload) {
       state.fullGffData = payload;
       for (let i = 0; i < state.chromNames.length; i++) {
-        state.fullGffData[state.chromNames[i]].sort(function (a,b) { // Sort the genes in every chromosomes by their start (number)
+        state.fullGffData[state.chromNames[i]].sort((a,b) => { // Sort the genes in every chromosomes by their start (number)
           if (a.geneStart < b.geneStart) {
             return -1;
           } else if (a.geneStart > b.geneStart) {
@@ -608,9 +612,9 @@ export default new Vuex.Store({
     updateGeneList({commit}, geneList) {
       commit('SET_GENE_LIST', geneList)
     },
-    updateFullChromData({commit}, pavData) {
-      commit('SET_FULL_CHROM_DATA', pavData)
-    },
+    // updateFullChromData({commit}, pavData) {
+    //   commit('SET_FULL_CHROM_DATA', pavData)
+    // },
     updateFullGffData({commit}, gffData) {
       commit('SET_FULL_GFF_DATA', gffData)
     },
