@@ -211,7 +211,6 @@ export default {
         'chr01', 'chr02', 'chr03', 'chr04', 'chr05', 'chr06', 'chr07', 'chr08',
         'chr09', 'chr10', 'chr11', 'chrUn_random'
         ]);
-      this.updateSelectedChrom('chr01');
       this.updateGenomesInDisplay([
         'Bile', 'BSK30', 'Calcutta', 'Ensete01', 'EnseteBedadit', 'EnseteDerea',
         'FHIA', 'Itinerans', 'Kole', 'Lidi', 'MasKirana', 'Pahang', 'PKW',
@@ -231,7 +230,9 @@ export default {
 
       //Section dedicated to sending the pav updates to the store
       this.updateFullChromData(pavData);
-      this.updateFileLoaded(true); //Useful for...?
+      this.updateSelectedChrom('chr01');
+      this.updateFileLoaded(true); //Useful for the loading spinner?
+      console.log('PAV FILE HAS BEEN LOADED AND CHROMDATA IS SET')
 
       //Section dedicated to sending the gff updates to the store
       this.updateFullGffData(gffData);
