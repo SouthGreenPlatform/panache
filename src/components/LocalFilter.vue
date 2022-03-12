@@ -182,6 +182,15 @@ export default {
     updateFullChromData(data) {
       nonReactiveDataStore.fullChromData = data;
     },
+    //regEx to automatically determine the order of genomes within a newick string
+    autoExtractGenoOrderFromNewick(newickStr) {
+      let regExNwk = /[^(),;]+/g;
+      let genoXWeight = newickStr.match(regExNwk);
+      if (genoXWeight != null) {
+        return genoXWeight.map(x => x.split(':')[0])
+      }
+      return []
+    },
     //Get Actions from the store
     ...mapActions([
       'updateDisplayLoadingStatus',
@@ -231,7 +240,7 @@ export default {
       //Section dedicated to sending the pav updates to the store
       this.updateFullChromData(pavData);
       this.updateSelectedChrom('chr01');
-      this.updateFileLoaded(true); //Useful for the loading spinner?
+      this.updateFileLoaded(true); //Useful for the loading spinner? But it uses updateDisplayLoadingStatus...
       console.log('PAV FILE HAS BEEN LOADED AND CHROMDATA IS SET')
 
       //Section dedicated to sending the gff updates to the store
@@ -240,8 +249,11 @@ export default {
       this.pushSortModeInSortChoice('Gene presence status'); // Add the choice to sort by gene presence status with a search bar
 
       //Section dedicated to the newick phylogeny sent to the store
-      this.updatePhylogenyTree(["Ensete01","EnseteDerea","EnseteBedadit","TongkatLangitMaluku","Itinerans","PKW","FHIA","Bile","Tanduk","Kole","MasKirana","Calcutta","Lidi","Pahang","BSK30"]);
-      this.updatePhylogenyString("((Ensete01,(EnseteDerea,EnseteBedadit)),((TongkatLangitMaluku,(Itinerans,(PKW,(((FHIA,(Bile,Tanduk)),((Kole,MasKirana),(Calcutta,(Lidi,(Pahang,BSK30)))))))))));");
+      let newickStr = '((Ensete01,(EnseteDerea,EnseteBedadit)),((TongkatLangitMaluku,(Itinerans,(PKW,(((FHIA,(Bile,Tanduk)),((Kole,MasKirana),(Calcutta,(Lidi,(Pahang,BSK30)))))))))));';
+      let phyloOrder = this.autoExtractGenoOrderFromNewick(newickStr);
+
+      this.updatePhylogenyTree(phyloOrder);
+      this.updatePhylogenyString(newickStr);
       this.pushSortModeInSortChoice('Phylogenetic tree'); // Add the choice to sort by phylogenetic tree
 
       //Disable loadingSpinner in Panache view
