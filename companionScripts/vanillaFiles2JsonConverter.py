@@ -283,7 +283,8 @@ def readGff(gffFileToParse):
     gffData = pd.read_csv(
         gffFileToParse,
         sep='\t',
-        header=0,
+        header=None,
+        comment='#',
         names=gffHeaders,
         converters={
             'start': convStart1To0, # Needs conversion from 1-based to 0-based coordinate system
