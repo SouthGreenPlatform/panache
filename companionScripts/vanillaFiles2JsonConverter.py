@@ -560,13 +560,15 @@ def extractNameAndNote(dfRow, column='attribute', gffNameKey='Name', gffAnnotKey
     # Extract every possible attribute from the last column of gff
     for attr in supInfoList:
 
-        key, value = attr.split('=')[0], attr.split('=')[1]
+        # Only checks actual attribute and not empty fields
+        if '=' in attr:
+            key, value = attr.split('=')[0], attr.split('=')[1]
 
-        if key == gffNameKey:
-            geneName = value
+            if key == gffNameKey:
+                geneName = value
 
-        elif key == gffAnnotKey:
-            annotation = value
+            elif key == gffAnnotKey:
+                annotation = value
 
     return {'geneName': geneName, 'annotation': annotation}
 
