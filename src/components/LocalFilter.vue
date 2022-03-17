@@ -184,12 +184,8 @@ export default {
     },
     //regEx to automatically determine the order of genomes within a newick string
     autoExtractGenoOrderFromNewick(newickStr) {
-      let regExNwk = /[^(),;]+/g;
-      let genoXWeight = newickStr.match(regExNwk);
-      if (genoXWeight != null) {
-        return genoXWeight.map(x => x.split(':')[0])
-      }
-      return []
+      let regExNwk = /([a-zA-Z][\w-]*)/g;
+      return newickStr.match(regExNwk);
     },
     //Get Actions from the store
     ...mapActions([
