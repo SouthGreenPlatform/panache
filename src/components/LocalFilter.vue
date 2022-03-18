@@ -184,7 +184,7 @@ export default {
     },
     //regEx to automatically determine the order of genomes within a newick string
     autoExtractGenoOrderFromNewick(newickStr) {
-      let regExNwk = /([a-zA-Z][\w\.-]*)/g;
+      let regExNwk = /([a-zA-Z][\w.-]*)/g;
       return newickStr.match(regExNwk);
     },
     //Get Actions from the store
