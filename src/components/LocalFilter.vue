@@ -91,8 +91,8 @@
     </div>
 
     <div v-show="selectedSortMode === 'Gene presence status'">
-      <CategoryTitle title="Search by genes"/>
-      <GeneSearchBar/>
+      <CategoryTitle title="Filter annotation presence statuses"/>
+      <SortOption_GffPresenceStatus/>
     </div>
 
     <div v-show="selectedSortMode === 'Local presence/absence pattern'">
@@ -175,7 +175,7 @@ import GffFileParser from "@/components/GffFileParser";
 import NewickFileParser from "@/components/NewickFileParser";
 import CollapseMenu from "@/components/CollapseMenu";
 import NewickTree from "@/components/NewickTree";
-import GeneSearchBar from "@/components/GeneSearchBar";
+import SortOption_GffPresenceStatus from "@/components/SortOption_GffPresenceStatus";
 import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
@@ -189,7 +189,7 @@ export default {
     GenePosition,
     InputPosition,
     CategoryTitle,
-    GeneSearchBar,
+    SortOption_GffPresenceStatus,
     NewickTree,
     NewickFileParser,
     CollapseMenu,

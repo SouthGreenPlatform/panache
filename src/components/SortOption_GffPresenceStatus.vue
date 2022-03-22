@@ -7,11 +7,11 @@
           <!-- SEARCH BAR -->
           <b-dropdown size="sm" variant="outline-secondary" class="mb-2" block menu-class="w-100">
             <template #button-content>
-              <b-icon icon="tag-fill"></b-icon> Choose gene
+              <b-icon icon="tag-fill"></b-icon> Select annotation(s)
             </template>
             <b-dropdown-form @submit.stop.prevent="() => {}">
               <b-form-group
-                  label="Search genes"
+                  label="Search annotations"
                   label-for="tag-search-input"
                   label-cols-md="auto"
                   class="mb-2 displayBlock"
@@ -71,11 +71,11 @@
             </b-popover>
           </div>
 
-          <!-- LIST OF THE TAGS (GENE) YOU WANT TO USE AS FILTER -->
+          <!-- LIST OF THE ANNOT TAGS THAT ARE SELECTED AS FILTER(S) -->
           <div :key="componentKey">
             <b-input-group v-for="tag in tags" :key="tag" size="sm" v-show="presenceMap.has(tag)" :prepend="presenceMap.get(tag) ? 'Presence' : 'Absence'" class="mb-2 tagCustomCSS">
               <b-input-group-prepend is-text>
-                <!-- CHECKBOX TO CHANGE THE STATUS OF THE GENE IN THE FILTER -->
+                <!-- CHECKBOX TO CHANGE THE DESIRED PRESENCE STATUS OF THE ANNOT -->
                 <b-form-checkbox
                     switch
                     class="mr-n2 noBorderLeft"
@@ -102,7 +102,7 @@ import {mapActions, mapState} from "vuex";
 import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 export default {
-  name: "GeneSearchBar",
+  name: "SortOption_GffPresenceStatus",
   data() {
     return {
       search: '',
@@ -271,10 +271,6 @@ export default {
 
 .noBorderLeft {
   border-left: none;
-}
-
-.test {
-  display: inline;
 }
 
 .cursorP {
