@@ -30,17 +30,17 @@
             <b-dropdown-divider></b-dropdown-divider>
             <!-- AVAILABLE OPTIONS IN SEARCH BAR -->
             <b-dropdown-item-button
-                v-for="option in availableOptions"
+                v-for="option in matchingAnnotNames"
                 :key="option"
                 @click="onOptionClick({ option, addTag })"
             >
               <div class="ellipsis">{{ option }}</div>
             </b-dropdown-item-button>
             <!-- INFORMATIONS ABOUT YOUR RESEARCH -->
-            <b-dropdown-text v-if="criteria.length >= searchMinChar && availableOptions.length === 0">
+            <b-dropdown-text v-if="searchCriteria.length >= searchMinChar && matchingAnnotNames.length === 0">
               There are no tags available to select
             </b-dropdown-text>
-            <b-dropdown-text v-else-if="criteria.length < searchMinChar && availableOptions.length === 0">
+            <b-dropdown-text v-else-if="searchCriteria.length < searchMinChar && matchingAnnotNames.length === 0">
               The research should be at least {{ searchMinChar }} characters long
             </b-dropdown-text>
           </b-dropdown>
@@ -116,31 +116,33 @@ export default {
   },
   computed: {
     ...mapState({
-      geneList: 'geneList',
+      annotMap: 'geneList', //TODO change to annot in store
       genomeList: 'genomeListInDisplay',
       // fullChromData: 'fullChromData',
     }),
     /**
-     * Function that return the criteria of research.
-     * @returns {string} = criteria of research
+     * Function that returns the research criteria.
+     * @returns {string} = research criteria
      */
-    criteria() {
+    searchCriteria() {
       // Compute the search criteria
       return this.search.trim().toLowerCase();
     },
     /**
-     * Function that return the genes corresponding to the criteria of research.
-     * @returns {string} = if there is gene available for the criteria
+     * Function that returns the named annotations matching to the research criteria.
+     * @returns {Array} = list of all matching annotation names, empty if none found
      */
-    availableOptions() {
-      const criteria = this.criteria; // Get the criteria
-      // Filter out already selected options
-      if (criteria.length >= this.searchMinChar) { // Verify if the criteria is longer than the minimum of characters expected
-        const options = [...this.geneList.keys()].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that match to the criteria from geneList
-        return options.filter(opt => opt.toLowerCase().indexOf(criteria) > -1);  // Return the options available
-      } else {
-        return '';
-      }
+    matchingAnnotNames() {
+      let criteria = this.searchCriteria;
+
+      if (criteria.length >= this.searchMinChar) {
+        // From annotMap, get names matching the search criteria
+        let matchingNames = [...this.annotMap.keys()].filter(opt => opt.toLowerCase().indexOf(criteria) > -1);
+
+        // Filter out already selected options
+        return matchingNames.filter(opt => this.value.indexOf(opt) === -1);
+
+      } else { return [] }
     },
   },
   methods: {
@@ -148,16 +150,16 @@ export default {
       'updateGenomesInDisplay',
     ]),
     /**
-     * Add an gene to tags (a Bootstrap.Vue list).
-     * @param option = Gene in that you want to add
+     * Add a named annot to tags (a Bootstrap.Vue list).
+     * @param option = Named annot to add
      * @param addTag = function addTag of Bootstrap.Vue
      */
     onOptionClick({ option, addTag }) {
-      addTag(option); // Add the gene to le tags list
+      addTag(option); // Add the annot to the tag list
       this.search = ''; // Empty the search bar
     },
     /**
-     * Sort the genome in function of the genes in the filter.
+     * Sort the genomes depending on the annotations used as filter.
      */
     sortByTags() {
       let rankGenomes = new Map; // Create a map to rank the genomes in function on their correspondance with the tags
@@ -165,20 +167,20 @@ export default {
         rankGenomes.set(this.genomeList[i], 0); // Set the Map with 0
       }
 
-      // Ranks genomes according to their correspondence with the gene in filter
-      for (let i = 0; i < this.presenceMap.size; i++) { // For each gene in tags (for each filter applied)
-        let gene = this.geneList.get([...this.presenceMap.keys()][i]); // Get the gene informations from geneList
-        let geneStatus = [...this.presenceMap.values()][i]; // Get the gene's status
-        let genePosition = gene[0]; // Get the gene's position
-        let geneChrom = gene[1]; // Get the gene's chromosome
-        let geneListChrom = [...nonReactiveDataStore.fullChromData[geneChrom]]; // Get the gene's chromosome's gene list
-        for (let j = 0; j < geneListChrom.length; j++) { // Full gene list exploration
-          if (parseInt(geneListChrom[j].FeatureStart) - 1 === genePosition) { // Verify if the gene position match the gene.FeatureStart in the gene list
+      // Ranks genomes according to their matching score with the choosen tags
+      for (let i = 0; i < this.presenceMap.size; i++) { // For each tag...
+        let annot = this.annotMap.get([...this.presenceMap.keys()][i]); // Get info from annotMap
+        let annotStatus = [...this.presenceMap.values()][i]; // Get the presence status
+        let annotPosition = annot[0]; // Get the annotation's coordinates
+        let annotChrom = annot[1]; // Get the annotation's chromosome
+        let annotMapChrom = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of annotations found in annotChrom
+        for (let j = 0; j < annotMapChrom.length; j++) { // Full annot list exploration
+          if (parseInt(annotMapChrom[j].FeatureStart) - 1 === annotPosition) { // Check if the annot position matches the annot.FeatureStart in the annot list
             for (let k = 0; k < this.genomeList.length; k++) { // If that the case then : full genome list exploration
               let genomeK = this.genomeList[k]; // Variable for the genome with index K of the list of genomes
-              let presenceStatus = parseInt(geneListChrom[j][genomeK]); // Get the presence status of the gene for genomeK
-              if ((geneStatus && presenceStatus > 0) ||
-                  (!geneStatus && presenceStatus === 0)) { // If the gene is actually present or absent and match the status requested
+              let presenceStatus = parseInt(annotMapChrom[j][genomeK]); // Get the presence status of the annotation for genomeK
+              if ((annotStatus && presenceStatus > 0) ||
+                  (!annotStatus && presenceStatus === 0)) { // If the annot is actually present or absent and match the status requested
                 rankGenomes.set(genomeK, rankGenomes.get(genomeK) + 1); // Increase the points of correspondence of the genome
               }
             }
@@ -200,11 +202,11 @@ export default {
       this.hasSearchHappened = true; // Turn hasSearchHappened to true to allow the popup to appear on Panache
     },
     /**
-     * Update the status of research of a gene.
-     * @param gene = The gene to which you want to update the status
+     * Update the status of research of an annotation.
+     * @param annot = The annot to which you want to update the status
      */
-    updateStatus(gene) {
-      this.presenceMap.set(gene, !this.presenceMap.get(gene))
+    updateStatus(annot) {
+      this.presenceMap.set(annot, !this.presenceMap.get(annot))
       this.hasSearchHappened = false; // Turn hasSearchHappened to false to not misinform the user and hide the popup
       this.forceRerender();
     },
@@ -232,8 +234,8 @@ export default {
       });
 
       // Add new (key, value) according to new tag
-      newValues.forEach( (geneName) => {
-        this.presenceMap.set(geneName, true);
+      newValues.forEach( (annotName) => {
+        this.presenceMap.set(annotName, true);
       });
     }
   }
