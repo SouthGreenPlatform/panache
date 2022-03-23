@@ -116,7 +116,7 @@ export default {
   },
   computed: {
     ...mapState({
-      annotMap: 'geneList', //TODO change to annot in store
+      annotMap: 'annotMap', //TODO change to annot in store
       genomeList: 'genomeListInDisplay',
     }),
     /**
@@ -216,10 +216,13 @@ export default {
         let annotChrom = annotObj[1];
         let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
 
+        //let spannedBlocks = [];
+
         chromPavBlocks.forEach( block => {
 
           // Checks if position matches
           if (parseInt(block.FeatureStart) - 1 === annotPosition) {
+            console.log({annotObj});
 
             this.genomeList.forEach( geno => {
               //Checks if there a match between desired and actual presence/absence statuses

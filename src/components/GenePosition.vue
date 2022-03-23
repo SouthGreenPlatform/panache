@@ -3,7 +3,7 @@
     <vue-bootstrap-typeahead
         size="sm"
         v-model="selectedGene"
-        :data="geneListNames"
+        :data="annotMapNames"
         :minMatchingChars="3"
         :maxMatches="50"
         placeholder="Search a gene name ..."
@@ -51,7 +51,7 @@ export default {
     return {
       targetedPosNt: Number(),
       selectedGene: 'GeneName',
-      GeneListChrom: Array,
+      annotMapChrom: Array,
       search: '',
       value: [],
       searchMinChar: 3,
@@ -59,9 +59,9 @@ export default {
   },
   computed: {
     ...mapState({
-      geneList: 'geneList',
-      geneListNames: 'geneListNames',
-      geneListSelectedChrom: 'geneListChromInDisplay',
+      annotMap: 'annotMap',
+      annotMapNames: 'annotMapNames',
+      annotMapSelectedChrom: 'annotMapChromInDisplay',
       selectedChrom: 'selectedChrom',
     }),
     maxFirstNt() {
@@ -98,7 +98,7 @@ export default {
       const criteria = this.criteria; // Get the criteria
       // Filter out already selected options
       if (criteria && criteria.length >= this.searchMinChar) { // Verify if the criteria is longer than the minimum of characters expected
-        const options = [...this.geneListSelectedChrom].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that correspond to the criteria
+        const options = [...this.annotMapSelectedChrom].filter(opt => this.value.indexOf(opt) === -1); // Get the genes that correspond to the criteria
         return options.filter(opt => opt.toLowerCase().indexOf(criteria) > -1);  // Return the options available
       } else {
         return '';
@@ -113,9 +113,9 @@ export default {
       return pxAmount / this.ntWidthInPixel;
     },
     jumpToPosition(geneToReach) {
-      if (this.geneList.has(geneToReach)) {
-        let genePosition = this.geneList.get(geneToReach)[0];
-        let geneChrom = this.geneList.get(geneToReach)[1]
+      if (this.annotMap.has(geneToReach)) {
+        let genePosition = this.annotMap.get(geneToReach)[0];
+        let geneChrom = this.annotMap.get(geneToReach)[1]
         if (genePosition !== undefined) {
           this.targetedPosNt = genePosition;
         }
