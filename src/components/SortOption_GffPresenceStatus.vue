@@ -196,7 +196,8 @@ export default {
       }
     },
     /**
-     * XXXXX
+     * Function that parses all the annotName x presenceStatus filters and
+     * computes a matching score for every genome.
      * @returns {Map} = mapOfScores[genome] --> score
      */
     applyScoresToGenomes() {
@@ -209,36 +210,56 @@ export default {
       }
 
       // Ranks genomes according to their matching score with the choosen tags
-      this.mapOfPresenceStatus.forEach( (desiredPavStatus, annotName) => {
+      this.mapOfPresenceStatus.forEach( (shouldBePresent, annotName) => {
 
-        let annotObj = this.annotMap.get(annotName);
-        let annotStart = annotObj[0];
-        //let annotStop = annotObj[1];
-        let annotChrom = annotObj[2];
+        let annotStartStopChrom = this.annotMap.get(annotName);
+        let annotStart = annotStartStopChrom[0];
+        let annotStop = annotStartStopChrom[1];
+        let annotChrom = annotStartStopChrom[2];
         let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
 
-        //let spannedBlocks = [];
-
+        // Find the blocks for which we should check the pav status
+        // Here the condition is that at least a part of the annotation should overlap the block(s)
+        let spannedBlocks = [];
         chromPavBlocks.forEach( block => {
 
-          // Checks if position matches
-          if (parseInt(block.FeatureStart) - 1 === annotStart) {
-            console.log({annotObj});
+          let annotStartIsInBlock = ( parseInt(block.FeatureStart) <= annotStop ) && ( annotStop <= parseInt(block.FeatureStop) );
+          let annotStopIsInBlock = ( parseInt(block.FeatureStart) <= annotStart ) && ( annotStart <= parseInt(block.FeatureStop) );
 
-            this.genomeList.forEach( geno => {
-              //Checks if there a match between desired and actual presence/absence statuses
-              let actualPavStatus = parseInt(block[geno]);
-
-              if ((desiredPavStatus && actualPavStatus > 0) ||
-                  (!desiredPavStatus && actualPavStatus === 0)) {
-
-                 // Increment the score accordingly
-                mapOfScores.set(geno, mapOfScores.get(geno) + 1);
-              }
-            });
-
+          if (annotStartIsInBlock || annotStopIsInBlock) {
+            spannedBlocks.push(block);
           }
         });
+
+        // Compute matching score for each genome
+        this.genomeList.forEach( geno => {
+
+          let cumulLenScore = 0;
+          let annotLength = annotStop - annotStart;
+
+          // Check PAV status of all candidate blocks
+          spannedBlocks.forEach(block => {
+            let leftExceedance = Math.max(block.FeatureStart - annotStart, 0);
+            let rightExceedance = Math.max(annotStop - block.FeatureStop, 0);
+            let overlappedLength = annotLength - leftExceedance - rightExceedance;
+
+            //Check if there is a match between desired and block presence/absence statuses
+            let pavStatus = parseInt(block[geno]);
+            let queryDoesMatch = (shouldBePresent && pavStatus > 0) || (!shouldBePresent && pavStatus === 0) ;
+
+              if (queryDoesMatch) {
+                cumulLenScore += overlappedLength;
+              }
+          });
+
+          // The score is a float between 0 and 1, shows the proportion of the annot that matches the desired pav status
+          let annotScore = cumulLenScore / annotLength;
+          //console.log({cumulLenScore, annotLength, spannedBlocks})
+
+          mapOfScores.set(geno, mapOfScores.get(geno) + annotScore);
+
+        });
+
       });
 
       return mapOfScores
