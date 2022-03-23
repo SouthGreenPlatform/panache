@@ -161,32 +161,11 @@ export default {
      * Sort the genomes based on their scores.
      */
     sortByTags() {
-      let rankGenomes = new Map; // Create a map to rank the genomes in function on their correspondance with the tags
-      for (let i = 0; i < this.genomeList.length; i++) {
-        rankGenomes.set(this.genomeList[i], 0); // Set the Map with 0
-      }
 
-      // Ranks genomes according to their matching score with the choosen tags
-      for (let i = 0; i < this.presenceMap.size; i++) { // For each tag...
-        let annot = this.annotMap.get([...this.presenceMap.keys()][i]); // Get info from annotMap
-        let annotStatus = [...this.presenceMap.values()][i]; // Get the presence status
-        let annotPosition = annot[0]; // Get the annotation's coordinates
-        let annotChrom = annot[1]; // Get the annotation's chromosome
-        let annotMapChrom = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of annotations found in annotChrom
-        for (let j = 0; j < annotMapChrom.length; j++) { // Full annot list exploration
-          if (parseInt(annotMapChrom[j].FeatureStart) - 1 === annotPosition) { // Check if the annot position matches the annot.FeatureStart in the annot list
-            for (let k = 0; k < this.genomeList.length; k++) { // If that the case then : full genome list exploration
-              let genomeK = this.genomeList[k]; // Variable for the genome with index K of the list of genomes
-              let presenceStatus = parseInt(annotMapChrom[j][genomeK]); // Get the presence status of the annotation for genomeK
-              if ((annotStatus && presenceStatus > 0) ||
-                  (!annotStatus && presenceStatus === 0)) { // If the annot is actually present or absent and match the status requested
-                rankGenomes.set(genomeK, rankGenomes.get(genomeK) + 1); // Increase the points of correspondence of the genome
-              }
-            }
-          }
-        }
-      }
-      rankGenomes = new Map([...rankGenomes.entries()].sort((a, b) => b[1] - a[1])); // Sort the ranking Map in function of their number of points.
+      let scorePerGenome = this.applyScoresToGenomes();
+
+       // Sort the ranking Map in function of their number of points.
+      let rankGenomes = new Map([...scorePerGenome.entries()].sort((a, b) => b[1] - a[1]));
 
       // Update the popup displaying the scores
       this.popupDiv = []; // Clear previous info
@@ -222,6 +201,49 @@ export default {
       if (this.componentKey > 2) { // To avoid a large number
         this.componentKey = 0;
       }
+    },
+    /**
+     * XXXXX
+     * @returns {Map} = mapOfScores[genome] --> score
+     */
+    applyScoresToGenomes() {
+      // Map that stores the scores of each genome depending on how well they match the tags
+      let mapOfScores = new Map();
+
+      // Initializing at 0
+      for (let i = 0; i < this.genomeList.length; i++) {
+        mapOfScores.set(this.genomeList[i], 0)
+      }
+
+      // Ranks genomes according to their matching score with the choosen tags
+      for (let i = 0; i < this.presenceMap.size; i++) { // For each tag...
+
+        let annot = this.annotMap.get([...this.presenceMap.keys()][i]); // Get info from annotMap
+        let annotPresenceStatus = [...this.presenceMap.values()][i]; // Get the presence status
+        let annotPosition = annot[0]; // Get the annotation's coordinates
+        let annotChrom = annot[1]; // Get the annotation's chromosome
+        let annotMapChrom = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
+
+        for (let j = 0; j < annotMapChrom.length; j++) { // Full annot list exploration
+
+          if (parseInt(annotMapChrom[j].FeatureStart) - 1 === annotPosition) { // Check if the annot position matches the annot.FeatureStart in the annot list
+
+            for (let k = 0; k < this.genomeList.length; k++) { // If that the case then : full genome list exploration
+
+              let genomeK = this.genomeList[k]; // Variable for the genome with index K of the list of genomes
+              let presenceStatus = parseInt(annotMapChrom[j][genomeK]); // Get the presence status of the annotation for genomeK
+
+              if ((annotPresenceStatus && presenceStatus > 0) ||
+                  (!annotPresenceStatus && presenceStatus === 0)) { // If the annot is actually present or absent and match the status requested
+
+                mapOfScores.set(genomeK, mapOfScores.get(genomeK) + 1); // Increase the points of correspondence of the genome
+              }
+            }
+          }
+        }
+      }
+
+      return mapOfScores
     },
   },
   watch: {
