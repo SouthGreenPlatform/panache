@@ -49,8 +49,8 @@
     </div>
 
     <div v-show="selectedSortMode === 'Gene presence status'">
-      <CategoryTitle title="Search by genes"/>
-      <GeneSearchBar/>
+      <CategoryTitle title="Filter annotation presence statuses"/>
+      <SortOption_GffPresenceStatus/>
     </div>
 
     <div v-show="selectedSortMode === 'Local presence/absence pattern'">
@@ -121,7 +121,7 @@ import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
 import SortTracks from "@/components/SortTracks";
 import CollapseMenu from "@/components/CollapseMenu";
 import NewickTree from "@/components/NewickTree";
-import GeneSearchBar from "@/components/GeneSearchBar";
+import SortOption_GffPresenceStatus from "@/components/SortOption_GffPresenceStatus";
 import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
@@ -143,7 +143,7 @@ export default {
     SortTracks,
     CollapseMenu,
     NewickTree,
-    GeneSearchBar,
+    SortOption_GffPresenceStatus,
     CategoryTitle,
     InputPosition,
     GenePosition,
