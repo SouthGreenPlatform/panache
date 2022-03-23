@@ -488,10 +488,6 @@ export default new Vuex.Store({
       state.genomeListInDisplaySave = [...payload]
       console.log("Save updated : " + state.genomeListInDisplaySave)
     },
-    SET_GENE_LIST(state, payload) {
-      state.annotMap = payload
-      console.log("Gene list updated : " + state.annotMap)
-    },
     // SET_FULL_CHROM_DATA(state, payload) {
     //   fullChromData = payload;
     // },
@@ -509,12 +505,12 @@ export default new Vuex.Store({
         });
       }
       // Extraction of the every genes, their position and their chromosome in a Map <---> { name, [positon , chromosome] }
-      let arrayGeneNameListUnSort = new Map;
+      let arrayGeneNameListUnSort = new Map();
       let annotMapSelectedChrom = [];
       for (let i = 0; i < state.chromNames.length; i++) {
         for (let j = 0; j < state.fullGffData[state.chromNames[i]].length; j++) {
           let gene = state.fullGffData[state.chromNames[i]][j];
-          arrayGeneNameListUnSort.set(gene.geneName, [gene.geneStart, state.chromNames[i]]);
+          arrayGeneNameListUnSort.set(gene.geneName, [gene.geneStart, gene.geneStop, state.chromNames[i]]);
           if (state.chromNames[i] === state.selectedChrom) { // Put the genes of the selected chromosome in an other list
             annotMapSelectedChrom.push(gene.geneName);
           }
@@ -523,7 +519,7 @@ export default new Vuex.Store({
       }
       state.annotMap = new Map([...arrayGeneNameListUnSort].sort()); // Sort the Map by alphabetical order.
       state.annotMapChromInDisplay = [...annotMapSelectedChrom]; // Update the list of the displayed chromosome's genes
-      console.log(state.annotMap);
+      //console.log('Annot Map updated', {'annotMap': state.annotMap});
     },
     SET_NEWICK_TREE_DATA(state, payload) {
       state.newickTreeData = payload
@@ -608,9 +604,6 @@ export default new Vuex.Store({
     },
     updateGenomesInDisplaySave({commit}, genoList) {
       commit('SET_GENOMES_IN_DISPLAY_SAVE', genoList)
-    },
-    updateannotMap({commit}, annotMap) {
-      commit('SET_GENE_LIST', annotMap)
     },
     // updateFullChromData({commit}, pavData) {
     //   commit('SET_FULL_CHROM_DATA', pavData)

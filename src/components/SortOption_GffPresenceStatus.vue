@@ -212,8 +212,9 @@ export default {
       this.mapOfPresenceStatus.forEach( (desiredPavStatus, annotName) => {
 
         let annotObj = this.annotMap.get(annotName);
-        let annotPosition = annotObj[0];
-        let annotChrom = annotObj[1];
+        let annotStart = annotObj[0];
+        //let annotStop = annotObj[1];
+        let annotChrom = annotObj[2];
         let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
 
         //let spannedBlocks = [];
@@ -221,7 +222,7 @@ export default {
         chromPavBlocks.forEach( block => {
 
           // Checks if position matches
-          if (parseInt(block.FeatureStart) - 1 === annotPosition) {
+          if (parseInt(block.FeatureStart) - 1 === annotStart) {
             console.log({annotObj});
 
             this.genomeList.forEach( geno => {

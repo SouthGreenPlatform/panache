@@ -114,10 +114,10 @@ export default {
     },
     jumpToPosition(geneToReach) {
       if (this.annotMap.has(geneToReach)) {
-        let genePosition = this.annotMap.get(geneToReach)[0];
-        let geneChrom = this.annotMap.get(geneToReach)[1]
-        if (genePosition !== undefined) {
-          this.targetedPosNt = genePosition;
+        let geneStart = this.annotMap.get(geneToReach)[0];
+        let geneChrom = this.annotMap.get(geneToReach)[2];
+        if (geneStart !== undefined) {
+          this.targetedPosNt = geneStart;
         }
         if (geneChrom !== this.selectedChrom) {
           this.updateSelectedChromStore(geneChrom);
