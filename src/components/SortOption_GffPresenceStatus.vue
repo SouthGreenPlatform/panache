@@ -73,14 +73,14 @@
 
           <!-- LIST OF THE ANNOT TAGS THAT ARE SELECTED AS FILTER(S) -->
           <div :key="componentKey">
-            <b-input-group v-for="tag in tags" :key="tag" size="sm" v-show="presenceMap.has(tag)" :prepend="presenceMap.get(tag) ? 'Presence' : 'Absence'" class="mb-2 tagCustomCSS">
+            <b-input-group v-for="tag in tags" :key="tag" size="sm" v-show="mapOfPresenceStatus.has(tag)" :prepend="mapOfPresenceStatus.get(tag) ? 'Presence' : 'Absence'" class="mb-2 tagCustomCSS">
               <b-input-group-prepend is-text>
                 <!-- CHECKBOX TO CHANGE THE DESIRED PRESENCE STATUS OF THE ANNOT -->
                 <b-form-checkbox
                     switch
                     class="mr-n2 noBorderLeft"
                     :class="'noBorderLeft'"
-                    :checked="presenceMap.get(tag)"
+                    :checked="mapOfPresenceStatus.get(tag)"
                     @change="updateStatus(tag)"
                     :id="'switch_' + tag">
                 </b-form-checkbox>
@@ -108,10 +108,10 @@ export default {
       search: '',
       tagNames: [], //TODO Rename, is it the possible names for annots? Name from bootstrap tags?
       searchMinChar: 3,
-      presenceMap: new Map(),
+      mapOfPresenceStatus: new Map(),
       hasSearchHappened: false,
       popupDiv: [],
-      componentKey: 0
+      componentKey: 0,
     }
   },
   computed: {
@@ -169,16 +169,9 @@ export default {
 
       // Update the popup displaying the scores
       this.popupDiv = []; // Clear previous info
-
       this.genomeList.forEach( genome => {
-        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)");
-      })
-
-      //for (let i = 0; i < this.genomeList.length; i++) {
-      //  let genome = [...rankGenomes.keys()][i];
-      //  // Add informations about the correspondence for each genome in the popup.
-      //  this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)");
-      //}
+        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.mapOfPresenceStatus.size * 100) + "%)");
+      });
 
       // Update the store with the new genome order
       this.updateGenomesInDisplay([...rankGenomes.keys()]);
@@ -189,7 +182,7 @@ export default {
      * @param annot = The annot to which you want to update the status
      */
     updateStatus(annot) {
-      this.presenceMap.set(annot, !this.presenceMap.get(annot))
+      this.mapOfPresenceStatus.set(annot, !this.mapOfPresenceStatus.get(annot))
       this.hasSearchHappened = false; // Turn hasSearchHappened to false to not misinform the user and hide the popup
       this.forceRerender();
     },
@@ -216,32 +209,33 @@ export default {
       }
 
       // Ranks genomes according to their matching score with the choosen tags
-      for (let i = 0; i < this.presenceMap.size; i++) { // For each tag...
+      this.mapOfPresenceStatus.forEach( (desiredPavStatus, annotName) => {
 
-        let annot = this.annotMap.get([...this.presenceMap.keys()][i]); // Get info from annotMap
-        let annotPresenceStatus = [...this.presenceMap.values()][i]; // Get the presence status
-        let annotPosition = annot[0]; // Get the annotation's coordinates
-        let annotChrom = annot[1]; // Get the annotation's chromosome
-        let annotMapChrom = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
+        let annotObj = this.annotMap.get(annotName);
+        let annotPosition = annotObj[0];
+        let annotChrom = annotObj[1];
+        let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
 
-        for (let j = 0; j < annotMapChrom.length; j++) { // Full annot list exploration
+        chromPavBlocks.forEach( block => {
 
-          if (parseInt(annotMapChrom[j].FeatureStart) - 1 === annotPosition) { // Check if the annot position matches the annot.FeatureStart in the annot list
+          // Checks if position matches
+          if (parseInt(block.FeatureStart) - 1 === annotPosition) {
 
-            for (let k = 0; k < this.genomeList.length; k++) { // If that the case then : full genome list exploration
+            this.genomeList.forEach( geno => {
+              //Checks if there a match between desired and actual presence/absence statuses
+              let actualPavStatus = parseInt(block[geno]);
 
-              let genomeK = this.genomeList[k]; // Variable for the genome with index K of the list of genomes
-              let presenceStatus = parseInt(annotMapChrom[j][genomeK]); // Get the presence status of the annotation for genomeK
+              if ((desiredPavStatus && actualPavStatus > 0) ||
+                  (!desiredPavStatus && actualPavStatus === 0)) {
 
-              if ((annotPresenceStatus && presenceStatus > 0) ||
-                  (!annotPresenceStatus && presenceStatus === 0)) { // If the annot is actually present or absent and match the status requested
-
-                mapOfScores.set(genomeK, mapOfScores.get(genomeK) + 1); // Increase the points of correspondence of the genome
+                 // Increment the score accordingly
+                mapOfScores.set(geno, mapOfScores.get(geno) + 1);
               }
-            }
+            });
+
           }
-        }
-      }
+        });
+      });
 
       return mapOfScores
     },
@@ -252,21 +246,21 @@ export default {
       let currentTags = [...this.tagNames];
 
       // In Map, remove keys from deleted tags
-      this.presenceMap.forEach( (val, key) => {
+      this.mapOfPresenceStatus.forEach( (val, key) => {
 
         if (currentTags.includes(key)) {
           let idxToDel = currentTags.indexOf(key);
           currentTags.splice(idxToDel, 1);
 
         } else {
-          this.presenceMap.delete(key);
+          this.mapOfPresenceStatus.delete(key);
         }
 
       });
 
       // Add new (key, value) according to new tag
       currentTags.forEach( (annotName) => {
-        this.presenceMap.set(annotName, true);
+        this.mapOfPresenceStatus.set(annotName, true);
       });
     }
   }
