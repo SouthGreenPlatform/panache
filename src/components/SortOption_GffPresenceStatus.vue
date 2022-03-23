@@ -2,7 +2,7 @@
   <div>
 <!--    <b-form-group label="Tagged input using dropdown" label-for="tags-with-dropdown">-->
     <b-form-group class="noMarginBottom">
-      <b-form-tags id="tags-with-dropdown" v-model="value" no-outer-focus class="revokeBootstrapCSS">
+      <b-form-tags id="tags-with-dropdown" v-model="tagNames" no-outer-focus class="revokeBootstrapCSS">
         <template v-slot="{ tags, disabled, addTag, removeTag }">
           <!-- SEARCH BAR -->
           <b-dropdown size="sm" variant="outline-secondary" class="mb-2" block menu-class="w-100">
@@ -46,7 +46,7 @@
           </b-dropdown>
 
           <!-- SORTING BUTTON -->
-          <b-button v-show="value.length > 0"
+          <b-button v-show="tagNames.length > 0"
                     block
                     class="mb-2 buttonPanache"
                     size="sm"
@@ -106,7 +106,7 @@ export default {
   data() {
     return {
       search: '',
-      value: [],
+      tagNames: [], //TODO Rename, is it the possible names for annots? Name from bootstrap tags?
       searchMinChar: 3,
       presenceMap: new Map(),
       hasSearchHappened: false,
@@ -118,7 +118,6 @@ export default {
     ...mapState({
       annotMap: 'geneList', //TODO change to annot in store
       genomeList: 'genomeListInDisplay',
-      // fullChromData: 'fullChromData',
     }),
     /**
      * Function that returns the research criteria.
@@ -140,7 +139,7 @@ export default {
         let matchingNames = [...this.annotMap.keys()].filter(opt => opt.toLowerCase().indexOf(criteria) > -1);
 
         // Filter out already selected options
-        return matchingNames.filter(opt => this.value.indexOf(opt) === -1);
+        return matchingNames.filter(opt => this.tagNames.indexOf(opt) === -1);
 
       } else { return [] }
     },
@@ -159,7 +158,7 @@ export default {
       this.search = ''; // Empty the search bar
     },
     /**
-     * Sort the genomes depending on the annotations used as filter.
+     * Sort the genomes based on their scores.
      */
     sortByTags() {
       let rankGenomes = new Map; // Create a map to rank the genomes in function on their correspondance with the tags
@@ -189,17 +188,22 @@ export default {
       }
       rankGenomes = new Map([...rankGenomes.entries()].sort((a, b) => b[1] - a[1])); // Sort the ranking Map in function of their number of points.
 
-      // Update the of popup that give informations about the points
-      this.popupDiv = []; // Empty the popup that give informations about the points
-      for (let i = 0; i < this.genomeList.length; i++) {
-        let genome = [...rankGenomes.keys()][i];
-        // Add informations about the correspondence for each genome in the popup.
-        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)");
-      }
+      // Update the popup displaying the scores
+      this.popupDiv = []; // Clear previous info
 
-      // Update the genomes in display with the sorted list
-      this.updateGenomesInDisplay([...rankGenomes.keys()]); // Update the order of the genome in the store in function of their rank.
-      this.hasSearchHappened = true; // Turn hasSearchHappened to true to allow the popup to appear on Panache
+      this.genomeList.forEach( genome => {
+        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)");
+      })
+
+      //for (let i = 0; i < this.genomeList.length; i++) {
+      //  let genome = [...rankGenomes.keys()][i];
+      //  // Add informations about the correspondence for each genome in the popup.
+      //  this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.presenceMap.size * 100) + "%)");
+      //}
+
+      // Update the store with the new genome order
+      this.updateGenomesInDisplay([...rankGenomes.keys()]);
+      this.hasSearchHappened = true; // Enables the info popup to appear on screen
     },
     /**
      * Update the status of research of an annotation.
@@ -221,20 +225,25 @@ export default {
     },
   },
   watch: {
-    value() {
-      let newValues = [...this.value];
+    tagNames() {
+
+      let currentTags = [...this.tagNames];
+
       // In Map, remove keys from deleted tags
       this.presenceMap.forEach( (val, key) => {
-        if (newValues.includes(key)) {
-          let idxToDel = newValues.indexOf(key);
-          newValues.splice(idxToDel, 1);
+
+        if (currentTags.includes(key)) {
+          let idxToDel = currentTags.indexOf(key);
+          currentTags.splice(idxToDel, 1);
+
         } else {
           this.presenceMap.delete(key);
         }
+
       });
 
       // Add new (key, value) according to new tag
-      newValues.forEach( (annotName) => {
+      currentTags.forEach( (annotName) => {
         this.presenceMap.set(annotName, true);
       });
     }
