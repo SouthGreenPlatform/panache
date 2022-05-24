@@ -14,7 +14,10 @@ Eloi Durant,  François Sabot, Matthieu Conte and Mathieu Rouard. Panache: a Web
 ## Installation
 
 ### With Docker
+
 Panache comes with a Docker container. Please make sure your machine already have Docker and Docker-compose (version >= 1.10) installed. If not, you might install it using ```apt install docker docker-compose```.
+
+**!CAUTION!** Somehow the installation does not work with the "bullseye" distribution of debian, to correct related bugs you can modify the `Dockerfile` and in the first line replace `FROM debian` with `FROM debian:buster`. Then proceed as follows:
 
 After cloning Panache's repository, the container can be built and launched running ```bash start.sh``` (with your sudo rights enabled; this will both create a build version and serve it with nginx).
 The web interface will be available after 1-2 minutes once everything is built.
