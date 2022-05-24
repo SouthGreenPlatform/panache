@@ -52,8 +52,8 @@ See the [Wiki](https://github.com/SouthGreenPlatform/panache/wiki) for full docu
 
 ## Acknowledgement
 
-Panache would not have come to light without the help of Romain Basset (transition to Vue JS framework) and Mel Florance (Docker container and various enhancements).
-Thank you to Gaetan Droc for setting up Panache on the Banana Genome Hub.
+Panache would not have come to light without the help of Romain Basset (transition to Vue JS framework), Mel Florance (Docker container and various enhancements) and Alexandre Bousquet (Various improvements and Sorting options for the genomes).
+Thank you to Gaetan Droc for setting up Panache on the Banana Genome Hub and Philipp Bayer for his hard-won version of wheat_panache.
 
 ## License
 Panache is published under the terms of the [MIT LICENSE](./LICENSE)
