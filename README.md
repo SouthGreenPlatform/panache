@@ -9,7 +9,7 @@ An instance of Panache is currently running at [https://panache.ird.fr/](https:/
 To see an instance with an existing dataset (Banana Pangenome by Rijzaani H. et al, 2021), you can visit the [Banana Genome Hub](https://banana-genome-hub.southgreen.fr/content/panache).
 
 ## Citation
-Eloi Durant,  François Sabot, Matthieu Conte and Mathieu Rouard. Panache: a Web Viewer for Linearized Pangenomes. BioRxiv. 2021.04.27.441597; doi: https://doi.org/10.1101/2021.04.27.441597 
+Éloi Durant, François Sabot, Matthieu Conte, Mathieu Rouard, Panache: a web browser-based viewer for linearized pangenomes, Bioinformatics, Volume 37, Issue 23, 1 December 2021, Pages 4556–4558, https://doi.org/10.1093/bioinformatics/btab688
 
 ## Installation
 
@@ -20,7 +20,8 @@ Panache comes with a Docker container. Please make sure your machine already hav
 **!CAUTION!** Somehow the installation does not work with the "bullseye" distribution of debian, to correct related bugs you can modify the `Dockerfile` and in the first line replace `FROM debian` with `FROM debian:buster`. Then proceed as follows:
 
 After cloning Panache's repository, the container can be built and launched running ```bash start.sh``` (with your sudo rights enabled; this will both create a build version and serve it with nginx).
-The web interface will be available after 1-2 minutes once everything is built.
+
+**The web interface will be available after 4-ish minutes once everything is built.** If you are impatient and want to see what is happening live, you can also run the same command that is in ```start.sh``` without the ```-d``` option, which hides the standard output from the generated container.
 Access the visualization through your [localhost](localhost:8080/) (by default a dev version will be served throught port 8080 and a prod version through port 1337).
 
 The visualization could be served on a custom IP when specified inside the nginx.conf file, instead of (or alongside with) localhost.
