@@ -59,6 +59,9 @@ Thank you to Gaetan Droc for setting up Panache on the Banana Genome Hub and Phi
 ## License
 Panache is published under the terms of the [MIT LICENSE](./LICENSE)
 
+## Contact
+Eloi Durant or Mathieu Rouard
+
 ---
 
 ## Miscellaneous
