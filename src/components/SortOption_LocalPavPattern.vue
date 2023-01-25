@@ -1,20 +1,20 @@
 <template>
   <div>
     <b-button
-        id="localGenePatternDisplayButton"
-        @click="sortBetweenValues"
+        id="SortOption_LocalPavPatternDisplayButton"
+        @click="sortPerPavPattern"
         size="sm"
         class="buttonPanache"
         block
         variant="light">
-      Sort by local pattern
+      Sort by local PAV pattern
     </b-button>
-    <b-popover v-if="hasSortHappened" target="localGenePatternDisplayButton" triggers="hover" placement="top">
-      <template #title class="centerT">Informations about values</template>
+    <b-popover v-if="isSortedByPavPattern" target="SortOption_LocalPavPatternDisplayButton" triggers="hover" placement="top">
+      <template #title class="centerT">Boundaries used for sorting</template>
       <p>
-        Left value : {{ leftValue }}
+        Left coordinate: {{ leftCoord }}
         <br>
-        Right value : {{ rightValue }}
+        Right coordinate: {{ rightCoord }}
       </p>
     </b-popover>
   </div>
@@ -26,12 +26,12 @@ import {clusterData} from "@greenelab/hclust";
 import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 export default {
-  name: "LocalGenePattern",
+  name: "SortOption_LocalPavPattern",
   data() {
     return {
-      hasSortHappened: false,
-      rightValue: 0,
-      leftValue: 0,
+      isSortedByPavPattern: false,
+      rightCoord: 0,
+      leftCoord: 0,
     }
   },
   computed: {
@@ -51,37 +51,38 @@ export default {
     ...mapActions([
       'updateGenomesInDisplay',
     ]),
+
     /**
-     * Transform the value in pixel to a value in nucleotide
+     * Convert a lentgh in pixel to a length in nucleotides
      * @param pxAmount value in pixel
      * @returns {number} value in nucleotide
      */
     pxToNt(pxAmount) {
-      if (pxAmount <= 0) { // Check if the value don't go in the negative (normally impossible)
+      if (pxAmount <= 0) { // Make sure the var is not negative
         return 0;
       } else if (pxAmount >= this.displayWindowWidth) { // Check if the value is not higher than the size of the display (this is the case at the beginning)
-        return this.displayWindowWidth / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
-      } else { // If everything is alright
+        return this.displayWindowWidth / this.currentDisplayNtWidthInPx + this.firstNtToDisplay; // TODO: check if this case makes sense
+      } else {
         return pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
       }
     },
 
     /**
-     * Sort the genomes in display by local phylogeny with the gene between the
-     * two sliders (selected area) from the component PresencePatternSelector.
+     * Order vertically all the genomes based on the similarity of their PAV patterns
+     * within the selected boundaries from the component PresencePatternSelector.
      */
-    sortBetweenValues() {
-      // Change the value of hasSortHappened to display informations
-      this.hasSortHappened = true;
+    sortPerPavPattern() {
+      // Temporarily shut down the display of info on hovering
+      this.isSortedByPavPattern = false;
 
       // Search the genes that match the selected area
       let geneBetweenValues = [];
       let selectedChromData = nonReactiveDataStore.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
-      this.leftValue = Math.round(this.pxToNt(this.localAreaSelected[0]));
-      this.rightValue = Math.round(this.pxToNt(this.localAreaSelected[1]));
+      this.leftCoord = Math.round(this.pxToNt(this.localAreaSelected[0]));
+      this.rightCoord = Math.round(this.pxToNt(this.localAreaSelected[1]));
       for (let i = 0; i < selectedChromData.length; i++) { // Check every gene of the chromosome
-        if (selectedChromData[i].FeatureStart >= this.leftValue &&
-            selectedChromData[i].FeatureStop <= this.rightValue) {
+        if (selectedChromData[i].FeatureStart >= this.leftCoord &&
+            selectedChromData[i].FeatureStop <= this.rightCoord) {
           geneBetweenValues.push(selectedChromData[i]); // Add the gene to list if its in the selected area
         }
       }
@@ -110,27 +111,30 @@ export default {
         genomeListSorted.push(this.genomeListInDisplay[clusterOrder[i]]) // Fill the list with the genome by their order in clusterOrder
       }
       this.updateGenomesInDisplay(genomeListSorted); // Update the genomes in display with he sorted list
-    }
-    ,
+
+      // Enable the display of info related to the parameters used to sort
+      this.isSortedByPavPattern = true;
+    },
+
     /**
      * Function that return the dissimilarity index between two arrays.
      * @param a first binary array
-     * @param b second binary array
+     * @param b second binary array, same length as a
      * @returns {number} dissimilarity index
      */
     simpleMatching(a, b) {
-      const size = Math.min(a.length, b.length); // Get the lowest array length as size for calculate (they have the same length normally)
-      let nbExactMatch = 0; // Initialising of the counter of similarity index
+      const arrayLength = Math.min(a.length, b.length); // Keep smallest length to avoid crashes if the lengths are different
+      let nbExactMatch = 0;
 
-      for (let index = 0; index < size; index++) { // For each value in the arrays
-        if ((a[index] === 1 && b[index] === 1) ||
-            (a[index] === 0 && b[index] === 0)) {
-          nbExactMatch++; // If the array both contains an 0 or an 1, increase the counter
-        }
+      // Build the count for a similarity index
+      for (let index = 0; index < arrayLength; index++) {
+        let arraysHaveSameValue = ((a[index] === 1 && b[index] === 1) || (a[index] === 0 && b[index] === 0));
+        if (arraysHaveSameValue) { nbExactMatch++ };
       }
 
       return 1 - nbExactMatch / size; // Return the dissimilarity index
     },
+
     displayNothing() {
       // Do nothing
     }
