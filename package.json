@@ -11,7 +11,7 @@
   },
   "main": "babel.config.js",
   "dependencies": {
-    "@vue/cli": "^4.5.12",
+    "@vue/cli": "^4.5.19",
     "@greenelab/hclust": "0.0.1",
     "@vue/composition-api": "^1.0.0-rc.9",
     "@vueform/slider": "^1.0.5",

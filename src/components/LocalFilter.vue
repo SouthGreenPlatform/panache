@@ -55,7 +55,7 @@
 
     <div v-show="selectedSortMode === 'Local presence/absence pattern'">
       <CategoryTitle title="Local presence/absence pattern sort"/>
-      <LocalGenePattern/>
+      <SortOption_LocalPavPattern/>
     </div>
 
     <CategoryTitle title="Display parameters"/>
@@ -125,7 +125,7 @@ import SortOption_GffPresenceStatus from "@/components/SortOption_GffPresenceSta
 import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
-import LocalGenePattern from "@/components/LocalGenePattern";
+import SortOption_LocalPavPattern from "@/components/SortOption_LocalPavPattern";
 import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
@@ -135,19 +135,19 @@ import * as d3 from "d3";
 export default {
   name: 'LocalFilter',
   components: {
+    GenePosition,
+    InputPosition,
+    CategoryTitle,
+    SortOption_LocalPavPattern,
+    SortOption_GffPresenceStatus,
+    NewickTree,
+    CollapseMenu,
+    SortTracks,
     CoreThreshold,
     MatrixOptimizedZoom,
     DropDownChoice,
     PavMatrixLegend,
     HollowAreaFinder,
-    SortTracks,
-    CollapseMenu,
-    NewickTree,
-    SortOption_GffPresenceStatus,
-    CategoryTitle,
-    InputPosition,
-    GenePosition,
-    LocalGenePattern,
   },
   props: {},
   data() {

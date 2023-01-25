@@ -29,10 +29,10 @@
         :lastNtToDisplay="lastNt"
         :trackWidth="displayWindowWidth"
       />
-      <PresencePatternSelector
+      <PavPatternRegionSelector
           v-show="selectedSortMode === 'Local presence/absence pattern'"
-          :minValue="0"
-          :maxValue="displayWindowWidth"
+          :leftmostPixel=0
+          :rightmostPixel="displayWindowWidth"
       />
       <div id='responsivePavDiv' :style="respPavDivWrapper">
         <HollowAreaTrack
@@ -98,14 +98,14 @@ import PavMatrix from '@/components/PavMatrix.vue';
 import Tracks from '@/components/Tracks.vue';
 import HollowAreaTrack from '@/components/HollowAreaTrack.vue';
 import AnnotationTrack from '@/components/AnnotationTrack.vue';
-import PresencePatternSelector from "@/components/PresencePatternSelector.vue";
+import PavPatternRegionSelector from "@/components/PavPatternRegionSelector.vue";
 
 import { mapState, mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'Panache',
   components: {
-    PresencePatternSelector,
+    PavPatternRegionSelector,
     LoadingSpinner,
     OverlayedCanvas,
     //PavMatrixAndTracks,
