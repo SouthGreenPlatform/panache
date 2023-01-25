@@ -31,8 +31,8 @@
       />
       <PavPatternRegionSelector
           v-show="selectedSortMode === 'Local presence/absence pattern'"
-          :minValue="0"
-          :maxValue="displayWindowWidth"
+          :leftmostPixel=0
+          :rightmostPixel="displayWindowWidth"
       />
       <div id='responsivePavDiv' :style="respPavDivWrapper">
         <HollowAreaTrack

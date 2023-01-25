@@ -80,11 +80,14 @@ export default {
       for (let i = 0; i < this.genomeListInDisplay.length; i++) {
         localBinaryPavMatrix.push([]);
       }
+      console.log(localBinaryPavMatrix);
 
       // Fill the binary PAV matrix with PAV values (0 or 1)
-      let nParsedGenomes = 0;
+      let nParsedBlocks = 0;
       panBlocksWithinBoundaries.forEach( panBlock => {
+        let nParsedGenomes = 0;
         this.genomeListInDisplay.forEach( geno => {
+          console.log({nParsedBlocks, nParsedGenomes});
           if (parseInt(panBlock[geno]) === 0) {
             localBinaryPavMatrix[nParsedGenomes].push(0);
           } else {
@@ -92,6 +95,7 @@ export default {
           }
           nParsedGenomes+=1;
         });
+        nParsedBlocks+=1;
       })
 
       // Use the hclust library to cluster and order the genomes by their similarities within localBinaryPavMatrix

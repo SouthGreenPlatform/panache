@@ -2,9 +2,9 @@
   <div class="marTop15">
     <!--  Component Slider used  -->
     <Slider
-        v-model="value"
-        :min="minValue"
-        :max="maxValue"
+        v-model="pxBoundaries"
+        :min="leftmostPixel"
+        :max="rightmostPixel"
         :merge="isToolTipDisplayed ? 100000000 : -1"
         :tooltips="isToolTipDisplayed"
     />
@@ -17,7 +17,7 @@ import Vue from "vue";
 import VueCompositionAPI from '@vue/composition-api'
 Vue.use(VueCompositionAPI)
 import Slider from '@vueform/slider/dist/slider.vue2.js'
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
   name: "PavPatternRegionSelector",
@@ -25,16 +25,18 @@ export default {
     Slider,
   },
   props: {
-    minValue: {
+    leftmostPixel: {
       require: true,
     },
-    maxValue: {
+    rightmostPixel: {
       require: true,
     },
   },
   data() {
+    let initialLeftBorder = this.leftmostPixel;
+    let initialRightBorder = this.rightmostPixel;
     return {
-      value: [0, 10000],
+      pxBoundaries: [initialLeftBorder, initialRightBorder],
       isToolTipDisplayed: false,
     }
   },
@@ -43,13 +45,10 @@ export default {
       firstNtToDisplay: 'firstNtToDisplay',
       currentDisplayNtWidthInPx : 'currentDisplayNtWidthInPx',
     }),
-    ...mapGetters({
-      displayWindowWidth: 'displayWindowWidth',
-    }),
 
-    boundaries() {
-      let leftCoord = Math.round(this.pxToNt(this.value[0]));
-      let rightCoord = Math.round(this.pxToNt(this.value[1]));
+    ntBoundaries() {
+      let leftCoord = this.pxToNt(this.pxBoundaries[0]);
+      let rightCoord = this.pxToNt(this.pxBoundaries[1]);
       return [leftCoord, rightCoord];
     },
   },
@@ -57,25 +56,22 @@ export default {
     ...mapActions([
       'updateRegionForPatternSort',
     ]),
-    
+
     /**
      * Convert a lentgh in pixel to a length in nucleotides
      * @param pxAmount value in pixel
      * @returns {number} value in nucleotide
      */
      pxToNt(pxAmount) {
-      if (pxAmount <= 0) { // Make sure the var is not negative
-        return 0;
-      } else if (pxAmount >= this.displayWindowWidth) { // Check if the value is not higher than the size of the display (this is the case at the beginning)
-        return this.displayWindowWidth / this.currentDisplayNtWidthInPx + this.firstNtToDisplay; // TODO: check if this case makes sense
-      } else {
-        return pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
-      }
+        return Math.round(pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay);
     },
   },
   watch: {
-    value() {
-      this.updateRegionForPatternSort(this.boundaries);
+    ntBoundaries: {
+      handler: function() {
+        this.updateRegionForPatternSort(this.ntBoundaries)
+      },
+      immediate: true
     },
   }
 }
