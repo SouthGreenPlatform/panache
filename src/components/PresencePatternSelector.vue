@@ -17,7 +17,7 @@ import Vue from "vue";
 import VueCompositionAPI from '@vue/composition-api'
 Vue.use(VueCompositionAPI)
 import Slider from '@vueform/slider/dist/slider.vue2.js'
-import { mapActions } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
   name: "PresencePatternSelector",
@@ -38,14 +38,44 @@ export default {
       isToolTipDisplayed: false,
     }
   },
+  computed: {
+    ...mapState({
+      firstNtToDisplay: 'firstNtToDisplay',
+      currentDisplayNtWidthInPx : 'currentDisplayNtWidthInPx',
+    }),
+    ...mapGetters({
+      displayWindowWidth: 'displayWindowWidth',
+    }),
+
+    boundaries() {
+      let leftCoord = Math.round(this.pxToNt(this.value[0]));
+      let rightCoord = Math.round(this.pxToNt(this.value[1]));
+      return [leftCoord, rightCoord];
+    },
+  },
   methods: {
     ...mapActions([
-      'updateLocalAreaSelected',
+      'updateRegionForPatternSort',
     ]),
+    
+    /**
+     * Convert a lentgh in pixel to a length in nucleotides
+     * @param pxAmount value in pixel
+     * @returns {number} value in nucleotide
+     */
+     pxToNt(pxAmount) {
+      if (pxAmount <= 0) { // Make sure the var is not negative
+        return 0;
+      } else if (pxAmount >= this.displayWindowWidth) { // Check if the value is not higher than the size of the display (this is the case at the beginning)
+        return this.displayWindowWidth / this.currentDisplayNtWidthInPx + this.firstNtToDisplay; // TODO: check if this case makes sense
+      } else {
+        return pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
+      }
+    },
   },
   watch: {
     value() {
-      this.updateLocalAreaSelected(this.value);
+      this.updateRegionForPatternSort(this.boundaries);
     },
   }
 }

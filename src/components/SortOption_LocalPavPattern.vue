@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 import {clusterData} from "@greenelab/hclust";
 import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
@@ -30,42 +30,21 @@ export default {
   data() {
     return {
       isSortedByPavPattern: false,
-      rightCoord: 0,
       leftCoord: 0,
+      rightCoord: 1,
     }
   },
   computed: {
     ...mapState({
-      localAreaSelected: 'localAreaSelected',
-      firstNtToDisplay: 'firstNtToDisplay',
-      currentDisplayNtWidthInPx : 'currentDisplayNtWidthInPx',
+      regionForPatternSort: 'regionForPatternSort',
       selectedChrom: 'selectedChrom',
-      // fullChromData: 'fullChromData',
       genomeListInDisplay: 'genomeListInDisplay',
-    }),
-    ...mapGetters({
-      displayWindowWidth: 'displayWindowWidth',
     }),
   },
   methods: {
     ...mapActions([
       'updateGenomesInDisplay',
     ]),
-
-    /**
-     * Convert a lentgh in pixel to a length in nucleotides
-     * @param pxAmount value in pixel
-     * @returns {number} value in nucleotide
-     */
-    pxToNt(pxAmount) {
-      if (pxAmount <= 0) { // Make sure the var is not negative
-        return 0;
-      } else if (pxAmount >= this.displayWindowWidth) { // Check if the value is not higher than the size of the display (this is the case at the beginning)
-        return this.displayWindowWidth / this.currentDisplayNtWidthInPx + this.firstNtToDisplay; // TODO: check if this case makes sense
-      } else {
-        return pxAmount / this.currentDisplayNtWidthInPx + this.firstNtToDisplay;
-      }
-    },
 
     /**
      * Order vertically all the genomes based on the similarity of their PAV patterns
@@ -75,28 +54,30 @@ export default {
       // Temporarily shut down the display of info on hovering
       this.isSortedByPavPattern = false;
 
-      // Search the genes that match the selected area
-      let geneBetweenValues = [];
+      // Get the panBlocks located within the selected boundaries
+      let panBlocksWithinBoundaries = [];
+      // TODO: check the locally visible blocks instead?
       let selectedChromData = nonReactiveDataStore.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
-      this.leftCoord = Math.round(this.pxToNt(this.localAreaSelected[0]));
-      this.rightCoord = Math.round(this.pxToNt(this.localAreaSelected[1]));
-      for (let i = 0; i < selectedChromData.length; i++) { // Check every gene of the chromosome
+      this.leftCoord = this.regionForPatternSort[0];
+      this.rightCoord = this.regionForPatternSort[1];
+
+      for (let i = 0; i < selectedChromData.length; i++) {
         if (selectedChromData[i].FeatureStart >= this.leftCoord &&
             selectedChromData[i].FeatureStop <= this.rightCoord) {
-          geneBetweenValues.push(selectedChromData[i]); // Add the gene to list if its in the selected area
+          panBlocksWithinBoundaries.push(selectedChromData[i]);
         }
       }
 
-      // Create a list that contain a list for avery genome and their presence/absence pattern of avery gene in geneBetweenValues
+      // Create a list that contain a list for avery genome and their presence/absence pattern of avery gene in panBlocksWithinBoundaries
       let presencePatternList = [];
       for (let i = 0; i < this.genomeListInDisplay.length; i++) {
         presencePatternList.push([]);
       }
 
-      // Fill presencePatternList with the data of every gene status for every genome for every gene in geneBetweenValues
-      for (let i = 0; i < geneBetweenValues.length; i++) {
+      // Fill presencePatternList with the data of every gene status for every genome for every gene in panBlocksWithinBoundaries
+      for (let i = 0; i < panBlocksWithinBoundaries.length; i++) {
         for (let j = 0; j < this.genomeListInDisplay.length; j++) {
-          if (parseInt(geneBetweenValues[i][this.genomeListInDisplay[j]]) === 0) { // Check if the presence status === 0
+          if (parseInt(panBlocksWithinBoundaries[i][this.genomeListInDisplay[j]]) === 0) { // Check if the presence status === 0
             presencePatternList[j].push(0); // If presence status === 0
           } else {
             presencePatternList[j].push(1); // If presence status >= 0
@@ -104,7 +85,7 @@ export default {
         }
       }
 
-      // Usage of the hclust library to create a cluster and order the genome by local phylogeny with the gene in geneBetweenValues
+      // Usage of the hclust library to create a cluster and order the genome by local phylogeny with the gene in panBlocksWithinBoundaries
       let clusterOrder = clusterData({ data: presencePatternList, distance: this.simpleMatching, onProgress: this.displayNothing}).order;
       let genomeListSorted = []; // Create a list that will contain the genomes newly sorted
       for (let i = 0; i < clusterOrder.length; i++) {

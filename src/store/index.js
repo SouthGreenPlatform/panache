@@ -38,7 +38,7 @@ export default new Vuex.Store({
     chromNames: ['0', '1', '2', '3'],
     selectedChrom: '0', // Stores the id of the chrom to display at the block level vis
     coordsOfHollowAreas: new Map(),
-    localAreaSelected: [0, 10000],
+    regionForPatternSort: [0, 10000],
 
     // Color scales used throughout the app
     colorsForPositionColorScale: [
@@ -577,7 +577,7 @@ export default new Vuex.Store({
       state.isNewickTreeDisplayed = false
     },
     SET_LOCAL_AREA_SELECTED(state, payload) {
-      state.localAreaSelected = payload
+      state.regionForPatternSort = payload
     },
   },
   // Functions to call within the app to apply mutations to the store, asynch
@@ -663,7 +663,7 @@ export default new Vuex.Store({
         commit('TURN_NEWICK_TREE_DISPLAYED_ON')
       }
     },
-    updateLocalAreaSelected({commit}, coordinates) {
+    updateRegionForPatternSort({commit}, coordinates) {
       commit('SET_LOCAL_AREA_SELECTED', coordinates)
     },
   },
