@@ -20,7 +20,7 @@ import Slider from '@vueform/slider/dist/slider.vue2.js'
 import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
-  name: "PresencePatternSelector",
+  name: "PavPatternRegionSelector",
   components: {
     Slider,
   },

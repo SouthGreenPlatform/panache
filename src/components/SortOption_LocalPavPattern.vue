@@ -48,7 +48,7 @@ export default {
 
     /**
      * Order vertically all the genomes based on the similarity of their PAV patterns
-     * within the selected boundaries from the component PresencePatternSelector.
+     * within the selected boundaries from the component PavPatternRegionSelector.
      */
     sortPerPavPattern() {
       // Temporarily shut down the display of info on hovering
