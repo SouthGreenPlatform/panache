@@ -56,11 +56,10 @@ export default {
 
       // Get the panBlocks located within the selected boundaries
       let panBlocksWithinBoundaries = [];
-      // TODO: check the locally visible blocks instead?
+      // TODO: check the locally visible blocks instead? Are they stored somewhere other than Panache.vue?
       let selectedChromData = nonReactiveDataStore.fullChromData[this.selectedChrom]; // Get the data of the chromosome in display
       this.leftCoord = this.regionForPatternSort[0];
       this.rightCoord = this.regionForPatternSort[1];
-
       for (let i = 0; i < selectedChromData.length; i++) {
         if (selectedChromData[i].FeatureStart >= this.leftCoord &&
             selectedChromData[i].FeatureStop <= this.rightCoord) {
@@ -68,30 +67,42 @@ export default {
         }
       }
 
-      // Create a list that contain a list for avery genome and their presence/absence pattern of avery gene in panBlocksWithinBoundaries
-      let presencePatternList = [];
+      /* Initiate a binary PAV matrix ahead of the computation of the dissimilarity index:
+                  panBlockA   B   C
+                 [
+        genome1   [0,         1,  0],
+        genome2   [0,         0,  0],
+        genome3   [1,         1,  1]
+                                    ]
+      0 being an absence, 1 a presence
+      */
+      let localBinaryPavMatrix = [];
       for (let i = 0; i < this.genomeListInDisplay.length; i++) {
-        presencePatternList.push([]);
+        localBinaryPavMatrix.push([]);
       }
 
-      // Fill presencePatternList with the data of every gene status for every genome for every gene in panBlocksWithinBoundaries
-      for (let i = 0; i < panBlocksWithinBoundaries.length; i++) {
-        for (let j = 0; j < this.genomeListInDisplay.length; j++) {
-          if (parseInt(panBlocksWithinBoundaries[i][this.genomeListInDisplay[j]]) === 0) { // Check if the presence status === 0
-            presencePatternList[j].push(0); // If presence status === 0
+      // Fill the binary PAV matrix with PAV values (0 or 1)
+      let nParsedGenomes = 0;
+      panBlocksWithinBoundaries.forEach( panBlock => {
+        this.genomeListInDisplay.forEach( geno => {
+          if (parseInt(panBlock[geno]) === 0) {
+            localBinaryPavMatrix[nParsedGenomes].push(0);
           } else {
-            presencePatternList[j].push(1); // If presence status >= 0
+            localBinaryPavMatrix[nParsedGenomes].push(1);
           }
-        }
-      }
+          nParsedGenomes+=1;
+        });
+      })
 
-      // Usage of the hclust library to create a cluster and order the genome by local phylogeny with the gene in panBlocksWithinBoundaries
-      let clusterOrder = clusterData({ data: presencePatternList, distance: this.simpleMatching, onProgress: this.displayNothing}).order;
-      let genomeListSorted = []; // Create a list that will contain the genomes newly sorted
-      for (let i = 0; i < clusterOrder.length; i++) {
-        genomeListSorted.push(this.genomeListInDisplay[clusterOrder[i]]) // Fill the list with the genome by their order in clusterOrder
-      }
-      this.updateGenomesInDisplay(genomeListSorted); // Update the genomes in display with he sorted list
+      // Use the hclust library to cluster and order the genomes by their similarities within localBinaryPavMatrix
+      let newOrderOfIndex = clusterData({ data: localBinaryPavMatrix, distance: this.simpleMatching, onProgress: this.displayNothing}).order;
+      let newlySortedGenoList = []; // Create a list that will contain the genomes newly sorted
+      newOrderOfIndex.forEach( oldIndex => {
+        newlySortedGenoList.push(this.genomeListInDisplay[oldIndex]) // Fill the list with the genome by their order in newOrderOfIndex
+      });
+
+      // Update the order of genomes on display
+      this.updateGenomesInDisplay(newlySortedGenoList);
 
       // Enable the display of info related to the parameters used to sort
       this.isSortedByPavPattern = true;
@@ -110,10 +121,10 @@ export default {
       // Build the count for a similarity index
       for (let index = 0; index < arrayLength; index++) {
         let arraysHaveSameValue = ((a[index] === 1 && b[index] === 1) || (a[index] === 0 && b[index] === 0));
-        if (arraysHaveSameValue) { nbExactMatch++ };
+        if (arraysHaveSameValue) { nbExactMatch++ }
       }
 
-      return 1 - nbExactMatch / size; // Return the dissimilarity index
+      return 1 - nbExactMatch / arrayLength; // Return the dissimilarity index
     },
 
     displayNothing() {
