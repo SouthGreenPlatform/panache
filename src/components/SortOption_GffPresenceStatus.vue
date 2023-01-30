@@ -205,13 +205,18 @@ export default {
       let mapOfScores = new Map();
 
       // Initializing at 0
-      for (let i = 0; i < this.genomeList.length; i++) {
-        mapOfScores.set(this.genomeList[i], 0)
-      }
+      this.genomeList.forEach( geno => mapOfScores.set(geno, 0) );
+
+      //for (let i = 0; i < this.genomeList.length; i++) {
+      //  mapOfScores.set(this.genomeList[i], 0)
+      //}
 
       // Ranks genomes according to their matching score with the choosen tags
       this.mapOfPresenceStatus.forEach( (shouldBePresent, annotName) => {
 
+        let { spannedBlocks, setOfBreakpoints } = getBlocksSpannedByAnnotAndBkpts(annotName);
+
+        /*
         let annotStartStopChrom = this.annotMap.get(annotName);
         let annotStart = annotStartStopChrom[0];
         let annotStop = annotStartStopChrom[1];
@@ -237,6 +242,7 @@ export default {
 
           return isMatching
         });
+        */
 
         // Build mapOfBlocksPerBreakpoint that lists, for all breakpoints, which
         // blocks cover the following interval
@@ -307,7 +313,8 @@ export default {
             nextBreakpoint = bkpt;
           })
 
-          /*// Check PAV status of all candidate blocks
+          /*
+          // Check PAV status of all candidate blocks
           spannedBlocks.forEach(block => {
             let pavStatus = parseInt(block[geno]);
             let leftExceedance = Math.max(block.FeatureStart - annotStart, 0);
@@ -334,6 +341,44 @@ export default {
       });
 
       return mapOfScores
+    },
+    /**
+     * Function that returns all the panBlocks overlaped by a given annotation
+     * as well as the coordinates of breakpoints within that annot, corresponding
+     * to the borders of said panBlocks when they are contained within the annot.
+     * @returns {Array} = [panBlock_A, ..., panBlock_M]
+     * @returns {Set} = (AnnotStart, BKPT_1, ..., BKPT_N, AnnotStop)
+     */
+    getBlocksSpannedByAnnotAndBkpts(annotName) {
+      let annotStartStopChrom = this.annotMap.get(annotName);
+      let annotStart = annotStartStopChrom[0];
+      let annotStop = annotStartStopChrom[1];
+      let annotChrom = annotStartStopChrom[2];
+      let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
+
+      // Find the blocks for which we should check the pav status
+      // Here the condition is that at least a part of the block(s) should
+      // overlap the annotation
+      let setOfBreakpoints = new Set([annotStart]);
+      let spannedBlocks = chromPavBlocks.filter( block => {
+
+        let blockStartIsInAnnot = ( annotStart <= parseInt(block.FeatureStart) ) && ( parseInt(block.FeatureStart) <= annotStop );
+        let blockStopIsInAnnot = ( annotStart <= parseInt(block.FeatureStop) ) && ( parseInt(block.FeatureStop) <= annotStop );
+        let blockContainsAnnot = ( parseInt(block.FeatureStart) <= annotStart) && ( annotStop <= parseInt(block.FeatureStop) );
+
+        let isMatching = (blockStartIsInAnnot || blockStopIsInAnnot || blockContainsAnnot);
+
+        // Keep track of the breakpoints within the annotation, made
+        // by the borders of PAV blocks
+        if (isMatching) {
+          setOfBreakpoints.add(Math.max(block.FeatureStart, annotStart));
+          setOfBreakpoints.add(Math.min(block.FeatureStop, annotStop));
+        }
+
+        return isMatching
+      });
+
+      return {spannedBlocks, setOfBreakpoints};
     },
   },
   watch: {
