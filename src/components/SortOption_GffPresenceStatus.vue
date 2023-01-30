@@ -169,8 +169,8 @@ export default {
 
       // Update the popup displaying the scores
       this.popupDiv = []; // Clear previous info
-      this.genomeList.forEach( genome => {
-        this.popupDiv.push(genome + " (" + Math.round(rankGenomes.get(genome) / this.mapOfPresenceStatus.size * 100) + "%)");
+      rankGenomes.forEach( (score, genome) => {
+        this.popupDiv.push(`${genome} (${score}%)`);
       });
 
       // Update the store with the new genome order
@@ -197,49 +197,35 @@ export default {
     },
     /**
      * Function that parses all the annotName x presenceStatus filters and
-     * computes a matching score for every genome.
+     * computes a matching score for every genome, as a rounded percent of match.
      * @returns {Map} = mapOfScores[genome] --> score
      */
     applyScoresToGenomes() {
+
       // Map that stores the scores of each genome depending on how well they match the tags
       let mapOfScores = new Map();
 
       // Initializing at 0
-      for (let i = 0; i < this.genomeList.length; i++) {
-        mapOfScores.set(this.genomeList[i], 0)
-      }
+      this.genomeList.forEach( geno => mapOfScores.set(geno, 0) );
 
       // Ranks genomes according to their matching score with the choosen tags
       this.mapOfPresenceStatus.forEach( (shouldBePresent, annotName) => {
 
         let annotStartStopChrom = this.annotMap.get(annotName);
-        let annotStart = annotStartStopChrom[0];
-        let annotStop = annotStartStopChrom[1];
-        let annotChrom = annotStartStopChrom[2];
-        let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
+        let searchCriteria = {
+          'shouldBePresent': shouldBePresent,
+          'annotStart': annotStartStopChrom[0], // Coordinate in nt of the start position of the annot
+          'annotStop': annotStartStopChrom[1], // Coordinate in nt of the stop position of the annot
+          'annotChrom': annotStartStopChrom[2], // Name of the chrom hosting the annot
+        };
 
-        // Find the blocks for which we should check the pav status
-        // Here the condition is that at least a part of the block(s) should
-        // overlap the annotation
-        let setOfBreakpoints = new Set([annotStart]);
-        let spannedBlocks = chromPavBlocks.filter( block => {
-
-          let blockStartIsInAnnot = ( annotStart <= parseInt(block.FeatureStart) ) && ( parseInt(block.FeatureStart) <= annotStop );
-          let blockStopIsInAnnot = ( annotStart <= parseInt(block.FeatureStop) ) && ( parseInt(block.FeatureStop) <= annotStop );
-          let blockContainsAnnot = ( parseInt(block.FeatureStart) <= annotStart) && ( annotStop <= parseInt(block.FeatureStart) );
-
-          let isMatching = (blockStartIsInAnnot || blockStopIsInAnnot || blockContainsAnnot);
-
-          if (isMatching) {
-            setOfBreakpoints.add(Math.min(block.FeatureStart, annotStart));
-            setOfBreakpoints.add(Math.max(block.FeatureStop, annotStop));
-          }
-
-          return isMatching
-        });
+        // Find the panBlocks overlapping the annot and the breakpoints
+        // that split the annot in multiple segments, each will have a part
+        // of the overall matching score.
+        let { spannedBlocks, arrayOfBreakpoints } = this.getBlocksSpannedByAnnotAndBkpts(searchCriteria);
 
         // Build mapOfBlocksPerBreakpoint that lists, for all breakpoints, which
-        // blocks cover the following interval
+        // panBlocks cover the subsequent interval
         //
         //Exemple:
         //  Annot |------------------------------------------------------------|
@@ -256,84 +242,132 @@ export default {
         // map.get(E) --> [];
         let mapOfBlocksPerBreakpoint = new Map();
 
-        // Create the ordered array of breakpoints / intervals starting points
-        let arrayOfBreakpoints = Array.from(setOfBreakpoints).sort((a, b) => a - b);
-        arrayOfBreakpoints.pop();
-        arrayOfBreakpoints.reverse(); // Will be parsed from end to start later
-
-        // For each breakpoint, stores the blocks present in the following interval
+        // For each breakpoint, stores the blocks present in the subsequent interval
+        // It enables overlapping blocks
         arrayOfBreakpoints.forEach( bkpt => {
           mapOfBlocksPerBreakpoint.set(bkpt, []);
           spannedBlocks.forEach(block => {
-            // Does the [breakpoint+, nextBreakpoint[ interval has the block?
+            // Does the [breakpoint, nextBreakpoint[ interval has the block?
             if ( (block.FeatureStart <= bkpt) || (bkpt < block.FeatureStop ) ) {
               mapOfBlocksPerBreakpoint.get(bkpt).push(block)
             }
           });
         });
 
-        // Compute matching score for each genome
-        this.genomeList.forEach( geno => {
-
-          let cumulLenScore = 0;
-          let nextBreakpoint = annotStop;
-          let annotLength = annotStop - annotStart;
-
-          // Parsing the breakpoints from right to left
-          arrayOfBreakpoints.forEach( bkpt => {
-
-            let intervalLength = nextBreakpoint - bkpt;
-            let intervalScore = 0;
-            let nbOfMatchingBlocks = 0;
-
-            // Check PAV status of all candidate blocks
-            mapOfBlocksPerBreakpoint.get(bkpt).forEach( block => {
-              let pavStatus = parseInt(block[geno]);
-
-              //Check if there is a match between desired and block presence/absence statuses
-              let queryDoesMatch = (shouldBePresent && pavStatus > 0) || (!shouldBePresent && pavStatus === 0) ;
-
-              if (queryDoesMatch) {
-                nbOfMatchingBlocks += 1;
-              }
-            })
-
-            let nbBlockInInter = mapOfBlocksPerBreakpoint.get(bkpt).length;
-            if (nbBlockInInter > 0) {
-              intervalScore = nbOfMatchingBlocks * intervalLength / nbBlockInInter;
-            }
-
-            cumulLenScore += intervalScore;
-            nextBreakpoint = bkpt;
-          })
-
-          /*// Check PAV status of all candidate blocks
-          spannedBlocks.forEach(block => {
-            let pavStatus = parseInt(block[geno]);
-            let leftExceedance = Math.max(block.FeatureStart - annotStart, 0);
-            let rightExceedance = Math.max(annotStop - block.FeatureStop, 0);
-            let overlappedLength = annotLength - leftExceedance - rightExceedance;
-
-            //Check if there is a match between desired and block presence/absence statuses
-            let queryDoesMatch = (shouldBePresent && pavStatus > 0) || (!shouldBePresent && pavStatus === 0) ;
-
-            if (queryDoesMatch) {
-              cumulLenScore += overlappedLength;
-            }
-          });
-          */
-
-          // The score is a float between 0 and 1, shows the proportion of the annot that matches the desired pav status
-          let annotScore = cumulLenScore / annotLength;
-          //console.log({cumulLenScore, annotLength, spannedBlocks})
-
-          mapOfScores.set(geno, mapOfScores.get(geno) + annotScore);
-
-        });
+        this.increaseScorePerGenome(mapOfScores, arrayOfBreakpoints, mapOfBlocksPerBreakpoint, searchCriteria);
 
       });
 
-      return mapOfScores
+      //console.log({mapOfScores});
+      // Turn the score into a percentage of matches
+      mapOfScores.forEach( (score, geno ) => mapOfScores.set(geno, Math.round(score / this.mapOfPresenceStatus.size * 100)));
+
+      //console.log({mapOfScores});
+      return mapOfScores;
+    },
+    /**
+     * Function that returns all the panBlocks overlaped by a given annotation
+     * as well as the coordinates of breakpoints within that annot, corresponding
+     * to the borders of said panBlocks when they are contained within the annot.
+     * @param searchCriteria = (object) Contains annotStart, annotStop, and annotChom
+     * @returns {Array} = [panBlock_A, ..., panBlock_M]
+     * @returns {Array} = [AnnotStart, BKPT_1, ..., BKPT_N, AnnotStop]
+     */
+    getBlocksSpannedByAnnotAndBkpts(searchCriteria) {
+
+      let {annotStart, annotStop, annotChrom} = searchCriteria;
+
+      let chromPavBlocks = [...nonReactiveDataStore.fullChromData[annotChrom]]; // Get the list of PAV blocks found in annotChrom
+
+      // Find the blocks for which we should check the pav status
+      // Here the condition is that at least a part of the block(s) should
+      // overlap the annotation
+      let setOfBreakpoints = new Set([annotStart]);
+      let spannedBlocks = chromPavBlocks.filter( block => {
+
+        let blockStartIsInAnnot = ( annotStart <= parseInt(block.FeatureStart) ) && ( parseInt(block.FeatureStart) <= annotStop );
+        let blockStopIsInAnnot = ( annotStart <= parseInt(block.FeatureStop) ) && ( parseInt(block.FeatureStop) <= annotStop );
+        let blockContainsAnnot = ( parseInt(block.FeatureStart) <= annotStart) && ( annotStop <= parseInt(block.FeatureStop) );
+
+        let isMatching = (blockStartIsInAnnot || blockStopIsInAnnot || blockContainsAnnot);
+
+        // Keep track of the breakpoints within the annotation, made
+        // by the borders of PAV blocks
+        if (isMatching) {
+          setOfBreakpoints.add(Math.max(block.FeatureStart, annotStart));
+          setOfBreakpoints.add(Math.min(block.FeatureStop, annotStop));
+        }
+
+        return isMatching
+      });
+
+      // Create the ordered array of breakpoints / intervals starting points
+      let arrayOfBreakpoints = Array.from(setOfBreakpoints).sort((a, b) => a - b); // Sort in increasing order
+      arrayOfBreakpoints.pop(); // Final breakpoint is useless since it does not start any interval to check
+      arrayOfBreakpoints.reverse(); // Will be parsed from end to start later
+
+      return {spannedBlocks, arrayOfBreakpoints};
+    },
+    /**
+     * For each annotation chunk between breakpoints, computes the matching score
+     * (ie. a proportion of the chunk's length depending on how well it matches)
+     * based on the search criteria and the panBlocks found.
+     * That score is then converted to a global score by cumulating the scores
+     * of all chunks, returned by the function.
+     * Increases the score obtained with previous search criterias / annot.
+     * @param mapOfScores = (Map) map.get(geno) --> matchingScore, updated based on the current annot score
+     * @param arrayOfBreakpoints = (Array) reverse ordered list of breakpoints
+     * @param mapOfBlocksPerBreakpoint = (Map) with the list of panBlocks found within each segment
+     * @param searchCriteria = (object) Contains shouldBePresent annotStop, and annotStart
+     */
+     increaseScorePerGenome(mapOfScores, arrayOfBreakpoints, mapOfBlocksPerBreakpoint, searchCriteria) {
+
+      let {shouldBePresent, annotStart, annotStop} = searchCriteria;
+
+      // Compute matching score for each genome
+      this.genomeList.forEach( geno => {
+
+        let cumulLenScore = 0;
+        let nextBreakpoint = annotStop;
+        let annotLength = annotStop - annotStart;
+
+        // Parsing the breakpoints from right to left
+        arrayOfBreakpoints.forEach( bkpt => {
+
+          let intervalLength = nextBreakpoint - bkpt;
+          let intervalScore = 0;
+          let nbOfMatchingBlocks = 0;
+
+          // Check PAV status of all candidate blocks
+          mapOfBlocksPerBreakpoint.get(bkpt).forEach( block => {
+            let pavStatus = parseInt(block[geno]);
+
+            //Check if there is a match between desired and block presence/absence statuses
+            let queryDoesMatch = (shouldBePresent && pavStatus > 0) || (!shouldBePresent && pavStatus === 0);
+
+            if (queryDoesMatch) {
+              nbOfMatchingBlocks += 1;
+            }
+          })
+
+          // Apply the score to the length of that chunk
+          let nbBlocksInInterval = mapOfBlocksPerBreakpoint.get(bkpt).length;
+          if (nbBlocksInInterval > 0) {
+            intervalScore = nbOfMatchingBlocks * intervalLength / nbBlocksInInterval;
+          }
+
+          cumulLenScore += intervalScore;
+          nextBreakpoint = bkpt;
+        })
+
+        // The score is a float between 0 and 1, shows the proportion of the annot that matches the desired pav status
+        let annotScore = cumulLenScore / annotLength;
+        //console.log({cumulLenScore, annotLength, spannedBlocks})
+
+        //console.log({geno, annotScore});
+        mapOfScores.set(geno, mapOfScores.get(geno) + annotScore);
+
+      });
     },
   },
   watch: {
