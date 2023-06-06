@@ -23,6 +23,7 @@
                 :updateGenoNames="function(listOfGenomes) { updateGenomesInDisplay(listOfGenomes) }"
                 :updateFunctionsDiversity="function() { return }"
                 :updatePavData="function(pavData) { updateFullChromData(pavData) }"
+                :updatePavFileName="function(pavFileName) { updatePavFileName(pavFileName) }"
             />
           </div>
         </template>
@@ -33,6 +34,9 @@
             <GffFileParser
                 :chromList="chromNames"
                 :updateAnnotationData="function(gffData) { updateFullGffData(gffData) }"
+                :updateIsGffUploadedTRUE="function() { updateIsGffUploadedTRUE() }"
+                :updateGffFileName="function(fileName) { updateGffFileName(fileName) }"
+                :pushSortModeInSortChoice="function(newSortName) { pushSortModeInSortChoice(newSortName) }"
             />
           </div>
 
@@ -101,16 +105,24 @@
     </div>
 
     <CategoryTitle title="Display parameters"/>
-
     <CoreThreshold/>
 
     <CategoryTitle title="Zoom Level"/>
-
     <MatrixOptimizedZoom
         class='zoomSlider'
         :smallestNtWidthInPx="minNtWidthInPx"
         :largestNtWidthInPx="maxNtWidthInPx"
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
+    />
+
+    <CategoryTitle title="Download data"/>
+    <ExportLocalRegionAnnotated
+        :pavDataOnDisplay="currentChromData"
+        :pavFileName="pavFileName"
+        :gffDataOnDisplay="currentGffData"
+        :gffFileName="gffFileName"
+        :panRegion="panRegion"
+        :genomeList="genoNames"
     />
 
     <!--MatrixPavZoom
@@ -170,16 +182,17 @@ import PavMatrixLegend from '@/components/PavMatrixLegend.vue';
 import MatrixOptimizedZoom from '@/components/MatrixOptimizedZoom.vue';
 //import MatrixPavZoom from '@/components/MatrixPavZoom.vue';
 import HollowAreaFinder from '@/components/HollowAreaFinder.vue';
-import SortTracks from "@/components/SortTracks";
-import GffFileParser from "@/components/GffFileParser";
-import NewickFileParser from "@/components/NewickFileParser";
-import CollapseMenu from "@/components/CollapseMenu";
-import NewickTree from "@/components/NewickTree";
-import SortOption_GffPresenceStatus from "@/components/SortOption_GffPresenceStatus";
-import CategoryTitle from "@/components/CategoryTitle";
-import InputPosition from "@/components/InputPosition";
-import GenePosition from "@/components/GenePosition";
-import SortOption_LocalPavPattern from "@/components/SortOption_LocalPavPattern";
+import SortTracks from "@/components/SortTracks.vue";
+import GffFileParser from "@/components/GffFileParser.vue";
+import NewickFileParser from "@/components/NewickFileParser.vue";
+import CollapseMenu from "@/components/CollapseMenu.vue";
+import NewickTree from "@/components/NewickTree.vue";
+import SortOption_GffPresenceStatus from "@/components/SortOption_GffPresenceStatus.vue";
+import CategoryTitle from "@/components/CategoryTitle.vue";
+import InputPosition from "@/components/InputPosition.vue";
+import GenePosition from "@/components/GenePosition.vue";
+import SortOption_LocalPavPattern from "@/components/SortOption_LocalPavPattern.vue";
+import ExportLocalRegionAnnotated from "@/components/ExportLocalRegionAnnotated.vue";
 import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 export default {
@@ -202,6 +215,7 @@ export default {
     DropDownChoice,
     PavMatrixLegend,
     HollowAreaFinder,
+    ExportLocalRegionAnnotated,
   },
   props: {},
   data() {
@@ -210,13 +224,17 @@ export default {
   computed: {
     ...mapState({
       chromNames: 'chromNames',
+      chromToDisplay: 'selectedChrom',
       firstNt: 'firstNtToDisplay',
+      lastNtToDisplay: 'lastNtToDisplay',
       genoNames: 'genomeListInDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
       sortChoice: 'sortChoice',
       selectedSortMode: 'selectedSortMode',
-      isGffUploaded: 'isGffUploaded',
+      pavFileName: 'pavFileName',
       fileLoaded: 'fileLoaded',
+      gffFileName: 'gffFileName',
+      isGffUploaded: 'isGffUploaded',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
@@ -226,7 +244,10 @@ export default {
       maxNtWidthInPx: 'maxNtWidthInMainDisplay',
       minNtWidthInPx: 'minNtWidthForNavigabilityInMainDisplay',
       nbOfGenomes: 'nbOfGenomesInDisplay',
-    })
+    }),
+    panRegion() {
+      return {'chrom': this.chromToDisplay, 'start': this.firstNt, 'stop': this.lastNtToDisplay}
+    }
   },
   methods: {
     updateFullChromData(data) {
@@ -239,6 +260,10 @@ export default {
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
       // 'updateFullChromData',
+      'updatePavFileName',
+      'updateIsGffUploadedTRUE',
+      'updateGffFileName',
+      'pushSortModeInSortChoice',
       'updateFullGffData',
       'updateGenomesInDisplay',
       'updateSelectedChrom',

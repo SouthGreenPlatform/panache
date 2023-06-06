@@ -16,7 +16,9 @@ export default new Vuex.Store({
     yOffsetOfPavBlocks: 0,
 
     displayIsLoading: false, //Whether a dataset is loading
+    pavFileName: 'defaultPavName.txt',
     fileLoaded: false, // Reflect if the main file is loaded
+    gffFileName: 'defaultGffName.txt',
     isGffUploaded: false, // Detect if a GFF file has been uploaded
 
     genomeListInDisplay: [ 'Gen1', 'Gen2', 'Gen3', 'Gen4', 'Gen5', 'Gen6' ], //List of every genome name, same order as within the initial dataset
@@ -470,6 +472,9 @@ export default new Vuex.Store({
     TURN_LOADING_OFF(state) {
       state.displayIsLoading = false
     },
+    SET_PAV_FILE_NAME(state, payload) {
+      state.pavFileName = payload
+    },
     SET_FILE_LOADED_TRUE(state) {
       state.fileLoaded = true
     },
@@ -570,6 +575,9 @@ export default new Vuex.Store({
     SET_GFF_UPLOADED_TRUE(state) {
       state.isGffUploaded = true
     },
+    SET_GFF_FILE_NAME(state, payload) {
+      state.gffFileName = payload
+    },
     TURN_NEWICK_TREE_DISPLAYED_ON(state) {
       state.isNewickTreeDisplayed = true
     },
@@ -588,6 +596,9 @@ export default new Vuex.Store({
       } else {
         commit('TURN_LOADING_ON')
       }
+    },
+    updatePavFileName({commit}, pavFileName) {
+      commit('SET_PAV_FILE_NAME', pavFileName)
     },
     updateFileLoaded({commit}, value) {
       if (value === false) {
@@ -655,6 +666,9 @@ export default new Vuex.Store({
       if (state.isGffUploaded === false) {
         commit('SET_GFF_UPLOADED_TRUE')
       }
+    },
+    updateGffFileName({commit}, gffFileName) {
+      commit('SET_GFF_FILE_NAME', gffFileName)
     },
     updateIsNewickTreeDisplayed({commit, state}) {
       if (state.isNewickTreeDisplayed === true) {

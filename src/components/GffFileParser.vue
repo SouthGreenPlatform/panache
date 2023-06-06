@@ -13,7 +13,6 @@
 import FileLoader from '@/components/FileLoader.vue';
 
 import * as d3 from "d3";
-import {mapActions} from "vuex";
 
 export default {
   name: 'GffFileParser',
@@ -29,6 +28,18 @@ export default {
       type: Function,
       required: true
     },
+    updateIsGffUploadedTRUE: {
+      type: Function,
+      required: true
+    },
+    updateGffFileName: {
+      type: Function,
+      required: true
+    },
+    pushSortModeInSortChoice: {
+      type: Function,
+      required: true
+    },
   },
   data() {
     return {
@@ -38,13 +49,9 @@ export default {
     }
   },
   methods: {
-    ...mapActions([
-      'updateIsGffUploadedTRUE',
-      'pushSortModeInSortChoice',
-    ]),
     parseGffToAnnotationObjects: async function(gffFile) {
 
-      //console.log({gffFile});
+      //console.log(gffFile);
 
       //Reading the full annotation dataset
       let gffData = await this.readTsv(gffFile);
@@ -165,6 +172,7 @@ export default {
       //Stores annotation Array within the App
       //console.log({groupedAnnot});
       this.updateAnnotationData(groupedAnnot);
+      this.updateGffFileName(gffFile.name);
       this.updateIsGffUploadedTRUE();
       this.pushSortModeInSortChoice('Gene presence status'); // Add the choice to sort by gene presence status with a search bar
     },
