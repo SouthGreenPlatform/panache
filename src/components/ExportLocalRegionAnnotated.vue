@@ -30,11 +30,12 @@ export default {
     },
   },
   data() {
+    let covMap = new Map();
     return {
+      annotCoverageMatrix: covMap,
       roundingAccuracy: 100,
       scoreShouldBeRounded: true,
       bkptOn: true, //for dev logging purposes
-      //TODO: store the whole data somewhere, and export only the visible
       //TODO: Correct pav file and reajust block coordinates (that are 1 based and note 0 based)
       //TODO: Enable download only once gff data are uploaded
       //TODO: make the button pretty
@@ -93,6 +94,7 @@ export default {
     /**
      * Function that writes a matrix with coverage score of each annotation for the
      * considered region. Turns it into a string along with commented headers.
+     * Stores the newly created coverage matrix, if it had not been stored already.
      * @returns {String} = String looking like below:
      * # Panache PAV x GFF export
      * # PAV: ${this.pavFileName}
@@ -112,12 +114,27 @@ export default {
         newMap.set(geneName, rest);
         return newMap;
       }, new Map());
-      //console.log('mapOfAnnot');
-      //console.log(mapOfAnnot);
 
-      let scoreMatrix = this.buildAnnotScoreMatrix(mapOfAnnot, this.computePresenceRates_ofRegion());
+      //The component sotres all coverage matrices in a Map, it can retrieve it if already existing
+      let scoreMatrix;
+      if (this.annotCoverageMatrix.get(this.panRegion.chrom) != undefined) {
+        scoreMatrix = this.annotCoverageMatrix.get(this.panRegion.chrom);
+      } else {
+        scoreMatrix = this.buildAnnotScoreMatrix(mapOfAnnot, this.computePresenceRates_ofChrom());
+        this.annotCoverageMatrix.set(this.panRegion.chrom, scoreMatrix);
+      }
 
-      let stringifiedScoreMatrix = scoreMatrix.map(row => [...row].join(this.delimiter));
+      //Gather only visible data
+      let localMatrix = scoreMatrix.filter( row => {
+        let annotStart = row[2];
+        let annotStop = row[3];
+
+        let isMatching = this.isElementInRegion(annotStart, annotStop, this.panRegion.start, this.panRegion.stop);
+
+        return isMatching;
+      });
+
+      let stringifiedScoreMatrix = localMatrix.map(row => [...row].join(this.delimiter));
 
       return [...headerArray, ...stringifiedScoreMatrix].join(this.endOfLine);
     },
@@ -128,7 +145,7 @@ export default {
      * according to the PAV data.
      * @returns {Map} = mapOfScores[annotName] --> Map{genome1: score%, genome2: score%...}
      */
-    computePresenceRates_ofRegion: function() {
+    computePresenceRates_ofChrom: function() {
       // Map that stores for each annotation the rate of their length found within at least one panBlock, per genome
       let mapOfScores = new Map();
 
@@ -179,11 +196,7 @@ export default {
       let setOfBreakpoints = new Set([annotStart]);
       let spannedBlocks = this.pavDataOnDisplay.filter( block => {
 
-        let blockStartIsInAnnot = ( annotStart <= parseInt(block.FeatureStart) ) && ( parseInt(block.FeatureStart) <= annotStop );
-        let blockStopIsInAnnot = ( annotStart <= parseInt(block.FeatureStop) ) && ( parseInt(block.FeatureStop) <= annotStop );
-        let blockContainsAnnot = ( parseInt(block.FeatureStart) <= annotStart) && ( annotStop <= parseInt(block.FeatureStop) );
-
-        let isMatching = (blockStartIsInAnnot || blockStopIsInAnnot || blockContainsAnnot);
+        let isMatching = this.isElementInRegion(block.FeatureStart, block.FeatureStop, annotStart, annotStop);
 
         // Keep track of the breakpoints within the annotation, made
         // by the borders of PAV blocks
@@ -415,6 +428,16 @@ export default {
         return scoreB - scoreA; // Higher scores top
       }
     },
+    isElementInRegion: function(start, stop, leftBorder, rightBorder) {
+
+        let elementStartIsInRegion = ( leftBorder <= parseInt(start) ) && ( parseInt(start) <= rightBorder );
+        let elementStopIsInRegion = ( leftBorder <= parseInt(stop) ) && ( parseInt(stop) <= rightBorder );
+        let elementSpansRegion = ( parseInt(start) <= leftBorder) && ( rightBorder <= parseInt(stop) );
+
+        let isMatching = (elementStartIsInRegion || elementStopIsInRegion || elementSpansRegion);
+
+        return isMatching
+    },
     pauseLog: function(toLog) {
       if (this.bkptOn) {
         console.log(toLog);
@@ -423,7 +446,7 @@ export default {
     },
   },
   watch: {
-    //nothing
+    // Watch panRegion chrom changes to retrieve coverage data
   }
 }
 </script>
