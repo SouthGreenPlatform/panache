@@ -44,7 +44,7 @@ export default {
       return '\t'
     },
     endOfLine() {
-      return '\r\n';
+      return '\n';
     },
     exportFileName() {
       return `panacheExport_${this.panRegion.chrom}-${this.roundedStart}-${this.roundedStop}.tsv`;
