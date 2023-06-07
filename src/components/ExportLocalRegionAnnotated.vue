@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button @click="saveFile">Export Local Data</button>
+    <b-button block variant='primary' @click="saveFile">Export local annot coverage</b-button>
   </div>
 </template>
 
@@ -37,8 +37,6 @@ export default {
       scoreShouldBeRounded: true,
       bkptOn: true, //for dev logging purposes
       //TODO: Correct pav file and reajust block coordinates (that are 1 based and note 0 based)
-      //TODO: Enable download only once gff data are uploaded
-      //TODO: make the button pretty
     }
   },
   computed: {
@@ -463,28 +461,5 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
-.wrapperFileLoader {
-  display: grid;
-  grid-template-rows: repeat(2, auto);
-  overflow: hidden;
-}
-
-.loaderLabel {
-  grid-row: 1;
-  text-align: center;
-  align-self: center;
-  margin-bottom: 0;
-}
-
-.loaderInput {
-  grid-row: 2;
-  align-self: center;
-}
-
-.ellipsis {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 </style>
