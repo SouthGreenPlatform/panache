@@ -70,10 +70,7 @@ export default {
      */
     saveFile: function() {
 
-      console.log(this.panRegion);
-      console.log(this.panRegion.start);
-      console.log(Math.round(this.panRegion.start));
-
+      /*
       console.log({
         'pavData': this.pavDataOnDisplay, // [ {#Chromosome, Chromosome, FeatureStart, FeatureStop, Function, Sequence_IUPAC_Plus, SimilarBlocks, genoName1, genoName2, ...}, {...}]
         'pavFile': this.pavFileName,
@@ -81,6 +78,7 @@ export default {
         'gffFile': this.gffFileName, //Does not work somehow
         'currentRegion': this.panRegion // {chrom, start, stop}
       });
+      */
 
       let file = new Blob([this.writeExportFile()], { type: 'text/plain' });
       let fileUrl = window.URL.createObjectURL(file);
@@ -236,7 +234,7 @@ export default {
       }
 
       arrayOfBreakpoints.pop(); // Final breakpoint is useless since it does not start any interval to check
-      this.pauseLog({spannedBlocks, arrayOfBreakpoints, intervalLengths});
+      //this.pauseLog({spannedBlocks, arrayOfBreakpoints, intervalLengths});
 
       return {spannedBlocks, arrayOfBreakpoints, intervalLengths};
     },
