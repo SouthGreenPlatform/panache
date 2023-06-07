@@ -49,14 +49,20 @@ export default {
       return '\r\n';
     },
     exportFileName() {
-      return `panacheExport_${this.panRegion.chrom}-${this.panRegion.start}-${this.panRegion.stop}.tsv`;
+      return `panacheExport_${this.panRegion.chrom}-${this.roundedStart}-${this.roundedStop}.tsv`;
     },
     header() {
       let row0 = `Panache PAV x GFF export`;
       let row1 = `PAV: ${this.pavFileName}`;
       let row2 = `Genes: ${this.gffFileName}`;
-      let row3 = `Region: ${this.panRegion.chrom} from ${this.panRegion.start} to ${this.panRegion.stop}`;
+      let row3 = `Region: ${this.panRegion.chrom} from ${this.roundedStart} to ${this.roundedStop}`;
       return {row0, row1, row2, row3};
+    },
+    roundedStart() {
+      return Math.round(this.panRegion.start)
+    },
+    roundedStop() {
+      return Math.round(this.panRegion.stop)
     },
   },
   methods: {
@@ -65,6 +71,10 @@ export default {
      * and saving it on the user's computer.
      */
     saveFile: function() {
+
+      console.log(this.panRegion);
+      console.log(this.panRegion.start);
+      console.log(Math.round(this.panRegion.start));
 
       console.log({
         'pavData': this.pavDataOnDisplay, // [ {#Chromosome, Chromosome, FeatureStart, FeatureStop, Function, Sequence_IUPAC_Plus, SimilarBlocks, genoName1, genoName2, ...}, {...}]
