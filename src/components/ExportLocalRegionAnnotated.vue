@@ -113,6 +113,7 @@ export default {
      */
     writeExportFile: function() {
       let headerArray = Object.values(this.header).map(value => `# ${value}`);
+      let matrixHeader = ['annotID', 'meanCoverage', 'annotStart', 'annotStop', ...this.genomeList].join(this.delimiter);
 
       // mapOfAnnot useful to retrieve annot properties per annotName when writing
       let mapOfAnnot = this.gffDataOnDisplay.reduce((newMap, annot) => {
@@ -142,7 +143,7 @@ export default {
 
       let stringifiedScoreMatrix = localMatrix.map(row => [...row].join(this.delimiter));
 
-      return [...headerArray, ...stringifiedScoreMatrix].join(this.endOfLine);
+      return [...headerArray, matrixHeader, ...stringifiedScoreMatrix].join(this.endOfLine);
     },
     /**
      * Function adapted from SortOption_GffPresenceStatus.vue, which
@@ -338,8 +339,6 @@ export default {
      * @returns {Array} = [ header, [annotName, meanCoverage, annotStart, annotStop, coverGenoA, coverGenoB, ...], ... ]
      */
     buildAnnotScoreMatrix: function(mapOfAnnot, presenceRatesOfRegion) {
-      let headerRow = ['annotID', 'meanCoverage', 'annotStart', 'annotStop', ...this.genomeList];
-
       let scoreMatrix = [];
 
       if (this.scoreShouldBeRounded) {
@@ -354,7 +353,7 @@ export default {
 
       scoreMatrix.sort(this.scoreMatrixCompare);
 
-      return [headerRow, ...scoreMatrix];
+      return scoreMatrix;
     },
     /**
      * Function that create a score matrix row for an annotation, with raw scores
