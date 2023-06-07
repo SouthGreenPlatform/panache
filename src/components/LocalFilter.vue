@@ -59,17 +59,27 @@
     </div>
 
     <CategoryTitle title="Display parameters"/>
-
     <CoreThreshold/>
 
     <CategoryTitle title="Zoom Level"/>
-
     <MatrixOptimizedZoom
         class='zoomSlider'
         :smallestNtWidthInPx="minNtWidthInPx"
         :largestNtWidthInPx="maxNtWidthInPx"
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
+
+    <div v-show="isGffUploaded">
+      <CategoryTitle title="Download data"/>
+      <ExportLocalRegionAnnotated
+          :pavDataOnDisplay="currentChromData"
+          :pavFileName="pavFileName"
+          :gffDataOnDisplay="currentGffData"
+          :gffFileName="gffFileName"
+          :panRegion="panRegion"
+          :genomeList="genoNames"
+      />
+    </div>
 
     <div class="row">
       <CollapseMenu idCollapse='collapseHollowAreaFinder'>
@@ -126,6 +136,8 @@ import CategoryTitle from "@/components/CategoryTitle";
 import InputPosition from "@/components/InputPosition";
 import GenePosition from "@/components/GenePosition";
 import SortOption_LocalPavPattern from "@/components/SortOption_LocalPavPattern";
+import ExportLocalRegionAnnotated from "@/components/ExportLocalRegionAnnotated.vue";
+
 import {nonReactiveDataStore} from '@/store/non-reactive-data';
 
 import {mapState, mapGetters, mapActions} from 'vuex';
@@ -148,6 +160,7 @@ export default {
     DropDownChoice,
     PavMatrixLegend,
     HollowAreaFinder,
+    ExportLocalRegionAnnotated,
   },
   props: {},
   data() {
@@ -156,13 +169,17 @@ export default {
   computed: {
     ...mapState({
       chromNames: 'chromNames',
+      chromToDisplay: 'selectedChrom',
       firstNt: 'firstNtToDisplay',
+      lastNtToDisplay: 'lastNtToDisplay',
       genoNames: 'genomeListInDisplay',
       ntWidthInPx: 'currentDisplayNtWidthInPx',
       sortChoice: 'sortChoice',
       selectedSortMode: 'selectedSortMode',
-      isGffUploaded: 'isGffUploaded',
+      pavFileName: 'pavFileName',
       fileLoaded: 'fileLoaded',
+      gffFileName: 'gffFileName',
+      isGffUploaded: 'isGffUploaded',
     }),
     ...mapGetters({
       currentChromData: 'chromDataInDisplay',
@@ -172,7 +189,10 @@ export default {
       maxNtWidthInPx: 'maxNtWidthInMainDisplay',
       minNtWidthInPx: 'minNtWidthForNavigabilityInMainDisplay',
       nbOfGenomes: 'nbOfGenomesInDisplay',
-    })
+    }),
+    panRegion() {
+      return {'chrom': this.chromToDisplay, 'start': this.firstNt, 'stop': this.lastNtToDisplay}
+    }
   },
   mounted() {
     //Pre-load vis with bananaGenomeHub data
@@ -195,6 +215,10 @@ export default {
       'updateCurrentZoomLvl',
       'updateFirstNtToDisplay',
       // 'updateFullChromData',
+      'updatePavFileName',
+      'updateIsGffUploadedTRUE',
+      'updateGffFileName',
+      'pushSortModeInSortChoice',
       'updateFullGffData',
       'updateGenomesInDisplay',
       'updateSelectedChrom',
@@ -236,11 +260,13 @@ export default {
       //Section dedicated to sending the pav updates to the store
       this.updateFullChromData(pavData);
       this.updateSelectedChrom('chr01');
+      this.updatePavFileName('OriginOfPavData.pav');
       this.updateFileLoaded(true); //Useful for the loading spinner? But it uses updateDisplayLoadingStatus...
       console.log('PAV FILE HAS BEEN LOADED AND CHROMDATA IS SET')
 
       //Section dedicated to sending the gff updates to the store
       this.updateFullGffData(gffData);
+      this.updateGffFileName('OriginOfGffData.gff');
       this.updateIsGffUploadedTRUE(); //Useful for...? Why has at a difference syntaxe than for PAV?
       this.pushSortModeInSortChoice('Gene presence status'); // Add the choice to sort by gene presence status with a search bar
 
