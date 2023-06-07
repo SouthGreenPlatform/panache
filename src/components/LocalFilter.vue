@@ -115,15 +115,17 @@
         :updateGlobalZoom="function(ntWidthInPx) { updateCurrentZoomLvl(ntWidthInPx) }"
     />
 
-    <CategoryTitle title="Download data"/>
-    <ExportLocalRegionAnnotated
-        :pavDataOnDisplay="currentChromData"
-        :pavFileName="pavFileName"
-        :gffDataOnDisplay="currentGffData"
-        :gffFileName="gffFileName"
-        :panRegion="panRegion"
-        :genomeList="genoNames"
-    />
+    <div v-show="isGffUploaded">
+      <CategoryTitle title="Download data"/>
+      <ExportLocalRegionAnnotated
+          :pavDataOnDisplay="currentChromData"
+          :pavFileName="pavFileName"
+          :gffDataOnDisplay="currentGffData"
+          :gffFileName="gffFileName"
+          :panRegion="panRegion"
+          :genomeList="genoNames"
+      />
+    </div>
 
     <!--MatrixPavZoom
         class='zoomSlider'
